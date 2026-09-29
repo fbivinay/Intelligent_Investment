@@ -1,6 +1,6 @@
 # Local caches and backups; the daily job fetches fresh prices every run.
-data/
-artifacts/
+/data/
+/artifacts/
 
 # Secrets. Nothing here should ever exist, but make it impossible by accident.
 .env
@@ -20,3 +20,4 @@ web/.next/
 web/node_modules/
 web/.env*.local
 web/next-env.d.ts
+.playwright-cli/

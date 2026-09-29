@@ -1,149 +1,98 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { BellRinging, Robot, ShieldCheck } from "@phosphor-icons/react/dist/ssr";
+import Reveal from "@/components/Reveal";
 
 export const metadata: Metadata = {
-  title: "Go live — Bitcoin ETF Trend Model",
-  description: "How to run the ETF trend model with real money from India: broker, LRS, automation, tax, safety.",
+  title: "Go live | DeepTrend",
+  description: "Running the model with real money from India: broker, LRS, automation, tax and safety.",
 };
+
+const ROUTES = [
+  { icon: BellRinging, title: "Phone alerts, any app",
+    body: "An alert arrives only when your split should change, about once a week. You place two to four orders in INDmoney, Vested or any broker you already use. No API needed.",
+    how: "Install the free ntfy app and subscribe to your private topic (the NTFY_TOPIC secret)." },
+  { icon: Robot, title: "Fully automatic",
+    body: "The daily job places the orders itself, the morning after each decision, with every safety rule below enforced in code.",
+    how: "Alpaca paper account first: add its keys as GitHub secrets and set SEND_ORDERS to on. Live keys and ALPACA_LIVE=yes later." },
+];
+
+const STEPS: [string, string][] = [
+  ["Paper first", "Run on a paper account for one to three months and compare it with this site."],
+  ["Make the repository private", "Actions logs of public repositories are public. Real money should not run in public."],
+  ["Send money under LRS", "Up to $250,000 a year with PAN and Form A2. TCS of 20% above ₹10 lakh comes back against your income tax."],
+  ["Switch to live keys, start small", "Set MAX_ORDER_USD to cap any single order."],
+];
+
+const RULES = [
+  "Buys only from cash. Never margin, never leverage.",
+  "Never sells more than it holds. No short selling.",
+  "Each order is tagged with its decision date, so the broker rejects a second copy.",
+  "Stale, missing or absurd prices stop the run instead of trading.",
+  "One switch, SEND_ORDERS, turns every order off.",
+];
 
 export default function GoLive() {
   return (
-    <main className="min-h-dvh bg-zinc-950 text-zinc-100">
-      <header className="border-b border-zinc-900">
-        <div className="mx-auto flex max-w-3xl items-center justify-between gap-2 px-4 py-3">
-          <span className="text-sm font-semibold tracking-tight">Go live with real money</span>
-          <Link href="/" className="text-xs text-zinc-400 hover:text-zinc-200">← dashboard</Link>
-        </div>
+    <div className="mx-auto max-w-6xl px-5">
+      <header className="max-w-[58ch] space-y-5 pt-16 pb-14 lg:pt-24">
+        <h1 className="text-4xl font-semibold leading-[1.05] tracking-tighter md:text-5xl">Going live with real money</h1>
+        <p className="text-lg leading-relaxed text-muted">
+          The automation already runs every trading day. Real money is a configuration change, not new code.
+        </p>
       </header>
 
-      <article className="mx-auto max-w-3xl space-y-4 px-4 py-5 text-sm leading-relaxed text-zinc-300">
-        <p className="rounded-md border border-emerald-900/60 bg-emerald-950/20 px-4 py-3 text-emerald-200">
-          The automation already runs every trading day as a paper portfolio on real prices. Going live is a
-          configuration change, not new code: add broker keys, flip two switches. Do the steps in order, and
-          stay on paper until the broker account matches this dashboard for a few weeks.
-        </p>
+      <Reveal className="grid gap-5 md:grid-cols-2">
+        {ROUTES.map((r) => (
+          <div key={r.title} className="flex flex-col rounded-2xl bg-surface p-8 ring-1 ring-line">
+            <r.icon aria-hidden size={28} weight="duotone" className="text-accent" />
+            <p className="mt-6 text-xl font-medium tracking-tight">{r.title}</p>
+            <p className="mt-3 leading-relaxed text-muted">{r.body}</p>
+            <p className="mt-auto pt-6 text-sm text-ink">{r.how}</p>
+          </div>
+        ))}
+      </Reveal>
 
-        <Block title="1. What you need">
-          <ul className="list-disc space-y-1.5 pl-5">
-            <li><b>A US broker that accepts Indian residents and has a trading API.</b>
-              <ul className="mt-1 list-[circle] space-y-1 pl-5">
-                <li><b>Alpaca</b> — the broker this code talks to today. Paper accounts are free for anyone.
-                  Check when you apply whether they open live accounts for residents of India; if they do,
-                  going live is just new keys and one switch.</li>
-                <li><b>Interactive Brokers</b> — accepts Indian residents and has a full API, but its gateway
-                  needs a small always-on computer rather than GitHub Actions alone, and this code would need
-                  an IBKR adapter next to the Alpaca one.</li>
-                <li>Indian apps (INDmoney, Vested, Appreciate and similar) are easy to open but offer no public
-                  trading API, so they cannot be automated.</li>
-              </ul>
-            </li>
-            <li><b>Money sent abroad under the Liberalised Remittance Scheme (LRS)</b>: up to $250,000 per
-              person per financial year, with PAN and Form A2 at your bank. Tax Collected at Source of 20%
-              applies above ₹10 lakh a year; it is not a cost — you get it back against your income tax.</li>
-            <li><b>LRS forbids leverage, margin trading and short selling.</b> The code enforces the same rules
-              on its own: buys are paid from cash only, sells never exceed what is held, and it asks the broker
-              to switch margin and shorting off as a second lock.</li>
-          </ul>
-        </Block>
-
-        <Block title="2. Two ways to run it" id="alerts">
-          <ul className="list-disc space-y-1.5 pl-5">
-            <li><b>Semi-automatic — works with any broker app, no API needed.</b> The job sends a phone alert
-              only when your split should change (about once a week), and you place the 2–4 orders yourself in
-              INDmoney, Vested, Interactive Brokers or any other app. Set up: install the free <b>ntfy</b> app,
-              subscribe to your private topic (the random name stored in the GitHub secret{" "}
-              <Code>NTFY_TOPIC</Code>), and adjust your holdings to the split in each alert, at the next US open.
-              Keep the topic name private: anyone who knows it can read and post to it.</li>
-            <li><b>Fully automatic — needs a broker with an API</b> (steps below). Orders are placed for you
-              every trading day, with the safety rules in section 4.</li>
-          </ul>
-        </Block>
-
-        <Block title="3. Switching on full automation">
-          <ol className="list-decimal space-y-1.5 pl-5">
-            <li><b>Paper broker first.</b> Open a free Alpaca paper account and create API keys. In the GitHub
-              repository add them as secrets <Code>ALPACA_KEY_ID</Code> and <Code>ALPACA_SECRET_KEY</Code>, then
-              add the variable <Code>SEND_ORDERS</Code> = <Code>on</Code>. From the next trading day the job places
-              paper orders after the open.</li>
-            <li><b>Run on paper for 1–3 months.</b> Compare the broker account with this dashboard. They will not
-              match to the cent (orders fill a little after the open), but the weights should.</li>
-            <li><b>Make the repository private.</b> Actions logs of public repositories are public. The job prints
-              no balances, but real money should not run in public. Private repositories get 2,000 free Actions
-              minutes a month; this uses about 60.</li>
-            <li><b>Open and fund the live account</b> (KYC, LRS remittance, convert to USD).</li>
-            <li><b>Swap in live keys and set <Code>ALPACA_LIVE</Code> = <Code>yes</Code>.</b> Start small, and set
-              <Code>MAX_ORDER_USD</Code> to cap the size of any single order.</li>
-            <li><b>Kill switch:</b> set <Code>SEND_ORDERS</Code> = <Code>off</Code> (GitHub → Settings → Secrets
-              and variables → Actions → Variables). It takes effect at the next run, with no code change.</li>
+      <Reveal className="grid gap-12 pt-24 md:grid-cols-[1fr_1fr]">
+        <div>
+          <h2 className="text-3xl font-semibold tracking-tight">Four steps</h2>
+          <ol className="mt-8 space-y-6">
+            {STEPS.map(([t, b], i) => (
+              <li key={t} className="grid grid-cols-[2rem_1fr] gap-3">
+                <span className="num grid h-7 w-7 place-items-center rounded-full bg-accent-soft text-sm text-accent">{i + 1}</span>
+                <div>
+                  <p className="font-medium">{t}</p>
+                  <p className="mt-1 text-sm leading-relaxed text-muted">{b}</p>
+                </div>
+              </li>
+            ))}
           </ol>
-        </Block>
-
-        <Block title="4. What runs every day">
-          <ul className="list-disc space-y-1.5 pl-5">
-            <li><b>Decide — 22:30 UTC (4:00 am IST), Monday to Friday.</b> Fetch the day&rsquo;s real closes, refuse
-              stale, missing or absurd data, record the decision once (it can never be edited afterwards), and
-              update the paper portfolio.</li>
-            <li><b>Execute — 14:45 UTC (8:15 pm IST), Monday to Friday</b>, when the US market is open in both
-              summer and winter time. Only if keys are set and the switch is on: sell first, wait for the fills,
-              then buy with cash only.</li>
-            <li><b>Alert</b> — right after the decision, if the split moved enough to be worth a trade, a phone
-              alert goes to your ntfy topic.</li>
-            <li><b>No duplicate orders:</b> every order carries an ID built from the decision date, and the broker
-              rejects a second copy. Blocked or inactive account: nothing is sent.</li>
-            <li><b>Monitoring:</b> the dashboard shows the last run; GitHub emails you when a run fails.</li>
-            <li><b>US holidays:</b> no new closing price means nothing new to decide or trade.</li>
+        </div>
+        <div className="rounded-2xl bg-ink p-8 text-page">
+          <ShieldCheck aria-hidden size={28} weight="duotone" className="text-page/80" />
+          <p className="mt-6 text-xl font-medium tracking-tight">Enforced in code, whatever the model says</p>
+          <ul className="mt-6 space-y-3.5 text-sm leading-relaxed text-page/75">
+            {RULES.map((r) => <li key={r}>{r}</li>)}
           </ul>
-        </Block>
+        </div>
+      </Reveal>
 
-        <Block title="5. Costs with real money">
-          <ul className="list-disc space-y-1.5 pl-5">
-            <li>Forex markup when sending and bringing back money: 0.5–2% each way depending on the bank, plus
-              ₹500–1,500 + GST per remittance. The results assume 1.5% each way.</li>
-            <li>Commission: $0 at Alpaca for US stocks and ETFs; about $0.35–1 per order at Interactive Brokers.
-              The model trades about 50 times a year.</li>
-            <li>Fund fees, already inside the ETF prices: IBIT 0.25% a year, GLD 0.40% (GLDM holds the same gold
-              for 0.10%), SGOV 0.09%.</li>
-          </ul>
-        </Block>
-
-        <Block title="6. Tax in India — confirm with a Chartered Accountant">
-          <ul className="list-disc space-y-1.5 pl-5">
-            <li>Gains on US-listed ETFs are capital gains on foreign securities — not the 30% crypto (VDA) tax.</li>
-            <li>Held under 24 months: taxed at your slab rate. The results assume the top slab, 31.2%. Held 24
-              months or more: 12.5% plus cess.</li>
-            <li>Losses offset gains in the same year, and unused losses carry forward for 8 years if you file
-              your return on time.</li>
-            <li>Report the account every year in Schedule FA (foreign assets) of ITR-2 or ITR-3.</li>
-            <li>Dividends (from SGOV) may have 25% US tax withheld; claim credit in India with Form 67.</li>
-            <li>The trade list on the dashboard gives dates and prices your CA needs (oldest shares sold first).</li>
-            <li>US estate tax can apply to non-US persons holding more than $60,000 of US assets. Take advice
-              before investing large amounts.</li>
-          </ul>
-        </Block>
-
-        <Block title="7. Risks">
-          <ul className="list-disc space-y-1.5 pl-5">
-            <li>The model can lose money. On IBIT&rsquo;s real prices since 2024 its worst fall was about 15% after
-              tax, against 43% for holding IBIT; Bitcoin itself has fallen 75% in the past.</li>
-            <li>Past results do not promise future ones. The real record is under three years long.</li>
-            <li>Prices come from an unofficial free source. If it breaks or returns something odd, the job stops
-              instead of trading on bad data — check the heartbeat.</li>
-          </ul>
-        </Block>
-      </article>
-    </main>
+      <Reveal className="pt-24">
+        <h2 className="text-3xl font-semibold tracking-tight">Tax in India</h2>
+        <div className="mt-8 grid gap-x-10 gap-y-6 md:grid-cols-3">
+          {[["Not crypto tax", "Gains on US-listed ETFs are capital gains on foreign securities, not the 30% VDA tax."],
+            ["24 months", "Under 24 months, taxed at your slab. From 24 months, 12.5% plus cess."],
+            ["Losses count", "Losses offset gains, and unused losses carry forward 8 years if you file on time."],
+            ["Schedule FA", "Report the foreign account every year in ITR-2 or ITR-3."],
+            ["Brokers", "Interactive Brokers accepts Indian residents and has an API. Check Alpaca's eligibility when you apply."],
+            ["Estate tax", "US estate tax can apply above $60,000 of US assets. Take advice before investing large sums."]].map(([t, b]) => (
+            <div key={t} className="border-t border-line pt-5">
+              <p className="font-medium">{t}</p>
+              <p className="mt-1.5 text-sm leading-relaxed text-muted">{b}</p>
+            </div>
+          ))}
+        </div>
+        <p className="mt-8 text-sm text-faint">Confirm with a Chartered Accountant before investing.</p>
+      </Reveal>
+    </div>
   );
-}
-
-function Block({ title, id, children }: { title: string; id?: string; children: React.ReactNode }) {
-  return (
-    <section id={id} className="scroll-mt-4 rounded-lg border border-zinc-800 bg-zinc-900/40 p-4">
-      <h2 className="mb-2 text-sm font-medium text-zinc-100">{title}</h2>
-      {children}
-    </section>
-  );
-}
-
-function Code({ children }: { children: React.ReactNode }) {
-  return <code className="rounded bg-zinc-800 px-1 py-0.5 text-[12px] text-zinc-200">{children}</code>;
 }

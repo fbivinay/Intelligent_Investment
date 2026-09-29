@@ -26,10 +26,10 @@ IBIT_START = pd.Timestamp("2024-01-11")
 START = 1498867200            # 2017-07-01
 
 
-def yahoo(ticker: str) -> pd.DataFrame:
+def yahoo(ticker: str, start: int = START) -> pd.DataFrame:
     """Daily open/close indexed by US trading date, completed sessions only."""
     url = (f"https://query1.finance.yahoo.com/v8/finance/chart/{ticker}"
-           f"?period1={START}&period2={int(pd.Timestamp.now().timestamp())}&interval=1d")
+           f"?period1={start}&period2={int(pd.Timestamp.now().timestamp())}&interval=1d")
     req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
     for attempt in range(3):                 # a free API hiccups; three tries, then fail loudly
         try:
