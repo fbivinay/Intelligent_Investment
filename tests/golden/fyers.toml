@@ -1,0 +1,485 @@
+[[case]]
+id = "fyers.brokerage-delivery-2015-11-13"
+kind = "rule_value"
+source = "S3 earliest known schedule used as a stand-in"
+table = "fyers.brokerage"
+on = 2015-11-13
+key = { product = "delivery" }
+boundary = ["fyers.brokerage[product=delivery]@2015-11-14:before"]
+[case.expect]
+mode = "pct"
+pct = "0.001"
+
+[[case]]
+id = "fyers.brokerage-delivery-2015-11-14"
+kind = "rule_value"
+source = "S3 Equity Delivery: 0.1% of Turnover on each leg"
+table = "fyers.brokerage"
+on = 2015-11-14
+key = { product = "delivery" }
+boundary = ["fyers.brokerage[product=delivery]@2015-11-14:after"]
+[case.expect]
+mode = "pct"
+pct = "0.001"
+
+[[case]]
+id = "fyers.brokerage-delivery-2016-04-12"
+kind = "rule_value"
+source = "S3 Equity Delivery: 0.1% of Turnover on each leg (copy of 2016-03-16)"
+table = "fyers.brokerage"
+on = 2016-04-12
+key = { product = "delivery" }
+boundary = ["fyers.brokerage[product=delivery]@2016-04-13:before"]
+[case.expect]
+mode = "pct"
+pct = "0.001"
+
+[[case]]
+id = "fyers.brokerage-delivery-2016-04-13"
+kind = "rule_value"
+source = "S4 Equity Delivery: 0.1% or Rs 100 per order (whichever is lower)"
+table = "fyers.brokerage"
+on = 2016-04-13
+key = { product = "delivery" }
+boundary = ["fyers.brokerage[product=delivery]@2016-04-13:after"]
+[case.expect]
+mode = "min_flat_pct"
+flat = "100"
+pct = "0.001"
+
+[[case]]
+id = "fyers.brokerage-delivery-2017-08-07"
+kind = "rule_value"
+source = "S4 Equity Delivery: 0.1% or Rs 100 per order (whichever is lower)"
+table = "fyers.brokerage"
+on = 2017-08-07
+key = { product = "delivery" }
+boundary = ["fyers.brokerage[product=delivery]@2017-08-08:before"]
+[case.expect]
+mode = "min_flat_pct"
+flat = "100"
+pct = "0.001"
+
+[[case]]
+id = "fyers.brokerage-delivery-2017-08-08"
+kind = "rule_value"
+source = "S5 Equity Delivery: Rs 20 per executed order or 0.1% (whichever is lower)"
+table = "fyers.brokerage"
+on = 2017-08-08
+key = { product = "delivery" }
+boundary = ["fyers.brokerage[product=delivery]@2017-08-08:after"]
+[case.expect]
+mode = "min_flat_pct"
+flat = "20"
+pct = "0.001"
+
+[[case]]
+id = "fyers.brokerage-delivery-2018-02-05"
+kind = "rule_value"
+source = "S5 Equity Delivery: Rs 20 per executed order or 0.1% (whichever is lower)"
+table = "fyers.brokerage"
+on = 2018-02-05
+key = { product = "delivery" }
+boundary = ["fyers.brokerage[product=delivery]@2018-02-06:before"]
+[case.expect]
+mode = "min_flat_pct"
+flat = "20"
+pct = "0.001"
+
+[[case]]
+id = "fyers.brokerage-delivery-2018-02-06"
+kind = "rule_value"
+source = "S6 With effect from 6th February 2018 ... Zero Brokerage for equity delivery"
+table = "fyers.brokerage"
+on = 2018-02-06
+key = { product = "delivery" }
+boundary = ["fyers.brokerage[product=delivery]@2018-02-06:after"]
+[case.expect]
+mode = "zero"
+
+[[case]]
+id = "fyers.brokerage-delivery-2024-09-30"
+kind = "rule_value"
+source = "S6 zero delivery brokerage until the S14 revision"
+table = "fyers.brokerage"
+on = 2024-09-30
+key = { product = "delivery" }
+boundary = ["fyers.brokerage[product=delivery]@2024-10-01:before"]
+[case.expect]
+mode = "zero"
+
+[[case]]
+id = "fyers.brokerage-delivery-2024-10-01"
+kind = "rule_value"
+source = "S14 Equity Delivery: 0.3% or Rs 20 per executed order, whichever is lower"
+table = "fyers.brokerage"
+on = 2024-10-01
+key = { product = "delivery" }
+boundary = ["fyers.brokerage[product=delivery]@2024-10-01:after"]
+[case.expect]
+mode = "min_flat_pct"
+flat = "20"
+pct = "0.003"
+
+[[case]]
+id = "fyers.brokerage-futures-2015-11-13"
+kind = "rule_value"
+source = "S3 earliest known schedule used as a stand-in"
+table = "fyers.brokerage"
+on = 2015-11-13
+key = { product = "futures" }
+boundary = ["fyers.brokerage[product=futures]@2015-11-14:before"]
+[case.expect]
+mode = "pct"
+pct = "0.0001"
+
+[[case]]
+id = "fyers.brokerage-futures-2015-11-14"
+kind = "rule_value"
+source = "S3 Equity Futures: 0.01% of Turnover on each leg"
+table = "fyers.brokerage"
+on = 2015-11-14
+key = { product = "futures" }
+boundary = ["fyers.brokerage[product=futures]@2015-11-14:after"]
+[case.expect]
+mode = "pct"
+pct = "0.0001"
+
+[[case]]
+id = "fyers.brokerage-futures-2016-04-12"
+kind = "rule_value"
+source = "S3 Equity Futures: 0.01% of Turnover on each leg (copy of 2016-03-16)"
+table = "fyers.brokerage"
+on = 2016-04-12
+key = { product = "futures" }
+boundary = ["fyers.brokerage[product=futures]@2016-04-13:before"]
+[case.expect]
+mode = "pct"
+pct = "0.0001"
+
+[[case]]
+id = "fyers.brokerage-futures-2016-04-13"
+kind = "rule_value"
+source = "S4 Equity Futures: 0.01% or Rs 100 per order (whichever is lower)"
+table = "fyers.brokerage"
+on = 2016-04-13
+key = { product = "futures" }
+boundary = ["fyers.brokerage[product=futures]@2016-04-13:after"]
+[case.expect]
+mode = "min_flat_pct"
+flat = "100"
+pct = "0.0001"
+
+[[case]]
+id = "fyers.brokerage-futures-2017-08-07"
+kind = "rule_value"
+source = "S4 Equity Futures: 0.01% or Rs 100 per order (whichever is lower)"
+table = "fyers.brokerage"
+on = 2017-08-07
+key = { product = "futures" }
+boundary = ["fyers.brokerage[product=futures]@2017-08-08:before"]
+[case.expect]
+mode = "min_flat_pct"
+flat = "100"
+pct = "0.0001"
+
+[[case]]
+id = "fyers.brokerage-futures-2017-08-08"
+kind = "rule_value"
+source = "S5 Futures: Rs 20 per executed order or 0.01% (whichever is lower)"
+table = "fyers.brokerage"
+on = 2017-08-08
+key = { product = "futures" }
+boundary = ["fyers.brokerage[product=futures]@2017-08-08:after"]
+[case.expect]
+mode = "min_flat_pct"
+flat = "20"
+pct = "0.0001"
+
+[[case]]
+id = "fyers.brokerage-futures-2020-05-10"
+kind = "rule_value"
+source = "S9 Instead of 0.01% (until 10 May 2020)"
+table = "fyers.brokerage"
+on = 2020-05-10
+key = { product = "futures" }
+boundary = ["fyers.brokerage[product=futures]@2020-05-11:before"]
+[case.expect]
+mode = "min_flat_pct"
+flat = "20"
+pct = "0.0001"
+
+[[case]]
+id = "fyers.brokerage-futures-2020-05-11"
+kind = "rule_value"
+source = "S9 0.03% or Rs 20 (whichever is lower) for futures with effect from 11th May 2020"
+table = "fyers.brokerage"
+on = 2020-05-11
+key = { product = "futures" }
+boundary = ["fyers.brokerage[product=futures]@2020-05-11:after"]
+[case.expect]
+mode = "min_flat_pct"
+flat = "20"
+pct = "0.0003"
+
+[[case]]
+id = "fyers.dp-2018-09-14"
+kind = "rule_value"
+source = "S7 earliest known value used as a stand-in: Rs 20"
+table = "fyers.dp"
+on = 2018-09-14
+key = {  }
+boundary = ["fyers.dp[]@2018-09-15:before"]
+[case.expect]
+value = "20"
+basis = "per_sale"
+
+[[case]]
+id = "fyers.dp-2018-09-15"
+kind = "rule_value"
+source = "S7 Demat Debit Transaction charges levied by IL&FS (ISSL): Rs 20"
+table = "fyers.dp"
+on = 2018-09-15
+key = {  }
+boundary = ["fyers.dp[]@2018-09-15:after"]
+[case.expect]
+value = "20"
+basis = "per_sale"
+
+[[case]]
+id = "fyers.dp-2019-11-14"
+kind = "rule_value"
+source = "S7 ISSL era Rs 20 (last copy 2019-09-23)"
+table = "fyers.dp"
+on = 2019-11-14
+key = {  }
+boundary = ["fyers.dp[]@2019-11-15:before"]
+[case.expect]
+value = "20"
+basis = "per_sale"
+
+[[case]]
+id = "fyers.dp-2019-11-15"
+kind = "rule_value"
+source = "S8 Debit Charges (Sell): Rs 10 + Rs 5.50 (CDSL Charges)"
+table = "fyers.dp"
+on = 2019-11-15
+key = {  }
+boundary = ["fyers.dp[]@2019-11-15:after"]
+[case.expect]
+value = "10"
+basis = "per_sale"
+
+[[case]]
+id = "fyers.dp-2021-08-12"
+kind = "rule_value"
+source = "S12 copy of 2021-07-25: Rs 10 + Rs 5.5 (CDSL)"
+table = "fyers.dp"
+on = 2021-08-12
+key = {  }
+boundary = ["fyers.dp[]@2021-08-13:before"]
+[case.expect]
+value = "10"
+basis = "per_sale"
+
+[[case]]
+id = "fyers.dp-2021-08-13"
+kind = "rule_value"
+source = "S12 copy of 2021-08-13: Demat Debit Charges Rs 7 + Rs 5.5 (CDSL)"
+table = "fyers.dp"
+on = 2021-08-13
+key = {  }
+boundary = ["fyers.dp[]@2021-08-13:after"]
+[case.expect]
+value = "7"
+basis = "per_sale"
+
+[[case]]
+id = "fyers.dp-2024-09-30"
+kind = "rule_value"
+source = "S13 Rs 7 + Rs 5.5 (CDSL); S14 old charge Rs 12.5 per transaction"
+table = "fyers.dp"
+on = 2024-09-30
+key = {  }
+boundary = ["fyers.dp[]@2024-10-01:before"]
+[case.expect]
+value = "7"
+basis = "per_sale"
+
+[[case]]
+id = "fyers.dp-2024-10-01"
+kind = "rule_value"
+source = "S14 reduced from Rs 12.5 to Rs 3.5 per transaction; Rs 3.5 is the CDSL fee"
+table = "fyers.dp"
+on = 2024-10-01
+key = {  }
+boundary = ["fyers.dp[]@2024-10-01:after"]
+[case.expect]
+value = "0"
+basis = "per_sale"
+
+[[case]]
+id = "fyers.dp-2025-06-01"
+kind = "rule_value"
+source = "S14 Rs 3.5 (CDSL) per transaction until the S15 change"
+table = "fyers.dp"
+on = 2025-06-01
+key = {  }
+boundary = ["fyers.dp[]@2025-06-02:before"]
+[case.expect]
+value = "0"
+basis = "per_sale"
+
+[[case]]
+id = "fyers.dp-2025-06-02"
+kind = "rule_value"
+source = "S15 flat Rs 12.5 + GST per ISIN per day; S1 Rs 3.5 CDSL + Rs 9 Fyers"
+table = "fyers.dp"
+on = 2025-06-02
+key = {  }
+boundary = ["fyers.dp[]@2025-06-02:after"]
+[case.expect]
+value = "9"
+basis = "per_isin_per_day"
+
+[[case]]
+id = "fyers.amc_cohort-2020-03-31"
+kind = "rule_value"
+source = "S10 opened on or before 31st March 2020 keep zero AMC"
+table = "fyers.amc_cohort"
+on = 2020-03-31
+key = {  }
+boundary = ["fyers.amc_cohort[]@2020-04-01:before"]
+[case.expect]
+cohort = "legacy"
+
+[[case]]
+id = "fyers.amc_cohort-2020-04-01"
+kind = "rule_value"
+source = "S10 With effect from 1st April 2020 the Demat AMC of Rs 300 + GST"
+table = "fyers.amc_cohort"
+on = 2020-04-01
+key = {  }
+boundary = ["fyers.amc_cohort[]@2020-04-01:after"]
+[case.expect]
+cohort = "standard"
+
+[[case]]
+id = "fyers.amc_cohort-2021-07-24"
+kind = "rule_value"
+source = "S12 copy of 2021-05-16 shows no free offer; standard group"
+table = "fyers.amc_cohort"
+on = 2021-07-24
+key = {  }
+boundary = ["fyers.amc_cohort[]@2021-07-25:before"]
+[case.expect]
+cohort = "standard"
+
+[[case]]
+id = "fyers.amc_cohort-2021-07-25"
+kind = "rule_value"
+source = "S12 Demat AMC: FREE (Limited Period Offer) first seen 2021-07-25"
+table = "fyers.amc_cohort"
+on = 2021-07-25
+key = {  }
+boundary = ["fyers.amc_cohort[]@2021-07-25:after"]
+[case.expect]
+cohort = "free"
+
+[[case]]
+id = "fyers.amc-legacy-2019-11-14"
+kind = "rule_value"
+source = "S7 ISSL era Rs 400 (last copy 2019-09-23)"
+table = "fyers.amc"
+on = 2019-11-14
+key = { cohort = "legacy" }
+boundary = ["fyers.amc[cohort=legacy]@2019-11-15:before"]
+[case.expect]
+value = "400"
+
+[[case]]
+id = "fyers.amc-legacy-2019-11-15"
+kind = "rule_value"
+source = "S8 Demat Annual Maintenance Charges: FREE"
+table = "fyers.amc"
+on = 2019-11-15
+key = { cohort = "legacy" }
+boundary = ["fyers.amc[cohort=legacy]@2019-11-15:after"]
+[case.expect]
+value = "0"
+
+[[case]]
+id = "fyers.amc-standard-2021-09-30"
+kind = "rule_value"
+source = "S10 Demat AMC of Rs 300 + GST per annum"
+table = "fyers.amc"
+on = 2021-09-30
+key = { cohort = "standard" }
+boundary = ["fyers.amc[cohort=standard]@2021-10-01:before"]
+[case.expect]
+value = "300"
+
+[[case]]
+id = "fyers.amc-standard-2021-10-01"
+kind = "rule_value"
+source = "S16 AMC waived off for all existing customers with effect from 1st October 2021"
+table = "fyers.amc"
+on = 2021-10-01
+key = { cohort = "standard" }
+boundary = ["fyers.amc[cohort=standard]@2021-10-01:after"]
+[case.expect]
+value = "0"
+
+[[case]]
+id = "fyers.amc-free-2021-07-25"
+kind = "rule_value"
+source = "S12 Demat AMC: FREE; S16 free AMC offer extended indefinitely"
+table = "fyers.amc"
+on = 2021-07-25
+key = { cohort = "free" }
+[case.expect]
+value = "0"
+
+[[case]]
+id = "fyers.account_opening-2020-03-31"
+kind = "rule_value"
+source = "S11 no account-opening charge before 1st April 2020"
+table = "fyers.account_opening"
+on = 2020-03-31
+key = {  }
+boundary = ["fyers.account_opening[]@2020-04-01:before"]
+[case.expect]
+value = "0"
+
+[[case]]
+id = "fyers.account_opening-2020-04-01"
+kind = "rule_value"
+source = "S11 With effect from 1st April 2020 ... account opening fees of Rs 400 + GST"
+table = "fyers.account_opening"
+on = 2020-04-01
+key = {  }
+boundary = ["fyers.account_opening[]@2020-04-01:after"]
+[case.expect]
+value = "400"
+
+[[case]]
+id = "fyers.account_opening-2020-11-23"
+kind = "rule_value"
+source = "S11 Rs 400 + GST until 23 November 2020"
+table = "fyers.account_opening"
+on = 2020-11-23
+key = {  }
+boundary = ["fyers.account_opening[]@2020-11-24:before"]
+[case.expect]
+value = "400"
+
+[[case]]
+id = "fyers.account_opening-2020-11-24"
+kind = "rule_value"
+source = "S11 With effect from 24th November 2020, the account opening charges are Nil"
+table = "fyers.account_opening"
+on = 2020-11-24
+key = {  }
+boundary = ["fyers.account_opening[]@2020-11-24:after"]
+[case.expect]
+value = "0"
