@@ -1,0 +1,32 @@
+# Clearing member charges Fyers lists, as a fraction of turnover.
+[meta]
+keys = ["segment"]
+coverage_from = 2010-04-01
+
+[[row]]
+segment = "delivery"
+from = 2010-04-01
+value = "0"
+source = "S1 and S39 Clearing Charges for delivery: 0; S31 no clearing charge in the delivery calculation of 2018 to 2020"
+verified_on = 2026-09-30
+confidence = "secondary"
+note = "Zero on Fyers' published tables."
+
+[[row]]
+segment = "futures"
+from = 2010-04-01
+to = 2018-03-03
+value = "0.000005"
+source = "S31 futures charge 0.0024% = exchange 0.0019% + clearing 0.0005% in the 2018 calculator"
+verified_on = 2026-09-30
+confidence = "assumed"
+note = "Earlier years were not researched; the 2018 value is used as a stand-in."
+
+[[row]]
+segment = "futures"
+from = 2018-03-04
+value = "0.000005"
+source = "S30 Clearing charge: 0.0005% (equity futures); S31 futures total 0.0024% = 0.0019% + 0.0005% in 2018, 2019 and 2020; S1 today: 0.0005%"
+verified_on = 2026-09-30
+confidence = "secondary"
+note = "Date is the first archived calculator script (2018-03-04)."

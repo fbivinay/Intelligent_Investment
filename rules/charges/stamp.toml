@@ -1,0 +1,126 @@
+# Stamp duty as a fraction of the traded value. Uniform, buyer only, from 2020-07-01. Before that it was state-wise:
+# the default state is Maharashtra (see note); change these rows if another state is wanted.
+[meta]
+keys = ["segment", "side"]
+coverage_from = 2010-04-01
+
+[[row]]
+segment = "delivery"
+side = "buy"
+from = 2010-04-01
+to = 2020-06-30
+value = "0.0001"
+source = "S31 Maharashtra delivery stamp duty in Fyers' calculator"
+verified_on = 2026-09-30
+confidence = "assumed"
+note = "State-wise before 2020-07-01. Maharashtra is the default state: Fyers' calculator scripts of 2018 to 2020 (S31) list Maharashtra delivery 0.01% and futures 0.002%. Sellers also paid in some states; the engine charges the buy side only."
+
+[[row]]
+segment = "delivery"
+side = "buy"
+from = 2020-07-01
+value = "0.00015"
+source = "S35 Transfer of security other than debenture on delivery basis 0.015% Buyer"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Uniform rate under the Indian Stamp Act amendments in force from 1 July 2020 (PIB, S35)."
+
+[[row]]
+segment = "delivery"
+side = "sell"
+from = 2010-04-01
+to = 2020-06-30
+value = "0"
+source = "S31 stamp duty on the buy side only in broker practice"
+verified_on = 2026-09-30
+confidence = "assumed"
+note = "State-wise before 2020-07-01. Maharashtra is the default state: Fyers' calculator scripts of 2018 to 2020 (S31) list Maharashtra delivery 0.01% and futures 0.002%. Sellers also paid in some states; the engine charges the buy side only."
+
+[[row]]
+segment = "delivery"
+side = "sell"
+from = 2020-07-01
+value = "0"
+source = "S35 stamp duty is levied only on the buyer"
+verified_on = 2026-09-30
+confidence = "primary"
+
+[[row]]
+segment = "futures"
+side = "buy"
+from = 2010-04-01
+to = 2020-06-30
+value = "0.00002"
+source = "S31 Maharashtra futures stamp duty in Fyers' calculator"
+verified_on = 2026-09-30
+confidence = "assumed"
+note = "State-wise before 2020-07-01. Maharashtra is the default state: Fyers' calculator scripts of 2018 to 2020 (S31) list Maharashtra delivery 0.01% and futures 0.002%. Sellers also paid in some states; the engine charges the buy side only."
+
+[[row]]
+segment = "futures"
+side = "buy"
+from = 2020-07-01
+value = "0.00002"
+source = "S35 Derivatives - Equity Futures 0.002% Buyer"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Uniform rate under the Indian Stamp Act amendments in force from 1 July 2020 (PIB, S35)."
+
+[[row]]
+segment = "futures"
+side = "sell"
+from = 2010-04-01
+to = 2020-06-30
+value = "0"
+source = "S31 stamp duty on the buy side only in broker practice"
+verified_on = 2026-09-30
+confidence = "assumed"
+note = "State-wise before 2020-07-01. Maharashtra is the default state: Fyers' calculator scripts of 2018 to 2020 (S31) list Maharashtra delivery 0.01% and futures 0.002%. Sellers also paid in some states; the engine charges the buy side only."
+
+[[row]]
+segment = "futures"
+side = "sell"
+from = 2020-07-01
+value = "0"
+source = "S35 stamp duty is levied only on the buyer"
+verified_on = 2026-09-30
+confidence = "primary"
+
+[[row]]
+segment = "mf"
+side = "buy"
+from = 2010-04-01
+to = 2020-06-30
+value = "0"
+source = "S36 stamp duty on mutual fund purchases starts with effect from 1 July 2020"
+verified_on = 2026-09-30
+confidence = "secondary"
+note = "None before that date."
+
+[[row]]
+segment = "mf"
+side = "buy"
+from = 2020-07-01
+value = "0.00005"
+source = "S36 0.005% of the net investment value on purchases (issue of units), with effect from July 1, 2020"
+verified_on = 2026-09-30
+confidence = "secondary"
+
+[[row]]
+segment = "mf"
+side = "sell"
+from = 2010-04-01
+to = 2020-06-30
+value = "0"
+source = "S36 stamp duty applies to purchases, not redemptions"
+verified_on = 2026-09-30
+confidence = "secondary"
+
+[[row]]
+segment = "mf"
+side = "sell"
+from = 2020-07-01
+value = "0"
+source = "S36 stamp duty applies to purchases, not redemptions"
+verified_on = 2026-09-30
+confidence = "secondary"

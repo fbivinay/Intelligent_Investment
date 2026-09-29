@@ -1,0 +1,67 @@
+# NSE Investor Protection Fund Trust contribution per side as a fraction of turnover. It is the trading member's
+# contribution to the exchange; the engine passes it to the client from the date the exchange raised it (2023-04-01).
+[meta]
+keys = ["exchange", "segment"]
+coverage_from = 2010-04-01
+
+[[row]]
+exchange = "NSE"
+segment = "delivery"
+from = 2010-04-01
+to = 2023-03-31
+value = "0.000000001"
+source = "S26 existing Rs.0.01 per crore of the traded value (as of 2023-03-24)"
+verified_on = 2026-09-30
+confidence = "assumed"
+note = "The value is stated for March 2023 only; earlier values were not found. It is Rs 0.0001 per lakh, immaterial."
+
+[[row]]
+exchange = "NSE"
+segment = "delivery"
+from = 2023-04-01
+to = 2026-02-28
+value = "0.000001"
+source = "S26 recalibrate the contribution to NSE IPFT from Rs.0.01 per crore to Rs.10 per crore of the traded value, from April 01, 2023; S29 confirms Rs. 10 each side"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Fyers' tables list it from March 2025 (S39)."
+
+[[row]]
+exchange = "NSE"
+segment = "delivery"
+from = 2026-03-01
+value = "0.000000001"
+source = "S29 contribution to NSE IPFT Rs. 0.01 each side per crore, with effect from March 1, 2026"
+verified_on = 2026-09-30
+confidence = "primary"
+
+[[row]]
+exchange = "NSE"
+segment = "futures"
+from = 2010-04-01
+to = 2023-03-31
+value = "0.000000001"
+source = "S26 existing Rs.0.01 per crore of the traded value (as of 2023-03-24)"
+verified_on = 2026-09-30
+confidence = "assumed"
+note = "The value is stated for March 2023 only; earlier values were not found. It is Rs 0.0001 per lakh, immaterial."
+
+[[row]]
+exchange = "NSE"
+segment = "futures"
+from = 2023-04-01
+to = 2026-02-28
+value = "0.000001"
+source = "S26 recalibrate the contribution to NSE IPFT from Rs.0.01 per crore to Rs.10 per crore of the traded value, from April 01, 2023; S29 confirms Rs. 10 each side"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Fyers' tables list it from March 2025 (S39)."
+
+[[row]]
+exchange = "NSE"
+segment = "futures"
+from = 2026-03-01
+value = "0.000000001"
+source = "S29 contribution to NSE IPFT Rs. 0.01 each side per crore, with effect from March 1, 2026"
+verified_on = 2026-09-30
+confidence = "primary"

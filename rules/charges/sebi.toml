@@ -1,0 +1,30 @@
+# SEBI broker turnover fee as a fraction of turnover, cash and equity derivatives.
+[meta]
+keys = []
+coverage_from = 2010-04-01
+
+[[row]]
+from = 2010-04-01
+to = 2017-03-31
+value = "0.000002"
+source = "S34 broker turnover fee cut from Rs 20 to Rs 15 per crore in January 2017"
+verified_on = 2026-09-30
+confidence = "assumed"
+note = "Rs 20 per crore before the cut; values for earlier years were not researched."
+
+[[row]]
+from = 2017-04-01
+to = 2019-03-31
+value = "0.0000015"
+source = "S34 Rs 15 per crore after the January 2017 cut; S32 Board memorandum of March 2019: current fee Rs.15/- per crore; S31 0.00015% in 2018 and 2019"
+verified_on = 2026-09-30
+confidence = "secondary"
+note = "The effective date of the 2017 cut was not found; 2017-04-01 is assumed."
+
+[[row]]
+from = 2019-04-01
+value = "0.000001"
+source = "S32 SEBI notification SEBI/LAD-NRO/GN/2019/03: 0.00010 per cent of turnover (Rs 10 per crore), in force from April 01, 2019"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "SEBI cut the fee by 50% for brokers from June 2020 to March 2021 (S33), but Fyers' published tables of Aug and Nov 2020 (S30) still show Rs 10 per crore, so Rs 10 is used throughout."

@@ -1,0 +1,84 @@
+# Service tax, then GST, on the broker's fees. applies_to lists the fee lines the tax is charged on. dp, amc and
+# account_opening are always taxed (they are services); the other lines follow Fyers' published base.
+[meta]
+keys = []
+coverage_from = 2010-04-01
+
+[[row]]
+from = 2010-04-01
+to = 2012-03-31
+value = "0.103"
+applies_to = ["brokerage", "exchange_txn", "clearing", "dp", "amc", "account_opening"]
+source = "S37 service tax 10.30% from 24 February 2009 to 31 March 2012"
+verified_on = 2026-09-30
+confidence = "assumed"
+note = "Service tax, not GST. The rate is from S37; the taxed base (brokerage plus transaction charges) is assumed to match Fyers' GST-era base (S30), because no pre-2017 statement of the base was found."
+
+[[row]]
+from = 2012-04-01
+to = 2015-05-31
+value = "0.1236"
+applies_to = ["brokerage", "exchange_txn", "clearing", "dp", "amc", "account_opening"]
+source = "S37 service tax 12.36% from 1 April 2012 to 31 May 2015"
+verified_on = 2026-09-30
+confidence = "assumed"
+note = "Service tax, not GST. The rate is from S37; the taxed base (brokerage plus transaction charges) is assumed to match Fyers' GST-era base (S30), because no pre-2017 statement of the base was found."
+
+[[row]]
+from = 2015-06-01
+to = 2015-11-14
+value = "0.14"
+applies_to = ["brokerage", "exchange_txn", "clearing", "dp", "amc", "account_opening"]
+source = "S37 service tax 14% from 1 June 2015 to 14 November 2015"
+verified_on = 2026-09-30
+confidence = "assumed"
+note = "Service tax, not GST. The rate is from S37; the taxed base (brokerage plus transaction charges) is assumed to match Fyers' GST-era base (S30), because no pre-2017 statement of the base was found."
+
+[[row]]
+from = 2015-11-15
+to = 2016-05-31
+value = "0.145"
+applies_to = ["brokerage", "exchange_txn", "clearing", "dp", "amc", "account_opening"]
+source = "S37 service tax 14.5% (14% + 0.5% Swachh Bharat Cess) from 15 November 2015 to 31 May 2016"
+verified_on = 2026-09-30
+confidence = "assumed"
+note = "Service tax, not GST. The rate is from S37; the taxed base (brokerage plus transaction charges) is assumed to match Fyers' GST-era base (S30), because no pre-2017 statement of the base was found."
+
+[[row]]
+from = 2016-06-01
+to = 2017-06-30
+value = "0.15"
+applies_to = ["brokerage", "exchange_txn", "clearing", "dp", "amc", "account_opening"]
+source = "S37 service tax 15% (14% + 0.5% + 0.5% Krishi Kalyan Cess) from 1 June 2016 to 30 June 2017"
+verified_on = 2026-09-30
+confidence = "assumed"
+note = "Service tax, not GST. The rate is from S37; the taxed base (brokerage plus transaction charges) is assumed to match Fyers' GST-era base (S30), because no pre-2017 statement of the base was found."
+
+[[row]]
+from = 2017-07-01
+to = 2023-06-04
+value = "0.18"
+applies_to = ["brokerage", "exchange_txn", "clearing", "dp", "amc", "account_opening"]
+source = "S30 GST 18% on the value of brokerage and total transaction charges (exchange transaction and clearing member charges); S39 copy of 2022-01-24"
+verified_on = 2026-09-30
+confidence = "secondary"
+note = "GST from 1 July 2017."
+
+[[row]]
+from = 2023-06-05
+to = 2025-03-16
+value = "0.18"
+applies_to = ["brokerage", "exchange_txn", "clearing", "sebi", "dp", "amc", "account_opening"]
+source = "S39 GST 18% on (Brokerage + Exchange Transaction charges + Clearing charges + SEBI Turnover Fee), copy of 2023-06-05"
+verified_on = 2026-09-30
+confidence = "secondary"
+note = "Date is the first archived copy showing the SEBI fee in the base; the copy of 2023-01-29 does not show it."
+
+[[row]]
+from = 2025-03-17
+value = "0.18"
+applies_to = ["brokerage", "exchange_txn", "clearing", "sebi", "ipft", "dp", "amc", "account_opening"]
+source = "S1 GST 18% on (Brokerage + Exchange Transaction charges + Clearing charges + SEBI Turnover Fee + NSE IPFT)"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Date is the first archived copy showing the IPFT in the base (2025-03-17); the copy of 2024-11-13 does not show it."
