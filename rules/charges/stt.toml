@@ -1,0 +1,220 @@
+# Securities Transaction Tax as a fraction of turnover, charged on the side shown. Rounded to the nearest rupee (S24).
+# instrument_class: etf_equity = equity-oriented ETF units sold on the exchange; mf_equity = equity-oriented fund units
+# bought from or redeemed to the fund house; etf_gold and mf_debt = units that are not equity oriented (no STT);
+# fut_index = index futures (STT on the seller only).
+[meta]
+keys = ["instrument_class", "side"]
+coverage_from = 2010-04-01
+
+[[row]]
+instrument_class = "etf_equity"
+side = "buy"
+from = 2010-04-01
+to = 2012-06-30
+value = "0.00125"
+round_step = "1"
+source = "S18 units of an equity oriented fund, delivery based: existing rate 0.125%"
+verified_on = 2026-09-30
+confidence = "secondary"
+note = "The Finance Bill 2012 memorandum gives 0.125% as the existing rate in March 2012. It is assumed to have been the same since 2010-04-01 (it was the original delivery rate in force before the 2012 cut)."
+
+[[row]]
+instrument_class = "etf_equity"
+side = "buy"
+from = 2012-07-01
+to = 2013-05-31
+value = "0.001"
+round_step = "1"
+source = "S18 proposed 0.1% from 1st July 2012; S19 existing 0.1% in Feb 2013"
+verified_on = 2026-09-30
+confidence = "primary"
+
+[[row]]
+instrument_class = "etf_equity"
+side = "buy"
+from = 2013-06-01
+value = "0"
+round_step = "1"
+source = "S19 delivery based purchase of units of an equity oriented fund: Nil from 1st June 2013; S23 lists no purchase of such units"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "No STT on buying ETF units."
+
+[[row]]
+instrument_class = "etf_equity"
+side = "sell"
+from = 2010-04-01
+to = 2012-06-30
+value = "0.00125"
+round_step = "1"
+source = "S18 units of an equity oriented fund, delivery based: existing rate 0.125%"
+verified_on = 2026-09-30
+confidence = "secondary"
+note = "The Finance Bill 2012 memorandum gives 0.125% as the existing rate in March 2012. It is assumed to have been the same since 2010-04-01 (it was the original delivery rate in force before the 2012 cut)."
+
+[[row]]
+instrument_class = "etf_equity"
+side = "sell"
+from = 2012-07-01
+to = 2013-05-31
+value = "0.001"
+round_step = "1"
+source = "S18 proposed 0.1% from 1st July 2012; S19 existing 0.1% in Feb 2013"
+verified_on = 2026-09-30
+confidence = "primary"
+
+[[row]]
+instrument_class = "etf_equity"
+side = "sell"
+from = 2013-06-01
+value = "0.00001"
+round_step = "1"
+source = "S19 delivery based sale of units of an equity oriented fund: 0.001% from 1st June 2013; S20 and S23 item 2A: 0.001% (No Change)"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Unchanged through the Finance Acts of 2016, 2023, 2024 and 2026 (NSE circulars S20 to S23)."
+
+[[row]]
+instrument_class = "mf_equity"
+side = "buy"
+from = 2010-04-01
+value = "0"
+round_step = "1"
+source = "S19 the taxable transactions listed are sales of units; subscription to a fund from the fund house is not one"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Buying units from the fund house carries no STT."
+
+[[row]]
+instrument_class = "mf_equity"
+side = "sell"
+from = 2010-04-01
+to = 2013-05-31
+value = "0.0025"
+round_step = "1"
+source = "S19 sale of a unit of an equity oriented fund to the mutual fund: existing 0.25%"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Redemption."
+
+[[row]]
+instrument_class = "mf_equity"
+side = "sell"
+from = 2013-06-01
+value = "0.00001"
+round_step = "1"
+source = "S19 sale of a unit of an equity oriented fund to the mutual fund: 0.001% from 1st June 2013"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Redemption. No later change found (NSE circulars S20 to S23 cover exchange sales only)."
+
+[[row]]
+instrument_class = "etf_gold"
+side = "buy"
+from = 2010-04-01
+value = "0"
+round_step = "1"
+source = "S23 the STT table lists equity shares, business trust units, equity oriented fund units and derivatives only"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Units that are not equity oriented (gold ETFs, debt and liquid funds) carry no STT."
+
+[[row]]
+instrument_class = "etf_gold"
+side = "sell"
+from = 2010-04-01
+value = "0"
+round_step = "1"
+source = "S23 the STT table lists equity shares, business trust units, equity oriented fund units and derivatives only"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Units that are not equity oriented (gold ETFs, debt and liquid funds) carry no STT."
+
+[[row]]
+instrument_class = "mf_debt"
+side = "buy"
+from = 2010-04-01
+value = "0"
+round_step = "1"
+source = "S23 the STT table lists equity shares, business trust units, equity oriented fund units and derivatives only"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Units that are not equity oriented (gold ETFs, debt and liquid funds) carry no STT."
+
+[[row]]
+instrument_class = "mf_debt"
+side = "sell"
+from = 2010-04-01
+value = "0"
+round_step = "1"
+source = "S23 the STT table lists equity shares, business trust units, equity oriented fund units and derivatives only"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Units that are not equity oriented (gold ETFs, debt and liquid funds) carry no STT."
+
+[[row]]
+instrument_class = "fut_index"
+side = "buy"
+from = 2010-04-01
+value = "0"
+round_step = "1"
+source = "S20 and S23: STT on a futures in securities is payable by the seller"
+verified_on = 2026-09-30
+confidence = "primary"
+
+[[row]]
+instrument_class = "fut_index"
+side = "sell"
+from = 2010-04-01
+to = 2013-05-31
+value = "0.00017"
+round_step = "1"
+source = "S19 sale of a futures in securities: existing 0.017%"
+verified_on = 2026-09-30
+confidence = "primary"
+
+[[row]]
+instrument_class = "fut_index"
+side = "sell"
+from = 2013-06-01
+to = 2023-03-31
+value = "0.0001"
+round_step = "1"
+source = "S19 futures 0.01% from 1st June 2013; S20 futures 0.01 per cent (No Change) in 2016; S21 up to March 31, 2023: 0.01%"
+verified_on = 2026-09-30
+confidence = "primary"
+
+[[row]]
+instrument_class = "fut_index"
+side = "sell"
+from = 2023-04-01
+to = 2024-09-30
+value = "0.000125"
+round_step = "1"
+source = "S21 Sale of a futures in securities has been revised to 0.0125% (upto March 31, 2023 - 0.01%)"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Finance Act 2023."
+
+[[row]]
+instrument_class = "fut_index"
+side = "sell"
+from = 2024-10-01
+to = 2026-03-31
+value = "0.0002"
+round_step = "1"
+source = "S22 Sale of a futures in securities has been revised to 0.02% (upto September 30, 2024 - 0.0125%)"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Finance Act 2024."
+
+[[row]]
+instrument_class = "fut_index"
+side = "sell"
+from = 2026-04-01
+value = "0.0005"
+round_step = "1"
+source = "S23 Sale of a futures in securities has been revised to 0.05% (upto March 31, 2026 - 0.02%)"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Finance Act 2026."
