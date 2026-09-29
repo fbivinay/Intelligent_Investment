@@ -1,143 +1,102 @@
-# Bitcoin ETF Trend Model
+# DeepTrend
 
-A daily trend model that decides how much to hold in a US spot Bitcoin ETF
-(IBIT), a gold ETF (GLD) and T-bills, built for an Indian resident investing
-under the Liberalised Remittance Scheme. It runs by itself every US trading day
-as a paper portfolio on **real ETF prices**, after **Indian tax and all charges**,
-next to buy & hold. Going live with real money is a configuration change: add
-broker keys and switch orders on.
+A deep-learning model that decides, every US trading day, how much of your money
+to hold in a US spot Bitcoin ETF (IBIT), a gold ETF (GLD) and T-bills. It is built for an
+Indian resident investing under the Liberalised Remittance Scheme, and measured in
+**rupees, after every Indian tax**, against what an Indian would otherwise buy.
 
-**Live dashboard:** https://btc-paper-trader-fbivinays-projects.vercel.app
-**Going live with real money:** https://btc-paper-trader-fbivinays-projects.vercel.app/go-live
+**Site:** https://btc-paper-trader-fbivinays-projects.vercel.app
 
----
+## The result that matters to an Indian investor
 
-## Results on IBIT's real prices
+₹1,00,000 put in on 11 Jan 2024 (IBIT's launch), worth this much in hand at the end of
+Sep 2026, after tax at the 30% slab. The rupee's fall (₹83 to ₹96 a dollar) is taxed as a
+gain, so it is counted too.
 
-$10,000 from IBIT's launch (11 Jan 2024) to 24 Sep 2026. "After" means Indian
-capital-gains tax at the top slab (31.2%, 13% after 24 months), 1.5% forex each
-way, 0.05% per trade, T-bill income taxed at slab. Equity is liquidation value:
-what you would get back if you sold that day.
+| Option | In hand | Per year | Worst fall |
+|---|---|---|---|
+| Gold ETF in India (GOLDBEES) | ₹2,17,872 | +33.2% | −23% |
+| Bitcoin ETF held (IBIT via LRS) | ₹1,86,483 | +25.8% | −40% |
+| Bitcoin on an Indian exchange | ₹1,86,585 | +25.9% | −43% |
+| **DeepTrend model** | **₹1,65,801** | **+20.5%** | **−16%** |
+| Bank FD (SBI, 1 year) | ₹1,12,990 | +4.6% | 0% |
+| Nifty 50 ETF (NIFTYBEES) | ₹1,10,575 | +3.8% | −15% |
 
-| | per year | worst drop | 2024 | 2025 | 2026 (to Sep) |
-|---|---|---|---|---|---|
-| **Model, after tax & charges** | **+26.4%** | **−15%** | +55% | +14% | +6% |
-| Model, before tax & charges | +42.8% | −19% | +94% | +23% | +9% |
-| Buy & hold IBIT, after | +20.5% | −43% | +64% | −5% | +6% |
-| Buy & hold IBIT, before | +24.6% | −53% | +101% | −6% | −4% |
+The model roughly quadruples Nifty and FD returns, and takes less than half the falls of
+holding Bitcoin. The site lets you pick your own slab; lower slabs raise the model most,
+because its gains are short-term.
 
-On real prices the model returned more than holding, with about a third of the
-worst drop, and no losing year. It does not reach 25% in every year.
+## The deep learning model
 
-The top slab is the conservative case. Tax is the biggest single cost, so the
-dashboard lets you pick your own slab. At the 20% slab the model made +30.6% a
-year on real prices; at 10%, +34.9%. Buy & hold barely moves, because gains on
-an ETF held over 24 months are taxed at a flat 12.5% plus cess, whatever the slab.
+A **Deep Momentum Network** (Lim, Zohren & Roberts, University of Oxford, 2019).
 
-## How it decides
+- **Why this model:** our first model, an LSTM, guessed Bitcoin's 4-hour direction right
+  44.3% of the time (37.6% by chance) and still lost money: a 0.04% edge against 0.25% fees.
+  So this network is not trained to guess. Its loss is minus the Sharpe ratio of the
+  positions it takes, so it learns directly to earn more per unit of risk.
+- **Why pooled:** Bitcoin has too little history for a neural network. The network learns
+  from 18 markets at once (95,615 market-days since 2000: stocks, bonds, gold, silver, oil,
+  Nifty, crypto), on scale-free features, then applies what it learned to Bitcoin and gold.
+- **How it works:**
+  1. Input: 63 trading days × 8 features (volatility-scaled returns over 1/21/63/126/252
+     days, three MACD trend signals).
+  2. A Transformer encoder (1 layer, 2 heads, causal mask) outputs a position from 0 to 1.
+  3. The output is calibrated: each value is ranked against the network's own outputs over
+     the previous 3 years.
+  4. The live model averages this with the share of 8 classic trend votes. It then shrinks
+     the position in wild markets, gives what's left to gold, and keeps the rest in T-bills.
+- **How it was chosen:** 40 variants were trained on a Kaggle GPU: 5 architectures (LSTM,
+  GRU, TCN, Transformer, MLP), each pooled or fine-tuned, raw or calibrated, alone or with
+  the votes. Every one was retrained each January on data before that year, chosen on
+  2019–2023 only, then tested on IBIT's real prices from 2024.
 
-Once a day, after the US close, from finished daily bars; traded at the next open.
-
-1. **Eight trend signals vote on Bitcoin**: is the price above its 20, 50, 100
-   and 200-day average, and higher than 1, 3, 6 and 12 months ago? The share of
-   "yes" votes is the Bitcoin weight.
-2. **Volatility sizing**: when Bitcoin swings harder than its own past-year
-   norm, the weight is scaled down.
-3. **Gold fills what Bitcoin leaves**, sized by the same eight votes on gold.
-4. **The rest earns T-bill interest.** No leverage, no short selling.
-
-Nothing is fitted to data: every lookback is a standard one, chosen in advance.
-
-## How it was chosen
-
-`ml/etf_research.py` judges 15 strategies the same way. They are chosen on
-**2019–2023 only**, using Bitcoin's own real price in place of the ETF, which did
-not exist yet. They are then tested once on **IBIT's real prices from 2024**, a
-period never used to choose anything.
-
-| Strategy | 2019–23 per year / worst drop | Real IBIT per year / worst drop |
+| Model | 2019–23 per year / worst fall | Real ETF 2024+ per year / worst fall |
 |---|---|---|
-| **The model** | +33.1% / −34% | **+26.4% / −15%** |
-| Bitcoin only (no gold) | +33.1% / −31% | +20.7% / −14% |
-| No volatility sizing | +41.5% / −41% | +26.3% / −18% |
-| AI re-picks 5 rules every January | +27.8% / −51% | +24.1% / −19% |
-| Machine learning (gradient boosting) | +1.7% / −67% | +27.0% / −22% |
-| Buy & hold | +56.5% / −76% | +20.5% / −43% |
+| **Transformer, calibrated + 8 votes (live)** | +26.6% / −28% | +18.1% / −16% |
+| 8 trend votes alone | +33.1% / −34% | +25.9% / −15% |
+| Transformer, calibrated, alone | +22.9% / −21% | +10.3% / −16% |
+| Buy & hold | +56.5% / −76% | +19.9% / −44% |
 
-The top three were essentially tied on 2019–23. The model was kept for its
-second asset. Letting the computer re-pick rules each year, and the
-gradient-boosting model, both did worse on the period used to choose. Other
-variants tried were faster and slower signals, SMA or momentum votes only,
-all-or-nothing, weekly decisions, gold first, and adding Nasdaq-100 and long
-bonds.
+Honest note: on real prices the simple trend votes alone earned more. The hybrid keeps the
+network in charge of half the decision and stays level with the rules on the years used to
+choose.
 
-## The automation
+## How it runs (free, no database)
 
 ```
-GitHub Actions (free)                 Supabase (free Postgres)        Vercel (free)
-  22:30 UTC Mon-Fri  decide  ────────►  etf_decisions (write-once)  ─►  dashboard
-    real prices (Yahoo) → checks          etf_equity, etf_trades          read-only,
-    → model → ledger                      etf_runs (heartbeat)            no login
-  14:45 UTC Mon-Fri  execute ─► broker   etf_orders (private)
-    only if keys + SEND_ORDERS=on
+GitHub Actions, Mon-Fri
+  22:30 UTC decide  -> real prices (Yahoo) -> checks -> Transformer + votes -> decision
+                    -> append to web/data/decisions.csv, rebuild web/data/site.json
+                    -> commit -> Vercel rebuilds the site
+  14:45 UTC execute -> broker orders, only if keys exist and SEND_ORDERS=on
 ```
 
-- **Decide** refuses stale, missing or absurd data. It records each decision
-  once, and a decision can never be edited, so the live record cannot be
-  rewritten afterwards. It then rebuilds the paper portfolio after and before
-  tax and charges, with buy & hold alongside.
-- **Execute** is off unless broker keys exist and the `SEND_ORDERS` variable is
-  `on`. When it runs it enforces these rules:
-  - it sells first, waits for the fills, then buys **from cash only** (no leverage)
-  - a sell never exceeds the shares held (no shorting)
-  - each order is capped at `MAX_ORDER_USD`
-  - every order carries an ID built from the decision date, so the broker rejects duplicates
-- **Alert** goes out when the split moves enough to be worth a trade, about once
-  a week. It is a free phone push via ntfy.sh, so the model works with **any**
-  broker app, even ones with no API (INDmoney, Vested and others): you place the
-  2–4 orders by hand.
-- Every run writes to `etf_runs`, which the dashboard shows as its heartbeat. A
-  failed run also makes GitHub email the owner.
+- **Tamper-evident record:** `web/data/decisions.csv` is append-only, and git timestamps
+  every row, so the live record cannot be edited after the fact without it showing.
+- **Phone alerts (ntfy.sh):** sent when the split should change, so the model can be
+  followed by hand in any broker app.
+- **Safety rules in code:** buys come from cash only (no leverage), it never sells more than
+  it holds, orders are capped, and duplicate orders are impossible. Stale or absurd data
+  stops the run.
+- **Yearly retraining:** each January the job trains that year's Transformer and commits
+  its weights to `models/`.
 
 ## Repository
 
 | Path | What |
 |---|---|
-| `ml/etf_model.py` | the model: votes, volatility sizing, weights |
-| `ml/etf_data.py` | real daily prices (IBIT, GLD, T-bill, USD/INR) and data checks |
-| `ml/btc_before_ibit.csv` | Bitcoin's real price at US market hours before IBIT existed |
-| `ml/etf_tax_sim.py` | Indian tax simulator: FIFO lots, 24-month rule, loss set-off and 8-year carry-forward |
+| `ml/etf_dl.py` | the Deep Momentum Network: features, Transformer, training, calibration |
+| `ml/dmn_kaggle.py` | the GPU run that compared all 40 variants |
+| `ml/dl_results.csv`, `ml/dmn_walkforward.csv` | its results and walk-forward outputs |
+| `ml/etf_model.py` | the live model: network + votes, volatility sizing, gold fill |
+| `ml/etf_tax_sim.py` | Indian tax simulator: FIFO lots, 24-month rule, loss set-off |
+| `ml/india_compare.py` | FD, Nifty, Indian gold, Indian Bitcoin, in rupees after tax |
 | `ml/etf_daily.py` | the daily decide / execute job |
 | `ml/broker.py` | Alpaca client and the cash-only rebalance |
-| `ml/etf_research.py` | all 15 strategies, chosen on 2019–23, tested on real 2024+ prices |
-| `ml/db.py` | minimal Supabase REST client |
-| `supabase/schema.sql` | tables (decisions, equity by tax slab, trades, alerts, runs, orders) and row-level security |
-| `web/` | Next.js dashboard and the go-live guide |
+| `ml/etf_research.py` | rule-based strategies compared the same way |
+| `web/` | the Next.js site; `web/data/` is written by the daily job |
 
-Every module has an assert-based self-check (`python ml/<module>.py`). CI runs
-them on every push.
+Every module has an assert-based self-check; CI runs them on every push.
 
-## Running it yourself
-
-```bash
-pip install -r requirements.txt
-python ml/etf_daily.py decide --dry-run      # today's decision and the portfolio, nothing written
-pip install scikit-learn && python ml/etf_research.py   # the full comparison
-```
-
-To write to your own database, put `SUPABASE_URL` and `SUPABASE_SERVICE_KEY` in
-`.env` locally, and in GitHub Actions secrets. The service key must never reach
-the browser; the dashboard uses the anon key and read-only row-level security.
-
-## Honest limits
-
-- The real ETF record is 2.7 years long.
-- Gold's 2024–25 rally helped the model. Without gold it made +20.7% a year on
-  real prices.
-- Tax rules are as understood at the time of writing; confirm with a Chartered
-  Accountant. Results are in US dollar terms, and rupee moves affect every
-  strategy alike.
-- Prices come from Yahoo's free chart API. If it fails, the job stops rather
-  than trading on bad data.
-
-Paper trading. Not investment advice.
+Paper trading on real prices. Not investment advice. Confirm tax treatment with a
+Chartered Accountant.

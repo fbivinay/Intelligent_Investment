@@ -75,6 +75,13 @@ class Alpaca:
             body["notional"] = f"{notional:.2f}"
         return self._req("POST", "/v2/orders", body)
 
+    def already_sent(self, prefix: str) -> bool:
+        """True if any order in the last week carries a client_order_id with this prefix."""
+        after = (time.time() - 7 * 86400)
+        stamp = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(after))
+        orders = self._req("GET", f"/v2/orders?status=all&limit=500&after={stamp}")
+        return any((o.get("client_order_id") or "").startswith(prefix) for o in orders)
+
     def wait(self, order_id: str, timeout: float = 90.0) -> dict:
         end = time.time() + timeout
         while True:
