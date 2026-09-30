@@ -33,6 +33,7 @@ MAX_SLIPPAGE = 0.03
 @dataclass(frozen=True)
 class CostTable:
     values: np.ndarray        # R x 3 classes x 2 sides x len(SIZES): rupees, ETF sells include the depository charge
+    ded: np.ndarray           # the same shape: the part of it a capital gain may deduct (everything but STT)
     dates: tuple              # the date each regime was evaluated on
 
 
@@ -44,15 +45,18 @@ def regimes(rules: Rules, days: list[date]):
 
 def charge_table(rules: Rules, regime_dates) -> CostTable:
     vals = np.zeros((len(regime_dates), len(CLASSES), 2, len(SIZES)))
+    ded = np.zeros_like(vals)
     price = Decimal(100)
     for r, on in enumerate(regime_dates):
         dp = float(dp_charge(rules, on).value)
         for c, cls in enumerate(CLASSES):
             for s, side in enumerate(SIDES):
                 for k, v in enumerate(SIZES):
-                    total = float(order_charges(rules, Order(on, cls, side, Decimal(repr(float(v))) / price, price)).total.value)
-                    vals[r, c, s, k] = total + (dp if (side == "sell" and cls != "mf_debt") else 0.0)
-    return CostTable(vals, tuple(regime_dates))
+                    ch = order_charges(rules, Order(on, cls, side, Decimal(repr(float(v))) / price, price))
+                    extra = dp if (side == "sell" and cls != "mf_debt") else 0.0
+                    vals[r, c, s, k] = float(ch.total.value) + extra
+                    ded[r, c, s, k] = float(ch.deductible.value) + extra
+    return CostTable(vals, ded, tuple(regime_dates))
 
 
 def charge_array(values: np.ndarray, reg: int, c: int, s: int, value: float) -> float:
@@ -69,6 +73,11 @@ def charge_array(values: np.ndarray, reg: int, c: int, s: int, value: float) -> 
 
 def charge(table: CostTable, reg: int, cls: str, side: str, value: float) -> float:
     return charge_array(table.values, reg, CLASSES.index(cls), SIDES.index(side), value)
+
+
+def deductible(table: CostTable, reg: int, cls: str, side: str, value: float) -> float:
+    """The part of the charges a capital gain may deduct: all of them but STT."""
+    return charge_array(table.ded, reg, CLASSES.index(cls), SIDES.index(side), value)
 
 
 def fixed_costs(rules: Rules, days: list[date]) -> np.ndarray:
