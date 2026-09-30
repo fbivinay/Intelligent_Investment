@@ -399,3 +399,14 @@ def test_the_liquidation_tax_is_what_selling_everything_adds_to_the_year_so_far(
     e1 = CGEvent("sold", days[3], "etf_equity", days[1], const("p", q * 110), const("sc", sc1.deductible.value + dp_charge(RULES, days[3]).value), const("c", q * 100 + bc1.deductible.value))
     total = float(investment_tax(RULES, fy_of(days[-1]), PROFILE, [e1, e2]).extra.value)
     assert r.liquidation_tax == pytest.approx(total - float(investment_tax(RULES, fy_of(days[-1]), PROFILE, [e1]).extra.value), abs=15.0)
+
+
+def test_the_wealth_lost_to_slippage_is_what_is_reported_on_buys_and_sells_together():
+    days = weekdays(date(2016, 6, 1), 6)
+    p = flat_panel(days, price=100.0, value=5e7)
+    w = W(days, [[1, 0, 0, 0, 0], [1, 0, 0, 0, 0], [0, 0, 0, 0, 1]])                  # buy on day 1, sell on day 3, both at the same flat price
+    free = sim.simulate(p, w, RULES, sim.SimConfig(**CFG))
+    slipped = sim.simulate(p, w, RULES, sim.SimConfig(capital=1_000_000.0, governor=False, slippage=True))
+    assert slipped.slippage[1] > 0 and slipped.slippage[3] > 0
+    lost = free.equity[5] - slipped.equity[5]
+    assert lost == pytest.approx(slipped.slippage[1] + slipped.slippage[3], rel=0.06)        # what the two fills cost, as reported (charges differ by a few rupees)
