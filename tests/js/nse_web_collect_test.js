@@ -27,8 +27,11 @@ function fakeSite(opts = {}) {
       return reply(200, {data: rows});
     }
     if (u.includes('foCPV')) {
-      const ok = (opts.expiries || []).includes(iso(fromDmon(q.get('expiryDate'))));
-      const rows = ok ? weekdays(a, z).reverse().slice(0, 70).map(d => ({FH_TIMESTAMP: label(d), FH_EXPIRY_DT: q.get('expiryDate')})) : [];
+      const expiry = iso(fromDmon(q.get('expiryDate')));
+      const ok = (opts.expiries || []).includes(expiry);
+      const stops = (opts.truncated || {})[expiry];                     // rows only up to this date
+      const from = (opts.startsAt || {})[expiry];                       // rows only from this date
+      const rows = ok ? weekdays(a, z).filter(d => (!stops || iso(d) <= stops) && (!from || iso(d) >= from)).reverse().slice(0, 70).map(d => ({FH_TIMESTAMP: label(d), FH_EXPIRY_DT: q.get('expiryDate')})) : [];
       return reply(200, {data: rows});
     }
     return reply(200, {data: []});
@@ -182,6 +185,39 @@ const test = async (name, fn) => { await fn(); n++; console.log('ok', name); };
     const d = makeCollector(fakeSite({expiries: ['2010-06-24']}).fetch, Object.assign({}, quiet, {from: '2010-04-01', to: '2010-06-30', etf: [], index: [], fut: ['NIFTY'], futMonthsFrom: {NIFTY: '2010-06-01'}}));
     await d.step(5);
     assert.strictEqual(d.state.items[0].from, '2010-04-01');
+  });
+
+  await test('a contract whose rows stop well before its expiry is also asked for under the days before (the site kept one contract under two expiry dates)', async () => {
+    const site = fakeSite({expiries: ['2014-02-27', '2014-02-26'], truncated: {'2014-02-27': '2013-12-27'}, startsAt: {'2014-02-26': '2013-12-30'}});
+    const c = makeCollector(site.fetch, Object.assign({}, quiet, {from: '2013-10-20', to: '2014-02-28', etf: [], index: [], fut: ['NIFTY'], futMonthsFrom: {NIFTY: '2014-02-01'}}));
+    await c.step(5);
+    assert.deepStrictEqual(c.state.items.map(i => i.expiry).sort(), ['2014-02-26', '2014-02-27']);
+    assert.ok(c.state.items.find(i => i.expiry === '2014-02-26').data.length > 0);
+    assert.deepStrictEqual(c.state.missing, []);
+  });
+
+  await test('a contract whose rows reach its expiry is not asked for under any other day', async () => {
+    const site = fakeSite({expiries: ['2015-08-27', '2015-08-26']});                                       // both exist in the fake, only the first should be asked for
+    const c = makeCollector(site.fetch, Object.assign({}, quiet, {from: '2015-08-01', to: '2015-08-31', etf: [], index: [], fut: ['NIFTY']}));
+    await c.step(5);
+    assert.deepStrictEqual(c.state.items.map(i => i.expiry), ['2015-08-27']);
+    assert.strictEqual(site.calls.filter(u => u.includes('foCPV')).length, 1);
+  });
+
+  await test('a contract that stays short under every candidate day is kept and is not reported as missing', async () => {
+    const c = makeCollector(fakeSite({expiries: ['2014-02-27'], truncated: {'2014-02-27': '2013-12-27'}}).fetch,
+                            Object.assign({}, quiet, {from: '2013-10-20', to: '2014-02-28', etf: [], index: [], fut: ['NIFTY'], futMonthsFrom: {NIFTY: '2014-02-01'}}));
+    await c.step(5);
+    assert.deepStrictEqual(c.state.items.map(i => i.expiry), ['2014-02-27']);
+    assert.deepStrictEqual(c.state.missing, []);
+  });
+
+  await test('a contract whose window is cut by the end date is not chased under other days just because its rows stop there', async () => {
+    const site = fakeSite({expiries: ['2010-04-29', '2010-04-28']});
+    const c = makeCollector(site.fetch, Object.assign({}, quiet, {from: '2010-04-01', to: '2010-04-20', etf: [], index: [], fut: ['NIFTY']}));
+    await c.step(5);
+    assert.deepStrictEqual(c.state.items.map(i => i.expiry), ['2010-04-29']);
+    assert.strictEqual(site.calls.filter(u => u.includes('foCPV')).length, 1);
   });
 
   console.log(n + ' collector tests passed');

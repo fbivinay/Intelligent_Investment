@@ -152,6 +152,10 @@ def _read(raw: bytes) -> tuple[dict[str, list[dict]], int]:
             got["index"] += _index(it)
         else:
             raise ValueError(f"an item of kind {kind!r} is not one this reader knows")
+    return _dedupe(got)
+
+
+def _dedupe(got: dict[str, list[dict]]) -> tuple[dict[str, list[dict]], int]:
     out: dict[str, list[dict]] = {}
     dropped = 0
     for kind, rows in got.items():
@@ -239,9 +243,27 @@ def verify_files(root: Path = ROOT, need_raw: bool = False) -> list[str]:
     return problems
 
 
+def load_redates(path: Path) -> dict[tuple[str, str], str]:
+    """{(symbol, expiry the site used): expiry the contract really had}. The site kept the Feb 2014 contracts under two expiry dates (the 27th, then the
+    26th when the 27th became a holiday); one line per such contract, with the evidence."""
+    out: dict[tuple[str, str], str] = {}
+    with path.open(newline="") as f:
+        for r in csv.DictReader(f):
+            tag = f"{r['symbol']} {r['from_expiry']}"
+            if r["from_expiry"] == r["to_expiry"]:
+                raise ValueError(f"{tag}: the old and the new expiry are the same")
+            if not r["evidence"].strip():
+                raise ValueError(f"{tag}: no evidence given")
+            if (r["symbol"], r["from_expiry"]) in out:
+                raise ValueError(f"{tag}: listed twice")
+            out[(r["symbol"], r["from_expiry"])] = r["to_expiry"]
+    return out
+
+
 def read_listed(root: Path = ROOT) -> dict[str, list[dict]]:
-    """Rows of every listed file, each checked against its listed hash first."""
-    out: dict[str, list[dict]] = {"cash": [], "fo": [], "index": []}
+    """Rows of every listed file, each checked against its listed hash first. The same row in two files is one row; contracts listed in
+    contract_redates.csv are given the expiry they really had; two different rows with one key are an error."""
+    got: dict[str, list[dict]] = {"cash": [], "fo": [], "index": []}
     for r in load_files(root):
         path = root / "raw" / "nse_web" / r["file"]
         if not path.exists():
@@ -250,8 +272,11 @@ def read_listed(root: Path = ROOT) -> dict[str, list[dict]]:
         if hashlib.sha256(raw).hexdigest() != r["sha256"]:
             raise ValueError(f"{r['file']}: raw file hash differs from the list")
         for kind, rows in read_web(raw).items():
-            out[kind] += rows
-    return out
+            got[kind] += rows
+    if (root / "contract_redates.csv").exists():
+        redates = load_redates(root / "contract_redates.csv")
+        got["fo"] = [dict(x, expiry=redates.get((x["symbol"], x["expiry"]), x["expiry"])) for x in got["fo"]]
+    return _dedupe(got)[0]
 
 
 if __name__ == "__main__":

@@ -193,3 +193,50 @@ def test_the_same_key_with_different_values_is_a_conflict_and_an_error():
     fo2 = dict(FO_ROW, FH_CLOSING_PRICE=1)
     with pytest.raises(ValueError, match="conflict"):
         nw.read_web(raw_of(item("fo", [FO_ROW, fo2], symbol="NIFTY", expiry="2010-03-25")))
+
+
+def _register(root, name, *items, tmp):
+    import json
+    src = tmp / name
+    src.write_text(json.dumps({"meta": {"collected": "x", "status": "finished", "failed": [], "missing": []}, "items": list(items)}))
+    return nw.register(src, root, tmp / "no_script.js", registered=date(2026, 10, 1))
+
+
+def test_the_same_row_in_two_files_is_read_once_and_different_rows_with_one_key_are_a_conflict(tmp_path):
+    root = tmp_path / "data"
+    root.mkdir()
+    it = item("fo", [FO_ROW], symbol="NIFTY", expiry="2010-03-25")
+    _register(root, "a.json", it, tmp=tmp_path)
+    _register(root, "b.json", it, tmp=tmp_path)
+    assert len(nw.read_listed(root)["fo"]) == 1
+    other = item("fo", [dict(FO_ROW, FH_CLOSING_PRICE=1)], symbol="NIFTY", expiry="2010-03-25")
+    _register(root, "c.json", other, tmp=tmp_path)
+    with pytest.raises(ValueError, match="conflict"):
+        nw.read_listed(root)
+
+
+def test_a_contract_the_site_kept_under_two_expiry_dates_is_read_as_one_after_the_listed_redating(tmp_path):
+    root = tmp_path / "data"
+    root.mkdir()
+    early = dict(FO_ROW, FH_EXPIRY_DT="27-Feb-2014", FH_TIMESTAMP="27-Dec-2013")
+    late = dict(FO_ROW, FH_EXPIRY_DT="26-Feb-2014", FH_TIMESTAMP="30-Dec-2013")
+    win = {"from": "2013-10-20", "to": "2014-02-28"}
+    _register(root, "a.json", item("fo", [early], symbol="NIFTY", expiry="2014-02-27", **win), tmp=tmp_path)
+    _register(root, "b.json", item("fo", [early], symbol="NIFTY", expiry="2014-02-27", **win), item("fo", [late], symbol="NIFTY", expiry="2014-02-26", **win), tmp=tmp_path)
+    assert sorted((r["expiry"], r["date"]) for r in nw.read_listed(root)["fo"]) == [("2014-02-26", "2013-12-30"), ("2014-02-27", "2013-12-27")]     # no list: as published
+    (root / "contract_redates.csv").write_text("symbol,from_expiry,to_expiry,evidence\nNIFTY,2014-02-27,2014-02-26,\"rows stop on 2013-12-27 and continue under the 26th from 2013-12-30\"\n", newline="")
+    assert sorted((r["expiry"], r["date"]) for r in nw.read_listed(root)["fo"]) == [("2014-02-26", "2013-12-27"), ("2014-02-26", "2013-12-30")]
+    # another symbol's contract with the same expiry is left alone
+    other = dict(early, FH_SYMBOL="BANKNIFTY")
+    _register(root, "c.json", item("fo", [other], symbol="BANKNIFTY", expiry="2014-02-27", **win), tmp=tmp_path)
+    assert {(r["symbol"], r["expiry"]) for r in nw.read_listed(root)["fo"]} == {("NIFTY", "2014-02-26"), ("BANKNIFTY", "2014-02-27")}
+
+
+def test_redates_are_read_with_their_evidence_and_bad_ones_are_refused(tmp_path):
+    p = tmp_path / "r.csv"
+    p.write_text("symbol,from_expiry,to_expiry,evidence\nNIFTY,2014-02-27,2014-02-26,\"x\"\n", newline="")
+    assert nw.load_redates(p) == {("NIFTY", "2014-02-27"): "2014-02-26"}
+    for bad, why in [("NIFTY,2014-02-27,2014-02-27,x", "same"), ("NIFTY,2014-02-27,2014-02-26,", "evidence"), ("NIFTY,2014-02-27,2014-02-26,x\nNIFTY,2014-02-27,2014-02-25,y", "twice")]:
+        p.write_text("symbol,from_expiry,to_expiry,evidence\n" + bad + "\n", newline="")
+        with pytest.raises(ValueError, match=why):
+            nw.load_redates(p)

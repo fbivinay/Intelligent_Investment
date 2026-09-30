@@ -96,9 +96,13 @@ function makeCollector(fetchFn, config) {
     return true;
   }
 
+  const dmonDate = s => { const [d, m, y] = s.split('-'); return new Date(Date.UTC(+y, MON.indexOf(m), +d)); };
+
   async function runTask(t) {
     if (t.kind !== 'fo') return fetchWindow(t);
-    // a month's contract: try the candidate expiry dates until one has rows
+    // a month's contract: try the candidate expiry dates until one has rows. When its rows stop well before its expiry the site has kept the contract
+    // under two expiry dates (the Feb 2014 expiry moved from the 27th to the 26th when the 27th became a holiday): the days before are asked for too.
+    let found = false;
     for (const exp of expiryCandidates(t.year, t.month)) {
       const first = Math.max(exp.getTime() - cfg.futLifeDays * DAY, utc(cfg.from).getTime());
       const last = Math.min(exp.getTime(), utc(cfg.to).getTime());
@@ -107,10 +111,15 @@ function makeCollector(fetchFn, config) {
       if (!ok) return false;
       const added = state.items.splice(before);
       const withRows = added.filter(i => i.n > 0);
-      if (withRows.length) { state.items.push(...withRows); return true; }
-      await cfg.sleep(cfg.gapMs);                     // an empty answer: no contract expires that day, try the day before
+      if (withRows.length) {
+        state.items.push(...withRows);
+        found = true;
+        const lastRow = Math.max(...withRows.flatMap(i => i.data.map(r => dmonDate(r.FH_TIMESTAMP).getTime())));
+        if (last < exp.getTime() || exp.getTime() - lastRow <= 7 * DAY) return true;     // the rows reach the expiry: this is the contract
+      }
+      await cfg.sleep(cfg.gapMs);                     // an empty answer (no contract expires that day) or a short one: try the day before
     }
-    state.missing.push({kind: 'fo', symbol: t.symbol, year: t.year, month: t.month + 1});
+    if (!found) state.missing.push({kind: 'fo', symbol: t.symbol, year: t.year, month: t.month + 1});
     return true;
   }
 
