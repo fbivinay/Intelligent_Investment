@@ -6,7 +6,7 @@ from datetime import date
 from decimal import Decimal
 
 from engine.rules import Rules
-from engine.trace import Node, add, cite, const, from_rule, minn, mul, rnd
+from engine.trace import Node, add, cite, const, from_row, from_rule, minn, mul, rnd
 
 SEGMENT = {"etf_equity": "delivery", "etf_gold": "delivery", "fut_index": "futures",
            "mf_equity": "mf", "mf_debt": "mf"}
@@ -41,12 +41,15 @@ class Charges:
 
 
 def _step(row) -> Node:
-    return from_rule("Rounding step", row.data.get("round_step", PAISE), row.ref)
+    """The rounding step: the row's own if it states one (STT does), else the engine's convention of a paisa, said as such."""
+    if "round_step" in row.data:
+        return from_row("Rounding step", row, "round_step")
+    return const("Rounding step", PAISE, note="engine convention: each charge line is rounded to the paisa; the rule row states no step")
 
 
 def _rate_line(rules: Rules, table: str, on: date, label: str, base: Node, tags, **key) -> Node:
     row = rules.at(table, on, **key)
-    raw = mul(f"{label} before rounding", base, from_rule(f"{label} rate", row.value, row.ref))
+    raw = mul(f"{label} before rounding", base, from_row(f"{label} rate", row))
     return rnd(label, raw, _step(row), tags=tags)
 
 
@@ -55,14 +58,13 @@ def _brokerage(rules: Rules, on: date, product: str, turnover: Node) -> Node:
     mode = row.data["mode"]
 
     def flat():
-        return from_rule("Brokerage flat fee per order", row.dec("flat"), row.ref)
+        return from_row("Brokerage flat fee per order", row, "flat")
 
     def pct():
-        return mul("Brokerage at % of turnover", turnover,
-                   from_rule("Brokerage rate", row.dec("pct"), row.ref))
+        return mul("Brokerage at % of turnover", turnover, from_row("Brokerage rate", row, "pct"))
 
     if mode == "zero":
-        raw = from_rule("Brokerage (none on this plan)", 0, row.ref)
+        raw = from_rule("Brokerage (none on this plan)", 0, row.ref)  # a zero the row states by its mode, not a field of it
     elif mode == "flat":
         raw = flat()
     elif mode == "pct":
@@ -77,7 +79,7 @@ def _brokerage(rules: Rules, on: date, product: str, turnover: Node) -> Node:
 def _gst(rules: Rules, on: date, lines: dict[str, Node]) -> Node:
     row = rules.at("charges.gst", on)
     base = add("GST base", *[lines[k] for k in row.data["applies_to"] if k in lines])
-    raw = mul("GST before rounding", base, from_rule("GST rate", row.value, row.ref))
+    raw = mul("GST before rounding", base, from_row("GST rate", row))
     return rnd("GST", raw, _step(row), tags={DEDUCTIBLE})
 
 
@@ -114,8 +116,7 @@ def dp_charge(rules: Rules, on: date) -> Node:
     What counts as one event is set by dp_basis: each sale, or each ISIN sold on a day.
     """
     broker, depo = rules.at("fyers.dp", on), rules.at("charges.dp_depository", on)
-    fees = add("DP fees", from_rule("Broker DP fee", broker.value, broker.ref),
-               from_rule("Depository fee", depo.value, depo.ref))
+    fees = add("DP fees", from_row("Broker DP fee", broker), from_row("Depository fee", depo))
     return add("DP charges for one charge event", fees, _gst(rules, on, {"dp": fees}), tags={DEDUCTIBLE})
 
 
@@ -130,13 +131,12 @@ def amc_fee(rules: Rules, on: date, opened: date) -> Node:
         raise ValueError(f"the account was opened {opened}, after the fee date {on}")
     cohort = rules.at("fyers.amc_cohort", opened)
     row = rules.at("fyers.amc", on, cohort=cohort.data["cohort"])
-    fee = cite(from_rule("Demat AMC for the year", row.value, row.ref,
-                         note=f"AMC group {cohort.data['cohort']!r}: account opened {opened}"), cohort.ref)
+    fee = cite(from_row("Demat AMC for the year", row, note=f"AMC group {cohort.data['cohort']!r}: account opened {opened}"), cohort.ref)
     return add("Demat AMC with GST", fee, _gst(rules, on, {"amc": fee}))
 
 
 def account_opening_fee(rules: Rules, opened: date) -> Node:
     """One-time account-opening fee for an account opened on `opened`, GST included."""
     row = rules.at("fyers.account_opening", opened)
-    fee = from_rule("Account opening fee", row.value, row.ref)
+    fee = from_row("Account opening fee", row)
     return add("Account opening fee with GST", fee, _gst(rules, opened, {"account_opening": fee}))

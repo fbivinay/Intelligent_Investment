@@ -2,6 +2,7 @@
 [meta]
 keys = []
 coverage_from = 2010-04-01
+granularity = "financial_year"
 
 [[row]]
 value = "0.03"

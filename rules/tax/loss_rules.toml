@@ -4,6 +4,7 @@
 [meta]
 keys = ["kind"]
 coverage_from = 2010-04-01
+granularity = "financial_year"
 
 [[row]]
 kind = "capital"

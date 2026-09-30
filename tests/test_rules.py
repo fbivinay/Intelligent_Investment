@@ -104,3 +104,37 @@ def test_a_rows_note_travels_with_its_reference(tmp_path):
     r = make_rules(tmp_path, {"t": text})
     assert r.at("t", date(2012, 1, 1), seg="eq").ref.note == "stand-in for the years before the broker existed"
     assert r.at("t", date(2020, 1, 1), seg="eq").ref.note == ""
+
+
+FY = 'granularity = "financial_year"'
+
+
+def test_a_financial_year_table_refuses_a_row_that_starts_or_ends_mid_year(tmp_path):
+    mid = table(["seg"], ['seg = "eq"\nfrom = 2010-04-01\nto = 2016-06-14\nvalue = "1"',
+                          'seg = "eq"\nfrom = 2016-06-15\nvalue = "2"'], extra_meta=FY)
+    with pytest.raises(RuleTableError, match="financial-year table"):
+        make_rules(tmp_path / "a", {"t": mid})
+    late_key = table(["regime"], ['regime = "old"\nfrom = 2010-04-01\nvalue = "1"',
+                                  'regime = "new"\nfrom = 2020-06-01\nvalue = "2"'],
+                     extra_meta=FY + '\nlate_keys = [{ regime = "new", from = 2020-06-01 }]')
+    with pytest.raises(RuleTableError, match="financial-year table"):
+        make_rules(tmp_path / "b", {"t": late_key})
+    ok = table(["seg"], ['seg = "eq"\nfrom = 2010-04-01\nto = 2016-03-31\nvalue = "1"',
+                         'seg = "eq"\nfrom = 2016-04-01\nvalue = "2"'], extra_meta=FY)
+    make_rules(tmp_path / "c", {"t": ok})
+
+
+def test_at_fy_reads_the_year_and_refuses_a_table_that_is_looked_up_by_date(tmp_path):
+    fy_table = table(["seg"], ['seg = "eq"\nfrom = 2010-04-01\nto = 2016-03-31\nvalue = "1"',
+                              'seg = "eq"\nfrom = 2016-04-01\nvalue = "2"'], extra_meta=FY)
+    r = make_rules(tmp_path, {"tax.a": fy_table, "charges.b": two_rows()})
+    assert r.at_fy("tax.a", 2015, seg="eq").value == Decimal("1") and r.at_fy("tax.a", 2016, seg="eq").value == Decimal("2")
+    assert r.has_fy("tax.a", 2020, seg="eq") and not r.has_fy("tax.a", 2009, seg="eq")
+    with pytest.raises(RuleTableError, match="looked up by date"):
+        r.at_fy("charges.b", 2015, seg="eq")
+
+
+def test_an_unknown_granularity_is_refused(tmp_path):
+    text = table(["seg"], ['seg = "eq"\nfrom = 2010-04-01\nvalue = "1"'], extra_meta='granularity = "week"')
+    with pytest.raises(RuleTableError, match="granularity"):
+        make_rules(tmp_path, {"t": text})
