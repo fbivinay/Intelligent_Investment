@@ -1,5 +1,6 @@
 import csv
 import json
+from datetime import date
 from decimal import Decimal
 
 from data import gaps
@@ -163,3 +164,37 @@ def test_the_dividend_check_puts_a_split_nav_on_one_unit_size_first(tmp_path):
     (root / "corporate_actions.csv").write_text("symbol,ex_date,kind,factor,nav_ex_date,evidence\nNIFTYBEES,2020-01-02,split,10,2020-01-03,\"x\"\n", newline="")
     text = gaps.report(root, symbol="NIFTYBEES", code="140084", yahoo="NIFTYBEES.csv", start="2020-01-01", end="2020-01-31", index_pairs={"NIFTYBEES": "Nifty 50"})
     assert "3 days, ratio drift" in text and "0 one-day step down" in text
+
+
+
+def test_compare_sources_counts_the_rows_both_have_and_names_the_worst_difference():
+    web = [{"date": "2016-01-04", "symbol": "X", "close": "100", "qty": "10"}, {"date": "2016-01-05", "symbol": "X", "close": "103", "qty": "10"},
+           {"date": "2010-01-05", "symbol": "X", "close": "1", "qty": "1"}]
+    arc = [{"date": "2016-01-04", "symbol": "X", "close": "100.00", "qty": "10"}, {"date": "2016-01-05", "symbol": "X", "close": "100", "qty": "10"}]
+    got = gaps.compare_sources(web, arc, ("date", "symbol"), ["close", "qty"])
+    assert got["both"] == 2
+    assert got["fields"]["close"] == {"compared": 2, "differ": 1, "worst_pct": Decimal(3), "worst_key": ("2016-01-05", "X")}
+    assert got["fields"]["qty"] == {"compared": 2, "differ": 0, "worst_pct": Decimal(0), "worst_key": None}
+
+
+def test_compare_sources_leaves_out_values_either_source_does_not_have():
+    web = [{"date": "d", "symbol": "X", "prev_close": "5"}]
+    arc = [{"date": "d", "symbol": "X", "prev_close": ""}]
+    assert gaps.compare_sources(web, arc, ("date", "symbol"), ["prev_close"])["fields"]["prev_close"]["compared"] == 0
+
+
+def test_report_sets_the_website_file_against_the_archive_on_the_days_both_have(tmp_path):
+    import json
+    from data import nse_web as nw
+    root = make_root(tmp_path)
+    cols = ["date", "symbol", "series", "open", "high", "low", "close", "last", "prev_close", "qty", "value", "trades", "isin", "source"]
+    write(root / "processed" / "nse_etf_daily.csv", cols, [["2016-06-01", "NIFTYBEES", "EQ", "827", "831.75", "826", "828.85", "829.05", "826.68", "32150", "26661845.83", "1158", "I", "archive"]])
+    web_row = {"CH_SYMBOL": "NIFTYBEES", "CH_SERIES": "EQ", "mTIMESTAMP": "01-Jun-2016", "CH_PREVIOUS_CLS_PRICE": 826.68, "CH_OPENING_PRICE": 827, "CH_TRADE_HIGH_PRICE": 831.75,
+               "CH_TRADE_LOW_PRICE": 826, "CH_LAST_TRADED_PRICE": 829.05, "CH_CLOSING_PRICE": 999, "CH_TOT_TRADED_QTY": 32150, "CH_TOT_TRADED_VAL": 26661845.83, "CH_TOTAL_TRADES": 1158}
+    src = tmp_path / "web.json"
+    src.write_text(json.dumps({"meta": {"collected": "x", "status": "finished", "failed": [], "missing": []},
+                               "items": [{"kind": "etf", "symbol": "NIFTYBEES", "from": "2016-06-01", "to": "2016-06-01", "data": [web_row]}]}))
+    nw.register(src, root, tmp_path / "none.js", registered=date(2026, 10, 1))
+    text = gaps.report(root, symbol="NIFTYBEES", code="140084", yahoo="NIFTYBEES.csv", start="2016-06-01", end="2016-06-30")
+    assert "## Website file against the archive files" in text
+    assert "- cash: 1 rows in both; differ: close 1 of 1 (largest 20.53%, 2016-06-01 NIFTYBEES EQ)" in text

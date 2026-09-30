@@ -13,6 +13,7 @@ from pathlib import Path
 
 from data import adjust
 from data import nse_archive as na
+from data import nse_web as nw
 
 ROOT = Path(__file__).parent
 YAHOO_TOL, NAV_TOL = Decimal("0.5"), Decimal("1")   # percent: a close that differs from Yahoo by more than 0.5%, or from the NAV by more than 1%, is listed
@@ -47,6 +48,36 @@ def nav_vs_index(nav: dict[str, Decimal], index: dict[str, Decimal], step: Decim
     steps = [(a, b, (ratio[b] / ratio[a] - 1) * 100) for a, b in zip(common, common[1:])
              if (date.fromisoformat(b) - date.fromisoformat(a)).days <= 5 and (ratio[b] / ratio[a] - 1) * 100 < -step]
     return {"days": len(common), "first": common[0] if common else None, "last": common[-1] if common else None, "drift": drift, "steps": steps}
+
+
+WEB_FIELDS = {"cash": ["open", "high", "low", "close", "last", "prev_close", "qty", "value"],
+              "fo": ["open", "high", "low", "close", "settle", "prev_close", "contracts", "value_rs", "open_int", "chg_oi"],
+              "index": ["open", "high", "low", "close", "volume", "turnover_cr"]}
+WEB_KEYS = {"cash": ("date", "symbol", "series"), "fo": ("date", "symbol", "expiry"), "index": ("date", "name")}
+WEB_FILES = {"cash": "nse_etf_daily.csv", "fo": "nse_index_futures_daily.csv", "index": "nse_index_daily.csv"}
+
+
+def compare_sources(web: list[dict], archive: list[dict], key: tuple, fields: list[str]) -> dict:
+    """For the rows both sources have (same key): per field, how many values differ, and the largest difference in percent of the archive value.
+    A value either source leaves blank is not compared."""
+    arc = {tuple(r[k] for k in key): r for r in archive}
+    both = [(w, arc[tuple(w[k] for k in key)]) for w in web if tuple(w[k] for k in key) in arc]
+    out = {}
+    for f in fields:
+        compared = differ = 0
+        worst, where = Decimal(0), None
+        for w, a in both:
+            if w[f] == "" or a[f] == "":
+                continue
+            compared += 1
+            x, y = Decimal(w[f]), Decimal(a[f])
+            if x != y:
+                differ += 1
+                pct = abs(x - y) / abs(y) * 100 if y else Decimal(100)
+                if pct > worst:
+                    worst, where = pct, tuple(w[k] for k in key)
+        out[f] = {"compared": compared, "differ": differ, "worst_pct": worst, "worst_key": where}
+    return {"both": len(both), "fields": out}
 
 
 def _nav_on_latest_scale(nav: dict[str, Decimal], actions: list[dict]) -> dict[str, Decimal]:
@@ -140,6 +171,20 @@ def report(root: Path = ROOT, symbol: str = "NIFTYBEES", code: str = "140084", y
             steps = ", ".join(f"{b} {pct:.2f}%" for _, b, pct in got["steps"][:10])
             out.append(f"- {sym} NAV against {name} (scheme {c}): {got['days']} days, ratio drift {got['drift']:+.2f}% a year, {len(got['steps'])} one-day step down over 0.25%"
                        + (f": {steps}" if steps else ""))
+        out.append("")
+
+    if nw.load_files(root):
+        web = nw.read_listed(root)
+        out += ["## Website file against the archive files", "",
+                "The file collected from the NSE website's own history reports (`nse_web_files.csv`) covers the years before the archive; on the days both have "
+                "a row the two are compared field by field, exactly (the build keeps the archive row).", ""]
+        for kind in ("cash", "fo", "index"):
+            path = root / "processed" / WEB_FILES[kind]
+            arc = [r for r in _read(path) if r.get("source", "archive") == "archive"] if path.exists() else []
+            res = compare_sources(web[kind], arc, WEB_KEYS[kind], WEB_FIELDS[kind])
+            diffs = [f"{f} {v['differ']} of {v['compared']} (largest {v['worst_pct']:.2f}%, {' '.join(v['worst_key'])})" for f, v in res["fields"].items() if v["differ"]]
+            same = "all compared fields equal" if not diffs else "differ: " + "; ".join(diffs)
+            out.append(f"- {kind}: {res['both']} rows in both; {same}")
         out.append("")
 
     out += ["## Processed files", ""]

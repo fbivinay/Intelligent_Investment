@@ -121,3 +121,15 @@ def test_the_midcap_100_index_is_read_under_one_name_across_its_renaming_in_2018
     raw = "\n".join([IDX_HEAD, "Nifty Free Float Midcap 100,05-07-2016,1,2,0.5,14122.85,0,0,1,1,32.83,1,1", "Nifty Full Midcap 100,05-07-2016,1,2,0.5,4352.82,0,0,1,1,41.12,1,1"]).encode()
     rows = nr.read_index(raw, {"Nifty Midcap 100"})
     assert [(r["name"], r["close"]) for r in rows] == [("Nifty Midcap 100", "14122.85")]            # the Full Midcap 100 is a different index
+
+
+def test_index_names_before_the_november_2015_renaming_are_read_under_todays_names():
+    # 2015-11-06 is the last day of the CNX names; every one of these renamings kept the index (closes are continuous across it)
+    raw = "\n".join([IDX_HEAD,
+                     "CNX Nifty,06-11-2015,7960,7970,7930,7954.3,1,0.1,1,1,22.1,3.1,1.4",
+                     "CNX Nifty Junior,06-11-2015,19500,19600,19400,19561.75,1,0.1,1,1,25.1,3.4,1.2",
+                     "CNX Bank,06-11-2015,17000,17100,16900,17086.5,1,0.1,1,1,16.1,2.1,1.0",
+                     "CNX Midcap,06-11-2015,13000,13100,12900,12995.7,1,0.1,1,1,21.1,2.6,1.1",
+                     "CNX Nifty Shariah,06-11-2015,1,2,0.5,1.5,0,0,1,1,1,1,1"]).encode()
+    rows = nr.read_index(raw, {"Nifty 50", "Nifty Next 50", "Nifty Bank", "Nifty Midcap 100"})
+    assert {r["name"]: r["close"] for r in rows} == {"Nifty 50": "7954.3", "Nifty Next 50": "19561.75", "Nifty Bank": "17086.5", "Nifty Midcap 100": "12995.7"}
