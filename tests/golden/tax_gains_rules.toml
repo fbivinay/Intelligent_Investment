@@ -1011,50 +1011,82 @@ value = "125000"
 order = "lowest_rate_first"
 
 [[case]]
-id = "tax.dividend-2016-03-31"
+id = "tax.dividend-company-2016-03-31"
 kind = "rule_value"
-source = "S59 dividend which suffer DDT is exempt in the hands of the shareholder under clause (34) of section 10; S45 unit income under 10(35)"
+source = "S59 dividend which suffer DDT is exempt in the hands of the shareholder under clause (34) of section 10"
 table = "tax.dividend"
 on = 2016-03-31
-key = {  }
-boundary = ["tax.dividend[]@2016-04-01:before"]
+key = { payer = "company" }
+boundary = ["tax.dividend[payer=company]@2016-04-01:before"]
 [case.expect]
 mode = "exempt"
 
 [[case]]
-id = "tax.dividend-2016-04-01"
+id = "tax.dividend-company-2016-04-01"
 kind = "rule_value"
-source = "S59 any income by way of dividend in excess of Rs. 10 lakh chargeable at the rate of ten percent, effective 1 April 2017 (AY 2017-18)"
+source = "S59 any income by way of dividend in excess of Rs. 10 lakh chargeable at the rate of ten percent, effective 1 April 2017 (AY 2017-18); S79 section 115BBDA(1): dividends declared, distributed or paid by a domestic company"
 table = "tax.dividend"
 on = 2016-04-01
-key = {  }
-boundary = ["tax.dividend[]@2016-04-01:after"]
+key = { payer = "company" }
+boundary = ["tax.dividend[payer=company]@2016-04-01:after"]
 [case.expect]
 mode = "above_threshold"
 threshold = "1000000"
 rate = "0.10"
 
 [[case]]
-id = "tax.dividend-2020-03-31"
+id = "tax.dividend-company-2020-03-31"
 kind = "rule_value"
 source = "S45 section 115BBDA amended to apply to dividends declared, distributed or paid on or before 31 March 2020"
 table = "tax.dividend"
 on = 2020-03-31
-key = {  }
-boundary = ["tax.dividend[]@2020-04-01:before"]
+key = { payer = "company" }
+boundary = ["tax.dividend[payer=company]@2020-04-01:before"]
 [case.expect]
 mode = "above_threshold"
 threshold = "1000000"
 rate = "0.10"
 
 [[case]]
-id = "tax.dividend-2020-04-01"
+id = "tax.dividend-company-2020-04-01"
 kind = "rule_value"
 source = "S45 dividend or income from units taxable in the hands of shareholders or unit holders at the applicable rate from 1 April 2020"
 table = "tax.dividend"
 on = 2020-04-01
-key = {  }
-boundary = ["tax.dividend[]@2020-04-01:after"]
+key = { payer = "company" }
+boundary = ["tax.dividend[payer=company]@2020-04-01:after"]
+[case.expect]
+mode = "slab"
+
+[[case]]
+id = "tax.dividend-fund-2010-04-01"
+kind = "rule_value"
+source = "S45 before 1 April 2020 dividend and unit income were exempt under sections 10(34) and 10(35) because the payer paid distribution tax; S79 section 115BBDA is on dividends of a domestic company, not on unit income"
+table = "tax.dividend"
+on = 2010-04-01
+key = { payer = "fund" }
+[case.expect]
+mode = "exempt"
+
+[[case]]
+id = "tax.dividend-fund-2020-03-31"
+kind = "rule_value"
+source = "S45 unit income exempt under section 10(35) up to the abolition of distribution tax; S79 115BBDA does not reach it"
+table = "tax.dividend"
+on = 2020-03-31
+key = { payer = "fund" }
+boundary = ["tax.dividend[payer=fund]@2020-04-01:before"]
+[case.expect]
+mode = "exempt"
+
+[[case]]
+id = "tax.dividend-fund-2020-04-01"
+kind = "rule_value"
+source = "S45 dividend or income from units taxable in the hands of unit holders at the applicable rate from 1 April 2020"
+table = "tax.dividend"
+on = 2020-04-01
+key = { payer = "fund" }
+boundary = ["tax.dividend[payer=fund]@2020-04-01:after"]
 [case.expect]
 mode = "slab"
 

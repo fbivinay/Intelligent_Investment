@@ -205,7 +205,8 @@ def _slab_tax(brackets: list[dict], income: Node, ref: RuleRef) -> Node:
 
 def fy_tax(rules: Rules, fy: int, profile: TaxProfile, events: list[CGEvent],
            carry_in: Carry = Carry(), dividends: Node | None = None,
-           interest: Node | None = None, business: Business | None = None) -> FYTax:
+           interest: Node | None = None, business: Business | None = None,
+           dividend_payer: str | None = None) -> FYTax:
     for kind, losses in (("short-term", carry_in.st), ("long-term", carry_in.lt), ("business", carry_in.biz)):
         for origin, amt in losses:
             if origin >= fy:
@@ -215,6 +216,8 @@ def fy_tax(rules: Rules, fy: int, profile: TaxProfile, events: list[CGEvent],
     for name, n in (("dividends", dividends), ("interest", interest)):
         if n is not None and n.value < 0:
             raise ValueError(f"{name} cannot be negative")
+    if dividends is not None and dividend_payer is None:
+        raise ValueError("dividend_payer is needed with dividends: 'fund' (units of a mutual fund or ETF) or 'company' (shares)")
     for e in events:
         if fy_of(e.sale_date) != fy:
             raise ValueError(f"{e.label!r} sold {e.sale_date} is not in {fy_label(fy)}")
@@ -297,7 +300,7 @@ def fy_tax(rules: Rules, fy: int, profile: TaxProfile, events: list[CGEvent],
     specials = [p for p in live if p.kind == "special"]
     div_ref = None
     if dividends is not None:
-        drow = rules.at_fy("tax.dividend", fy)
+        drow = rules.at_fy("tax.dividend", fy, payer=dividend_payer)
         div_ref, mode = drow.ref, drow.data["mode"]
         if mode == "slab":
             parts.append(cite(dividends, drow.ref))
@@ -362,7 +365,7 @@ def fy_tax(rules: Rules, fy: int, profile: TaxProfile, events: list[CGEvent],
         taxable_, tax_ = {}, {}
         for p in by_rate:
             cur = lefts[id(p)]
-            if shortfall.value > 0 and cur.value > 0:
+            if shortfall.value > 0 and cur.value > 0 and p.term != "income":  # section 115BBDA allows no such adjustment
                 used = minn(f"Shortfall used against {p.section}{at}", shortfall, cur)
                 cur = sub(f"{p.section} gain after basic-exemption adjustment{at}", cur, used)
                 shortfall = sub(f"Shortfall unused{at}", shortfall, used)
@@ -478,8 +481,9 @@ def fy_tax(rules: Rules, fy: int, profile: TaxProfile, events: list[CGEvent],
 
 def investment_tax(rules: Rules, fy: int, profile: TaxProfile, events: list[CGEvent],
                    carry_in: Carry = Carry(), dividends: Node | None = None,
-                   interest: Node | None = None, business: Business | None = None) -> InvestmentTax:
+                   interest: Node | None = None, business: Business | None = None,
+                   dividend_payer: str | None = None) -> InvestmentTax:
     """Tax caused by the investments: the year's tax with them minus the year's tax without."""
-    w = fy_tax(rules, fy, profile, events, carry_in, dividends, interest, business)
+    w = fy_tax(rules, fy, profile, events, carry_in, dividends, interest, business, dividend_payer)
     wo = fy_tax(rules, fy, profile, [], Carry(), None, None)
     return InvestmentTax(sub(f"Tax caused by your investments in {fy_label(fy)}", w.tax, wo.tax), w, wo)

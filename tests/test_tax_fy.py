@@ -2,6 +2,7 @@ from decimal import Decimal as Dc
 
 import pytest
 
+from engine.rules import RuleNotFound
 from engine.tax import Business, Carry, TaxProfile, fy_tax, investment_tax
 from engine.trace import assert_balanced, const, flags, rules_used
 from tests.helpers import make_rules
@@ -156,19 +157,38 @@ def test_a_loss_on_an_exempt_sale_is_not_carried_forward(rules):
 
 # ---- dividends ------------------------------------------------------------
 
-@pytest.mark.parametrize("fy, dividends, expected", [
-    (2013, "1200000", "0"),        # company-paid tax era: exempt
-    (2017, "1200000", "20800"),    # only the part above Rs 10 lakh, at 10% x 1.04
-    (2021, "100000", "31200"),     # slab rate 30% x 1.04
+@pytest.mark.parametrize("fy, payer, dividends, expected", [
+    (2013, "company", "1200000", "0"),        # distribution tax era: exempt in the holder's hands
+    (2013, "fund", "1200000", "0"),
+    (2017, "company", "1200000", "20800"),    # only the part above Rs 10 lakh, at 10% x 1.04 (section 115BBDA: company dividends)
+    (2017, "fund", "1200000", "0"),           # unit income stayed exempt until 2020-03-31 (section 10(35))
+    (2021, "company", "100000", "31200"),     # slab rate 30% x 1.04
+    (2021, "fund", "100000", "31200"),
 ])
-def test_dividend_tax_follows_the_rule_of_the_year(rules, fy, dividends, expected):
-    r = extra(rules, fy, [], dividends=const("Dividends", dividends))
+def test_dividend_tax_follows_the_rule_of_the_year_and_of_who_paid_it(rules, fy, payer, dividends, expected):
+    r = extra(rules, fy, [], dividends=const("Dividends", dividends), dividend_payer=payer)
     assert r.extra.value == Dc(expected)
 
 
+def test_dividends_without_a_payer_are_refused_and_an_unknown_payer_is_not_guessed(rules):
+    with pytest.raises(ValueError, match="dividend_payer"):
+        fy_tax(rules, 2017, TaxProfile("old", Dc("1000000")), [], dividends=const("Dividends", "5000"))
+    with pytest.raises(RuleNotFound, match="payer"):
+        fy_tax(rules, 2017, TaxProfile("old", Dc("1000000")), [], dividends=const("Dividends", "5000"), dividend_payer="broker")
+
+
 def test_the_dividend_rule_row_is_cited_even_when_dividends_are_exempt(rules):
-    r = fy_tax(rules, 2013, TaxProfile("old", Dc(0)), [], dividends=const("Dividends", "5000"))
-    assert "tax.dividend[]" in {x.rule_id for x in rules_used(r.tax)}
+    r = fy_tax(rules, 2013, TaxProfile("old", Dc(0)), [], dividends=const("Dividends", "5000"), dividend_payer="fund")
+    assert "tax.dividend[payer=fund]" in {x.rule_id for x in rules_used(r.tax)}
+
+
+def test_the_unused_basic_exemption_does_not_shelter_the_dividend_over_10_lakh(rules):
+    # Section 115BBDA taxes the excess over Rs 10 lakh at 10% on its own. With other income of 150,000 or 200,000 the basic exemption of
+    # 250,000 is partly unused, but it may not be set against that tax (it is not a capital gain): 400,000 x 10% x 1.04 is due. The
+    # total income is above the Rs 5 lakh rebate limit in both, so the rebate plays no part.
+    for income in ("150000", "200000"):
+        r = extra(rules, 2017, [], income=income, dividends=const("Dividends", "1400000"), dividend_payer="company")
+        assert r.extra.value == Dc("41600"), income
 
 
 # ---- slabs, rebate, surcharge, cess ---------------------------------------
@@ -286,7 +306,7 @@ def test_a_negative_brought_forward_loss_is_refused(rules):
 def test_negative_dividends_interest_or_business_costs_are_refused(rules):
     p = TaxProfile("old", Dc("1000000"))
     with pytest.raises(ValueError, match="negative"):
-        fy_tax(rules, 2019, p, [], dividends=const("d", "-1"))
+        fy_tax(rules, 2019, p, [], dividends=const("d", "-1"), dividend_payer="fund")
     with pytest.raises(ValueError, match="negative"):
         fy_tax(rules, 2019, p, [], interest=const("i", "-1"))
     with pytest.raises(ValueError, match="negative"):

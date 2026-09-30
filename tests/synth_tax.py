@@ -63,10 +63,12 @@ TAX = {
         f'regime = "new"\nfrom = 2020-04-01\ntiers = {TIERS}\ncap_special = "0.15"',
     ], extra_meta=LATE_NEW + "\n" + FY),
     "tax.cess": table([], ['from = 2010-04-01\nvalue = "0.04"'], extra_meta=FY),
-    "tax.dividend": table([], [
-        'from = 2010-04-01\nto = 2016-03-31\nmode = "exempt"',
-        'from = 2016-04-01\nto = 2020-03-31\nmode = "above_threshold"\nthreshold = "1000000"\nrate = "0.10"',
-        'from = 2020-04-01\nmode = "slab"',
+    "tax.dividend": table(["payer"], [
+        'payer = "company"\nfrom = 2010-04-01\nto = 2016-03-31\nmode = "exempt"',
+        'payer = "company"\nfrom = 2016-04-01\nto = 2020-03-31\nmode = "above_threshold"\nthreshold = "1000000"\nrate = "0.10"',
+        'payer = "company"\nfrom = 2020-04-01\nmode = "slab"',
+        'payer = "fund"\nfrom = 2010-04-01\nto = 2020-03-31\nmode = "exempt"',
+        'payer = "fund"\nfrom = 2020-04-01\nmode = "slab"',
     ], extra_meta=FY),
     "tax.loss_rules": table(["kind"], [
         'kind = "capital"\nfrom = 2010-04-01\nvalue = "8"',

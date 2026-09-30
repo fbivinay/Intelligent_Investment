@@ -95,7 +95,7 @@ def buy_and_hold(rules: Rules, *, instrument: str, instrument_class: str, bars: 
     taxes, carry = [], Carry()
     for fy in range(fy_of(buy.on), fy_of(sell.on) + 1):
         events = [event] if event is not None and fy == fy_of(sell.on) else []
-        r = investment_tax(rules, fy, profile, events, carry, dividends=div_fy.get(fy))
+        r = investment_tax(rules, fy, profile, events, carry, dividends=div_fy.get(fy), dividend_payer="fund")  # units of an ETF or fund
         carry = r.with_items.carry_out
         taxes.append(r.extra)
 
