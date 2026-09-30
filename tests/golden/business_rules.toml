@@ -104,9 +104,9 @@ value = "8"
 [[case]]
 id = "tax.conventions-business_loss_setoff-2010-04-01"
 kind = "rule_value"
-source = "S0 assumption: the set-off coded in engine/tax.py (slab income only); the law in S75 section 71(2) is wider"
+source = "S0 assumption: the set-off coded in engine/tax.py (interest and slab-taxed income, never the other income given or special-rate gains); the law in S75 section 71 is wider except for salary (71(2A))"
 table = "tax.conventions"
 on = 2010-04-01
 key = { name = "business_loss_setoff" }
 [case.expect]
-value = "slab income only, as coded in engine/tax.py"
+value = "interest and slab-taxed income only, not the other income given, as coded in engine/tax.py"

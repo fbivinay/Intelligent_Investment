@@ -29,14 +29,33 @@ def test_profit_after_costs_is_taxed_at_slab_rates(rules):
     assert extra(rules, 2019, biz("150000", "50000")).extra.value == Dc("31200")   # 100,000 x 30% x 1.04
 
 
-def test_loss_is_set_off_against_other_income(rules):
-    assert extra(rules, 2019, biz("-200000")).extra.value == Dc("-41600")          # saves 200,000 x 20% x 1.04
+def test_loss_is_never_set_off_against_the_other_income_given_because_it_may_be_salary(rules):
+    r = extra(rules, 2019, biz("-200000"))                                         # other income 1,000,000: section 71(2A)
+    assert r.extra.value == 0 and r.with_items.parts["ordinary_income"].value == Dc("1000000")
+    assert [(o, n.value) for o, n in r.with_items.carry_out.biz] == [(2019, Dc("200000"))]
 
 
-def test_loss_bigger_than_income_is_carried_forward_not_refunded(rules):
-    r = extra(rules, 2019, biz("-250000"), income="100000")
-    assert r.extra.value == 0
+def test_loss_is_set_off_against_interest_and_the_rest_is_carried_forward(rules):
+    r = extra(rules, 2019, biz("-200000"), interest=const("Interest", "300000"))
+    assert r.with_items.parts["ordinary_income"].value == Dc("1100000")           # 1,000,000 + 300,000 - 200,000
+    assert r.with_items.carry_out.biz == ()
+    r = extra(rules, 2019, biz("-400000"), interest=const("Interest", "300000"))
+    assert r.with_items.parts["ordinary_income"].value == Dc("1000000")           # the interest is wiped out, no more
+    assert [(o, n.value) for o, n in r.with_items.carry_out.biz] == [(2019, Dc("100000"))]
+
+
+def test_loss_is_set_off_against_a_gain_taxed_at_slab_rates(rules):
+    debt = ev("2023-05-01", "2024-06-01", "100000", "400000", cls="mf_debt")      # bought after March 2023: 300,000 short-term at slab rates
+    r = investment_tax(rules, 2024, TaxProfile("old", Dc("1000000")), [debt], business=biz("-200000"))
+    assert r.with_items.parts["ordinary_income"].value == Dc("1100000")           # 1,000,000 + 300,000 - 200,000
+    assert r.with_items.carry_out.biz == ()
+
+
+def test_loss_bigger_than_the_income_it_can_reach_is_carried_forward_not_refunded(rules):
+    r = extra(rules, 2019, biz("-250000"), interest=const("Interest", "100000"))
+    assert r.with_items.parts["ordinary_income"].value == Dc("1000000")           # the interest is wiped out, no more
     assert [(o, n.value) for o, n in r.with_items.carry_out.biz] == [(2019, Dc("150000"))]
+    assert r.with_items.tax.value == r.without_items.tax.value                    # and nothing is refunded
 
 
 def test_carried_loss_is_used_against_later_profit(rules):
@@ -85,13 +104,13 @@ def test_carried_losses_are_used_oldest_first_and_the_rest_stays_dated(rules):
 def test_this_years_loss_is_added_after_the_ones_brought_forward(rules):
     carry = Carry(biz=((2017, const("older", "50000")),))
     r = extra(rules, 2019, biz("-250000"), income="100000", carry_in=carry)
-    assert [(o, n.value) for o, n in r.with_items.carry_out.biz] == [(2017, Dc("50000")), (2019, Dc("150000"))]
+    assert [(o, n.value) for o, n in r.with_items.carry_out.biz] == [(2017, Dc("50000")), (2019, Dc("250000"))]
 
 
 def test_a_business_loss_is_not_set_off_against_gains_taxed_at_special_rates(rules):
     gain = ev("2019-06-01", "2019-12-01", "10000", "1010000")                      # 1,000,000 short-term gain at 15%
-    r = investment_tax(rules, 2019, TaxProfile("old", Dc("600000")), [gain], business=biz("-700000"))
-    assert r.with_items.parts["ordinary_income"].value == 0                        # the loss wiped out the 600,000 of slab income
+    r = investment_tax(rules, 2019, TaxProfile("old", Dc("0")), [gain], interest=const("Interest", "600000"), business=biz("-700000"))
+    assert r.with_items.parts["ordinary_income"].value == 0                        # the loss wiped out the 600,000 of interest
     assert r.with_items.parts["special_tax"].value == Dc("112500")                 # (1,000,000 - unused basic exemption 250,000) x 15%
     assert [(o, n.value) for o, n in r.with_items.carry_out.biz] == [(2019, Dc("100000"))]   # the rest waits for business profit
 

@@ -264,7 +264,8 @@ def fy_tax(rules: Rules, fy: int, profile: TaxProfile, events: list[CGEvent],
             room = sub("Exemption unused", room, used)
 
     # Income taxed at slab rates, and gains taxed at special rates.
-    parts = [const("Other taxable income", profile.other_income)]
+    other = const("Other taxable income", profile.other_income)
+    parts = [other]
     parts += [p.left for p in live if p.kind == "slab"]
     if interest is not None:
         parts.append(interest)
@@ -283,9 +284,9 @@ def fy_tax(rules: Rules, fy: int, profile: TaxProfile, events: list[CGEvent],
                                 left=over, included=over))
         elif mode != "exempt":
             raise ValueError(f"unknown dividend mode {mode!r}")
-    # Futures income is business income at slab rates. A loss is set off against income taxed at slab rates only (never against
-    # gains taxed at special rates: conservative, the business_loss_setoff convention) and the rest is carried forward for
-    # business income.
+    # Futures income is business income at slab rates. A loss is set off against interest, dividends and gains taxed at slab rates
+    # only: never against the other income given (it may be salary, section 71(2A)) and never against gains taxed at special rates
+    # (the business_loss_setoff convention). The rest is carried forward for business income.
     new_biz: list[tuple[int, Node]] = []
     biz_row = biz_conv = None
     if business is not None or carry_in.biz:
@@ -307,9 +308,11 @@ def fy_tax(rules: Rules, fy: int, profile: TaxProfile, events: list[CGEvent],
         else:
             biz_conv = rules.at("tax.conventions", end, name="business_loss_setoff")
             loss = sub("Business loss this year", ZERO_N, net)
-            room = maxn("Slab income not below zero", add("Slab income before the business loss", *parts), ZERO_N)
-            used = minn("Business loss set off against slab income", loss, room)
-            parts.append(sub("Business loss set off", ZERO_N, used))
+            room = maxn("Slab income a business loss can reach",
+                        add("Slab income before the business loss, without the other income given",
+                            *[x for x in parts if x is not other]), ZERO_N)
+            used = minn("Business loss set off", loss, room)
+            parts.append(sub("Business loss set off, taken off slab income", ZERO_N, used))
             rest = sub("Business loss carried forward", loss, used)
             new_biz = old + ([(fy, rest)] if rest.value > 0 else [])
     ordinary = add("Income taxed at slab rates", *parts)
