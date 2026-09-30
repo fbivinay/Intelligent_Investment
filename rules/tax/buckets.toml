@@ -1,0 +1,62 @@
+# Which tax bucket a holding falls in, by the date it was ACQUIRED. Each bucket has its own treatment in tax.capital_gains,
+# looked up by the SALE date. asset_class: etf_equity and mf_equity = equity oriented ETFs and funds (arbitrage funds too),
+# etf_gold = listed gold ETF units, mf_debt = units of debt and liquid funds (index futures are business income, not here).
+[meta]
+keys = ["asset_class"]
+coverage_from = 2010-04-01
+
+[[row]]
+asset_class = "etf_equity"
+bucket = "equity"
+from = 2010-04-01
+source = "S43 section 112A and S46 section 111A apply to STT-paid units of an equity oriented fund, whatever the date of purchase"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Equity oriented funds: at least 65% of the money in listed Indian equity shares (S43). Equity ETFs and arbitrage funds qualify."
+
+[[row]]
+asset_class = "mf_equity"
+bucket = "equity"
+from = 2010-04-01
+source = "S43 section 112A and S46 section 111A apply to STT-paid units of an equity oriented fund, whatever the date of purchase"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Equity oriented funds: at least 65% of the money in listed Indian equity shares (S43). Equity ETFs and arbitrage funds qualify."
+
+[[row]]
+asset_class = "etf_gold"
+bucket = "gold"
+from = 2010-04-01
+to = 2023-03-31
+source = "S41 a unit of a mutual fund other than an equity oriented fund; S47 gold ETFs are outside section 50AA for units bought before 2023-04-01"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Gold ETF units bought before 2023-04-01 always keep the older rules (S46: section 50AA covers units acquired on or after 2023-04-01)."
+
+[[row]]
+asset_class = "etf_gold"
+bucket = "gold_post_apr2023"
+from = 2023-04-01
+source = "S46 clause 21: section 50AA covers a unit of a Specified Mutual Fund acquired on or after 2023-04-01; S47 the 35% equity test caught ETFs and gold ETFs; S49 lists gold ETFs"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Whether section 50AA bites depends on the SALE date (the definition of Specified Mutual Fund changed for sales from 2025-04-01): see tax.capital_gains."
+
+[[row]]
+asset_class = "mf_debt"
+bucket = "debt_pre_apr2023"
+from = 2010-04-01
+to = 2023-03-31
+source = "S41 a unit of a mutual fund other than an equity oriented fund; S46 clause 21: section 50AA covers only units acquired on or after 2023-04-01"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Debt and liquid fund units bought before 2023-04-01 keep the older rules, including indexation while it lasted."
+
+[[row]]
+asset_class = "mf_debt"
+bucket = "debt_post_apr2023"
+from = 2023-04-01
+source = "S46 clause 21: unit of a Specified Mutual Fund acquired on or after 2023-04-01; S49 debt, liquid, money market and gilt funds are Specified Mutual Funds"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Gains are deemed short-term whatever the holding period."

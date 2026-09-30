@@ -1,0 +1,14 @@
+# How many assessment years after the year it arose a loss can be carried forward, by kind of loss. kind = capital: losses under
+# the head capital gains. The return must be filed on time to keep the loss (assumed).
+[meta]
+keys = ["kind"]
+coverage_from = 2010-04-01
+
+[[row]]
+kind = "capital"
+value = "8"
+from = 2010-04-01
+source = "S54 section 74(2): no capital loss is carried forward for more than eight assessment years; the e-Filing FAQ says the eight-year limit continues under the Income-tax Act 2025"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Short-term losses set off against any capital gain, long-term losses against long-term gains only."

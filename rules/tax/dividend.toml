@@ -1,0 +1,33 @@
+# Tax on dividends in the holder's hands, by financial year. mode: exempt = not taxed; above_threshold = the part above `threshold`
+# is taxed at `rate` on its own (section 115BBDA); slab = added to income and taxed at slab rates.
+[meta]
+keys = []
+coverage_from = 2010-04-01
+
+[[row]]
+mode = "exempt"
+from = 2010-04-01
+to = 2016-03-31
+source = "S45 dividends and mutual fund income were exempt in the holder's hands under section 10(34) and 10(35) because the payer paid distribution tax"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Exempt in full."
+
+[[row]]
+mode = "above_threshold"
+threshold = "1000000"
+rate = "0.10"
+from = 2016-04-01
+to = 2020-03-31
+source = "S44 section 115BBDA from 2017-04-01 (AY 2017-18): 10% on dividends above Rs 10 lakh; S45 it covers dividends up to 2020-03-31"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Section 115BBDA covers dividends from domestic companies. Unit income of mutual funds stayed exempt in these years; the rule is applied to all dividends here (it only matters above Rs 10 lakh a year)."
+
+[[row]]
+mode = "slab"
+from = 2020-04-01
+source = "S45 dividends and unit income received on or after 2020-04-01 are taxed at the holder's applicable rates"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Added to income at slab rates. Interest expense against it is capped at 20% of the dividend (S45); no such expense is modelled."
