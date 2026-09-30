@@ -115,3 +115,9 @@ def test_an_index_file_that_writes_the_date_month_first_is_read_as_the_day_it_wa
     assert nr.read_index(raw, {"Nifty 50"}, day="2023-04-06")[0]["date"] == "2023-04-06"
     assert nr.read_index(raw, {"Nifty 50"})[0]["date"] == "2023-06-04"                               # without a day to hold it to, it is read as written
     assert nr.read_index(raw, {"Nifty 50"}, day="2023-01-01")[0]["date"] == "2023-06-04"             # a date that fits neither way is not touched
+
+
+def test_the_midcap_100_index_is_read_under_one_name_across_its_renaming_in_2018():
+    raw = "\n".join([IDX_HEAD, "Nifty Free Float Midcap 100,05-07-2016,1,2,0.5,14122.85,0,0,1,1,32.83,1,1", "Nifty Full Midcap 100,05-07-2016,1,2,0.5,4352.82,0,0,1,1,41.12,1,1"]).encode()
+    rows = nr.read_index(raw, {"Nifty Midcap 100"})
+    assert [(r["name"], r["close"]) for r in rows] == [("Nifty Midcap 100", "14122.85")]            # the Full Midcap 100 is a different index

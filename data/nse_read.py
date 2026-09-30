@@ -12,7 +12,8 @@ from decimal import Decimal
 
 MON = {m: i + 1 for i, m in enumerate("JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC".split())}
 # index names NSE has changed over the years, read under one name
-ALIASES = {"S&P CNX Nifty": "Nifty 50", "CNX Nifty": "Nifty 50"}
+ALIASES = {"S&P CNX Nifty": "Nifty 50", "CNX Nifty": "Nifty 50",
+           "Nifty Free Float Midcap 100": "Nifty Midcap 100"}    # same index, values continuous across the renaming (files to 2018-03-28 use the long name)
 
 
 def _text(raw: bytes) -> str:

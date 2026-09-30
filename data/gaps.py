@@ -9,6 +9,7 @@ from collections import Counter
 from decimal import Decimal
 from pathlib import Path
 
+from data import adjust
 from data import nse_archive as na
 
 ROOT = Path(__file__).parent
@@ -30,6 +31,18 @@ def summary(diffs: list, tol: Decimal) -> dict:
     over = sorted(((d, pct) for d, _, _, pct in diffs if abs(pct) > tol), key=lambda x: (-abs(x[1]), x[0]))
     big = max(diffs, key=lambda x: (abs(x[3]), x[0]), default=None)
     return {"days": len(diffs), "over": len(over), "max_abs": abs(big[3]) if big else Decimal(0), "max_day": big[0] if big else None, "worst": over[:5]}
+
+
+def _nav_on_latest_scale(nav: dict[str, Decimal], actions: list[dict]) -> dict[str, Decimal]:
+    """NAV divided by each split's factor for the days before the NAV series itself switched (its `nav_ex_date`, else the exchange's `ex_date`)."""
+    out = {}
+    for d, v in nav.items():
+        f = Decimal(1)
+        for a in actions:
+            if (a["nav_ex_date"] or a["ex_date"]).isoformat() > d:
+                f *= a["factor"]
+        out[d] = v / f
+    return out
 
 
 def _read(path: Path) -> list[dict]:
@@ -80,15 +93,20 @@ def report(root: Path = ROOT, symbol: str = "NIFTYBEES", code: str = "140084", y
                 f"- NSE cash days {len(cash_ok)}; Yahoo days {len([d for d in ycl if start <= d <= end])}",
                 f"- days the NSE cash list has and Yahoo does not: {_dates(only_nse)}",
                 f"- days Yahoo has and the NSE cash list does not: {_dates(cal['only_other'])}", ""]
-    out += ["## Prices against a second source", ""]
+    out += ["## Prices against a second source", "",
+            "The NAV is put on the unit size of the adjusted close: divided by each split's factor for the days before the day the NAV series itself "
+            "switched (`nav_ex_date` in `corporate_actions.csv`; AMFI's NAV can lag the exchange price by days).", ""]
     if ypath.exists():
         out += _line(f"{symbol} close, NSE split-adjusted against Yahoo (split-adjusted)",
                      summary(price_diffs({d: Decimal(r["adj_close"]) for d, r in adj_of(symbol).items()}, ycl), YAHOO_TOL), YAHOO_TOL)
     navs = root / "processed" / "amfi_nav_daily.csv"
     nav_rows = _read(navs) if navs.exists() else []
+    cpath = root / "corporate_actions.csv"
+    actions = adjust.load_actions(cpath) if cpath.exists() else []
     for sym, c in nav_pairs.items():
-        nav = {r["date"]: Decimal(r["nav"]) for r in nav_rows if r["code"] == c}
-        out += _line(f"{sym} close against AMFI NAV (scheme {c})", summary(price_diffs({d: Decimal(r["close"]) for d, r in adj_of(sym).items()}, nav), NAV_TOL), NAV_TOL)
+        nav = _nav_on_latest_scale({r["date"]: Decimal(r["nav"]) for r in nav_rows if r["code"] == c}, [a for a in actions if a["symbol"] == sym])
+        out += _line(f"{sym} split-adjusted close against AMFI NAV (scheme {c})",
+                     summary(price_diffs({d: Decimal(r["adj_close"]) for d, r in adj_of(sym).items()}, nav), NAV_TOL), NAV_TOL)
     out.append("")
 
     out += ["## Processed files", ""]

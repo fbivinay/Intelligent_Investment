@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import csv
 import hashlib
+from collections import Counter
 from datetime import date
 from pathlib import Path
 
@@ -61,6 +62,11 @@ def build(root: Path = ROOT, etfs=ETFS, futures=FUTURES, indices=INDICES) -> dic
             break
     if problems:      # every bad file at once, so a fix does not cost one full build per file
         raise ValueError(f"{len(problems)} files disagree with the list or are in a layout the reader does not know: " + "; ".join(problems[:20]))
+    for kind, (name, fields, key) in OUT.items():
+        seen = Counter(tuple(x[k] for k in key) for x in rows[kind])
+        twice = [k for k, n in seen.items() if n > 1]
+        if twice:
+            raise ValueError(f"{name}: {len(twice)} keys would be listed twice, first {twice[:5]}")
     (root / "processed").mkdir(exist_ok=True)
     for kind, (name, fields, key) in OUT.items():
         with (root / "processed" / name).open("w", newline="") as f:
