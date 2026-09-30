@@ -40,7 +40,7 @@ def test_actions_are_read_with_their_evidence_and_bad_ones_are_refused(tmp_path)
     p = tmp_path / "a.csv"
     p.write_text("symbol,ex_date,kind,factor,evidence\nNIFTYBEES,2019-12-19,split,10,\"ratio 9.93; NAV agrees\"\n", newline="")
     (a,) = adj.load_actions(p)
-    assert a == {"symbol": "NIFTYBEES", "ex_date": date(2019, 12, 19), "factor": Decimal(10), "evidence": "ratio 9.93; NAV agrees"}
+    assert a == {"symbol": "NIFTYBEES", "ex_date": date(2019, 12, 19), "factor": Decimal(10), "nav_ex_date": None, "evidence": "ratio 9.93; NAV agrees"}
     for bad, why in [("NIFTYBEES,2019-12-19,split,0,x", "factor"), ("NIFTYBEES,2019-12-19,split,-2,x", "factor"), ("NIFTYBEES,2019-12-19,merger,10,x", "kind"),
                      ("NIFTYBEES,2019-12-19,split,10,", "evidence"),
                      ("NIFTYBEES,2019-12-19,split,10,x\nNIFTYBEES,2019-12-19,split,2,y", "twice")]:
@@ -124,3 +124,10 @@ def test_build_refuses_an_action_that_shows_no_gap_in_the_prices(tmp_path):
     (tmp_path / "corporate_actions.csv").write_text("symbol,ex_date,kind,factor,evidence\nNIFTYBEES,2019-12-19,split,10,\"typo\"\n", newline="")
     with pytest.raises(ValueError, match="shows no matching gap"):
         adj.build(tmp_path)
+
+
+def test_the_date_the_nav_series_switches_scale_is_optional_and_read_when_given(tmp_path):
+    p = tmp_path / "a.csv"
+    p.write_text("symbol,ex_date,kind,factor,nav_ex_date,evidence\nNIFTYBEES,2019-12-19,split,10,2019-12-23,\"x\"\nGOLDBEES,2019-12-19,split,100,,\"y\"\n", newline="")
+    gold, nifty = adj.load_actions(p)
+    assert (gold["symbol"], gold["nav_ex_date"]) == ("GOLDBEES", None) and nifty["nav_ex_date"] == date(2019, 12, 23)

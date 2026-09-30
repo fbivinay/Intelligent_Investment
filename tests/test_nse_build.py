@@ -99,3 +99,12 @@ def test_build_reads_an_index_file_written_month_first_as_its_day_and_counts_it(
     counts = nb.build(tmp_path, {"NIFTYBEES"}, {"NIFTY"}, {"Nifty 50"})
     assert counts["index"] == 2 and counts["index_month_first"] == 1
     assert [r["date"] for r in read(tmp_path / "processed" / "nse_index_daily.csv")] == ["2023-04-06", "2023-04-12"]
+
+
+def test_build_refuses_two_rows_for_one_key(tmp_path):
+    import pytest
+    put(tmp_path, "index", date(2016, 7, 7), ("\n".join([IDX_HEAD, "Nifty Free Float Midcap 100,07-07-2016,1,2,0.5,14122.85,0,0,1,1,32.83,1,1",
+                                                        "NIFTY Midcap 100,07-07-2016,1,2,0.5,14095.35,0,0,1,1,32.77,1,1"]) + "\n").encode())
+    with pytest.raises(ValueError, match="twice"):
+        nb.build(tmp_path, {"NIFTYBEES"}, {"NIFTY"}, {"Nifty Midcap 100"})
+    assert not (tmp_path / "processed" / "nse_index_daily.csv").exists()

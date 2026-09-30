@@ -35,7 +35,9 @@ def load_actions(path: Path = ROOT / "corporate_actions.csv") -> list[dict]:
             if (r["symbol"], r["ex_date"]) in seen:
                 raise ValueError(f"{tag}: listed twice")
             seen.add((r["symbol"], r["ex_date"]))
-            out.append({"symbol": r["symbol"], "ex_date": date.fromisoformat(r["ex_date"]), "factor": factor, "evidence": r["evidence"]})
+            # nav_ex_date: the day AMFI's NAV series for the fund switches to the new unit size (it can lag the exchange price by days); optional
+            nav_day = date.fromisoformat(r["nav_ex_date"]) if r.get("nav_ex_date") else None
+            out.append({"symbol": r["symbol"], "ex_date": date.fromisoformat(r["ex_date"]), "factor": factor, "nav_ex_date": nav_day, "evidence": r["evidence"]})
     return sorted(out, key=lambda a: (a["symbol"], a["ex_date"]))
 
 

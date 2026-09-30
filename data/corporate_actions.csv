@@ -1,0 +1,4 @@
+symbol,ex_date,kind,factor,nav_ex_date,evidence
+BANKBEES,2019-12-19,split,10,2019-12-23,"NSE close 3286.95 to 329.51 on 2019-12-19 (ratio 9.98). AMFI NAV 3305.2296 on 2019-12-20 to 330.0579 on 2019-12-23 (ratio 10.01): the NAV series switches unit size two trading days after the exchange price."
+GOLDBEES,2019-12-19,split,100,2019-12-23,"NSE close 3359.60 to 33.55 on 2019-12-19 (ratio 100.14). AMFI NAV 3358.6429 on 2019-12-20 to 33.7313 on 2019-12-23 (ratio 99.57): the NAV series switches unit size two trading days after the exchange price."
+NIFTYBEES,2019-12-19,split,10,2019-12-23,"NSE close 1292.54 to 130.20 on 2019-12-19 (ratio 9.93). AMFI NAV 1300.3137 on 2019-12-20 to 129.9356 on 2019-12-23 (ratio 10.01): the NAV series switches unit size two trading days after the exchange price. Trendlyne split history (1 for 10, face value Rs 10 to Rs 1, ex-date 2019-12-19) as recorded in data/manifest.json."

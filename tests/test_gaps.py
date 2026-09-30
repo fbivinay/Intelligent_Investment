@@ -73,9 +73,10 @@ def test_yahoo_is_compared_with_our_split_adjusted_close_and_the_nav_with_the_pu
     write(root / "processed" / "etf_daily_adjusted.csv", ["date", "symbol", "series", "close", "adj_close", "adj_qty"],
           [["2020-01-01", "NIFTYBEES", "EQ", "1000", "100", "10"], ["2020-01-02", "NIFTYBEES", "EQ", "101", "101", "10"]])
     write(root / "processed" / "amfi_nav_daily.csv", ["date", "code", "nav"], [["2020-01-01", "140084", "1002"], ["2020-01-02", "140084", "101.5"]])
+    (root / "corporate_actions.csv").write_text("symbol,ex_date,kind,factor,nav_ex_date,evidence\nNIFTYBEES,2020-01-02,split,10,2020-01-02,\"x\"\n", newline="")
     text = gaps.report(root, symbol="NIFTYBEES", code="140084", yahoo="NIFTYBEES.csv", start="2020-01-01", end="2020-01-31")
     assert "2 days compared, 1 differ by more than 0.5%, largest 1.00% (2020-01-02)" in text          # 100 and 101 against Yahoo's 100 and 100
-    assert "AMFI NAV (scheme 140084): 2 days compared, 0 differ by more than 1%" in text              # 1000 against 1002, 101 against 101.5
+    assert "AMFI NAV (scheme 140084): 2 days compared, 0 differ by more than 1%" in text              # 1002 on the old scale is 100.2 against 100, 101.5 against 101
 
 
 def test_report_compares_every_listed_etf_with_its_own_nav(tmp_path):
@@ -87,5 +88,35 @@ def test_report_compares_every_listed_etf_with_its_own_nav(tmp_path):
           [["2020-01-01", "140084", "100.5"], ["2020-01-02", "140084", "100"], ["2020-01-01", "140088", "50.2"], ["2020-01-02", "140088", "50"]])
     text = gaps.report(root, symbol="NIFTYBEES", code="140084", yahoo="NIFTYBEES.csv", start="2020-01-01", end="2020-01-31",
                        nav_pairs={"NIFTYBEES": "140084", "GOLDBEES": "140088"})
-    assert "- NIFTYBEES close against AMFI NAV (scheme 140084): 2 days compared, 0 differ by more than 1%" in text
-    assert "- GOLDBEES close against AMFI NAV (scheme 140088): 2 days compared, 1 differ by more than 1%, largest 4.00% (2020-01-02)" in text
+    assert "- NIFTYBEES split-adjusted close against AMFI NAV (scheme 140084): 2 days compared, 0 differ by more than 1%" in text
+    assert "- GOLDBEES split-adjusted close against AMFI NAV (scheme 140088): 2 days compared, 1 differ by more than 1%, largest 4.00% (2020-01-02)" in text
+
+
+def test_a_nav_that_switches_scale_days_after_the_price_is_compared_on_one_scale(tmp_path):
+    root = make_root(tmp_path)
+    write(root / "processed" / "etf_daily_adjusted.csv", ["date", "symbol", "series", "close", "adj_close", "adj_qty"],
+          [["2020-01-01", "NIFTYBEES", "EQ", "1000", "100", "10"], ["2020-01-02", "NIFTYBEES", "EQ", "101", "101", "10"], ["2020-01-03", "NIFTYBEES", "EQ", "102", "102", "10"]])
+    write(root / "processed" / "amfi_nav_daily.csv", ["date", "code", "nav"], [["2020-01-01", "140084", "1002"], ["2020-01-02", "140084", "1010"], ["2020-01-03", "140084", "102.1"]])
+    (root / "corporate_actions.csv").write_text("symbol,ex_date,kind,factor,nav_ex_date,evidence\nNIFTYBEES,2020-01-02,split,10,2020-01-03,\"NAV switches a day later\"\n", newline="")
+    text = gaps.report(root, symbol="NIFTYBEES", code="140084", yahoo="NIFTYBEES.csv", start="2020-01-01", end="2020-01-31")
+    assert "AMFI NAV (scheme 140084): 3 days compared, 0 differ by more than 1%" in text
+
+
+def test_without_a_nav_switch_date_the_nav_is_taken_to_switch_with_the_price(tmp_path):
+    root = make_root(tmp_path)
+    write(root / "processed" / "etf_daily_adjusted.csv", ["date", "symbol", "series", "close", "adj_close", "adj_qty"],
+          [["2020-01-01", "NIFTYBEES", "EQ", "1000", "100", "10"], ["2020-01-02", "NIFTYBEES", "EQ", "101", "101", "10"]])
+    write(root / "processed" / "amfi_nav_daily.csv", ["date", "code", "nav"], [["2020-01-01", "140084", "1002"], ["2020-01-02", "140084", "101.2"]])
+    (root / "corporate_actions.csv").write_text("symbol,ex_date,kind,factor,evidence\nNIFTYBEES,2020-01-02,split,10,\"x\"\n", newline="")
+    text = gaps.report(root, symbol="NIFTYBEES", code="140084", yahoo="NIFTYBEES.csv", start="2020-01-01", end="2020-01-31")
+    assert "AMFI NAV (scheme 140084): 2 days compared, 0 differ by more than 1%" in text
+
+
+def test_two_splits_multiply_when_the_nav_is_put_on_the_latest_unit_size(tmp_path):
+    root = make_root(tmp_path)
+    write(root / "processed" / "etf_daily_adjusted.csv", ["date", "symbol", "series", "close", "adj_close", "adj_qty"],
+          [["2020-01-01", "NIFTYBEES", "EQ", "2000", "100", "10"], ["2020-01-03", "NIFTYBEES", "EQ", "201", "100.5", "10"], ["2020-01-05", "NIFTYBEES", "EQ", "101", "101", "10"]])
+    write(root / "processed" / "amfi_nav_daily.csv", ["date", "code", "nav"], [["2020-01-01", "140084", "2010"], ["2020-01-03", "140084", "201"], ["2020-01-05", "140084", "100.9"]])
+    (root / "corporate_actions.csv").write_text("symbol,ex_date,kind,factor,nav_ex_date,evidence\nNIFTYBEES,2020-01-03,split,10,,\"a\"\nNIFTYBEES,2020-01-05,split,2,,\"b\"\n", newline="")
+    text = gaps.report(root, symbol="NIFTYBEES", code="140084", yahoo="NIFTYBEES.csv", start="2020-01-01", end="2020-01-31")
+    assert "AMFI NAV (scheme 140084): 3 days compared, 0 differ by more than 1%" in text
