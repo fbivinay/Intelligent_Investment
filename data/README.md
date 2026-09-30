@@ -79,9 +79,11 @@ Building twice gives the same bytes; every raw file is checked against its liste
 - **India VIX** starts 2010-07 (website) and is continuous from there; the archive files carry it only from 2014-05.
 - **LIQUIDBEES** trades and reports its NAV at Rs 1,000 all the time: its return is a daily cash dividend that no file carries. For a cash
   return use a liquid fund's growth NAV.
-- **Dividends** are not in any file here. The three equity ETFs (Nifty, Junior, Bank BeES) do not pay them out in 2016 to 2026: `gaps.md` sets each
+- **Dividends** are not in any file here. From 2016 to 2026 the three equity ETFs (Nifty, Junior, Bank BeES) do not pay them out: `gaps.md` sets each
   NAV against its index, finds no payout step, and the ratio drifts up (dividends kept in the NAV), so their prices already carry them. Gold BeES
-  pays none. Liquid BeES is the exception (above).
+  pays none. Liquid BeES is the exception (above). **Before 2016 Nifty BeES did pay out**: Rs 10 per unit around 2012-03-09 to 12 (Trendlyne, see
+  `manifest.json`), which shows as a 1.7% step down of its price against the Nifty on 2012-03-09. Other payouts in 2010 to 2015 may exist; the
+  price's own noise against the index (about 1% a day) hides small ones, and AMFI has no NAV for the ETFs from 2011-08 to 2016-11. None is added back.
 - **Lot sizes** are per contract (NSE revises a lot for contracts listed after a date). The website rows and the new daily file (from
   2024-07-08) publish the lot; for the old daily file (2016-01 to 2024-07-05) each contract's lot is worked out from traded value / contracts /
   close, nearest multiple of 5, every day of the contract voting. The working-out agrees with every published lot where a contract has both
@@ -103,3 +105,7 @@ Building twice gives the same bytes; every raw file is checked against its liste
   a listed futures contract nobody traded on a day comes as a row with no values (left out, counted by `python -m data.nse_web describe`);
   futures quantity is in units and value in lakhs (contracts = quantity / lot).
 - Index futures: near-month settle against the index stays within about 1% on every day (checked, nothing odd), three contracts a day.
+- The frozen Yahoo series of Nifty BeES (`processed/NIFTYBEES.csv`, a cross-check only) differs from the NSE close by more than 0.5% on 143 days,
+  all in 2010, 2012 and 2013 (by up to 2.2%); on the worst of them the NSE close is the one near the AMFI NAV and Yahoo is the outlier.
+- India VIX differs between the website and the archive by at most 0.04% (on 383 of 3,447 closes): a rounding difference in the source; every other
+  index field is equal on all 3,447 overlap rows, and every ETF field on all 615.

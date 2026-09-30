@@ -42,6 +42,7 @@ function makeCollector(fetchFn, config) {
     index: ['NIFTY 50', 'NIFTY NEXT 50', 'NIFTY BANK'],   // 'NIFTY MIDCAP 100' (and the other spellings tried) gets no rows from this report
     vixFrom: '2010-04-01',                            // a date: ask for India VIX from then on; null leaves it out
     fut: ['NIFTY', 'BANKNIFTY'], futLifeDays: 130,
+    futMonthsFrom: {},                                // per symbol, the first month to ask for (a date); the default is `from`. Used to collect what an earlier run did not
     sleep: ms => new Promise(r => setTimeout(r, ms)),
   }, config || {});
   fetchFn = fetchFn || ((u, o) => fetch(u, o));
@@ -118,7 +119,7 @@ function makeCollector(fetchFn, config) {
   for (const n of cfg.index) for (const [a, b] of windows(cfg.from, cfg.to, cfg.windowDays)) queue.push({kind: 'index', index: n, from: a, to: b});
   if (cfg.vixFrom) for (const [a, b] of windows(cfg.vixFrom, cfg.to, cfg.windowDays)) queue.push({kind: 'vix', from: a, to: b});
   for (const s of cfg.fut) {
-    const a = utc(cfg.from), z = utc(cfg.to);
+    const a = utc(cfg.futMonthsFrom[s] || cfg.from), z = utc(cfg.to);
     for (let y = a.getUTCFullYear(), m = a.getUTCMonth(); y < z.getUTCFullYear() || (y === z.getUTCFullYear() && m <= z.getUTCMonth()); m === 11 ? (y++, m = 0) : m++) {
       queue.push({kind: 'fo', symbol: s, year: y, month: m});
     }
