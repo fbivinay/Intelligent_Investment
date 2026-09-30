@@ -23,7 +23,8 @@ def fake_result():
 def test_report_shows_exact_values_behind_an_info_button_and_escapes_text():
     html = render_html("T & <script>", [("Sold", fake_result())], ["a note <i>"])
     assert "ⓘ" in html and "99.623456789" in html          # exact, unrounded value is in the trace
-    assert "&lt;b&gt;Cost&lt;/b&gt;" in html and "<script>" not in html and "&lt;i&gt;" in html
+    assert "&lt;b&gt;Cost&lt;/b&gt;" in html and "&lt;script&gt;" in html and "&lt;i&gt;" in html
+    assert html.count("<script>") == 1                       # only the report's own small script, never text from a label or title
     assert "None used." in html                             # no non-primary rules involved
 
 
@@ -98,3 +99,25 @@ def test_the_report_says_what_the_prices_are_adjusted_for(tmp_path):
     args = frozen_etf(tmp_path, {"adjusted": {"2019-12-19": "1-for-10 unit split, earlier prices adjusted <b>"}})
     html = main(args).read_text(encoding="utf-8")
     assert "adjusted for" in html and "2019-12-19" in html and "1-for-10 unit split" in html and "&lt;b&gt;" in html
+
+
+def test_a_derivation_shared_by_several_rows_is_written_once_and_linked_elsewhere():
+    html = render_html("T", [("Sold", fake_result()), ("Held", fake_result())], [])
+    # ten rows in each of two sections all trace back to the same three nodes: each is written out once, the other rows link to it
+    assert html.count("<details id=") == 3 and "same derivation as above" in html      # Net, Cost and Fee: one full copy each
+    assert 'href="#n' in html and "<script>" in html                        # the link opens the closed rows above it
+
+
+def test_the_real_checkpoint_report_stays_small():
+    from pathlib import Path
+    root = Path(__file__).resolve().parents[1]
+    out = main(["--end", "2026-09-28", "--out", str(root / "out" / "size_check.html")])
+    try:
+        assert out.stat().st_size < 1_000_000, out.stat().st_size            # it was 4.7 MB when every row repeated every derivation
+    finally:
+        out.unlink()
+
+
+def test_the_report_names_what_is_not_modelled_including_the_womens_exemption_of_2010_11(tmp_path):
+    html = main(frozen_etf(tmp_path)).read_text(encoding="utf-8")
+    assert "Not modelled" in html and "women" in html and "1.9 lakh" in html

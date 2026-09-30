@@ -139,9 +139,38 @@ def rules_used(n: Node) -> set[RuleRef]:
     return {r for x in walk(n) for r in x.rules}
 
 
+def _active_inputs(n: Node) -> tuple[Node, ...]:
+    """The inputs whose value can move this node's value as it stands: a max or min follows only the input it picked, and a product
+    with a zero factor ignores the others. Everything else passes every input on."""
+    v = [i.value for i in n.inputs]
+    if n.op == "max":
+        return tuple(i for i in n.inputs if i.value == max(v))
+    if n.op == "min":
+        return tuple(i for i in n.inputs if i.value == min(v))
+    if n.op == "mul":
+        return tuple(i for k, i in enumerate(n.inputs) if all(o.value != 0 for j, o in enumerate(n.inputs) if j != k))
+    if n.op == "div":
+        return n.inputs if n.inputs[0].value != 0 else n.inputs[:1]
+    return n.inputs
+
+
+def influencing_rules(n: Node) -> set[RuleRef]:
+    """Rules that can move this number: those on a node reached through inputs that matter (see _active_inputs)."""
+    seen, stack, out = set(), [n], set()
+    while stack:
+        x = stack.pop()
+        if id(x) in seen:
+            continue
+        seen.add(id(x))
+        out.update(x.rules)
+        stack.extend(_active_inputs(x))
+    return out
+
+
 def flags(n: Node) -> list[RuleRef]:
-    """Rules under this number that are not backed by a primary source."""
-    return sorted((r for r in rules_used(n) if r.confidence != "primary"),
+    """Rules that can move this number and are not backed by a primary source. A weak rule that was read but cannot change the
+    number (the other side of a max, a rate times a zero amount) is left out; rules_used still lists it."""
+    return sorted((r for r in influencing_rules(n) if r.confidence != "primary"),
                   key=lambda r: (r.rule_id, r.valid_from))
 
 
