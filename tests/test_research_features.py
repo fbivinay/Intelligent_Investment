@@ -124,8 +124,8 @@ def test_a_function_that_does_not_return_one_row_per_day_is_an_error():
 
 def test_a_look_ahead_that_only_changes_earlier_rows_is_caught_too():
     p = mini_panel()
-    # every row but the last is today's latest close: the values of past days change when the data grows
-    sneaky = lambda q: np.concatenate([np.full(len(q.close) - 1, q.close[-1, 0]), [np.nan]])        # noqa: E731
+    # only the first day's value depends on the end of the data; the last row of every run is the same
+    sneaky = lambda q: np.concatenate([[q.close[-1, 0]], q.close[1:, 0]])                          # noqa: E731
     with pytest.raises(AssertionError, match="look"):
         causal.assert_causal(sneaky, p, n_cuts=4, seed=2)
 
