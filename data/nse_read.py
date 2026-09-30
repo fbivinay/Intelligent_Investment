@@ -102,7 +102,18 @@ def read_fo(raw: bytes, symbols: set[str]) -> list[dict]:
     return out
 
 
-def read_index(raw: bytes, names: set[str]) -> list[dict]:
+def _index_day(text: str, day: str | None) -> str:
+    """The row's date. Three files (2023-04-06, 2023-04-10, 2023-04-11) write it month first; when the file is known to be for `day` and only the
+    month-first reading gives that day, it is `day`. A date that fits neither way is returned as written, for the caller's check to refuse."""
+    written = _dmy_num(text)
+    if day is not None and written != day:
+        d, m, y = text.split("-")
+        if _dmy_num(f"{m}-{d}-{y}") == day:
+            return day
+    return written
+
+
+def read_index(raw: bytes, names: set[str], day: str | None = None) -> list[dict]:
     head, rows = _table(raw)
     _need(head, "index closes", {"Index Name", "Index Date", "Open Index Value", "High Index Value", "Low Index Value", "Closing Index Value",
                                  "Volume", "Turnover (Rs. Cr.)", "P/E", "P/B", "Div Yield"})
@@ -112,7 +123,7 @@ def read_index(raw: bytes, names: set[str]) -> list[dict]:
     for r in rows:
         name = ours.get(ALIASES.get(r["Index Name"], r["Index Name"]).casefold())
         if name is not None:
-            out.append(dict(date=_dmy_num(r["Index Date"]), name=name, open=blank(r["Open Index Value"]), high=blank(r["High Index Value"]),
+            out.append(dict(date=_index_day(r["Index Date"], day), name=name, open=blank(r["Open Index Value"]), high=blank(r["High Index Value"]),
                             low=blank(r["Low Index Value"]), close=blank(r["Closing Index Value"]), volume=blank(r["Volume"]),
                             turnover_cr=blank(r["Turnover (Rs. Cr.)"]), pe=blank(r["P/E"]), pb=blank(r["P/B"]), div_yield=blank(r["Div Yield"])))
     return out

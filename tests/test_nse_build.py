@@ -47,7 +47,7 @@ def read(path):
 def test_build_writes_one_sorted_csv_per_kind_from_the_raw_files_that_are_listed(tmp_path):
     root = make_root(tmp_path)
     counts = nb.build(root, etfs={"NIFTYBEES", "GOLDBEES"}, futures={"NIFTY"}, indices={"Nifty 50"})
-    assert counts == {"cash": 3, "fo": 1, "index": 1}
+    assert counts == {"cash": 3, "fo": 1, "index": 1, "index_month_first": 0}
     etf = read(root / "processed" / "nse_etf_daily.csv")
     assert [(r["date"], r["symbol"], r["close"]) for r in etf] == [("2016-06-01", "GOLDBEES", "2505"), ("2016-06-01", "NIFTYBEES", "828.85"),
                                                                     ("2016-06-02", "NIFTYBEES", "834.5")]
@@ -91,3 +91,11 @@ def test_build_names_every_file_whose_rows_or_layout_disagree_in_one_error(tmp_p
     msg = str(e.value)
     assert "2 files" in msg and "cash 2016-06-01: a row is dated 2016-06-05" in msg and "cash 2016-06-02" in msg and "layout" in msg
     assert not (tmp_path / "processed" / "nse_etf_daily.csv").exists()                     # nothing is written from a build that found problems
+
+
+def test_build_reads_an_index_file_written_month_first_as_its_day_and_counts_it(tmp_path):
+    put(tmp_path, "index", date(2023, 4, 6), ("\n".join([IDX_HEAD, "Nifty 50,04-06-2023,8200,8224.9,8178.3,8194.55,1,0.1,1,1,21.5,3.1,1.3"]) + "\n").encode())
+    put(tmp_path, "index", date(2023, 4, 12), ("\n".join([IDX_HEAD, "Nifty 50,12-04-2023,8200,8224.9,8178.3,8194.55,1,0.1,1,1,21.5,3.1,1.3"]) + "\n").encode())
+    counts = nb.build(tmp_path, {"NIFTYBEES"}, {"NIFTY"}, {"Nifty 50"})
+    assert counts["index"] == 2 and counts["index_month_first"] == 1
+    assert [r["date"] for r in read(tmp_path / "processed" / "nse_index_daily.csv")] == ["2023-04-06", "2023-04-12"]
