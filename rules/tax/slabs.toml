@@ -1,0 +1,98 @@
+# Income-tax slabs for a resident individual under 60, by regime and FINANCIAL YEAR (rows run 1 April to 31 March).
+# brackets are in order; upto is the top of the bracket in rupees (cumulative), the last one is empty (no top). The first bracket is
+# the nil-rate band: its upto is the basic exemption. regime old = the ordinary slabs; regime new = the section 115BAC regime
+# (optional from 2020-21, the default from 2023-24), which exists only from 2020-04-01.
+# Not modelled: the slabs of senior citizens (60 to 79) and very senior citizens (80 and over), and the higher basic exemption that
+# women had in 2010-11 (Rs 1.9 lakh against Rs 1.6 lakh). Every profile here is the general resident individual, so tax is never
+# understated for someone who was in one of those groups.
+[meta]
+keys = ["regime"]
+coverage_from = 2010-04-01
+granularity = "financial_year"
+late_keys = [{ regime = "new", from = 2020-04-01 }]
+
+[[row]]
+regime = "old"
+brackets = [{ upto = "160000", rate = "0" }, { upto = "500000", rate = "0.10" }, { upto = "800000", rate = "0.20" }, { upto = "", rate = "0.30" }]
+from = 2010-04-01
+to = 2011-03-31
+source = "S56 Finance Bill 2010 memorandum: Upto Rs. 1,60,000 Nil; to Rs. 5,00,000 10 per cent; to Rs. 8,00,000 20 per cent; above 30 per cent"
+verified_on = 2026-09-30
+confidence = "primary"
+
+[[row]]
+regime = "old"
+brackets = [{ upto = "180000", rate = "0" }, { upto = "500000", rate = "0.10" }, { upto = "800000", rate = "0.20" }, { upto = "", rate = "0.30" }]
+from = 2011-04-01
+to = 2012-03-31
+source = "S57 Finance Bill 2011 memorandum: Upto Rs. 1,80,000 Nil; to Rs. 5,00,000 10 per cent; to Rs. 8,00,000 20 per cent; above 30 per cent"
+verified_on = 2026-09-30
+confidence = "primary"
+
+[[row]]
+regime = "old"
+brackets = [{ upto = "200000", rate = "0" }, { upto = "500000", rate = "0.10" }, { upto = "1000000", rate = "0.20" }, { upto = "", rate = "0.30" }]
+from = 2012-04-01
+to = 2014-03-31
+source = "S40 Finance Bill 2012 memorandum: Upto Rs. 2,00,000 Nil; to Rs. 5,00,000 10 per cent; to Rs. 10,00,000 20 per cent; above 30 per cent; S19 the 2013 Bill keeps the same rates"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Financial years 2012-13 and 2013-14."
+
+[[row]]
+regime = "old"
+brackets = [{ upto = "250000", rate = "0" }, { upto = "500000", rate = "0.10" }, { upto = "1000000", rate = "0.20" }, { upto = "", rate = "0.30" }]
+from = 2014-04-01
+to = 2017-03-31
+source = "S41 Finance Bill 2014 memorandum: Upto Rs. 2,50,000 Nil; to Rs. 5,00,000 10 per cent; to Rs. 10,00,000 20 per cent; above 30 per cent; S58 and S59 the 2015 and 2016 Bills keep them"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Financial years 2014-15, 2015-16 and 2016-17."
+
+[[row]]
+regime = "old"
+brackets = [{ upto = "250000", rate = "0" }, { upto = "500000", rate = "0.05" }, { upto = "1000000", rate = "0.20" }, { upto = "", rate = "0.30" }]
+from = 2017-04-01
+source = "S44 Finance Bill 2017 memorandum: Rs. 2,50,001 to Rs. 5,00,000 5 per cent; to Rs. 10,00,000 20 per cent; above 30 per cent; S43, S61, S45, S62, S63, S64, S47, S65 and S55 (Finance Bill 2026, old-regime option) show the same slabs in later years"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Financial years 2017-18 onward. Unchanged in every later Finance Act; for 2026-27 it is the option under section 202(4) of the Income-tax Act 2025."
+
+[[row]]
+regime = "new"
+brackets = [{ upto = "250000", rate = "0" }, { upto = "500000", rate = "0.05" }, { upto = "750000", rate = "0.10" }, { upto = "1000000", rate = "0.15" }, { upto = "1250000", rate = "0.20" }, { upto = "1500000", rate = "0.25" }, { upto = "", rate = "0.30" }]
+from = 2020-04-01
+to = 2023-03-31
+source = "S45 Finance Bill 2020 memorandum, section 115BAC: to Rs 2,50,000 Nil; 5 per cent to 5,00,000; 10 per cent to 7,50,000; 15 per cent to 10,00,000; 20 per cent to 12,50,000; 25 per cent to 15,00,000; 30 per cent above; S62 and S64 confirm 2021-22 and 2022-23"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Financial years 2020-21, 2021-22 and 2022-23. An optional regime in these years."
+
+[[row]]
+regime = "new"
+brackets = [{ upto = "300000", rate = "0" }, { upto = "600000", rate = "0.05" }, { upto = "900000", rate = "0.10" }, { upto = "1200000", rate = "0.15" }, { upto = "1500000", rate = "0.20" }, { upto = "", rate = "0.30" }]
+from = 2023-04-01
+to = 2024-03-31
+source = "S64 Finance Bill 2023 memorandum, section 115BAC(1A): Upto Rs. 3,00,000 Nil; 5 per cent to 6,00,000; 10 per cent to 9,00,000; 15 per cent to 12,00,000; 20 per cent to 15,00,000; 30 per cent above"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Financial year 2023-24: the new regime becomes the default."
+
+[[row]]
+regime = "new"
+brackets = [{ upto = "300000", rate = "0" }, { upto = "700000", rate = "0.05" }, { upto = "1000000", rate = "0.10" }, { upto = "1200000", rate = "0.15" }, { upto = "1500000", rate = "0.20" }, { upto = "", rate = "0.30" }]
+from = 2024-04-01
+to = 2025-03-31
+source = "S47 Finance (No.2) Bill 2024 memorandum: Upto Rs. 3,00,000 Nil; 5 per cent to 7,00,000; 10 per cent to 10,00,000; 15 per cent to 12,00,000; 20 per cent to 15,00,000; 30 per cent above; S65 confirms"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Financial year 2024-25."
+
+[[row]]
+regime = "new"
+brackets = [{ upto = "400000", rate = "0" }, { upto = "800000", rate = "0.05" }, { upto = "1200000", rate = "0.10" }, { upto = "1600000", rate = "0.15" }, { upto = "2000000", rate = "0.20" }, { upto = "2400000", rate = "0.25" }, { upto = "", rate = "0.30" }]
+from = 2025-04-01
+source = "S65 Finance Bill 2025 memorandum: Upto Rs. 4,00,000 Nil; 5 per cent to 8,00,000; 10 per cent to 12,00,000; 15 per cent to 16,00,000; 20 per cent to 20,00,000; 25 per cent to 24,00,000; 30 per cent above; S55 Finance Bill 2026 memorandum: the same for tax year 2026-27 (section 202)"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Financial years 2025-26 and 2026-27 (tax year 2026-27 under the Income-tax Act 2025)."

@@ -1,0 +1,65 @@
+# Fyers' own depository-participant fee for one delivery sale, in rupees before GST. It excludes the depository's own
+# share (CDSL), which is in charges.dp_depository, and GST, which charges.gst adds.
+# basis: per_sale = charged on each sell transaction; per_isin_per_day = one flat charge per ISIN per day however many sales.
+[meta]
+keys = []
+coverage_from = 2010-04-01
+
+[[row]]
+from = 2010-04-01
+to = 2018-09-14
+value = "20"
+basis = "per_sale"
+source = "S7 Demat Debit Transaction charges levied by IL&FS (ISSL): Rs 20 + Depository charges at actuals"
+verified_on = 2026-09-29
+confidence = "assumed"
+note = "No demat charges were published on any archived Fyers page before 2018-09-15; the earliest known value is used as a stand-in."
+
+[[row]]
+from = 2018-09-15
+to = 2019-11-14
+value = "20"
+basis = "per_sale"
+source = "S7 Demat Debit Transaction charges levied by IL&FS (ISSL): Rs 20 + Depository charges at actuals"
+verified_on = 2026-09-29
+confidence = "secondary"
+note = "Levied by the ISSL demat participant. First archived copy 2018-09-15; last copy with it 2019-09-23; Fyers' own demat starts with the copy of 2019-11-15."
+
+[[row]]
+from = 2019-11-15
+to = 2021-08-12
+value = "10"
+basis = "per_sale"
+source = "S8 Debit Charges (Sell): Rs 10 + Rs 5.50 (CDSL Charges); S17 confirms"
+verified_on = 2026-09-29
+confidence = "secondary"
+note = "Fyers' own part is Rs 10. Date is the first archived copy showing it (2019-11-15); last ISSL-era copy 2019-09-23."
+
+[[row]]
+from = 2021-08-13
+to = 2024-09-30
+value = "7"
+basis = "per_sale"
+source = "S12 Demat Debit Charges: Rs 7 + Rs 5.5 (CDSL Charges); S13 same on 2024-07-19"
+verified_on = 2026-09-29
+confidence = "secondary"
+note = "Fyers' own part is Rs 7 (total Rs 12.5, the figure S14 calls the pre-October-2024 charge). Date is the first archived copy showing it; last copy with Rs 10 is 2021-07-25."
+
+[[row]]
+from = 2024-10-01
+to = 2025-06-01
+value = "0"
+basis = "per_sale"
+source = "S14 The DP charges will be reduced from Rs 12.5 per transaction to Rs 3.5 per transaction (effective October 1, 2024)"
+verified_on = 2026-09-29
+confidence = "primary"
+note = "Fyers' own part is zero; the Rs 3.5 that remains is the CDSL fee (Fyers charges list of 2024-11-13: Rs 3.5 (CDSL Charges) per transaction)."
+
+[[row]]
+from = 2025-06-02
+value = "9"
+basis = "per_isin_per_day"
+source = "S15 a single, flat charge of Rs 12.5 + GST per stock (ISIN) per day, from 2nd June 2025; S1 splits it as Rs 3.5 CDSL + Rs 9 Fyers"
+verified_on = 2026-09-29
+confidence = "primary"
+note = "One charge per ISIN per day however many times it is sold that day."

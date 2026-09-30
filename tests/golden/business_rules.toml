@@ -1,0 +1,112 @@
+[[case]]
+id = "tax.audit-2012-03-31"
+kind = "rule_value"
+source = "S71 Finance Bill 2010 memorandum: limit for a person carrying on business from forty lakh to sixty lakh rupees, effective assessment year 2011-12; fee S78 assumption Rs 25,000 (F&O firms Rs 14,000 for audit, accounts and return; general bands Rs 25,000 to 60,000 for Rs 1 crore to 5 crore)"
+table = "tax.audit"
+on = 2012-03-31
+key = {  }
+boundary = ["tax.audit[]@2012-04-01:before"]
+[case.expect]
+turnover_limit = "6000000"
+fee = "25000"
+
+[[case]]
+id = "tax.audit-2012-04-01"
+kind = "rule_value"
+source = "S72 Finance Bill 2012 memorandum: from sixty lakh rupees to one crore rupees, effective assessment year 2013-14; fee S78 assumption Rs 25,000"
+table = "tax.audit"
+on = 2012-04-01
+key = {  }
+boundary = ["tax.audit[]@2012-04-01:after"]
+[case.expect]
+turnover_limit = "10000000"
+fee = "25000"
+
+[[case]]
+id = "tax.audit-2019-03-31"
+kind = "rule_value"
+source = "S72 Finance Bill 2012 memorandum: one crore rupees stays the limit until the Finance Act 2020 change; fee S78 assumption Rs 25,000"
+table = "tax.audit"
+on = 2019-03-31
+key = {  }
+boundary = ["tax.audit[]@2019-04-01:before"]
+[case.expect]
+turnover_limit = "10000000"
+fee = "25000"
+
+[[case]]
+id = "tax.audit-2019-04-01"
+kind = "rule_value"
+source = "S73 Finance Bill 2020 memorandum: from one crore to five crore rupees where cash receipts and cash payments are each at most five per cent, effective assessment year 2020-21 (financial year 2019-20); fee S78 assumption Rs 25,000"
+table = "tax.audit"
+on = 2019-04-01
+key = {  }
+boundary = ["tax.audit[]@2019-04-01:after"]
+[case.expect]
+turnover_limit = "50000000"
+fee = "25000"
+
+[[case]]
+id = "tax.audit-2020-03-31"
+kind = "rule_value"
+source = "S73 Finance Bill 2020 memorandum: five crore rupees (both cash tests met) for financial year 2019-20; fee S78 assumption Rs 25,000"
+table = "tax.audit"
+on = 2020-03-31
+key = {  }
+boundary = ["tax.audit[]@2020-04-01:before"]
+[case.expect]
+turnover_limit = "50000000"
+fee = "25000"
+
+[[case]]
+id = "tax.audit-2020-04-01"
+kind = "rule_value"
+source = "S74 Finance Bill 2021 memorandum: from five crore to ten crore rupees on the same two cash tests, effective assessment year 2021-22 (financial year 2020-21); fee S78 assumption Rs 25,000"
+table = "tax.audit"
+on = 2020-04-01
+key = {  }
+boundary = ["tax.audit[]@2020-04-01:after"]
+[case.expect]
+turnover_limit = "100000000"
+fee = "25000"
+
+[[case]]
+id = "tax.audit-2026-04-01"
+kind = "rule_value"
+source = "S76 Income-tax Act 2025 section 63(1) Table: ten crore rupees where cash receipts and cash payments are each at most 5%, from tax year 2026-27; fee S78 assumption Rs 25,000"
+table = "tax.audit"
+on = 2026-04-01
+key = {  }
+[case.expect]
+turnover_limit = "100000000"
+fee = "25000"
+
+[[case]]
+id = "tax.loss_rules-business-2010-04-01"
+kind = "rule_value"
+source = "S75 section 72(3): no loss shall be carried forward for more than eight assessment years"
+table = "tax.loss_rules"
+on = 2010-04-01
+key = { kind = "business" }
+[case.expect]
+value = "8"
+
+[[case]]
+id = "tax.loss_rules-business-2026-04-01"
+kind = "rule_value"
+source = "S76 section 112(2) of the Income-tax Act 2025: no loss shall be carried forward for more than eight tax years"
+table = "tax.loss_rules"
+on = 2026-04-01
+key = { kind = "business" }
+[case.expect]
+value = "8"
+
+[[case]]
+id = "tax.conventions-business_loss_setoff-2010-04-01"
+kind = "rule_value"
+source = "S0 assumption: the set-off coded in engine/tax.py (interest and slab-taxed income, never the other income given or special-rate gains); the law in S75 section 71 is wider except for salary (71(2A))"
+table = "tax.conventions"
+on = 2010-04-01
+key = { name = "business_loss_setoff" }
+[case.expect]
+value = "interest and slab-taxed income only, not the other income given, as coded in engine/tax.py"

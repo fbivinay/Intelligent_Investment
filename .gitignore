@@ -1,6 +1,7 @@
-# Local caches and backups; the daily job fetches fresh prices every run.
-/data/
+# Local caches. Raw downloads are ignored; processed slices and data/manifest.json are committed.
+/data/raw/
 /artifacts/
+/out/
 
 # Secrets. Nothing here should ever exist, but make it impossible by accident.
 .env

@@ -1,0 +1,1101 @@
+[[case]]
+id = "tax.buckets-etf_equity-2010-04-01"
+kind = "rule_value"
+source = "S43 section 112A covers units of an equity oriented fund (STT paid on transfer)"
+table = "tax.buckets"
+on = 2010-04-01
+key = { asset_class = "etf_equity" }
+[case.expect]
+bucket = "equity"
+
+[[case]]
+id = "tax.buckets-mf_equity-2010-04-01"
+kind = "rule_value"
+source = "S43 same definition of equity oriented fund covers mutual fund units redeemed with STT"
+table = "tax.buckets"
+on = 2010-04-01
+key = { asset_class = "mf_equity" }
+[case.expect]
+bucket = "equity"
+
+[[case]]
+id = "tax.buckets-etf_gold-2023-03-31"
+kind = "rule_value"
+source = "S46 clause 21: section 50AA covers a unit acquired on or after the 1st day of April 2023, so 31 March 2023 is outside it"
+table = "tax.buckets"
+on = 2023-03-31
+key = { asset_class = "etf_gold" }
+boundary = ["tax.buckets[asset_class=etf_gold]@2023-04-01:before"]
+[case.expect]
+bucket = "gold"
+
+[[case]]
+id = "tax.buckets-etf_gold-2023-04-01"
+kind = "rule_value"
+source = "S46 clause 21: a unit of a Specified Mutual Fund acquired on or after the 1st day of April 2023; S47 gold ETFs caught"
+table = "tax.buckets"
+on = 2023-04-01
+key = { asset_class = "etf_gold" }
+boundary = ["tax.buckets[asset_class=etf_gold]@2023-04-01:after"]
+[case.expect]
+bucket = "gold_post_apr2023"
+
+[[case]]
+id = "tax.buckets-mf_debt-2023-03-31"
+kind = "rule_value"
+source = "S46 clause 21: only units acquired on or after 1 April 2023"
+table = "tax.buckets"
+on = 2023-03-31
+key = { asset_class = "mf_debt" }
+boundary = ["tax.buckets[asset_class=mf_debt]@2023-04-01:before"]
+[case.expect]
+bucket = "debt_pre_apr2023"
+
+[[case]]
+id = "tax.buckets-mf_debt-2023-04-01"
+kind = "rule_value"
+source = "S46 clause 21: unit of a Specified Mutual Fund acquired on or after 1 April 2023; S49 debt and liquid funds"
+table = "tax.buckets"
+on = 2023-04-01
+key = { asset_class = "mf_debt" }
+boundary = ["tax.buckets[asset_class=mf_debt]@2023-04-01:after"]
+[case.expect]
+bucket = "debt_post_apr2023"
+
+[[case]]
+id = "tax.capital_gains-equity-2018-03-31"
+kind = "rule_value"
+source = "S40 tax on short-term gains under section 111A 15%; S43 long-term gains exempt under section 10(38) until withdrawn from 2018-04-01"
+table = "tax.capital_gains"
+on = 2018-03-31
+key = { bucket = "equity" }
+boundary = ["tax.capital_gains[bucket=equity]@2018-04-01:before"]
+[case.expect]
+lt_months = 12
+st_treatment = "special"
+st_rate = "0.15"
+st_section = "111A"
+lt_treatment = "exempt"
+lt_section = "10(38)"
+
+[[case]]
+id = "tax.capital_gains-equity-2018-04-01"
+kind = "rule_value"
+source = "S43 new section 112A: 10% above Rs 1 lakh, no indexation, cost grandfathered to 31 Jan 2018, from the year starting 2018-04-01"
+table = "tax.capital_gains"
+on = 2018-04-01
+key = { bucket = "equity" }
+boundary = ["tax.capital_gains[bucket=equity]@2018-04-01:after"]
+[case.expect]
+lt_months = 12
+st_treatment = "special"
+st_rate = "0.15"
+st_section = "111A"
+lt_treatment = "special"
+lt_rate = "0.10"
+lt_section = "112A"
+indexation = false
+lt_exemption_group = "equity_112a"
+grandfather_acq_upto = 2018-01-31
+
+[[case]]
+id = "tax.capital_gains-equity-2024-07-22"
+kind = "rule_value"
+source = "S46 First Schedule: section 111A 15% and section 112A 10% for any transfer before 23 July 2024"
+table = "tax.capital_gains"
+on = 2024-07-22
+key = { bucket = "equity" }
+boundary = ["tax.capital_gains[bucket=equity]@2024-07-23:before"]
+[case.expect]
+lt_months = 12
+st_treatment = "special"
+st_rate = "0.15"
+st_section = "111A"
+lt_treatment = "special"
+lt_rate = "0.10"
+lt_section = "112A"
+indexation = false
+lt_exemption_group = "equity_112a"
+grandfather_acq_upto = 2018-01-31
+
+[[case]]
+id = "tax.capital_gains-equity-2024-07-23"
+kind = "rule_value"
+source = "S46 First Schedule: 111A 20% and 112A 12.5% for any transfer on or after 23 July 2024; S48 Q2 new provisions from 23.7.2024"
+table = "tax.capital_gains"
+on = 2024-07-23
+key = { bucket = "equity" }
+boundary = ["tax.capital_gains[bucket=equity]@2024-07-23:after"]
+[case.expect]
+lt_months = 12
+st_treatment = "special"
+st_rate = "0.20"
+st_section = "111A"
+lt_treatment = "special"
+lt_rate = "0.125"
+lt_section = "112A"
+indexation = false
+lt_exemption_group = "equity_112a"
+grandfather_acq_upto = 2018-01-31
+
+[[case]]
+id = "tax.capital_gains-equity-2026-03-31"
+kind = "rule_value"
+source = "S46 and S48: 20% and 12.5% (holding 12 months for listed securities)"
+table = "tax.capital_gains"
+on = 2026-03-31
+key = { bucket = "equity" }
+boundary = ["tax.capital_gains[bucket=equity]@2026-04-01:before"]
+[case.expect]
+lt_months = 12
+st_treatment = "special"
+st_rate = "0.20"
+st_section = "111A"
+lt_treatment = "special"
+lt_rate = "0.125"
+lt_section = "112A"
+indexation = false
+lt_exemption_group = "equity_112a"
+grandfather_acq_upto = 2018-01-31
+
+[[case]]
+id = "tax.capital_gains-equity-2026-04-01"
+kind = "rule_value"
+source = "S55 Income-tax Act 2025 section 196 at 20% and section 198 at 12.5% above Rs 125000"
+table = "tax.capital_gains"
+on = 2026-04-01
+key = { bucket = "equity" }
+boundary = ["tax.capital_gains[bucket=equity]@2026-04-01:after"]
+[case.expect]
+lt_months = 12
+st_treatment = "special"
+st_rate = "0.20"
+st_section = "196 (2025 Act)"
+lt_treatment = "special"
+lt_rate = "0.125"
+lt_section = "198 (2025 Act)"
+indexation = false
+lt_exemption_group = "equity_112a"
+grandfather_acq_upto = 2018-01-31
+
+[[case]]
+id = "tax.capital_gains-gold-2014-07-10"
+kind = "rule_value"
+source = "S42 paras 5.2 and 30.2: units transferred from 2014-04-01 to 2014-07-10 keep 12 months and the 10% option; S47 20% with indexation"
+table = "tax.capital_gains"
+on = 2014-07-10
+key = { bucket = "gold" }
+boundary = ["tax.capital_gains[bucket=gold]@2014-07-11:before"]
+[case.expect]
+lt_months = 12
+st_treatment = "slab"
+st_section = "normal rates"
+lt_treatment = "special"
+lt_rate = "0.20"
+lt_section = "112"
+indexation = true
+lt_alt_rate = "0.10"
+lt_alt_indexation = false
+lt_alt_section = "112 (10% option)"
+
+[[case]]
+id = "tax.capital_gains-gold-2014-07-11"
+kind = "rule_value"
+source = "S42 para 5.2: unit of a mutual fund other than equity oriented is short-term if held 36 months or less; para 30.2: 10% option only up to 10 July 2014"
+table = "tax.capital_gains"
+on = 2014-07-11
+key = { bucket = "gold" }
+boundary = ["tax.capital_gains[bucket=gold]@2014-07-11:after"]
+[case.expect]
+lt_months = 36
+st_treatment = "slab"
+st_section = "normal rates"
+lt_treatment = "special"
+lt_rate = "0.20"
+lt_section = "112"
+indexation = true
+
+[[case]]
+id = "tax.capital_gains-gold-2024-07-22"
+kind = "rule_value"
+source = "S49 before 23 July 2024 long-term only after 36 months; S47 20% with indexation under section 112"
+table = "tax.capital_gains"
+on = 2024-07-22
+key = { bucket = "gold" }
+boundary = ["tax.capital_gains[bucket=gold]@2024-07-23:before"]
+[case.expect]
+lt_months = 36
+st_treatment = "slab"
+st_section = "normal rates"
+lt_treatment = "special"
+lt_rate = "0.20"
+lt_section = "112"
+indexation = true
+
+[[case]]
+id = "tax.capital_gains-gold-2024-07-23"
+kind = "rule_value"
+source = "S46 clause 3 and S49: listed units 12 months from 23 July 2024; S46 First Schedule 12.5%"
+table = "tax.capital_gains"
+on = 2024-07-23
+key = { bucket = "gold" }
+boundary = ["tax.capital_gains[bucket=gold]@2024-07-23:after"]
+[case.expect]
+lt_months = 12
+st_treatment = "slab"
+st_section = "normal rates"
+lt_treatment = "special"
+lt_rate = "0.125"
+lt_section = "112"
+indexation = false
+
+[[case]]
+id = "tax.capital_gains-gold-2026-03-31"
+kind = "rule_value"
+source = "S46 clause 3 and S49: listed units 12 months from 23 July 2024; S46 First Schedule 12.5%"
+table = "tax.capital_gains"
+on = 2026-03-31
+key = { bucket = "gold" }
+boundary = ["tax.capital_gains[bucket=gold]@2026-04-01:before"]
+[case.expect]
+lt_months = 12
+st_treatment = "slab"
+st_section = "normal rates"
+lt_treatment = "special"
+lt_rate = "0.125"
+lt_section = "112"
+indexation = false
+
+[[case]]
+id = "tax.capital_gains-gold-2026-04-01"
+kind = "rule_value"
+source = "S55 Income-tax Act 2025 section 197: long-term gains at 12.5%"
+table = "tax.capital_gains"
+on = 2026-04-01
+key = { bucket = "gold" }
+boundary = ["tax.capital_gains[bucket=gold]@2026-04-01:after"]
+[case.expect]
+lt_months = 12
+st_treatment = "slab"
+st_section = "normal rates"
+lt_treatment = "special"
+lt_rate = "0.125"
+lt_section = "197 (2025 Act)"
+indexation = false
+
+[[case]]
+id = "tax.capital_gains-debt_pre_apr2023-2014-07-10"
+kind = "rule_value"
+source = "S42 paras 5.2 and 30.2: units transferred from 2014-04-01 to 2014-07-10 keep 12 months and the 10% option; S47 20% with indexation"
+table = "tax.capital_gains"
+on = 2014-07-10
+key = { bucket = "debt_pre_apr2023" }
+boundary = ["tax.capital_gains[bucket=debt_pre_apr2023]@2014-07-11:before"]
+[case.expect]
+lt_months = 12
+st_treatment = "slab"
+st_section = "normal rates"
+lt_treatment = "special"
+lt_rate = "0.20"
+lt_section = "112"
+indexation = true
+lt_alt_rate = "0.10"
+lt_alt_indexation = false
+lt_alt_section = "112 (10% option)"
+
+[[case]]
+id = "tax.capital_gains-debt_pre_apr2023-2014-07-11"
+kind = "rule_value"
+source = "S42 para 5.2: unit of a mutual fund other than equity oriented is short-term if held 36 months or less; para 30.2: 10% option only up to 10 July 2014"
+table = "tax.capital_gains"
+on = 2014-07-11
+key = { bucket = "debt_pre_apr2023" }
+boundary = ["tax.capital_gains[bucket=debt_pre_apr2023]@2014-07-11:after"]
+[case.expect]
+lt_months = 36
+st_treatment = "slab"
+st_section = "normal rates"
+lt_treatment = "special"
+lt_rate = "0.20"
+lt_section = "112"
+indexation = true
+
+[[case]]
+id = "tax.capital_gains-debt_pre_apr2023-2024-07-22"
+kind = "rule_value"
+source = "S49 before 23 July 2024 long-term only after 36 months; S47 20% with indexation under section 112"
+table = "tax.capital_gains"
+on = 2024-07-22
+key = { bucket = "debt_pre_apr2023" }
+boundary = ["tax.capital_gains[bucket=debt_pre_apr2023]@2024-07-23:before"]
+[case.expect]
+lt_months = 36
+st_treatment = "slab"
+st_section = "normal rates"
+lt_treatment = "special"
+lt_rate = "0.20"
+lt_section = "112"
+indexation = true
+
+[[case]]
+id = "tax.capital_gains-debt_pre_apr2023-2024-07-23"
+kind = "rule_value"
+source = "S46 clause 3, S48 Q3 and S49: unlisted units 24 months from 23 July 2024; S46 First Schedule 12.5%"
+table = "tax.capital_gains"
+on = 2024-07-23
+key = { bucket = "debt_pre_apr2023" }
+boundary = ["tax.capital_gains[bucket=debt_pre_apr2023]@2024-07-23:after"]
+[case.expect]
+lt_months = 24
+st_treatment = "slab"
+st_section = "normal rates"
+lt_treatment = "special"
+lt_rate = "0.125"
+lt_section = "112"
+indexation = false
+
+[[case]]
+id = "tax.capital_gains-debt_pre_apr2023-2026-03-31"
+kind = "rule_value"
+source = "S46 clause 3, S48 Q3 and S49: unlisted units 24 months from 23 July 2024; S46 First Schedule 12.5%"
+table = "tax.capital_gains"
+on = 2026-03-31
+key = { bucket = "debt_pre_apr2023" }
+boundary = ["tax.capital_gains[bucket=debt_pre_apr2023]@2026-04-01:before"]
+[case.expect]
+lt_months = 24
+st_treatment = "slab"
+st_section = "normal rates"
+lt_treatment = "special"
+lt_rate = "0.125"
+lt_section = "112"
+indexation = false
+
+[[case]]
+id = "tax.capital_gains-debt_pre_apr2023-2026-04-01"
+kind = "rule_value"
+source = "S55 Income-tax Act 2025 section 197: long-term gains at 12.5%"
+table = "tax.capital_gains"
+on = 2026-04-01
+key = { bucket = "debt_pre_apr2023" }
+boundary = ["tax.capital_gains[bucket=debt_pre_apr2023]@2026-04-01:after"]
+[case.expect]
+lt_months = 24
+st_treatment = "slab"
+st_section = "normal rates"
+lt_treatment = "special"
+lt_rate = "0.125"
+lt_section = "197 (2025 Act)"
+indexation = false
+
+[[case]]
+id = "tax.capital_gains-gold_post_apr2023-2025-03-31"
+kind = "rule_value"
+source = "S46 clause 21 and S47: section 50AA deems the gain short-term; S49 gold ETFs are Specified Mutual Funds for FY 2024-25"
+table = "tax.capital_gains"
+on = 2025-03-31
+key = { bucket = "gold_post_apr2023" }
+boundary = ["tax.capital_gains[bucket=gold_post_apr2023]@2025-04-01:before"]
+[case.expect]
+always_short = true
+st_treatment = "slab"
+st_section = "50AA"
+
+[[case]]
+id = "tax.capital_gains-gold_post_apr2023-2025-04-01"
+kind = "rule_value"
+source = "S46 clause 21(b): new definition from 1 April 2026, i.e. AY 2026-27; S47: applicable from AY 2026-27 onwards; S49 only debt oriented funds from FY 2025-26"
+table = "tax.capital_gains"
+on = 2025-04-01
+key = { bucket = "gold_post_apr2023" }
+boundary = ["tax.capital_gains[bucket=gold_post_apr2023]@2025-04-01:after"]
+[case.expect]
+lt_months = 12
+st_treatment = "slab"
+st_section = "normal rates"
+lt_treatment = "special"
+lt_rate = "0.125"
+lt_section = "112"
+indexation = false
+
+[[case]]
+id = "tax.capital_gains-gold_post_apr2023-2026-03-31"
+kind = "rule_value"
+source = "S46 clause 21(b) and S47: the redefinition applies to the whole of FY 2025-26"
+table = "tax.capital_gains"
+on = 2026-03-31
+key = { bucket = "gold_post_apr2023" }
+boundary = ["tax.capital_gains[bucket=gold_post_apr2023]@2026-04-01:before"]
+[case.expect]
+lt_months = 12
+st_treatment = "slab"
+st_section = "normal rates"
+lt_treatment = "special"
+lt_rate = "0.125"
+lt_section = "112"
+indexation = false
+
+[[case]]
+id = "tax.capital_gains-gold_post_apr2023-2026-04-01"
+kind = "rule_value"
+source = "S55 Income-tax Act 2025 section 197: long-term gains at 12.5%"
+table = "tax.capital_gains"
+on = 2026-04-01
+key = { bucket = "gold_post_apr2023" }
+boundary = ["tax.capital_gains[bucket=gold_post_apr2023]@2026-04-01:after"]
+[case.expect]
+lt_months = 12
+st_treatment = "slab"
+st_section = "normal rates"
+lt_treatment = "special"
+lt_rate = "0.125"
+lt_section = "197 (2025 Act)"
+indexation = false
+
+[[case]]
+id = "tax.capital_gains-debt_post_apr2023-2026-03-31"
+kind = "rule_value"
+source = "S46 clause 21 and S49: debt oriented funds remain Specified Mutual Funds after the 2025-26 change"
+table = "tax.capital_gains"
+on = 2026-03-31
+key = { bucket = "debt_post_apr2023" }
+boundary = ["tax.capital_gains[bucket=debt_post_apr2023]@2026-04-01:before"]
+[case.expect]
+always_short = true
+st_treatment = "slab"
+st_section = "50AA"
+
+[[case]]
+id = "tax.capital_gains-debt_post_apr2023-2026-04-01"
+kind = "rule_value"
+source = "S49 debt oriented funds stay covered; S55 the Income-tax Act 2025 replaces the 1961 section numbers"
+table = "tax.capital_gains"
+on = 2026-04-01
+key = { bucket = "debt_post_apr2023" }
+boundary = ["tax.capital_gains[bucket=debt_post_apr2023]@2026-04-01:after"]
+[case.expect]
+always_short = true
+st_treatment = "slab"
+st_section = "50AA equivalent (2025 Act)"
+
+[[case]]
+id = "tax.cii-1981-2011-03-31"
+kind = "rule_value"
+source = "S50 notification No. 59/2010 of 2010-07-21: 2010-11 = 711"
+table = "tax.cii"
+on = 2011-03-31
+key = { series = "1981" }
+boundary = ["tax.cii[series=1981]@2011-04-01:before"]
+[case.expect]
+value = "711"
+
+[[case]]
+id = "tax.cii-1981-2011-04-01"
+kind = "rule_value"
+source = "S50 notification No. 35/2011 of 2011-06-23: 2011-12 = 785"
+table = "tax.cii"
+on = 2011-04-01
+key = { series = "1981" }
+boundary = ["tax.cii[series=1981]@2011-04-01:after"]
+[case.expect]
+value = "785"
+
+[[case]]
+id = "tax.cii-1981-2012-03-31"
+kind = "rule_value"
+source = "S50 notification No. 35/2011 of 2011-06-23: 2011-12 = 785"
+table = "tax.cii"
+on = 2012-03-31
+key = { series = "1981" }
+boundary = ["tax.cii[series=1981]@2012-04-01:before"]
+[case.expect]
+value = "785"
+
+[[case]]
+id = "tax.cii-1981-2012-04-01"
+kind = "rule_value"
+source = "S50 notification No. 38/2012 of 2012-09-17: 2012-13 = 852"
+table = "tax.cii"
+on = 2012-04-01
+key = { series = "1981" }
+boundary = ["tax.cii[series=1981]@2012-04-01:after"]
+[case.expect]
+value = "852"
+
+[[case]]
+id = "tax.cii-1981-2013-03-31"
+kind = "rule_value"
+source = "S50 notification No. 38/2012 of 2012-09-17: 2012-13 = 852"
+table = "tax.cii"
+on = 2013-03-31
+key = { series = "1981" }
+boundary = ["tax.cii[series=1981]@2013-04-01:before"]
+[case.expect]
+value = "852"
+
+[[case]]
+id = "tax.cii-1981-2013-04-01"
+kind = "rule_value"
+source = "S50 notification No. 40/2013 of 2013-06-06: 2013-14 = 939"
+table = "tax.cii"
+on = 2013-04-01
+key = { series = "1981" }
+boundary = ["tax.cii[series=1981]@2013-04-01:after"]
+[case.expect]
+value = "939"
+
+[[case]]
+id = "tax.cii-1981-2014-03-31"
+kind = "rule_value"
+source = "S50 notification No. 40/2013 of 2013-06-06: 2013-14 = 939"
+table = "tax.cii"
+on = 2014-03-31
+key = { series = "1981" }
+boundary = ["tax.cii[series=1981]@2014-04-01:before"]
+[case.expect]
+value = "939"
+
+[[case]]
+id = "tax.cii-1981-2014-04-01"
+kind = "rule_value"
+source = "S50 notification No. 31/2014 of 2014-06-11: 2014-15 = 1024"
+table = "tax.cii"
+on = 2014-04-01
+key = { series = "1981" }
+boundary = ["tax.cii[series=1981]@2014-04-01:after"]
+[case.expect]
+value = "1024"
+
+[[case]]
+id = "tax.cii-1981-2015-03-31"
+kind = "rule_value"
+source = "S50 notification No. 31/2014 of 2014-06-11: 2014-15 = 1024"
+table = "tax.cii"
+on = 2015-03-31
+key = { series = "1981" }
+boundary = ["tax.cii[series=1981]@2015-04-01:before"]
+[case.expect]
+value = "1024"
+
+[[case]]
+id = "tax.cii-1981-2015-04-01"
+kind = "rule_value"
+source = "S50 notification No. 60/2015 of 2015-07-24: 2015-16 = 1081"
+table = "tax.cii"
+on = 2015-04-01
+key = { series = "1981" }
+boundary = ["tax.cii[series=1981]@2015-04-01:after"]
+[case.expect]
+value = "1081"
+
+[[case]]
+id = "tax.cii-1981-2016-03-31"
+kind = "rule_value"
+source = "S50 notification No. 60/2015 of 2015-07-24: 2015-16 = 1081"
+table = "tax.cii"
+on = 2016-03-31
+key = { series = "1981" }
+boundary = ["tax.cii[series=1981]@2016-04-01:before"]
+[case.expect]
+value = "1081"
+
+[[case]]
+id = "tax.cii-1981-2016-04-01"
+kind = "rule_value"
+source = "S50 notification No. 42/2016 of 2016-06-02: 2016-17 = 1125"
+table = "tax.cii"
+on = 2016-04-01
+key = { series = "1981" }
+boundary = ["tax.cii[series=1981]@2016-04-01:after"]
+[case.expect]
+value = "1125"
+
+[[case]]
+id = "tax.cii-2001-2011-03-31"
+kind = "rule_value"
+source = "S51 table 2001-02 = 100: 2010-11 = 167"
+table = "tax.cii"
+on = 2011-03-31
+key = { series = "2001" }
+boundary = ["tax.cii[series=2001]@2011-04-01:before"]
+[case.expect]
+value = "167"
+
+[[case]]
+id = "tax.cii-2001-2011-04-01"
+kind = "rule_value"
+source = "S51 table 2001-02 = 100: 2011-12 = 184"
+table = "tax.cii"
+on = 2011-04-01
+key = { series = "2001" }
+boundary = ["tax.cii[series=2001]@2011-04-01:after"]
+[case.expect]
+value = "184"
+
+[[case]]
+id = "tax.cii-2001-2012-03-31"
+kind = "rule_value"
+source = "S51 table 2001-02 = 100: 2011-12 = 184"
+table = "tax.cii"
+on = 2012-03-31
+key = { series = "2001" }
+boundary = ["tax.cii[series=2001]@2012-04-01:before"]
+[case.expect]
+value = "184"
+
+[[case]]
+id = "tax.cii-2001-2012-04-01"
+kind = "rule_value"
+source = "S51 table 2001-02 = 100: 2012-13 = 200"
+table = "tax.cii"
+on = 2012-04-01
+key = { series = "2001" }
+boundary = ["tax.cii[series=2001]@2012-04-01:after"]
+[case.expect]
+value = "200"
+
+[[case]]
+id = "tax.cii-2001-2013-03-31"
+kind = "rule_value"
+source = "S51 table 2001-02 = 100: 2012-13 = 200"
+table = "tax.cii"
+on = 2013-03-31
+key = { series = "2001" }
+boundary = ["tax.cii[series=2001]@2013-04-01:before"]
+[case.expect]
+value = "200"
+
+[[case]]
+id = "tax.cii-2001-2013-04-01"
+kind = "rule_value"
+source = "S51 table 2001-02 = 100: 2013-14 = 220"
+table = "tax.cii"
+on = 2013-04-01
+key = { series = "2001" }
+boundary = ["tax.cii[series=2001]@2013-04-01:after"]
+[case.expect]
+value = "220"
+
+[[case]]
+id = "tax.cii-2001-2014-03-31"
+kind = "rule_value"
+source = "S51 table 2001-02 = 100: 2013-14 = 220"
+table = "tax.cii"
+on = 2014-03-31
+key = { series = "2001" }
+boundary = ["tax.cii[series=2001]@2014-04-01:before"]
+[case.expect]
+value = "220"
+
+[[case]]
+id = "tax.cii-2001-2014-04-01"
+kind = "rule_value"
+source = "S51 table 2001-02 = 100: 2014-15 = 240"
+table = "tax.cii"
+on = 2014-04-01
+key = { series = "2001" }
+boundary = ["tax.cii[series=2001]@2014-04-01:after"]
+[case.expect]
+value = "240"
+
+[[case]]
+id = "tax.cii-2001-2015-03-31"
+kind = "rule_value"
+source = "S51 table 2001-02 = 100: 2014-15 = 240"
+table = "tax.cii"
+on = 2015-03-31
+key = { series = "2001" }
+boundary = ["tax.cii[series=2001]@2015-04-01:before"]
+[case.expect]
+value = "240"
+
+[[case]]
+id = "tax.cii-2001-2015-04-01"
+kind = "rule_value"
+source = "S51 table 2001-02 = 100: 2015-16 = 254"
+table = "tax.cii"
+on = 2015-04-01
+key = { series = "2001" }
+boundary = ["tax.cii[series=2001]@2015-04-01:after"]
+[case.expect]
+value = "254"
+
+[[case]]
+id = "tax.cii-2001-2016-03-31"
+kind = "rule_value"
+source = "S51 table 2001-02 = 100: 2015-16 = 254"
+table = "tax.cii"
+on = 2016-03-31
+key = { series = "2001" }
+boundary = ["tax.cii[series=2001]@2016-04-01:before"]
+[case.expect]
+value = "254"
+
+[[case]]
+id = "tax.cii-2001-2016-04-01"
+kind = "rule_value"
+source = "S51 table 2001-02 = 100: 2016-17 = 264"
+table = "tax.cii"
+on = 2016-04-01
+key = { series = "2001" }
+boundary = ["tax.cii[series=2001]@2016-04-01:after"]
+[case.expect]
+value = "264"
+
+[[case]]
+id = "tax.cii-2001-2017-03-31"
+kind = "rule_value"
+source = "S51 table 2001-02 = 100: 2016-17 = 264"
+table = "tax.cii"
+on = 2017-03-31
+key = { series = "2001" }
+boundary = ["tax.cii[series=2001]@2017-04-01:before"]
+[case.expect]
+value = "264"
+
+[[case]]
+id = "tax.cii-2001-2017-04-01"
+kind = "rule_value"
+source = "S51 table 2001-02 = 100: 2017-18 = 272"
+table = "tax.cii"
+on = 2017-04-01
+key = { series = "2001" }
+boundary = ["tax.cii[series=2001]@2017-04-01:after"]
+[case.expect]
+value = "272"
+
+[[case]]
+id = "tax.cii-2001-2018-03-31"
+kind = "rule_value"
+source = "S51 table 2001-02 = 100: 2017-18 = 272"
+table = "tax.cii"
+on = 2018-03-31
+key = { series = "2001" }
+boundary = ["tax.cii[series=2001]@2018-04-01:before"]
+[case.expect]
+value = "272"
+
+[[case]]
+id = "tax.cii-2001-2018-04-01"
+kind = "rule_value"
+source = "S51 table 2001-02 = 100: 2018-19 = 280"
+table = "tax.cii"
+on = 2018-04-01
+key = { series = "2001" }
+boundary = ["tax.cii[series=2001]@2018-04-01:after"]
+[case.expect]
+value = "280"
+
+[[case]]
+id = "tax.cii-2001-2019-03-31"
+kind = "rule_value"
+source = "S51 table 2001-02 = 100: 2018-19 = 280"
+table = "tax.cii"
+on = 2019-03-31
+key = { series = "2001" }
+boundary = ["tax.cii[series=2001]@2019-04-01:before"]
+[case.expect]
+value = "280"
+
+[[case]]
+id = "tax.cii-2001-2019-04-01"
+kind = "rule_value"
+source = "S51 table 2001-02 = 100: 2019-20 = 289"
+table = "tax.cii"
+on = 2019-04-01
+key = { series = "2001" }
+boundary = ["tax.cii[series=2001]@2019-04-01:after"]
+[case.expect]
+value = "289"
+
+[[case]]
+id = "tax.cii-2001-2020-03-31"
+kind = "rule_value"
+source = "S51 table 2001-02 = 100: 2019-20 = 289"
+table = "tax.cii"
+on = 2020-03-31
+key = { series = "2001" }
+boundary = ["tax.cii[series=2001]@2020-04-01:before"]
+[case.expect]
+value = "289"
+
+[[case]]
+id = "tax.cii-2001-2020-04-01"
+kind = "rule_value"
+source = "S51 table 2001-02 = 100: 2020-21 = 301"
+table = "tax.cii"
+on = 2020-04-01
+key = { series = "2001" }
+boundary = ["tax.cii[series=2001]@2020-04-01:after"]
+[case.expect]
+value = "301"
+
+[[case]]
+id = "tax.cii-2001-2021-03-31"
+kind = "rule_value"
+source = "S51 table 2001-02 = 100: 2020-21 = 301"
+table = "tax.cii"
+on = 2021-03-31
+key = { series = "2001" }
+boundary = ["tax.cii[series=2001]@2021-04-01:before"]
+[case.expect]
+value = "301"
+
+[[case]]
+id = "tax.cii-2001-2021-04-01"
+kind = "rule_value"
+source = "S52 table 2001-02 = 100: 2021-22 = 317"
+table = "tax.cii"
+on = 2021-04-01
+key = { series = "2001" }
+boundary = ["tax.cii[series=2001]@2021-04-01:after"]
+[case.expect]
+value = "317"
+
+[[case]]
+id = "tax.cii-2001-2022-03-31"
+kind = "rule_value"
+source = "S52 table 2001-02 = 100: 2021-22 = 317"
+table = "tax.cii"
+on = 2022-03-31
+key = { series = "2001" }
+boundary = ["tax.cii[series=2001]@2022-04-01:before"]
+[case.expect]
+value = "317"
+
+[[case]]
+id = "tax.cii-2001-2022-04-01"
+kind = "rule_value"
+source = "S52 table 2001-02 = 100: 2022-23 = 331"
+table = "tax.cii"
+on = 2022-04-01
+key = { series = "2001" }
+boundary = ["tax.cii[series=2001]@2022-04-01:after"]
+[case.expect]
+value = "331"
+
+[[case]]
+id = "tax.cii-2001-2023-03-31"
+kind = "rule_value"
+source = "S52 table 2001-02 = 100: 2022-23 = 331"
+table = "tax.cii"
+on = 2023-03-31
+key = { series = "2001" }
+boundary = ["tax.cii[series=2001]@2023-04-01:before"]
+[case.expect]
+value = "331"
+
+[[case]]
+id = "tax.cii-2001-2023-04-01"
+kind = "rule_value"
+source = "S52 table 2001-02 = 100: 2023-24 = 348"
+table = "tax.cii"
+on = 2023-04-01
+key = { series = "2001" }
+boundary = ["tax.cii[series=2001]@2023-04-01:after"]
+[case.expect]
+value = "348"
+
+[[case]]
+id = "tax.cii-2001-2024-03-31"
+kind = "rule_value"
+source = "S52 table 2001-02 = 100: 2023-24 = 348"
+table = "tax.cii"
+on = 2024-03-31
+key = { series = "2001" }
+boundary = ["tax.cii[series=2001]@2024-04-01:before"]
+[case.expect]
+value = "348"
+
+[[case]]
+id = "tax.cii-2001-2024-04-01"
+kind = "rule_value"
+source = "S52 table 2001-02 = 100: 2024-25 = 363"
+table = "tax.cii"
+on = 2024-04-01
+key = { series = "2001" }
+boundary = ["tax.cii[series=2001]@2024-04-01:after"]
+[case.expect]
+value = "363"
+
+[[case]]
+id = "tax.cii-2001-2025-03-31"
+kind = "rule_value"
+source = "S52 table 2001-02 = 100: 2024-25 = 363"
+table = "tax.cii"
+on = 2025-03-31
+key = { series = "2001" }
+boundary = ["tax.cii[series=2001]@2025-04-01:before"]
+[case.expect]
+value = "363"
+
+[[case]]
+id = "tax.cii-2001-2025-04-01"
+kind = "rule_value"
+source = "S52 table 2001-02 = 100: 2025-26 = 376"
+table = "tax.cii"
+on = 2025-04-01
+key = { series = "2001" }
+boundary = ["tax.cii[series=2001]@2025-04-01:after"]
+[case.expect]
+value = "376"
+
+[[case]]
+id = "tax.cii-2001-2026-03-31"
+kind = "rule_value"
+source = "S52 table 2001-02 = 100: 2025-26 = 376"
+table = "tax.cii"
+on = 2026-03-31
+key = { series = "2001" }
+boundary = ["tax.cii[series=2001]@2026-04-01:before"]
+[case.expect]
+value = "376"
+
+[[case]]
+id = "tax.cii-2001-2026-04-01"
+kind = "rule_value"
+source = "S53 table 2001-02 = 100: 2026-27 = 384"
+table = "tax.cii"
+on = 2026-04-01
+key = { series = "2001" }
+boundary = ["tax.cii[series=2001]@2026-04-01:after"]
+[case.expect]
+value = "384"
+
+[[case]]
+id = "tax.lt_exemption-equity_112a-2024-03-31"
+kind = "rule_value"
+source = "S43 long-term gains exceeding one lakh rupees"
+table = "tax.lt_exemption"
+on = 2024-03-31
+key = { group = "equity_112a" }
+boundary = ["tax.lt_exemption[group=equity_112a]@2024-04-01:before"]
+[case.expect]
+value = "100000"
+order = "lowest_rate_first"
+
+[[case]]
+id = "tax.lt_exemption-equity_112a-2024-04-01"
+kind = "rule_value"
+source = "S48 Q7 the exemption limit of 1 lakh increased to 1.25 lakh for FY 2024-25; S46 the limit applies on the aggregate"
+table = "tax.lt_exemption"
+on = 2024-04-01
+key = { group = "equity_112a" }
+boundary = ["tax.lt_exemption[group=equity_112a]@2024-04-01:after"]
+[case.expect]
+value = "125000"
+order = "lowest_rate_first"
+
+[[case]]
+id = "tax.lt_exemption-equity_112a-2025-03-31"
+kind = "rule_value"
+source = "S46 clause 31: limit of one lakh twenty-five thousand rupees applies on aggregate of the long-term gains"
+table = "tax.lt_exemption"
+on = 2025-03-31
+key = { group = "equity_112a" }
+boundary = ["tax.lt_exemption[group=equity_112a]@2025-04-01:before"]
+[case.expect]
+value = "125000"
+order = "lowest_rate_first"
+
+[[case]]
+id = "tax.lt_exemption-equity_112a-2025-04-01"
+kind = "rule_value"
+source = "S48 Q7 FY 2024-25 and subsequent years; S55 section 198(2)(a) Rs 125000"
+table = "tax.lt_exemption"
+on = 2025-04-01
+key = { group = "equity_112a" }
+boundary = ["tax.lt_exemption[group=equity_112a]@2025-04-01:after"]
+[case.expect]
+value = "125000"
+order = "lowest_rate_first"
+
+[[case]]
+id = "tax.dividend-company-2016-03-31"
+kind = "rule_value"
+source = "S59 dividend which suffer DDT is exempt in the hands of the shareholder under clause (34) of section 10"
+table = "tax.dividend"
+on = 2016-03-31
+key = { payer = "company" }
+boundary = ["tax.dividend[payer=company]@2016-04-01:before"]
+[case.expect]
+mode = "exempt"
+
+[[case]]
+id = "tax.dividend-company-2016-04-01"
+kind = "rule_value"
+source = "S59 any income by way of dividend in excess of Rs. 10 lakh chargeable at the rate of ten percent, effective 1 April 2017 (AY 2017-18); S79 section 115BBDA(1): dividends declared, distributed or paid by a domestic company"
+table = "tax.dividend"
+on = 2016-04-01
+key = { payer = "company" }
+boundary = ["tax.dividend[payer=company]@2016-04-01:after"]
+[case.expect]
+mode = "above_threshold"
+threshold = "1000000"
+rate = "0.10"
+
+[[case]]
+id = "tax.dividend-company-2020-03-31"
+kind = "rule_value"
+source = "S45 section 115BBDA amended to apply to dividends declared, distributed or paid on or before 31 March 2020"
+table = "tax.dividend"
+on = 2020-03-31
+key = { payer = "company" }
+boundary = ["tax.dividend[payer=company]@2020-04-01:before"]
+[case.expect]
+mode = "above_threshold"
+threshold = "1000000"
+rate = "0.10"
+
+[[case]]
+id = "tax.dividend-company-2020-04-01"
+kind = "rule_value"
+source = "S45 dividend or income from units taxable in the hands of shareholders or unit holders at the applicable rate from 1 April 2020"
+table = "tax.dividend"
+on = 2020-04-01
+key = { payer = "company" }
+boundary = ["tax.dividend[payer=company]@2020-04-01:after"]
+[case.expect]
+mode = "slab"
+
+[[case]]
+id = "tax.dividend-fund-2010-04-01"
+kind = "rule_value"
+source = "S45 before 1 April 2020 dividend and unit income were exempt under sections 10(34) and 10(35) because the payer paid distribution tax; S79 section 115BBDA is on dividends of a domestic company, not on unit income"
+table = "tax.dividend"
+on = 2010-04-01
+key = { payer = "fund" }
+[case.expect]
+mode = "exempt"
+
+[[case]]
+id = "tax.dividend-fund-2020-03-31"
+kind = "rule_value"
+source = "S45 unit income exempt under section 10(35) up to the abolition of distribution tax; S79 115BBDA does not reach it"
+table = "tax.dividend"
+on = 2020-03-31
+key = { payer = "fund" }
+boundary = ["tax.dividend[payer=fund]@2020-04-01:before"]
+[case.expect]
+mode = "exempt"
+
+[[case]]
+id = "tax.dividend-fund-2020-04-01"
+kind = "rule_value"
+source = "S45 dividend or income from units taxable in the hands of unit holders at the applicable rate from 1 April 2020"
+table = "tax.dividend"
+on = 2020-04-01
+key = { payer = "fund" }
+boundary = ["tax.dividend[payer=fund]@2020-04-01:after"]
+[case.expect]
+mode = "slab"
+
+[[case]]
+id = "tax.loss_rules-capital-2010-04-01"
+kind = "rule_value"
+source = "S54 section 74(2): no loss carried forward for more than eight assessment years"
+table = "tax.loss_rules"
+on = 2010-04-01
+key = { kind = "capital" }
+[case.expect]
+value = "8"

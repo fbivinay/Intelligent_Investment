@@ -1,0 +1,25 @@
+# How many assessment years after the year it arose a loss can be carried forward, by kind of loss. kind = capital: losses under
+# the head capital gains; kind = business: a business loss that is not a speculation loss (losses on index futures, S75 section
+# 43(5)). The return must be filed on time to keep the loss (assumed).
+[meta]
+keys = ["kind"]
+coverage_from = 2010-04-01
+granularity = "financial_year"
+
+[[row]]
+kind = "capital"
+value = "8"
+from = 2010-04-01
+source = "S54 section 74(2): no capital loss is carried forward for more than eight assessment years; the e-Filing FAQ says the eight-year limit continues under the Income-tax Act 2025"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Short-term losses set off against any capital gain, long-term losses against long-term gains only."
+
+[[row]]
+kind = "business"
+value = "8"
+from = 2010-04-01
+source = "S75 section 72(3): no loss shall be carried forward under this section for more than eight assessment years immediately succeeding the assessment year for which the loss was first computed; S76 section 112(2) of the Income-tax Act 2025 says the same for eight tax years"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "A business loss left after set-off in its own year is carried forward and set off against business profits only (section 72(1)); the return must be filed on time to keep it (section 80, not modelled). Speculation losses, carried forward for four years, do not arise on index futures traded on a recognised exchange (section 43(5) proviso (d))."

@@ -1,0 +1,21 @@
+# Health and education cess on income-tax including surcharge, as a fraction, by financial year. No marginal relief.
+[meta]
+keys = []
+coverage_from = 2010-04-01
+granularity = "financial_year"
+
+[[row]]
+value = "0.03"
+from = 2010-04-01
+to = 2018-03-31
+source = "S57 Finance Bill 2011 memorandum: Education Cess two per cent and Secondary and Higher Education Cess one per cent on the tax including surcharge; S44 says the same for 2017-18"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Two cesses (2% and 1%) add up to 3%."
+
+[[row]]
+value = "0.04"
+from = 2018-04-01
+source = "S43 Finance Bill 2018 memorandum: the two cesses are discontinued and a Health and Education Cess of four per cent is levied; S61, S64, S65 and S55 repeat 4% in later years"
+verified_on = 2026-09-30
+confidence = "primary"

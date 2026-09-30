@@ -1,0 +1,2881 @@
+[[case]]
+id = "amc-2010-04-01-opened-2010-04-01"
+kind = "amc"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "account opened 2010-04-01 is in the legacy group; AMC 400; GST 0.103 x 400 = 41.20; total 441.20"
+[case.input]
+on = 2010-04-01
+opened = 2010-04-01
+[case.expect]
+total = "441.20"
+
+[[case]]
+id = "amc-2012-03-31-opened-2010-04-01"
+kind = "amc"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "account opened 2010-04-01 is in the legacy group; AMC 400; GST 0.103 x 400 = 41.20; total 441.20"
+boundary = ["charges.gst[]@2012-04-01:before"]
+[case.input]
+on = 2012-03-31
+opened = 2010-04-01
+[case.expect]
+total = "441.20"
+
+[[case]]
+id = "amc-2012-04-01-opened-2010-04-01"
+kind = "amc"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "account opened 2010-04-01 is in the legacy group; AMC 400; GST 0.1236 x 400 = 49.44; total 449.44"
+boundary = ["charges.gst[]@2012-04-01:after"]
+[case.input]
+on = 2012-04-01
+opened = 2010-04-01
+[case.expect]
+total = "449.44"
+
+[[case]]
+id = "amc-2015-05-31-opened-2010-04-01"
+kind = "amc"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "account opened 2010-04-01 is in the legacy group; AMC 400; GST 0.1236 x 400 = 49.44; total 449.44"
+boundary = ["charges.gst[]@2015-06-01:before"]
+[case.input]
+on = 2015-05-31
+opened = 2010-04-01
+[case.expect]
+total = "449.44"
+
+[[case]]
+id = "amc-2015-06-01-opened-2010-04-01"
+kind = "amc"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "account opened 2010-04-01 is in the legacy group; AMC 400; GST 0.14 x 400 = 56.00; total 456.00"
+boundary = ["charges.gst[]@2015-06-01:after"]
+[case.input]
+on = 2015-06-01
+opened = 2010-04-01
+[case.expect]
+total = "456.00"
+
+[[case]]
+id = "amc-2015-11-14-opened-2010-04-01"
+kind = "amc"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "account opened 2010-04-01 is in the legacy group; AMC 400; GST 0.14 x 400 = 56.00; total 456.00"
+boundary = ["charges.gst[]@2015-11-15:before"]
+[case.input]
+on = 2015-11-14
+opened = 2010-04-01
+[case.expect]
+total = "456.00"
+
+[[case]]
+id = "amc-2015-11-15-opened-2010-04-01"
+kind = "amc"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "account opened 2010-04-01 is in the legacy group; AMC 400; GST 0.145 x 400 = 58.00; total 458.00"
+boundary = ["charges.gst[]@2015-11-15:after"]
+[case.input]
+on = 2015-11-15
+opened = 2010-04-01
+[case.expect]
+total = "458.00"
+
+[[case]]
+id = "amc-2016-05-31-opened-2010-04-01"
+kind = "amc"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "account opened 2010-04-01 is in the legacy group; AMC 400; GST 0.145 x 400 = 58.00; total 458.00"
+boundary = ["charges.gst[]@2016-06-01:before"]
+[case.input]
+on = 2016-05-31
+opened = 2010-04-01
+[case.expect]
+total = "458.00"
+
+[[case]]
+id = "amc-2016-06-01-opened-2010-04-01"
+kind = "amc"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "account opened 2010-04-01 is in the legacy group; AMC 400; GST 0.15 x 400 = 60.00; total 460.00"
+boundary = ["charges.gst[]@2016-06-01:after"]
+[case.input]
+on = 2016-06-01
+opened = 2010-04-01
+[case.expect]
+total = "460.00"
+
+[[case]]
+id = "amc-2017-06-30-opened-2010-04-01"
+kind = "amc"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "account opened 2010-04-01 is in the legacy group; AMC 400; GST 0.15 x 400 = 60.00; total 460.00"
+boundary = ["charges.gst[]@2017-07-01:before"]
+[case.input]
+on = 2017-06-30
+opened = 2010-04-01
+[case.expect]
+total = "460.00"
+
+[[case]]
+id = "amc-2017-07-01-opened-2010-04-01"
+kind = "amc"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "account opened 2010-04-01 is in the legacy group; AMC 400; GST 0.18 x 400 = 72.00; total 472.00"
+boundary = ["charges.gst[]@2017-07-01:after"]
+[case.input]
+on = 2017-07-01
+opened = 2010-04-01
+[case.expect]
+total = "472.00"
+
+[[case]]
+id = "amc-2019-11-14-opened-2018-05-01"
+kind = "amc"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "account opened 2018-05-01 is in the legacy group; AMC 400; GST 0.18 x 400 = 72.00; total 472.00"
+boundary = ["fyers.amc[cohort=legacy]@2019-11-15:before"]
+[case.input]
+on = 2019-11-14
+opened = 2018-05-01
+[case.expect]
+total = "472.00"
+
+[[case]]
+id = "amc-2019-11-15-opened-2018-05-01"
+kind = "amc"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "account opened 2018-05-01 is in the legacy group; AMC 0; GST 0.18 x 0 = 0.00; total 0.00"
+boundary = ["fyers.amc[cohort=legacy]@2019-11-15:after"]
+[case.input]
+on = 2019-11-15
+opened = 2018-05-01
+[case.expect]
+total = "0.00"
+
+[[case]]
+id = "amc-2019-11-15-opened-2019-01-01"
+kind = "amc"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "account opened 2019-01-01 is in the legacy group; AMC 0; GST 0.18 x 0 = 0.00; total 0.00"
+[case.input]
+on = 2019-11-15
+opened = 2019-01-01
+[case.expect]
+total = "0.00"
+
+[[case]]
+id = "amc-2020-04-01-opened-2020-04-01"
+kind = "amc"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "account opened 2020-04-01 is in the standard group; AMC 300; GST 0.18 x 300 = 54.00; total 354.00"
+[case.input]
+on = 2020-04-01
+opened = 2020-04-01
+[case.expect]
+total = "354.00"
+
+[[case]]
+id = "amc-2021-03-31-opened-2020-03-31"
+kind = "amc"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "account opened 2020-03-31 is in the legacy group; AMC 0; GST 0.18 x 0 = 0.00; total 0.00"
+boundary = ["fyers.amc_cohort[]@2020-04-01:before"]
+[case.input]
+on = 2021-03-31
+opened = 2020-03-31
+[case.expect]
+total = "0.00"
+
+[[case]]
+id = "amc-2021-03-31-opened-2020-04-01"
+kind = "amc"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "account opened 2020-04-01 is in the standard group; AMC 300; GST 0.18 x 300 = 54.00; total 354.00"
+boundary = ["fyers.amc_cohort[]@2020-04-01:after"]
+[case.input]
+on = 2021-03-31
+opened = 2020-04-01
+[case.expect]
+total = "354.00"
+
+[[case]]
+id = "amc-2021-07-25-opened-2021-07-25"
+kind = "amc"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "account opened 2021-07-25 is in the free group; AMC 0; GST 0.18 x 0 = 0.00; total 0.00"
+[case.input]
+on = 2021-07-25
+opened = 2021-07-25
+[case.expect]
+total = "0.00"
+
+[[case]]
+id = "amc-2021-09-30-opened-2020-06-01"
+kind = "amc"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "account opened 2020-06-01 is in the standard group; AMC 300; GST 0.18 x 300 = 54.00; total 354.00"
+boundary = ["fyers.amc[cohort=standard]@2021-10-01:before"]
+[case.input]
+on = 2021-09-30
+opened = 2020-06-01
+[case.expect]
+total = "354.00"
+
+[[case]]
+id = "amc-2021-09-30-opened-2021-07-24"
+kind = "amc"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "account opened 2021-07-24 is in the standard group; AMC 300; GST 0.18 x 300 = 54.00; total 354.00"
+boundary = ["fyers.amc_cohort[]@2021-07-25:before"]
+[case.input]
+on = 2021-09-30
+opened = 2021-07-24
+[case.expect]
+total = "354.00"
+
+[[case]]
+id = "amc-2021-09-30-opened-2021-07-25"
+kind = "amc"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "account opened 2021-07-25 is in the free group; AMC 0; GST 0.18 x 0 = 0.00; total 0.00"
+boundary = ["fyers.amc_cohort[]@2021-07-25:after"]
+[case.input]
+on = 2021-09-30
+opened = 2021-07-25
+[case.expect]
+total = "0.00"
+
+[[case]]
+id = "amc-2021-10-01-opened-2020-06-01"
+kind = "amc"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "account opened 2020-06-01 is in the standard group; AMC 0; GST 0.18 x 0 = 0.00; total 0.00"
+boundary = ["fyers.amc[cohort=standard]@2021-10-01:after"]
+[case.input]
+on = 2021-10-01
+opened = 2020-06-01
+[case.expect]
+total = "0.00"
+
+[[case]]
+id = "amc-2023-06-04-opened-2010-04-01"
+kind = "amc"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "account opened 2010-04-01 is in the legacy group; AMC 0; GST 0.18 x 0 = 0.00; total 0.00"
+boundary = ["charges.gst[]@2023-06-05:before"]
+[case.input]
+on = 2023-06-04
+opened = 2010-04-01
+[case.expect]
+total = "0.00"
+
+[[case]]
+id = "amc-2023-06-05-opened-2010-04-01"
+kind = "amc"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "account opened 2010-04-01 is in the legacy group; AMC 0; GST 0.18 x 0 = 0.00; total 0.00"
+boundary = ["charges.gst[]@2023-06-05:after"]
+[case.input]
+on = 2023-06-05
+opened = 2010-04-01
+[case.expect]
+total = "0.00"
+
+[[case]]
+id = "amc-2025-03-16-opened-2010-04-01"
+kind = "amc"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "account opened 2010-04-01 is in the legacy group; AMC 0; GST 0.18 x 0 = 0.00; total 0.00"
+boundary = ["charges.gst[]@2025-03-17:before"]
+[case.input]
+on = 2025-03-16
+opened = 2010-04-01
+[case.expect]
+total = "0.00"
+
+[[case]]
+id = "amc-2025-03-17-opened-2010-04-01"
+kind = "amc"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "account opened 2010-04-01 is in the legacy group; AMC 0; GST 0.18 x 0 = 0.00; total 0.00"
+boundary = ["charges.gst[]@2025-03-17:after"]
+[case.input]
+on = 2025-03-17
+opened = 2010-04-01
+[case.expect]
+total = "0.00"
+
+[[case]]
+id = "charges-etf_equity-buy-2010-04-01-brokerage"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage 0.001 x 100000 = 100.000; STT 0.00125 x 100000 = 125.00000 -> step 1 -> 125; exchange 0.0000325 x 100000 = 3.2500000 -> 3.25; SEBI 0.000002 x 100000 = 0.200000 -> 0.20; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0 x 100000 = 0 -> 0.00; stamp 0.0001 x 100000 = 10.0000 -> 10.00; GST 0.103 x 103.25 (lines brokerage+exchange_txn+clearing) = 10.63475 -> 10.63; total 249.08; deductible 124.08"
+[case.input]
+on = 2010-04-01
+instrument_class = "etf_equity"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+brokerage = "100.00"
+
+[[case]]
+id = "charges-etf_equity-buy-2010-04-01-clearing"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage 0.001 x 100000 = 100.000; STT 0.00125 x 100000 = 125.00000 -> step 1 -> 125; exchange 0.0000325 x 100000 = 3.2500000 -> 3.25; SEBI 0.000002 x 100000 = 0.200000 -> 0.20; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0 x 100000 = 0 -> 0.00; stamp 0.0001 x 100000 = 10.0000 -> 10.00; GST 0.103 x 103.25 (lines brokerage+exchange_txn+clearing) = 10.63475 -> 10.63; total 249.08; deductible 124.08"
+[case.input]
+on = 2010-04-01
+instrument_class = "etf_equity"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+clearing = "0.00"
+
+[[case]]
+id = "charges-etf_equity-buy-2010-04-01-exchange_txn"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage 0.001 x 100000 = 100.000; STT 0.00125 x 100000 = 125.00000 -> step 1 -> 125; exchange 0.0000325 x 100000 = 3.2500000 -> 3.25; SEBI 0.000002 x 100000 = 0.200000 -> 0.20; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0 x 100000 = 0 -> 0.00; stamp 0.0001 x 100000 = 10.0000 -> 10.00; GST 0.103 x 103.25 (lines brokerage+exchange_txn+clearing) = 10.63475 -> 10.63; total 249.08; deductible 124.08"
+[case.input]
+on = 2010-04-01
+instrument_class = "etf_equity"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+exchange_txn = "3.25"
+
+[[case]]
+id = "charges-etf_equity-buy-2010-04-01-full"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 500 = 50000; brokerage 0.001 x 50000 = 50.000; STT 0.00125 x 50000 = 62.50000 -> step 1 -> 63; exchange 0.0000325 x 50000 = 1.6250000 -> 1.63; SEBI 0.000002 x 50000 = 0.100000 -> 0.10; IPFT 0.000000001 x 50000 = 0.000050000 -> 0.00; clearing 0 x 50000 = 0 -> 0.00; stamp 0.0001 x 50000 = 5.0000 -> 5.00; GST 0.103 x 51.63 (lines brokerage+exchange_txn+clearing) = 5.31789 -> 5.32; total 125.05; deductible 62.05"
+[case.input]
+on = 2010-04-01
+instrument_class = "etf_equity"
+side = "buy"
+qty = "100"
+price = "500"
+[case.expect]
+brokerage = "50.00"
+stt = "63"
+exchange_txn = "1.63"
+sebi = "0.10"
+ipft = "0.00"
+clearing = "0.00"
+stamp = "5.00"
+gst = "5.32"
+total = "125.05"
+deductible = "62.05"
+turnover = "50000"
+
+[[case]]
+id = "charges-etf_equity-buy-2010-04-01-ipft"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage 0.001 x 100000 = 100.000; STT 0.00125 x 100000 = 125.00000 -> step 1 -> 125; exchange 0.0000325 x 100000 = 3.2500000 -> 3.25; SEBI 0.000002 x 100000 = 0.200000 -> 0.20; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0 x 100000 = 0 -> 0.00; stamp 0.0001 x 100000 = 10.0000 -> 10.00; GST 0.103 x 103.25 (lines brokerage+exchange_txn+clearing) = 10.63475 -> 10.63; total 249.08; deductible 124.08"
+[case.input]
+on = 2010-04-01
+instrument_class = "etf_equity"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+ipft = "0.00"
+
+[[case]]
+id = "charges-etf_equity-buy-2010-04-01-sebi"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage 0.001 x 100000 = 100.000; STT 0.00125 x 100000 = 125.00000 -> step 1 -> 125; exchange 0.0000325 x 100000 = 3.2500000 -> 3.25; SEBI 0.000002 x 100000 = 0.200000 -> 0.20; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0 x 100000 = 0 -> 0.00; stamp 0.0001 x 100000 = 10.0000 -> 10.00; GST 0.103 x 103.25 (lines brokerage+exchange_txn+clearing) = 10.63475 -> 10.63; total 249.08; deductible 124.08"
+[case.input]
+on = 2010-04-01
+instrument_class = "etf_equity"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+sebi = "0.20"
+
+[[case]]
+id = "charges-etf_equity-buy-2010-04-01-stamp"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage 0.001 x 100000 = 100.000; STT 0.00125 x 100000 = 125.00000 -> step 1 -> 125; exchange 0.0000325 x 100000 = 3.2500000 -> 3.25; SEBI 0.000002 x 100000 = 0.200000 -> 0.20; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0 x 100000 = 0 -> 0.00; stamp 0.0001 x 100000 = 10.0000 -> 10.00; GST 0.103 x 103.25 (lines brokerage+exchange_txn+clearing) = 10.63475 -> 10.63; total 249.08; deductible 124.08"
+[case.input]
+on = 2010-04-01
+instrument_class = "etf_equity"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+stamp = "10.00"
+
+[[case]]
+id = "charges-etf_equity-buy-2010-04-01-stt"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage 0.001 x 100000 = 100.000; STT 0.00125 x 100000 = 125.00000 -> step 1 -> 125; exchange 0.0000325 x 100000 = 3.2500000 -> 3.25; SEBI 0.000002 x 100000 = 0.200000 -> 0.20; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0 x 100000 = 0 -> 0.00; stamp 0.0001 x 100000 = 10.0000 -> 10.00; GST 0.103 x 103.25 (lines brokerage+exchange_txn+clearing) = 10.63475 -> 10.63; total 249.08; deductible 124.08"
+[case.input]
+on = 2010-04-01
+instrument_class = "etf_equity"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+stt = "125"
+
+[[case]]
+id = "charges-etf_equity-buy-2012-06-30-stt"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage 0.001 x 100000 = 100.000; STT 0.00125 x 100000 = 125.00000 -> step 1 -> 125; exchange 0.0000325 x 100000 = 3.2500000 -> 3.25; SEBI 0.000002 x 100000 = 0.200000 -> 0.20; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0 x 100000 = 0 -> 0.00; stamp 0.0001 x 100000 = 10.0000 -> 10.00; GST 0.1236 x 103.25 (lines brokerage+exchange_txn+clearing) = 12.761700 -> 12.76; total 251.21; deductible 126.21"
+boundary = ["charges.stt[instrument_class=etf_equity,side=buy]@2012-07-01:before"]
+[case.input]
+on = 2012-06-30
+instrument_class = "etf_equity"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+stt = "125"
+
+[[case]]
+id = "charges-etf_equity-buy-2012-07-01-stt"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage 0.001 x 100000 = 100.000; STT 0.001 x 100000 = 100.000 -> step 1 -> 100; exchange 0.0000325 x 100000 = 3.2500000 -> 3.25; SEBI 0.000002 x 100000 = 0.200000 -> 0.20; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0 x 100000 = 0 -> 0.00; stamp 0.0001 x 100000 = 10.0000 -> 10.00; GST 0.1236 x 103.25 (lines brokerage+exchange_txn+clearing) = 12.761700 -> 12.76; total 226.21; deductible 126.21"
+boundary = ["charges.stt[instrument_class=etf_equity,side=buy]@2012-07-01:after"]
+[case.input]
+on = 2012-07-01
+instrument_class = "etf_equity"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+stt = "100"
+
+[[case]]
+id = "charges-etf_equity-buy-2013-05-31-stt"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage 0.001 x 100000 = 100.000; STT 0.001 x 100000 = 100.000 -> step 1 -> 100; exchange 0.0000325 x 100000 = 3.2500000 -> 3.25; SEBI 0.000002 x 100000 = 0.200000 -> 0.20; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0 x 100000 = 0 -> 0.00; stamp 0.0001 x 100000 = 10.0000 -> 10.00; GST 0.1236 x 103.25 (lines brokerage+exchange_txn+clearing) = 12.761700 -> 12.76; total 226.21; deductible 126.21"
+boundary = ["charges.stt[instrument_class=etf_equity,side=buy]@2013-06-01:before"]
+[case.input]
+on = 2013-05-31
+instrument_class = "etf_equity"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+stt = "100"
+
+[[case]]
+id = "charges-etf_equity-buy-2013-06-01-stt"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage 0.001 x 100000 = 100.000; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.0000325 x 100000 = 3.2500000 -> 3.25; SEBI 0.000002 x 100000 = 0.200000 -> 0.20; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0 x 100000 = 0 -> 0.00; stamp 0.0001 x 100000 = 10.0000 -> 10.00; GST 0.1236 x 103.25 (lines brokerage+exchange_txn+clearing) = 12.761700 -> 12.76; total 126.21; deductible 126.21"
+boundary = ["charges.stt[instrument_class=etf_equity,side=buy]@2013-06-01:after"]
+[case.input]
+on = 2013-06-01
+instrument_class = "etf_equity"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+stt = "0"
+
+[[case]]
+id = "charges-etf_equity-buy-2015-11-13-brokerage"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage 0.001 x 100000 = 100.000; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.0000325 x 100000 = 3.2500000 -> 3.25; SEBI 0.000002 x 100000 = 0.200000 -> 0.20; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0 x 100000 = 0 -> 0.00; stamp 0.0001 x 100000 = 10.0000 -> 10.00; GST 0.14 x 103.25 (lines brokerage+exchange_txn+clearing) = 14.4550 -> 14.46; total 127.91; deductible 127.91"
+boundary = ["fyers.brokerage[product=delivery]@2015-11-14:before"]
+[case.input]
+on = 2015-11-13
+instrument_class = "etf_equity"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+brokerage = "100.00"
+
+[[case]]
+id = "charges-etf_equity-buy-2015-11-14-brokerage"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage 0.001 x 100000 = 100.000; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.0000325 x 100000 = 3.2500000 -> 3.25; SEBI 0.000002 x 100000 = 0.200000 -> 0.20; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0 x 100000 = 0 -> 0.00; stamp 0.0001 x 100000 = 10.0000 -> 10.00; GST 0.14 x 103.25 (lines brokerage+exchange_txn+clearing) = 14.4550 -> 14.46; total 127.91; deductible 127.91"
+boundary = ["fyers.brokerage[product=delivery]@2015-11-14:after"]
+[case.input]
+on = 2015-11-14
+instrument_class = "etf_equity"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+brokerage = "100.00"
+
+[[case]]
+id = "charges-etf_equity-buy-2016-04-12-brokerage"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage 0.001 x 100000 = 100.000; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.0000325 x 100000 = 3.2500000 -> 3.25; SEBI 0.000002 x 100000 = 0.200000 -> 0.20; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0 x 100000 = 0 -> 0.00; stamp 0.0001 x 100000 = 10.0000 -> 10.00; GST 0.145 x 103.25 (lines brokerage+exchange_txn+clearing) = 14.97125 -> 14.97; total 128.42; deductible 128.42"
+boundary = ["fyers.brokerage[product=delivery]@2016-04-13:before"]
+[case.input]
+on = 2016-04-12
+instrument_class = "etf_equity"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+brokerage = "100.00"
+
+[[case]]
+id = "charges-etf_equity-buy-2016-04-13-brokerage"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage lower of flat 100 and 0.001 x 100000 = 100.000 -> 100; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.0000325 x 100000 = 3.2500000 -> 3.25; SEBI 0.000002 x 100000 = 0.200000 -> 0.20; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0 x 100000 = 0 -> 0.00; stamp 0.0001 x 100000 = 10.0000 -> 10.00; GST 0.145 x 103.25 (lines brokerage+exchange_txn+clearing) = 14.97125 -> 14.97; total 128.42; deductible 128.42"
+boundary = ["fyers.brokerage[product=delivery]@2016-04-13:after"]
+[case.input]
+on = 2016-04-13
+instrument_class = "etf_equity"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+brokerage = "100.00"
+
+[[case]]
+id = "charges-etf_equity-buy-2017-03-31-sebi"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage lower of flat 100 and 0.001 x 100000 = 100.000 -> 100; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.0000325 x 100000 = 3.2500000 -> 3.25; SEBI 0.000002 x 100000 = 0.200000 -> 0.20; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0 x 100000 = 0 -> 0.00; stamp 0.0001 x 100000 = 10.0000 -> 10.00; GST 0.15 x 103.25 (lines brokerage+exchange_txn+clearing) = 15.4875 -> 15.49; total 128.94; deductible 128.94"
+boundary = ["charges.sebi[]@2017-04-01:before"]
+[case.input]
+on = 2017-03-31
+instrument_class = "etf_equity"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+sebi = "0.20"
+
+[[case]]
+id = "charges-etf_equity-buy-2017-04-01-sebi"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage lower of flat 100 and 0.001 x 100000 = 100.000 -> 100; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.0000325 x 100000 = 3.2500000 -> 3.25; SEBI 0.0000015 x 100000 = 0.1500000 -> 0.15; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0 x 100000 = 0 -> 0.00; stamp 0.0001 x 100000 = 10.0000 -> 10.00; GST 0.15 x 103.25 (lines brokerage+exchange_txn+clearing) = 15.4875 -> 15.49; total 128.89; deductible 128.89"
+boundary = ["charges.sebi[]@2017-04-01:after"]
+[case.input]
+on = 2017-04-01
+instrument_class = "etf_equity"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+sebi = "0.15"
+
+[[case]]
+id = "charges-etf_equity-buy-2017-06-30-full"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 1000 x 985.6 = 985600.0; brokerage lower of flat 100 and 0.001 x 985600.0 = 985.6000 -> 100; STT 0 x 985600.0 = 0.0 -> step 1 -> 0; exchange 0.0000325 x 985600.0 = 32.03200000 -> 32.03; SEBI 0.0000015 x 985600.0 = 1.47840000 -> 1.48; IPFT 0.000000001 x 985600.0 = 0.0009856000 -> 0.00; clearing 0 x 985600.0 = 0.0 -> 0.00; stamp 0.0001 x 985600.0 = 98.56000 -> 98.56; GST 0.15 x 132.03 (lines brokerage+exchange_txn+clearing) = 19.8045 -> 19.80; total 251.87; deductible 251.87"
+[case.input]
+on = 2017-06-30
+instrument_class = "etf_equity"
+side = "buy"
+qty = "1000"
+price = "985.6"
+[case.expect]
+brokerage = "100.00"
+stt = "0"
+exchange_txn = "32.03"
+sebi = "1.48"
+ipft = "0.00"
+clearing = "0.00"
+stamp = "98.56"
+gst = "19.80"
+total = "251.87"
+deductible = "251.87"
+turnover = "985600.0"
+
+[[case]]
+id = "charges-etf_equity-buy-2017-07-01-full"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 1000 x 985.6 = 985600.0; brokerage lower of flat 100 and 0.001 x 985600.0 = 985.6000 -> 100; STT 0 x 985600.0 = 0.0 -> step 1 -> 0; exchange 0.0000325 x 985600.0 = 32.03200000 -> 32.03; SEBI 0.0000015 x 985600.0 = 1.47840000 -> 1.48; IPFT 0.000000001 x 985600.0 = 0.0009856000 -> 0.00; clearing 0 x 985600.0 = 0.0 -> 0.00; stamp 0.0001 x 985600.0 = 98.56000 -> 98.56; GST 0.18 x 132.03 (lines brokerage+exchange_txn+clearing) = 23.7654 -> 23.77; total 255.84; deductible 255.84"
+[case.input]
+on = 2017-07-01
+instrument_class = "etf_equity"
+side = "buy"
+qty = "1000"
+price = "985.6"
+[case.expect]
+brokerage = "100.00"
+stt = "0"
+exchange_txn = "32.03"
+sebi = "1.48"
+ipft = "0.00"
+clearing = "0.00"
+stamp = "98.56"
+gst = "23.77"
+total = "255.84"
+deductible = "255.84"
+turnover = "985600.0"
+
+[[case]]
+id = "charges-etf_equity-buy-2017-08-07-brokerage"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage lower of flat 100 and 0.001 x 100000 = 100.000 -> 100; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.0000325 x 100000 = 3.2500000 -> 3.25; SEBI 0.0000015 x 100000 = 0.1500000 -> 0.15; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0 x 100000 = 0 -> 0.00; stamp 0.0001 x 100000 = 10.0000 -> 10.00; GST 0.18 x 103.25 (lines brokerage+exchange_txn+clearing) = 18.5850 -> 18.59; total 131.99; deductible 131.99"
+boundary = ["fyers.brokerage[product=delivery]@2017-08-08:before"]
+[case.input]
+on = 2017-08-07
+instrument_class = "etf_equity"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+brokerage = "100.00"
+
+[[case]]
+id = "charges-etf_equity-buy-2017-08-08-brokerage"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage lower of flat 20 and 0.001 x 100000 = 100.000 -> 20; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.0000325 x 100000 = 3.2500000 -> 3.25; SEBI 0.0000015 x 100000 = 0.1500000 -> 0.15; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0 x 100000 = 0 -> 0.00; stamp 0.0001 x 100000 = 10.0000 -> 10.00; GST 0.18 x 23.25 (lines brokerage+exchange_txn+clearing) = 4.1850 -> 4.19; total 37.59; deductible 37.59"
+boundary = ["fyers.brokerage[product=delivery]@2017-08-08:after"]
+[case.input]
+on = 2017-08-08
+instrument_class = "etf_equity"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+brokerage = "20.00"
+
+[[case]]
+id = "charges-etf_equity-buy-2018-02-05-brokerage"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage lower of flat 20 and 0.001 x 100000 = 100.000 -> 20; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.0000325 x 100000 = 3.2500000 -> 3.25; SEBI 0.0000015 x 100000 = 0.1500000 -> 0.15; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0 x 100000 = 0 -> 0.00; stamp 0.0001 x 100000 = 10.0000 -> 10.00; GST 0.18 x 23.25 (lines brokerage+exchange_txn+clearing) = 4.1850 -> 4.19; total 37.59; deductible 37.59"
+boundary = ["fyers.brokerage[product=delivery]@2018-02-06:before"]
+[case.input]
+on = 2018-02-05
+instrument_class = "etf_equity"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+brokerage = "20.00"
+
+[[case]]
+id = "charges-etf_equity-buy-2018-02-06-brokerage"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage none; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.0000325 x 100000 = 3.2500000 -> 3.25; SEBI 0.0000015 x 100000 = 0.1500000 -> 0.15; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0 x 100000 = 0 -> 0.00; stamp 0.0001 x 100000 = 10.0000 -> 10.00; GST 0.18 x 3.25 (lines brokerage+exchange_txn+clearing) = 0.5850 -> 0.59; total 13.99; deductible 13.99"
+boundary = ["fyers.brokerage[product=delivery]@2018-02-06:after"]
+[case.input]
+on = 2018-02-06
+instrument_class = "etf_equity"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+brokerage = "0.00"
+
+[[case]]
+id = "charges-etf_equity-buy-2019-03-31-sebi"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage none; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.0000325 x 100000 = 3.2500000 -> 3.25; SEBI 0.0000015 x 100000 = 0.1500000 -> 0.15; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0 x 100000 = 0 -> 0.00; stamp 0.0001 x 100000 = 10.0000 -> 10.00; GST 0.18 x 3.25 (lines brokerage+exchange_txn+clearing) = 0.5850 -> 0.59; total 13.99; deductible 13.99"
+boundary = ["charges.sebi[]@2019-04-01:before"]
+[case.input]
+on = 2019-03-31
+instrument_class = "etf_equity"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+sebi = "0.15"
+
+[[case]]
+id = "charges-etf_equity-buy-2019-04-01-sebi"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage none; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.0000325 x 100000 = 3.2500000 -> 3.25; SEBI 0.000001 x 100000 = 0.100000 -> 0.10; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0 x 100000 = 0 -> 0.00; stamp 0.0001 x 100000 = 10.0000 -> 10.00; GST 0.18 x 3.25 (lines brokerage+exchange_txn+clearing) = 0.5850 -> 0.59; total 13.94; deductible 13.94"
+boundary = ["charges.sebi[]@2019-04-01:after"]
+[case.input]
+on = 2019-04-01
+instrument_class = "etf_equity"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+sebi = "0.10"
+
+[[case]]
+id = "charges-etf_equity-buy-2020-06-30-full"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 500 x 1180 = 590000; brokerage none; STT 0 x 590000 = 0 -> step 1 -> 0; exchange 0.0000325 x 590000 = 19.1750000 -> 19.18; SEBI 0.000001 x 590000 = 0.590000 -> 0.59; IPFT 0.000000001 x 590000 = 0.000590000 -> 0.00; clearing 0 x 590000 = 0 -> 0.00; stamp 0.0001 x 590000 = 59.0000 -> 59.00; GST 0.18 x 19.18 (lines brokerage+exchange_txn+clearing) = 3.4524 -> 3.45; total 82.22; deductible 82.22"
+[case.input]
+on = 2020-06-30
+instrument_class = "etf_equity"
+side = "buy"
+qty = "500"
+price = "1180"
+[case.expect]
+brokerage = "0.00"
+stt = "0"
+exchange_txn = "19.18"
+sebi = "0.59"
+ipft = "0.00"
+clearing = "0.00"
+stamp = "59.00"
+gst = "3.45"
+total = "82.22"
+deductible = "82.22"
+turnover = "590000"
+
+[[case]]
+id = "charges-etf_equity-buy-2020-06-30-stamp"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage none; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.0000325 x 100000 = 3.2500000 -> 3.25; SEBI 0.000001 x 100000 = 0.100000 -> 0.10; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0 x 100000 = 0 -> 0.00; stamp 0.0001 x 100000 = 10.0000 -> 10.00; GST 0.18 x 3.25 (lines brokerage+exchange_txn+clearing) = 0.5850 -> 0.59; total 13.94; deductible 13.94"
+boundary = ["charges.stamp[segment=delivery,side=buy]@2020-07-01:before"]
+[case.input]
+on = 2020-06-30
+instrument_class = "etf_equity"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+stamp = "10.00"
+
+[[case]]
+id = "charges-etf_equity-buy-2020-07-01-full"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 500 x 1180 = 590000; brokerage none; STT 0 x 590000 = 0 -> step 1 -> 0; exchange 0.0000325 x 590000 = 19.1750000 -> 19.18; SEBI 0.000001 x 590000 = 0.590000 -> 0.59; IPFT 0.000000001 x 590000 = 0.000590000 -> 0.00; clearing 0 x 590000 = 0 -> 0.00; stamp 0.00015 x 590000 = 88.50000 -> 88.50; GST 0.18 x 19.18 (lines brokerage+exchange_txn+clearing) = 3.4524 -> 3.45; total 111.72; deductible 111.72"
+[case.input]
+on = 2020-07-01
+instrument_class = "etf_equity"
+side = "buy"
+qty = "500"
+price = "1180"
+[case.expect]
+brokerage = "0.00"
+stt = "0"
+exchange_txn = "19.18"
+sebi = "0.59"
+ipft = "0.00"
+clearing = "0.00"
+stamp = "88.50"
+gst = "3.45"
+total = "111.72"
+deductible = "111.72"
+turnover = "590000"
+
+[[case]]
+id = "charges-etf_equity-buy-2020-07-01-stamp"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage none; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.0000325 x 100000 = 3.2500000 -> 3.25; SEBI 0.000001 x 100000 = 0.100000 -> 0.10; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0 x 100000 = 0 -> 0.00; stamp 0.00015 x 100000 = 15.00000 -> 15.00; GST 0.18 x 3.25 (lines brokerage+exchange_txn+clearing) = 0.5850 -> 0.59; total 18.94; deductible 18.94"
+boundary = ["charges.stamp[segment=delivery,side=buy]@2020-07-01:after"]
+[case.input]
+on = 2020-07-01
+instrument_class = "etf_equity"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+stamp = "15.00"
+
+[[case]]
+id = "charges-etf_equity-buy-2020-12-31-exchange_txn"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage none; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.0000325 x 100000 = 3.2500000 -> 3.25; SEBI 0.000001 x 100000 = 0.100000 -> 0.10; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0 x 100000 = 0 -> 0.00; stamp 0.00015 x 100000 = 15.00000 -> 15.00; GST 0.18 x 3.25 (lines brokerage+exchange_txn+clearing) = 0.5850 -> 0.59; total 18.94; deductible 18.94"
+boundary = ["charges.exchange_txn[exchange=NSE,segment=delivery]@2021-01-01:before"]
+[case.input]
+on = 2020-12-31
+instrument_class = "etf_equity"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+exchange_txn = "3.25"
+
+[[case]]
+id = "charges-etf_equity-buy-2021-01-01-exchange_txn"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage none; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.0000345 x 100000 = 3.4500000 -> 3.45; SEBI 0.000001 x 100000 = 0.100000 -> 0.10; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0 x 100000 = 0 -> 0.00; stamp 0.00015 x 100000 = 15.00000 -> 15.00; GST 0.18 x 3.45 (lines brokerage+exchange_txn+clearing) = 0.6210 -> 0.62; total 19.17; deductible 19.17"
+boundary = ["charges.exchange_txn[exchange=NSE,segment=delivery]@2021-01-01:after"]
+[case.input]
+on = 2021-01-01
+instrument_class = "etf_equity"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+exchange_txn = "3.45"
+
+[[case]]
+id = "charges-etf_equity-buy-2023-03-31-exchange_txn"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage none; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.0000345 x 100000 = 3.4500000 -> 3.45; SEBI 0.000001 x 100000 = 0.100000 -> 0.10; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0 x 100000 = 0 -> 0.00; stamp 0.00015 x 100000 = 15.00000 -> 15.00; GST 0.18 x 3.45 (lines brokerage+exchange_txn+clearing) = 0.6210 -> 0.62; total 19.17; deductible 19.17"
+boundary = ["charges.exchange_txn[exchange=NSE,segment=delivery]@2023-04-01:before"]
+[case.input]
+on = 2023-03-31
+instrument_class = "etf_equity"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+exchange_txn = "3.45"
+
+[[case]]
+id = "charges-etf_equity-buy-2023-03-31-ipft"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage none; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.0000345 x 100000 = 3.4500000 -> 3.45; SEBI 0.000001 x 100000 = 0.100000 -> 0.10; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0 x 100000 = 0 -> 0.00; stamp 0.00015 x 100000 = 15.00000 -> 15.00; GST 0.18 x 3.45 (lines brokerage+exchange_txn+clearing) = 0.6210 -> 0.62; total 19.17; deductible 19.17"
+boundary = ["charges.ipft[exchange=NSE,segment=delivery]@2023-04-01:before"]
+[case.input]
+on = 2023-03-31
+instrument_class = "etf_equity"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+ipft = "0.00"
+
+[[case]]
+id = "charges-etf_equity-buy-2023-04-01-exchange_txn"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage none; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.0000325 x 100000 = 3.2500000 -> 3.25; SEBI 0.000001 x 100000 = 0.100000 -> 0.10; IPFT 0.000001 x 100000 = 0.100000 -> 0.10; clearing 0 x 100000 = 0 -> 0.00; stamp 0.00015 x 100000 = 15.00000 -> 15.00; GST 0.18 x 3.25 (lines brokerage+exchange_txn+clearing) = 0.5850 -> 0.59; total 19.04; deductible 19.04"
+boundary = ["charges.exchange_txn[exchange=NSE,segment=delivery]@2023-04-01:after"]
+[case.input]
+on = 2023-04-01
+instrument_class = "etf_equity"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+exchange_txn = "3.25"
+
+[[case]]
+id = "charges-etf_equity-buy-2023-04-01-ipft"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage none; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.0000325 x 100000 = 3.2500000 -> 3.25; SEBI 0.000001 x 100000 = 0.100000 -> 0.10; IPFT 0.000001 x 100000 = 0.100000 -> 0.10; clearing 0 x 100000 = 0 -> 0.00; stamp 0.00015 x 100000 = 15.00000 -> 15.00; GST 0.18 x 3.25 (lines brokerage+exchange_txn+clearing) = 0.5850 -> 0.59; total 19.04; deductible 19.04"
+boundary = ["charges.ipft[exchange=NSE,segment=delivery]@2023-04-01:after"]
+[case.input]
+on = 2023-04-01
+instrument_class = "etf_equity"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+ipft = "0.10"
+
+[[case]]
+id = "charges-etf_equity-buy-2024-03-31-exchange_txn"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage none; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.0000325 x 100000 = 3.2500000 -> 3.25; SEBI 0.000001 x 100000 = 0.100000 -> 0.10; IPFT 0.000001 x 100000 = 0.100000 -> 0.10; clearing 0 x 100000 = 0 -> 0.00; stamp 0.00015 x 100000 = 15.00000 -> 15.00; GST 0.18 x 3.35 (lines brokerage+exchange_txn+clearing+sebi) = 0.6030 -> 0.60; total 19.05; deductible 19.05"
+boundary = ["charges.exchange_txn[exchange=NSE,segment=delivery]@2024-04-01:before"]
+[case.input]
+on = 2024-03-31
+instrument_class = "etf_equity"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+exchange_txn = "3.25"
+
+[[case]]
+id = "charges-etf_equity-buy-2024-04-01-exchange_txn"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage none; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.0000322 x 100000 = 3.2200000 -> 3.22; SEBI 0.000001 x 100000 = 0.100000 -> 0.10; IPFT 0.000001 x 100000 = 0.100000 -> 0.10; clearing 0 x 100000 = 0 -> 0.00; stamp 0.00015 x 100000 = 15.00000 -> 15.00; GST 0.18 x 3.32 (lines brokerage+exchange_txn+clearing+sebi) = 0.5976 -> 0.60; total 19.02; deductible 19.02"
+boundary = ["charges.exchange_txn[exchange=NSE,segment=delivery]@2024-04-01:after"]
+[case.input]
+on = 2024-04-01
+instrument_class = "etf_equity"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+exchange_txn = "3.22"
+
+[[case]]
+id = "charges-etf_equity-buy-2024-09-30-brokerage"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage none; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.0000322 x 100000 = 3.2200000 -> 3.22; SEBI 0.000001 x 100000 = 0.100000 -> 0.10; IPFT 0.000001 x 100000 = 0.100000 -> 0.10; clearing 0 x 100000 = 0 -> 0.00; stamp 0.00015 x 100000 = 15.00000 -> 15.00; GST 0.18 x 3.32 (lines brokerage+exchange_txn+clearing+sebi) = 0.5976 -> 0.60; total 19.02; deductible 19.02"
+boundary = ["fyers.brokerage[product=delivery]@2024-10-01:before"]
+[case.input]
+on = 2024-09-30
+instrument_class = "etf_equity"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+brokerage = "0.00"
+
+[[case]]
+id = "charges-etf_equity-buy-2024-09-30-exchange_txn"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage none; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.0000322 x 100000 = 3.2200000 -> 3.22; SEBI 0.000001 x 100000 = 0.100000 -> 0.10; IPFT 0.000001 x 100000 = 0.100000 -> 0.10; clearing 0 x 100000 = 0 -> 0.00; stamp 0.00015 x 100000 = 15.00000 -> 15.00; GST 0.18 x 3.32 (lines brokerage+exchange_txn+clearing+sebi) = 0.5976 -> 0.60; total 19.02; deductible 19.02"
+boundary = ["charges.exchange_txn[exchange=NSE,segment=delivery]@2024-10-01:before"]
+[case.input]
+on = 2024-09-30
+instrument_class = "etf_equity"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+exchange_txn = "3.22"
+
+[[case]]
+id = "charges-etf_equity-buy-2024-10-01-brokerage"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage lower of flat 20 and 0.003 x 100000 = 300.000 -> 20; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.0000297 x 100000 = 2.9700000 -> 2.97; SEBI 0.000001 x 100000 = 0.100000 -> 0.10; IPFT 0.000001 x 100000 = 0.100000 -> 0.10; clearing 0 x 100000 = 0 -> 0.00; stamp 0.00015 x 100000 = 15.00000 -> 15.00; GST 0.18 x 23.07 (lines brokerage+exchange_txn+clearing+sebi) = 4.1526 -> 4.15; total 42.32; deductible 42.32"
+boundary = ["fyers.brokerage[product=delivery]@2024-10-01:after"]
+[case.input]
+on = 2024-10-01
+instrument_class = "etf_equity"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+brokerage = "20.00"
+
+[[case]]
+id = "charges-etf_equity-buy-2024-10-01-exchange_txn"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage lower of flat 20 and 0.003 x 100000 = 300.000 -> 20; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.0000297 x 100000 = 2.9700000 -> 2.97; SEBI 0.000001 x 100000 = 0.100000 -> 0.10; IPFT 0.000001 x 100000 = 0.100000 -> 0.10; clearing 0 x 100000 = 0 -> 0.00; stamp 0.00015 x 100000 = 15.00000 -> 15.00; GST 0.18 x 23.07 (lines brokerage+exchange_txn+clearing+sebi) = 4.1526 -> 4.15; total 42.32; deductible 42.32"
+boundary = ["charges.exchange_txn[exchange=NSE,segment=delivery]@2024-10-01:after"]
+[case.input]
+on = 2024-10-01
+instrument_class = "etf_equity"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+exchange_txn = "2.97"
+
+[[case]]
+id = "charges-etf_equity-buy-2024-10-01-full"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 3000 x 250.05 = 750150.00; brokerage lower of flat 20 and 0.003 x 750150.00 = 2250.45000 -> 20; STT 0 x 750150.00 = 0.00 -> step 1 -> 0; exchange 0.0000297 x 750150.00 = 22.279455000 -> 22.28; SEBI 0.000001 x 750150.00 = 0.75015000 -> 0.75; IPFT 0.000001 x 750150.00 = 0.75015000 -> 0.75; clearing 0 x 750150.00 = 0.00 -> 0.00; stamp 0.00015 x 750150.00 = 112.5225000 -> 112.52; GST 0.18 x 43.03 (lines brokerage+exchange_txn+clearing+sebi) = 7.7454 -> 7.75; total 164.05; deductible 164.05"
+[case.input]
+on = 2024-10-01
+instrument_class = "etf_equity"
+side = "buy"
+qty = "3000"
+price = "250.05"
+[case.expect]
+brokerage = "20.00"
+stt = "0"
+exchange_txn = "22.28"
+sebi = "0.75"
+ipft = "0.75"
+clearing = "0.00"
+stamp = "112.52"
+gst = "7.75"
+total = "164.05"
+deductible = "164.05"
+turnover = "750150.00"
+
+[[case]]
+id = "charges-etf_equity-buy-2026-02-28-exchange_txn"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage lower of flat 20 and 0.003 x 100000 = 300.000 -> 20; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.0000297 x 100000 = 2.9700000 -> 2.97; SEBI 0.000001 x 100000 = 0.100000 -> 0.10; IPFT 0.000001 x 100000 = 0.100000 -> 0.10; clearing 0 x 100000 = 0 -> 0.00; stamp 0.00015 x 100000 = 15.00000 -> 15.00; GST 0.18 x 23.17 (lines brokerage+exchange_txn+clearing+sebi+ipft) = 4.1706 -> 4.17; total 42.34; deductible 42.34"
+boundary = ["charges.exchange_txn[exchange=NSE,segment=delivery]@2026-03-01:before"]
+[case.input]
+on = 2026-02-28
+instrument_class = "etf_equity"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+exchange_txn = "2.97"
+
+[[case]]
+id = "charges-etf_equity-buy-2026-02-28-ipft"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage lower of flat 20 and 0.003 x 100000 = 300.000 -> 20; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.0000297 x 100000 = 2.9700000 -> 2.97; SEBI 0.000001 x 100000 = 0.100000 -> 0.10; IPFT 0.000001 x 100000 = 0.100000 -> 0.10; clearing 0 x 100000 = 0 -> 0.00; stamp 0.00015 x 100000 = 15.00000 -> 15.00; GST 0.18 x 23.17 (lines brokerage+exchange_txn+clearing+sebi+ipft) = 4.1706 -> 4.17; total 42.34; deductible 42.34"
+boundary = ["charges.ipft[exchange=NSE,segment=delivery]@2026-03-01:before"]
+[case.input]
+on = 2026-02-28
+instrument_class = "etf_equity"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+ipft = "0.10"
+
+[[case]]
+id = "charges-etf_equity-buy-2026-03-01-exchange_txn"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage lower of flat 20 and 0.003 x 100000 = 300.000 -> 20; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.000030699 x 100000 = 3.069900000 -> 3.07; SEBI 0.000001 x 100000 = 0.100000 -> 0.10; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0 x 100000 = 0 -> 0.00; stamp 0.00015 x 100000 = 15.00000 -> 15.00; GST 0.18 x 23.17 (lines brokerage+exchange_txn+clearing+sebi+ipft) = 4.1706 -> 4.17; total 42.34; deductible 42.34"
+boundary = ["charges.exchange_txn[exchange=NSE,segment=delivery]@2026-03-01:after"]
+[case.input]
+on = 2026-03-01
+instrument_class = "etf_equity"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+exchange_txn = "3.07"
+
+[[case]]
+id = "charges-etf_equity-buy-2026-03-01-ipft"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage lower of flat 20 and 0.003 x 100000 = 300.000 -> 20; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.000030699 x 100000 = 3.069900000 -> 3.07; SEBI 0.000001 x 100000 = 0.100000 -> 0.10; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0 x 100000 = 0 -> 0.00; stamp 0.00015 x 100000 = 15.00000 -> 15.00; GST 0.18 x 23.17 (lines brokerage+exchange_txn+clearing+sebi+ipft) = 4.1706 -> 4.17; total 42.34; deductible 42.34"
+boundary = ["charges.ipft[exchange=NSE,segment=delivery]@2026-03-01:after"]
+[case.input]
+on = 2026-03-01
+instrument_class = "etf_equity"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+ipft = "0.00"
+
+[[case]]
+id = "charges-etf_equity-sell-2010-04-01-stamp"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage 0.001 x 100000 = 100.000; STT 0.00125 x 100000 = 125.00000 -> step 1 -> 125; exchange 0.0000325 x 100000 = 3.2500000 -> 3.25; SEBI 0.000002 x 100000 = 0.200000 -> 0.20; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0 x 100000 = 0 -> 0.00; stamp 0 x 100000 = 0 -> 0.00; GST 0.103 x 103.25 (lines brokerage+exchange_txn+clearing) = 10.63475 -> 10.63; total 239.08; deductible 114.08"
+[case.input]
+on = 2010-04-01
+instrument_class = "etf_equity"
+side = "sell"
+qty = "100"
+price = "1000"
+[case.expect]
+stamp = "0.00"
+
+[[case]]
+id = "charges-etf_equity-sell-2010-04-01-stt"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage 0.001 x 100000 = 100.000; STT 0.00125 x 100000 = 125.00000 -> step 1 -> 125; exchange 0.0000325 x 100000 = 3.2500000 -> 3.25; SEBI 0.000002 x 100000 = 0.200000 -> 0.20; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0 x 100000 = 0 -> 0.00; stamp 0 x 100000 = 0 -> 0.00; GST 0.103 x 103.25 (lines brokerage+exchange_txn+clearing) = 10.63475 -> 10.63; total 239.08; deductible 114.08"
+[case.input]
+on = 2010-04-01
+instrument_class = "etf_equity"
+side = "sell"
+qty = "100"
+price = "1000"
+[case.expect]
+stt = "125"
+
+[[case]]
+id = "charges-etf_equity-sell-2012-06-30-full"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 200 x 350.25 = 70050.00; brokerage 0.001 x 70050.00 = 70.05000; STT 0.00125 x 70050.00 = 87.5625000 -> step 1 -> 88; exchange 0.0000325 x 70050.00 = 2.276625000 -> 2.28; SEBI 0.000002 x 70050.00 = 0.14010000 -> 0.14; IPFT 0.000000001 x 70050.00 = 0.00007005000 -> 0.00; clearing 0 x 70050.00 = 0.00 -> 0.00; stamp 0 x 70050.00 = 0.00 -> 0.00; GST 0.1236 x 72.33 (lines brokerage+exchange_txn+clearing) = 8.939988 -> 8.94; total 169.41; deductible 81.41"
+[case.input]
+on = 2012-06-30
+instrument_class = "etf_equity"
+side = "sell"
+qty = "200"
+price = "350.25"
+[case.expect]
+brokerage = "70.05"
+stt = "88"
+exchange_txn = "2.28"
+sebi = "0.14"
+ipft = "0.00"
+clearing = "0.00"
+stamp = "0.00"
+gst = "8.94"
+total = "169.41"
+deductible = "81.41"
+turnover = "70050.00"
+
+[[case]]
+id = "charges-etf_equity-sell-2012-06-30-stt"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage 0.001 x 100000 = 100.000; STT 0.00125 x 100000 = 125.00000 -> step 1 -> 125; exchange 0.0000325 x 100000 = 3.2500000 -> 3.25; SEBI 0.000002 x 100000 = 0.200000 -> 0.20; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0 x 100000 = 0 -> 0.00; stamp 0 x 100000 = 0 -> 0.00; GST 0.1236 x 103.25 (lines brokerage+exchange_txn+clearing) = 12.761700 -> 12.76; total 241.21; deductible 116.21"
+boundary = ["charges.stt[instrument_class=etf_equity,side=sell]@2012-07-01:before"]
+[case.input]
+on = 2012-06-30
+instrument_class = "etf_equity"
+side = "sell"
+qty = "100"
+price = "1000"
+[case.expect]
+stt = "125"
+
+[[case]]
+id = "charges-etf_equity-sell-2012-07-01-full"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 200 x 350.25 = 70050.00; brokerage 0.001 x 70050.00 = 70.05000; STT 0.001 x 70050.00 = 70.05000 -> step 1 -> 70; exchange 0.0000325 x 70050.00 = 2.276625000 -> 2.28; SEBI 0.000002 x 70050.00 = 0.14010000 -> 0.14; IPFT 0.000000001 x 70050.00 = 0.00007005000 -> 0.00; clearing 0 x 70050.00 = 0.00 -> 0.00; stamp 0 x 70050.00 = 0.00 -> 0.00; GST 0.1236 x 72.33 (lines brokerage+exchange_txn+clearing) = 8.939988 -> 8.94; total 151.41; deductible 81.41"
+[case.input]
+on = 2012-07-01
+instrument_class = "etf_equity"
+side = "sell"
+qty = "200"
+price = "350.25"
+[case.expect]
+brokerage = "70.05"
+stt = "70"
+exchange_txn = "2.28"
+sebi = "0.14"
+ipft = "0.00"
+clearing = "0.00"
+stamp = "0.00"
+gst = "8.94"
+total = "151.41"
+deductible = "81.41"
+turnover = "70050.00"
+
+[[case]]
+id = "charges-etf_equity-sell-2012-07-01-stt"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage 0.001 x 100000 = 100.000; STT 0.001 x 100000 = 100.000 -> step 1 -> 100; exchange 0.0000325 x 100000 = 3.2500000 -> 3.25; SEBI 0.000002 x 100000 = 0.200000 -> 0.20; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0 x 100000 = 0 -> 0.00; stamp 0 x 100000 = 0 -> 0.00; GST 0.1236 x 103.25 (lines brokerage+exchange_txn+clearing) = 12.761700 -> 12.76; total 216.21; deductible 116.21"
+boundary = ["charges.stt[instrument_class=etf_equity,side=sell]@2012-07-01:after"]
+[case.input]
+on = 2012-07-01
+instrument_class = "etf_equity"
+side = "sell"
+qty = "100"
+price = "1000"
+[case.expect]
+stt = "100"
+
+[[case]]
+id = "charges-etf_equity-sell-2013-05-31-stt"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage 0.001 x 100000 = 100.000; STT 0.001 x 100000 = 100.000 -> step 1 -> 100; exchange 0.0000325 x 100000 = 3.2500000 -> 3.25; SEBI 0.000002 x 100000 = 0.200000 -> 0.20; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0 x 100000 = 0 -> 0.00; stamp 0 x 100000 = 0 -> 0.00; GST 0.1236 x 103.25 (lines brokerage+exchange_txn+clearing) = 12.761700 -> 12.76; total 216.21; deductible 116.21"
+boundary = ["charges.stt[instrument_class=etf_equity,side=sell]@2013-06-01:before"]
+[case.input]
+on = 2013-05-31
+instrument_class = "etf_equity"
+side = "sell"
+qty = "100"
+price = "1000"
+[case.expect]
+stt = "100"
+
+[[case]]
+id = "charges-etf_equity-sell-2013-06-01-stt"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage 0.001 x 100000 = 100.000; STT 0.00001 x 100000 = 1.00000 -> step 1 -> 1; exchange 0.0000325 x 100000 = 3.2500000 -> 3.25; SEBI 0.000002 x 100000 = 0.200000 -> 0.20; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0 x 100000 = 0 -> 0.00; stamp 0 x 100000 = 0 -> 0.00; GST 0.1236 x 103.25 (lines brokerage+exchange_txn+clearing) = 12.761700 -> 12.76; total 117.21; deductible 116.21"
+boundary = ["charges.stt[instrument_class=etf_equity,side=sell]@2013-06-01:after"]
+[case.input]
+on = 2013-06-01
+instrument_class = "etf_equity"
+side = "sell"
+qty = "100"
+price = "1000"
+[case.expect]
+stt = "1"
+
+[[case]]
+id = "charges-etf_equity-sell-2020-06-30-stamp"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage none; STT 0.00001 x 100000 = 1.00000 -> step 1 -> 1; exchange 0.0000325 x 100000 = 3.2500000 -> 3.25; SEBI 0.000001 x 100000 = 0.100000 -> 0.10; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0 x 100000 = 0 -> 0.00; stamp 0 x 100000 = 0 -> 0.00; GST 0.18 x 3.25 (lines brokerage+exchange_txn+clearing) = 0.5850 -> 0.59; total 4.94; deductible 3.94"
+boundary = ["charges.stamp[segment=delivery,side=sell]@2020-07-01:before"]
+[case.input]
+on = 2020-06-30
+instrument_class = "etf_equity"
+side = "sell"
+qty = "100"
+price = "1000"
+[case.expect]
+stamp = "0.00"
+
+[[case]]
+id = "charges-etf_equity-sell-2020-07-01-stamp"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage none; STT 0.00001 x 100000 = 1.00000 -> step 1 -> 1; exchange 0.0000325 x 100000 = 3.2500000 -> 3.25; SEBI 0.000001 x 100000 = 0.100000 -> 0.10; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0 x 100000 = 0 -> 0.00; stamp 0 x 100000 = 0 -> 0.00; GST 0.18 x 3.25 (lines brokerage+exchange_txn+clearing) = 0.5850 -> 0.59; total 4.94; deductible 3.94"
+boundary = ["charges.stamp[segment=delivery,side=sell]@2020-07-01:after"]
+[case.input]
+on = 2020-07-01
+instrument_class = "etf_equity"
+side = "sell"
+qty = "100"
+price = "1000"
+[case.expect]
+stamp = "0.00"
+
+[[case]]
+id = "charges-etf_equity-sell-2021-01-01-full"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 500 x 1240.35 = 620175.00; brokerage none; STT 0.00001 x 620175.00 = 6.2017500 -> step 1 -> 6; exchange 0.0000345 x 620175.00 = 21.396037500 -> 21.40; SEBI 0.000001 x 620175.00 = 0.62017500 -> 0.62; IPFT 0.000000001 x 620175.00 = 0.00062017500 -> 0.00; clearing 0 x 620175.00 = 0.00 -> 0.00; stamp 0 x 620175.00 = 0.00 -> 0.00; GST 0.18 x 21.40 (lines brokerage+exchange_txn+clearing) = 3.8520 -> 3.85; total 31.87; deductible 25.87"
+[case.input]
+on = 2021-01-01
+instrument_class = "etf_equity"
+side = "sell"
+qty = "500"
+price = "1240.35"
+[case.expect]
+brokerage = "0.00"
+stt = "6"
+exchange_txn = "21.40"
+sebi = "0.62"
+ipft = "0.00"
+clearing = "0.00"
+stamp = "0.00"
+gst = "3.85"
+total = "31.87"
+deductible = "25.87"
+turnover = "620175.00"
+
+[[case]]
+id = "charges-etf_gold-buy-2010-04-01-stt"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage 0.001 x 100000 = 100.000; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.0000325 x 100000 = 3.2500000 -> 3.25; SEBI 0.000002 x 100000 = 0.200000 -> 0.20; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0 x 100000 = 0 -> 0.00; stamp 0.0001 x 100000 = 10.0000 -> 10.00; GST 0.103 x 103.25 (lines brokerage+exchange_txn+clearing) = 10.63475 -> 10.63; total 124.08; deductible 124.08"
+[case.input]
+on = 2010-04-01
+instrument_class = "etf_gold"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+stt = "0"
+
+[[case]]
+id = "charges-etf_gold-sell-2010-04-01-stt"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage 0.001 x 100000 = 100.000; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.0000325 x 100000 = 3.2500000 -> 3.25; SEBI 0.000002 x 100000 = 0.200000 -> 0.20; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0 x 100000 = 0 -> 0.00; stamp 0 x 100000 = 0 -> 0.00; GST 0.103 x 103.25 (lines brokerage+exchange_txn+clearing) = 10.63475 -> 10.63; total 114.08; deductible 114.08"
+[case.input]
+on = 2010-04-01
+instrument_class = "etf_gold"
+side = "sell"
+qty = "100"
+price = "1000"
+[case.expect]
+stt = "0"
+
+[[case]]
+id = "charges-etf_gold-sell-2015-01-15-full"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 1500 x 2650.2 = 3975300.0; brokerage 0.001 x 3975300.0 = 3975.3000; STT 0 x 3975300.0 = 0.0 -> step 1 -> 0; exchange 0.0000325 x 3975300.0 = 129.19725000 -> 129.20; SEBI 0.000002 x 3975300.0 = 7.9506000 -> 7.95; IPFT 0.000000001 x 3975300.0 = 0.0039753000 -> 0.00; clearing 0 x 3975300.0 = 0.0 -> 0.00; stamp 0 x 3975300.0 = 0.0 -> 0.00; GST 0.1236 x 4104.50 (lines brokerage+exchange_txn+clearing) = 507.316200 -> 507.32; total 4619.77; deductible 4619.77"
+[case.input]
+on = 2015-01-15
+instrument_class = "etf_gold"
+side = "sell"
+qty = "1500"
+price = "2650.2"
+[case.expect]
+brokerage = "3975.30"
+stt = "0"
+exchange_txn = "129.20"
+sebi = "7.95"
+ipft = "0.00"
+clearing = "0.00"
+stamp = "0.00"
+gst = "507.32"
+total = "4619.77"
+deductible = "4619.77"
+turnover = "3975300.0"
+
+[[case]]
+id = "charges-fut_index-buy-2010-04-01-brokerage"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage 0.0001 x 100000 = 10.0000; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.000019 x 100000 = 1.900000 -> 1.90; SEBI 0.000002 x 100000 = 0.200000 -> 0.20; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0.000005 x 100000 = 0.500000 -> 0.50; stamp 0.00002 x 100000 = 2.00000 -> 2.00; GST 0.103 x 12.40 (lines brokerage+exchange_txn+clearing) = 1.27720 -> 1.28; total 15.88; deductible 15.88"
+[case.input]
+on = 2010-04-01
+instrument_class = "fut_index"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+brokerage = "10.00"
+
+[[case]]
+id = "charges-fut_index-buy-2010-04-01-clearing"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage 0.0001 x 100000 = 10.0000; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.000019 x 100000 = 1.900000 -> 1.90; SEBI 0.000002 x 100000 = 0.200000 -> 0.20; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0.000005 x 100000 = 0.500000 -> 0.50; stamp 0.00002 x 100000 = 2.00000 -> 2.00; GST 0.103 x 12.40 (lines brokerage+exchange_txn+clearing) = 1.27720 -> 1.28; total 15.88; deductible 15.88"
+[case.input]
+on = 2010-04-01
+instrument_class = "fut_index"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+clearing = "0.50"
+
+[[case]]
+id = "charges-fut_index-buy-2010-04-01-exchange_txn"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage 0.0001 x 100000 = 10.0000; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.000019 x 100000 = 1.900000 -> 1.90; SEBI 0.000002 x 100000 = 0.200000 -> 0.20; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0.000005 x 100000 = 0.500000 -> 0.50; stamp 0.00002 x 100000 = 2.00000 -> 2.00; GST 0.103 x 12.40 (lines brokerage+exchange_txn+clearing) = 1.27720 -> 1.28; total 15.88; deductible 15.88"
+[case.input]
+on = 2010-04-01
+instrument_class = "fut_index"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+exchange_txn = "1.90"
+
+[[case]]
+id = "charges-fut_index-buy-2010-04-01-ipft"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage 0.0001 x 100000 = 10.0000; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.000019 x 100000 = 1.900000 -> 1.90; SEBI 0.000002 x 100000 = 0.200000 -> 0.20; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0.000005 x 100000 = 0.500000 -> 0.50; stamp 0.00002 x 100000 = 2.00000 -> 2.00; GST 0.103 x 12.40 (lines brokerage+exchange_txn+clearing) = 1.27720 -> 1.28; total 15.88; deductible 15.88"
+[case.input]
+on = 2010-04-01
+instrument_class = "fut_index"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+ipft = "0.00"
+
+[[case]]
+id = "charges-fut_index-buy-2010-04-01-stamp"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage 0.0001 x 100000 = 10.0000; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.000019 x 100000 = 1.900000 -> 1.90; SEBI 0.000002 x 100000 = 0.200000 -> 0.20; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0.000005 x 100000 = 0.500000 -> 0.50; stamp 0.00002 x 100000 = 2.00000 -> 2.00; GST 0.103 x 12.40 (lines brokerage+exchange_txn+clearing) = 1.27720 -> 1.28; total 15.88; deductible 15.88"
+[case.input]
+on = 2010-04-01
+instrument_class = "fut_index"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+stamp = "2.00"
+
+[[case]]
+id = "charges-fut_index-buy-2010-04-01-stt"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage 0.0001 x 100000 = 10.0000; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.000019 x 100000 = 1.900000 -> 1.90; SEBI 0.000002 x 100000 = 0.200000 -> 0.20; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0.000005 x 100000 = 0.500000 -> 0.50; stamp 0.00002 x 100000 = 2.00000 -> 2.00; GST 0.103 x 12.40 (lines brokerage+exchange_txn+clearing) = 1.27720 -> 1.28; total 15.88; deductible 15.88"
+[case.input]
+on = 2010-04-01
+instrument_class = "fut_index"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+stt = "0"
+
+[[case]]
+id = "charges-fut_index-buy-2015-11-13-brokerage"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage 0.0001 x 100000 = 10.0000; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.000019 x 100000 = 1.900000 -> 1.90; SEBI 0.000002 x 100000 = 0.200000 -> 0.20; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0.000005 x 100000 = 0.500000 -> 0.50; stamp 0.00002 x 100000 = 2.00000 -> 2.00; GST 0.14 x 12.40 (lines brokerage+exchange_txn+clearing) = 1.7360 -> 1.74; total 16.34; deductible 16.34"
+boundary = ["fyers.brokerage[product=futures]@2015-11-14:before"]
+[case.input]
+on = 2015-11-13
+instrument_class = "fut_index"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+brokerage = "10.00"
+
+[[case]]
+id = "charges-fut_index-buy-2015-11-14-brokerage"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage 0.0001 x 100000 = 10.0000; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.000019 x 100000 = 1.900000 -> 1.90; SEBI 0.000002 x 100000 = 0.200000 -> 0.20; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0.000005 x 100000 = 0.500000 -> 0.50; stamp 0.00002 x 100000 = 2.00000 -> 2.00; GST 0.14 x 12.40 (lines brokerage+exchange_txn+clearing) = 1.7360 -> 1.74; total 16.34; deductible 16.34"
+boundary = ["fyers.brokerage[product=futures]@2015-11-14:after"]
+[case.input]
+on = 2015-11-14
+instrument_class = "fut_index"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+brokerage = "10.00"
+
+[[case]]
+id = "charges-fut_index-buy-2016-04-12-brokerage"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage 0.0001 x 100000 = 10.0000; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.000019 x 100000 = 1.900000 -> 1.90; SEBI 0.000002 x 100000 = 0.200000 -> 0.20; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0.000005 x 100000 = 0.500000 -> 0.50; stamp 0.00002 x 100000 = 2.00000 -> 2.00; GST 0.145 x 12.40 (lines brokerage+exchange_txn+clearing) = 1.79800 -> 1.80; total 16.40; deductible 16.40"
+boundary = ["fyers.brokerage[product=futures]@2016-04-13:before"]
+[case.input]
+on = 2016-04-12
+instrument_class = "fut_index"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+brokerage = "10.00"
+
+[[case]]
+id = "charges-fut_index-buy-2016-04-13-brokerage"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage lower of flat 100 and 0.0001 x 100000 = 10.0000 -> 10.0000; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.000019 x 100000 = 1.900000 -> 1.90; SEBI 0.000002 x 100000 = 0.200000 -> 0.20; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0.000005 x 100000 = 0.500000 -> 0.50; stamp 0.00002 x 100000 = 2.00000 -> 2.00; GST 0.145 x 12.40 (lines brokerage+exchange_txn+clearing) = 1.79800 -> 1.80; total 16.40; deductible 16.40"
+boundary = ["fyers.brokerage[product=futures]@2016-04-13:after"]
+[case.input]
+on = 2016-04-13
+instrument_class = "fut_index"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+brokerage = "10.00"
+
+[[case]]
+id = "charges-fut_index-buy-2017-08-07-brokerage"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage lower of flat 100 and 0.0001 x 100000 = 10.0000 -> 10.0000; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.000019 x 100000 = 1.900000 -> 1.90; SEBI 0.0000015 x 100000 = 0.1500000 -> 0.15; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0.000005 x 100000 = 0.500000 -> 0.50; stamp 0.00002 x 100000 = 2.00000 -> 2.00; GST 0.18 x 12.40 (lines brokerage+exchange_txn+clearing) = 2.2320 -> 2.23; total 16.78; deductible 16.78"
+boundary = ["fyers.brokerage[product=futures]@2017-08-08:before"]
+[case.input]
+on = 2017-08-07
+instrument_class = "fut_index"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+brokerage = "10.00"
+
+[[case]]
+id = "charges-fut_index-buy-2017-08-08-brokerage"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage lower of flat 20 and 0.0001 x 100000 = 10.0000 -> 10.0000; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.000019 x 100000 = 1.900000 -> 1.90; SEBI 0.0000015 x 100000 = 0.1500000 -> 0.15; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0.000005 x 100000 = 0.500000 -> 0.50; stamp 0.00002 x 100000 = 2.00000 -> 2.00; GST 0.18 x 12.40 (lines brokerage+exchange_txn+clearing) = 2.2320 -> 2.23; total 16.78; deductible 16.78"
+boundary = ["fyers.brokerage[product=futures]@2017-08-08:after"]
+[case.input]
+on = 2017-08-08
+instrument_class = "fut_index"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+brokerage = "10.00"
+
+[[case]]
+id = "charges-fut_index-buy-2018-03-03-clearing"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage lower of flat 20 and 0.0001 x 100000 = 10.0000 -> 10.0000; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.000019 x 100000 = 1.900000 -> 1.90; SEBI 0.0000015 x 100000 = 0.1500000 -> 0.15; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0.000005 x 100000 = 0.500000 -> 0.50; stamp 0.00002 x 100000 = 2.00000 -> 2.00; GST 0.18 x 12.40 (lines brokerage+exchange_txn+clearing) = 2.2320 -> 2.23; total 16.78; deductible 16.78"
+boundary = ["charges.clearing[segment=futures]@2018-03-04:before"]
+[case.input]
+on = 2018-03-03
+instrument_class = "fut_index"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+clearing = "0.50"
+
+[[case]]
+id = "charges-fut_index-buy-2018-03-04-clearing"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage lower of flat 20 and 0.0001 x 100000 = 10.0000 -> 10.0000; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.000019 x 100000 = 1.900000 -> 1.90; SEBI 0.0000015 x 100000 = 0.1500000 -> 0.15; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0.000005 x 100000 = 0.500000 -> 0.50; stamp 0.00002 x 100000 = 2.00000 -> 2.00; GST 0.18 x 12.40 (lines brokerage+exchange_txn+clearing) = 2.2320 -> 2.23; total 16.78; deductible 16.78"
+boundary = ["charges.clearing[segment=futures]@2018-03-04:after"]
+[case.input]
+on = 2018-03-04
+instrument_class = "fut_index"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+clearing = "0.50"
+
+[[case]]
+id = "charges-fut_index-buy-2018-03-04-full"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 50 x 10345.5 = 517275.0; brokerage lower of flat 20 and 0.0001 x 517275.0 = 51.72750 -> 20; STT 0 x 517275.0 = 0.0 -> step 1 -> 0; exchange 0.000019 x 517275.0 = 9.8282250 -> 9.83; SEBI 0.0000015 x 517275.0 = 0.77591250 -> 0.78; IPFT 0.000000001 x 517275.0 = 0.0005172750 -> 0.00; clearing 0.000005 x 517275.0 = 2.5863750 -> 2.59; stamp 0.00002 x 517275.0 = 10.345500 -> 10.35; GST 0.18 x 32.42 (lines brokerage+exchange_txn+clearing) = 5.8356 -> 5.84; total 49.39; deductible 49.39"
+[case.input]
+on = 2018-03-04
+instrument_class = "fut_index"
+side = "buy"
+qty = "50"
+price = "10345.5"
+[case.expect]
+brokerage = "20.00"
+stt = "0"
+exchange_txn = "9.83"
+sebi = "0.78"
+ipft = "0.00"
+clearing = "2.59"
+stamp = "10.35"
+gst = "5.84"
+total = "49.39"
+deductible = "49.39"
+turnover = "517275.0"
+
+[[case]]
+id = "charges-fut_index-buy-2020-05-10-brokerage"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage lower of flat 20 and 0.0001 x 100000 = 10.0000 -> 10.0000; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.000019 x 100000 = 1.900000 -> 1.90; SEBI 0.000001 x 100000 = 0.100000 -> 0.10; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0.000005 x 100000 = 0.500000 -> 0.50; stamp 0.00002 x 100000 = 2.00000 -> 2.00; GST 0.18 x 12.40 (lines brokerage+exchange_txn+clearing) = 2.2320 -> 2.23; total 16.73; deductible 16.73"
+boundary = ["fyers.brokerage[product=futures]@2020-05-11:before"]
+[case.input]
+on = 2020-05-10
+instrument_class = "fut_index"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+brokerage = "10.00"
+
+[[case]]
+id = "charges-fut_index-buy-2020-05-11-brokerage"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage lower of flat 20 and 0.0003 x 100000 = 30.0000 -> 20; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.000019 x 100000 = 1.900000 -> 1.90; SEBI 0.000001 x 100000 = 0.100000 -> 0.10; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0.000005 x 100000 = 0.500000 -> 0.50; stamp 0.00002 x 100000 = 2.00000 -> 2.00; GST 0.18 x 22.40 (lines brokerage+exchange_txn+clearing) = 4.0320 -> 4.03; total 28.53; deductible 28.53"
+boundary = ["fyers.brokerage[product=futures]@2020-05-11:after"]
+[case.input]
+on = 2020-05-11
+instrument_class = "fut_index"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+brokerage = "20.00"
+
+[[case]]
+id = "charges-fut_index-buy-2020-06-30-stamp"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage lower of flat 20 and 0.0003 x 100000 = 30.0000 -> 20; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.000019 x 100000 = 1.900000 -> 1.90; SEBI 0.000001 x 100000 = 0.100000 -> 0.10; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0.000005 x 100000 = 0.500000 -> 0.50; stamp 0.00002 x 100000 = 2.00000 -> 2.00; GST 0.18 x 22.40 (lines brokerage+exchange_txn+clearing) = 4.0320 -> 4.03; total 28.53; deductible 28.53"
+boundary = ["charges.stamp[segment=futures,side=buy]@2020-07-01:before"]
+[case.input]
+on = 2020-06-30
+instrument_class = "fut_index"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+stamp = "2.00"
+
+[[case]]
+id = "charges-fut_index-buy-2020-07-01-stamp"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage lower of flat 20 and 0.0003 x 100000 = 30.0000 -> 20; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.000019 x 100000 = 1.900000 -> 1.90; SEBI 0.000001 x 100000 = 0.100000 -> 0.10; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0.000005 x 100000 = 0.500000 -> 0.50; stamp 0.00002 x 100000 = 2.00000 -> 2.00; GST 0.18 x 22.40 (lines brokerage+exchange_txn+clearing) = 4.0320 -> 4.03; total 28.53; deductible 28.53"
+boundary = ["charges.stamp[segment=futures,side=buy]@2020-07-01:after"]
+[case.input]
+on = 2020-07-01
+instrument_class = "fut_index"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+stamp = "2.00"
+
+[[case]]
+id = "charges-fut_index-buy-2020-12-31-exchange_txn"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage lower of flat 20 and 0.0003 x 100000 = 30.0000 -> 20; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.000019 x 100000 = 1.900000 -> 1.90; SEBI 0.000001 x 100000 = 0.100000 -> 0.10; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0.000005 x 100000 = 0.500000 -> 0.50; stamp 0.00002 x 100000 = 2.00000 -> 2.00; GST 0.18 x 22.40 (lines brokerage+exchange_txn+clearing) = 4.0320 -> 4.03; total 28.53; deductible 28.53"
+boundary = ["charges.exchange_txn[exchange=NSE,segment=futures]@2021-01-01:before"]
+[case.input]
+on = 2020-12-31
+instrument_class = "fut_index"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+exchange_txn = "1.90"
+
+[[case]]
+id = "charges-fut_index-buy-2021-01-01-exchange_txn"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage lower of flat 20 and 0.0003 x 100000 = 30.0000 -> 20; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.00002 x 100000 = 2.00000 -> 2.00; SEBI 0.000001 x 100000 = 0.100000 -> 0.10; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0.000005 x 100000 = 0.500000 -> 0.50; stamp 0.00002 x 100000 = 2.00000 -> 2.00; GST 0.18 x 22.50 (lines brokerage+exchange_txn+clearing) = 4.0500 -> 4.05; total 28.65; deductible 28.65"
+boundary = ["charges.exchange_txn[exchange=NSE,segment=futures]@2021-01-01:after"]
+[case.input]
+on = 2021-01-01
+instrument_class = "fut_index"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+exchange_txn = "2.00"
+
+[[case]]
+id = "charges-fut_index-buy-2023-03-31-exchange_txn"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage lower of flat 20 and 0.0003 x 100000 = 30.0000 -> 20; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.00002 x 100000 = 2.00000 -> 2.00; SEBI 0.000001 x 100000 = 0.100000 -> 0.10; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0.000005 x 100000 = 0.500000 -> 0.50; stamp 0.00002 x 100000 = 2.00000 -> 2.00; GST 0.18 x 22.50 (lines brokerage+exchange_txn+clearing) = 4.0500 -> 4.05; total 28.65; deductible 28.65"
+boundary = ["charges.exchange_txn[exchange=NSE,segment=futures]@2023-04-01:before"]
+[case.input]
+on = 2023-03-31
+instrument_class = "fut_index"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+exchange_txn = "2.00"
+
+[[case]]
+id = "charges-fut_index-buy-2023-03-31-ipft"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage lower of flat 20 and 0.0003 x 100000 = 30.0000 -> 20; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.00002 x 100000 = 2.00000 -> 2.00; SEBI 0.000001 x 100000 = 0.100000 -> 0.10; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0.000005 x 100000 = 0.500000 -> 0.50; stamp 0.00002 x 100000 = 2.00000 -> 2.00; GST 0.18 x 22.50 (lines brokerage+exchange_txn+clearing) = 4.0500 -> 4.05; total 28.65; deductible 28.65"
+boundary = ["charges.ipft[exchange=NSE,segment=futures]@2023-04-01:before"]
+[case.input]
+on = 2023-03-31
+instrument_class = "fut_index"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+ipft = "0.00"
+
+[[case]]
+id = "charges-fut_index-buy-2023-04-01-exchange_txn"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage lower of flat 20 and 0.0003 x 100000 = 30.0000 -> 20; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.000019 x 100000 = 1.900000 -> 1.90; SEBI 0.000001 x 100000 = 0.100000 -> 0.10; IPFT 0.000001 x 100000 = 0.100000 -> 0.10; clearing 0.000005 x 100000 = 0.500000 -> 0.50; stamp 0.00002 x 100000 = 2.00000 -> 2.00; GST 0.18 x 22.40 (lines brokerage+exchange_txn+clearing) = 4.0320 -> 4.03; total 28.63; deductible 28.63"
+boundary = ["charges.exchange_txn[exchange=NSE,segment=futures]@2023-04-01:after"]
+[case.input]
+on = 2023-04-01
+instrument_class = "fut_index"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+exchange_txn = "1.90"
+
+[[case]]
+id = "charges-fut_index-buy-2023-04-01-ipft"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage lower of flat 20 and 0.0003 x 100000 = 30.0000 -> 20; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.000019 x 100000 = 1.900000 -> 1.90; SEBI 0.000001 x 100000 = 0.100000 -> 0.10; IPFT 0.000001 x 100000 = 0.100000 -> 0.10; clearing 0.000005 x 100000 = 0.500000 -> 0.50; stamp 0.00002 x 100000 = 2.00000 -> 2.00; GST 0.18 x 22.40 (lines brokerage+exchange_txn+clearing) = 4.0320 -> 4.03; total 28.63; deductible 28.63"
+boundary = ["charges.ipft[exchange=NSE,segment=futures]@2023-04-01:after"]
+[case.input]
+on = 2023-04-01
+instrument_class = "fut_index"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+ipft = "0.10"
+
+[[case]]
+id = "charges-fut_index-buy-2024-03-31-exchange_txn"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage lower of flat 20 and 0.0003 x 100000 = 30.0000 -> 20; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.000019 x 100000 = 1.900000 -> 1.90; SEBI 0.000001 x 100000 = 0.100000 -> 0.10; IPFT 0.000001 x 100000 = 0.100000 -> 0.10; clearing 0.000005 x 100000 = 0.500000 -> 0.50; stamp 0.00002 x 100000 = 2.00000 -> 2.00; GST 0.18 x 22.50 (lines brokerage+exchange_txn+clearing+sebi) = 4.0500 -> 4.05; total 28.65; deductible 28.65"
+boundary = ["charges.exchange_txn[exchange=NSE,segment=futures]@2024-04-01:before"]
+[case.input]
+on = 2024-03-31
+instrument_class = "fut_index"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+exchange_txn = "1.90"
+
+[[case]]
+id = "charges-fut_index-buy-2024-04-01-exchange_txn"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage lower of flat 20 and 0.0003 x 100000 = 30.0000 -> 20; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.0000188 x 100000 = 1.8800000 -> 1.88; SEBI 0.000001 x 100000 = 0.100000 -> 0.10; IPFT 0.000001 x 100000 = 0.100000 -> 0.10; clearing 0.000005 x 100000 = 0.500000 -> 0.50; stamp 0.00002 x 100000 = 2.00000 -> 2.00; GST 0.18 x 22.48 (lines brokerage+exchange_txn+clearing+sebi) = 4.0464 -> 4.05; total 28.63; deductible 28.63"
+boundary = ["charges.exchange_txn[exchange=NSE,segment=futures]@2024-04-01:after"]
+[case.input]
+on = 2024-04-01
+instrument_class = "fut_index"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+exchange_txn = "1.88"
+
+[[case]]
+id = "charges-fut_index-buy-2024-09-30-exchange_txn"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage lower of flat 20 and 0.0003 x 100000 = 30.0000 -> 20; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.0000188 x 100000 = 1.8800000 -> 1.88; SEBI 0.000001 x 100000 = 0.100000 -> 0.10; IPFT 0.000001 x 100000 = 0.100000 -> 0.10; clearing 0.000005 x 100000 = 0.500000 -> 0.50; stamp 0.00002 x 100000 = 2.00000 -> 2.00; GST 0.18 x 22.48 (lines brokerage+exchange_txn+clearing+sebi) = 4.0464 -> 4.05; total 28.63; deductible 28.63"
+boundary = ["charges.exchange_txn[exchange=NSE,segment=futures]@2024-10-01:before"]
+[case.input]
+on = 2024-09-30
+instrument_class = "fut_index"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+exchange_txn = "1.88"
+
+[[case]]
+id = "charges-fut_index-buy-2024-10-01-exchange_txn"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage lower of flat 20 and 0.0003 x 100000 = 30.0000 -> 20; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.0000173 x 100000 = 1.7300000 -> 1.73; SEBI 0.000001 x 100000 = 0.100000 -> 0.10; IPFT 0.000001 x 100000 = 0.100000 -> 0.10; clearing 0.000005 x 100000 = 0.500000 -> 0.50; stamp 0.00002 x 100000 = 2.00000 -> 2.00; GST 0.18 x 22.33 (lines brokerage+exchange_txn+clearing+sebi) = 4.0194 -> 4.02; total 28.45; deductible 28.45"
+boundary = ["charges.exchange_txn[exchange=NSE,segment=futures]@2024-10-01:after"]
+[case.input]
+on = 2024-10-01
+instrument_class = "fut_index"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+exchange_txn = "1.73"
+
+[[case]]
+id = "charges-fut_index-buy-2026-02-28-exchange_txn"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage lower of flat 20 and 0.0003 x 100000 = 30.0000 -> 20; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.0000173 x 100000 = 1.7300000 -> 1.73; SEBI 0.000001 x 100000 = 0.100000 -> 0.10; IPFT 0.000001 x 100000 = 0.100000 -> 0.10; clearing 0.000005 x 100000 = 0.500000 -> 0.50; stamp 0.00002 x 100000 = 2.00000 -> 2.00; GST 0.18 x 22.43 (lines brokerage+exchange_txn+clearing+sebi+ipft) = 4.0374 -> 4.04; total 28.47; deductible 28.47"
+boundary = ["charges.exchange_txn[exchange=NSE,segment=futures]@2026-03-01:before"]
+[case.input]
+on = 2026-02-28
+instrument_class = "fut_index"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+exchange_txn = "1.73"
+
+[[case]]
+id = "charges-fut_index-buy-2026-02-28-ipft"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage lower of flat 20 and 0.0003 x 100000 = 30.0000 -> 20; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.0000173 x 100000 = 1.7300000 -> 1.73; SEBI 0.000001 x 100000 = 0.100000 -> 0.10; IPFT 0.000001 x 100000 = 0.100000 -> 0.10; clearing 0.000005 x 100000 = 0.500000 -> 0.50; stamp 0.00002 x 100000 = 2.00000 -> 2.00; GST 0.18 x 22.43 (lines brokerage+exchange_txn+clearing+sebi+ipft) = 4.0374 -> 4.04; total 28.47; deductible 28.47"
+boundary = ["charges.ipft[exchange=NSE,segment=futures]@2026-03-01:before"]
+[case.input]
+on = 2026-02-28
+instrument_class = "fut_index"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+ipft = "0.10"
+
+[[case]]
+id = "charges-fut_index-buy-2026-03-01-exchange_txn"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage lower of flat 20 and 0.0003 x 100000 = 30.0000 -> 20; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.000018299 x 100000 = 1.829900000 -> 1.83; SEBI 0.000001 x 100000 = 0.100000 -> 0.10; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0.000005 x 100000 = 0.500000 -> 0.50; stamp 0.00002 x 100000 = 2.00000 -> 2.00; GST 0.18 x 22.43 (lines brokerage+exchange_txn+clearing+sebi+ipft) = 4.0374 -> 4.04; total 28.47; deductible 28.47"
+boundary = ["charges.exchange_txn[exchange=NSE,segment=futures]@2026-03-01:after"]
+[case.input]
+on = 2026-03-01
+instrument_class = "fut_index"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+exchange_txn = "1.83"
+
+[[case]]
+id = "charges-fut_index-buy-2026-03-01-ipft"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage lower of flat 20 and 0.0003 x 100000 = 30.0000 -> 20; STT 0 x 100000 = 0 -> step 1 -> 0; exchange 0.000018299 x 100000 = 1.829900000 -> 1.83; SEBI 0.000001 x 100000 = 0.100000 -> 0.10; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0.000005 x 100000 = 0.500000 -> 0.50; stamp 0.00002 x 100000 = 2.00000 -> 2.00; GST 0.18 x 22.43 (lines brokerage+exchange_txn+clearing+sebi+ipft) = 4.0374 -> 4.04; total 28.47; deductible 28.47"
+boundary = ["charges.ipft[exchange=NSE,segment=futures]@2026-03-01:after"]
+[case.input]
+on = 2026-03-01
+instrument_class = "fut_index"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+ipft = "0.00"
+
+[[case]]
+id = "charges-fut_index-sell-2010-04-01-gst"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage 0.0001 x 100000 = 10.0000; STT 0.00017 x 100000 = 17.00000 -> step 1 -> 17; exchange 0.000019 x 100000 = 1.900000 -> 1.90; SEBI 0.000002 x 100000 = 0.200000 -> 0.20; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0.000005 x 100000 = 0.500000 -> 0.50; stamp 0 x 100000 = 0 -> 0.00; GST 0.103 x 12.40 (lines brokerage+exchange_txn+clearing) = 1.27720 -> 1.28; total 30.88; deductible 13.88"
+[case.input]
+on = 2010-04-01
+instrument_class = "fut_index"
+side = "sell"
+qty = "100"
+price = "1000"
+[case.expect]
+gst = "1.28"
+
+[[case]]
+id = "charges-fut_index-sell-2010-04-01-stamp"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage 0.0001 x 100000 = 10.0000; STT 0.00017 x 100000 = 17.00000 -> step 1 -> 17; exchange 0.000019 x 100000 = 1.900000 -> 1.90; SEBI 0.000002 x 100000 = 0.200000 -> 0.20; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0.000005 x 100000 = 0.500000 -> 0.50; stamp 0 x 100000 = 0 -> 0.00; GST 0.103 x 12.40 (lines brokerage+exchange_txn+clearing) = 1.27720 -> 1.28; total 30.88; deductible 13.88"
+[case.input]
+on = 2010-04-01
+instrument_class = "fut_index"
+side = "sell"
+qty = "100"
+price = "1000"
+[case.expect]
+stamp = "0.00"
+
+[[case]]
+id = "charges-fut_index-sell-2010-04-01-stt"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage 0.0001 x 100000 = 10.0000; STT 0.00017 x 100000 = 17.00000 -> step 1 -> 17; exchange 0.000019 x 100000 = 1.900000 -> 1.90; SEBI 0.000002 x 100000 = 0.200000 -> 0.20; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0.000005 x 100000 = 0.500000 -> 0.50; stamp 0 x 100000 = 0 -> 0.00; GST 0.103 x 12.40 (lines brokerage+exchange_txn+clearing) = 1.27720 -> 1.28; total 30.88; deductible 13.88"
+[case.input]
+on = 2010-04-01
+instrument_class = "fut_index"
+side = "sell"
+qty = "100"
+price = "1000"
+[case.expect]
+stt = "17"
+
+[[case]]
+id = "charges-fut_index-sell-2012-03-31-gst"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage 0.0001 x 100000 = 10.0000; STT 0.00017 x 100000 = 17.00000 -> step 1 -> 17; exchange 0.000019 x 100000 = 1.900000 -> 1.90; SEBI 0.000002 x 100000 = 0.200000 -> 0.20; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0.000005 x 100000 = 0.500000 -> 0.50; stamp 0 x 100000 = 0 -> 0.00; GST 0.103 x 12.40 (lines brokerage+exchange_txn+clearing) = 1.27720 -> 1.28; total 30.88; deductible 13.88"
+boundary = ["charges.gst[]@2012-04-01:before"]
+[case.input]
+on = 2012-03-31
+instrument_class = "fut_index"
+side = "sell"
+qty = "100"
+price = "1000"
+[case.expect]
+gst = "1.28"
+
+[[case]]
+id = "charges-fut_index-sell-2012-04-01-gst"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage 0.0001 x 100000 = 10.0000; STT 0.00017 x 100000 = 17.00000 -> step 1 -> 17; exchange 0.000019 x 100000 = 1.900000 -> 1.90; SEBI 0.000002 x 100000 = 0.200000 -> 0.20; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0.000005 x 100000 = 0.500000 -> 0.50; stamp 0 x 100000 = 0 -> 0.00; GST 0.1236 x 12.40 (lines brokerage+exchange_txn+clearing) = 1.532640 -> 1.53; total 31.13; deductible 14.13"
+boundary = ["charges.gst[]@2012-04-01:after"]
+[case.input]
+on = 2012-04-01
+instrument_class = "fut_index"
+side = "sell"
+qty = "100"
+price = "1000"
+[case.expect]
+gst = "1.53"
+
+[[case]]
+id = "charges-fut_index-sell-2013-05-31-stt"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage 0.0001 x 100000 = 10.0000; STT 0.00017 x 100000 = 17.00000 -> step 1 -> 17; exchange 0.000019 x 100000 = 1.900000 -> 1.90; SEBI 0.000002 x 100000 = 0.200000 -> 0.20; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0.000005 x 100000 = 0.500000 -> 0.50; stamp 0 x 100000 = 0 -> 0.00; GST 0.1236 x 12.40 (lines brokerage+exchange_txn+clearing) = 1.532640 -> 1.53; total 31.13; deductible 14.13"
+boundary = ["charges.stt[instrument_class=fut_index,side=sell]@2013-06-01:before"]
+[case.input]
+on = 2013-05-31
+instrument_class = "fut_index"
+side = "sell"
+qty = "100"
+price = "1000"
+[case.expect]
+stt = "17"
+
+[[case]]
+id = "charges-fut_index-sell-2013-06-01-stt"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage 0.0001 x 100000 = 10.0000; STT 0.0001 x 100000 = 10.0000 -> step 1 -> 10; exchange 0.000019 x 100000 = 1.900000 -> 1.90; SEBI 0.000002 x 100000 = 0.200000 -> 0.20; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0.000005 x 100000 = 0.500000 -> 0.50; stamp 0 x 100000 = 0 -> 0.00; GST 0.1236 x 12.40 (lines brokerage+exchange_txn+clearing) = 1.532640 -> 1.53; total 24.13; deductible 14.13"
+boundary = ["charges.stt[instrument_class=fut_index,side=sell]@2013-06-01:after"]
+[case.input]
+on = 2013-06-01
+instrument_class = "fut_index"
+side = "sell"
+qty = "100"
+price = "1000"
+[case.expect]
+stt = "10"
+
+[[case]]
+id = "charges-fut_index-sell-2015-05-31-gst"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage 0.0001 x 100000 = 10.0000; STT 0.0001 x 100000 = 10.0000 -> step 1 -> 10; exchange 0.000019 x 100000 = 1.900000 -> 1.90; SEBI 0.000002 x 100000 = 0.200000 -> 0.20; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0.000005 x 100000 = 0.500000 -> 0.50; stamp 0 x 100000 = 0 -> 0.00; GST 0.1236 x 12.40 (lines brokerage+exchange_txn+clearing) = 1.532640 -> 1.53; total 24.13; deductible 14.13"
+boundary = ["charges.gst[]@2015-06-01:before"]
+[case.input]
+on = 2015-05-31
+instrument_class = "fut_index"
+side = "sell"
+qty = "100"
+price = "1000"
+[case.expect]
+gst = "1.53"
+
+[[case]]
+id = "charges-fut_index-sell-2015-06-01-gst"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage 0.0001 x 100000 = 10.0000; STT 0.0001 x 100000 = 10.0000 -> step 1 -> 10; exchange 0.000019 x 100000 = 1.900000 -> 1.90; SEBI 0.000002 x 100000 = 0.200000 -> 0.20; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0.000005 x 100000 = 0.500000 -> 0.50; stamp 0 x 100000 = 0 -> 0.00; GST 0.14 x 12.40 (lines brokerage+exchange_txn+clearing) = 1.7360 -> 1.74; total 24.34; deductible 14.34"
+boundary = ["charges.gst[]@2015-06-01:after"]
+[case.input]
+on = 2015-06-01
+instrument_class = "fut_index"
+side = "sell"
+qty = "100"
+price = "1000"
+[case.expect]
+gst = "1.74"
+
+[[case]]
+id = "charges-fut_index-sell-2015-11-14-gst"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage 0.0001 x 100000 = 10.0000; STT 0.0001 x 100000 = 10.0000 -> step 1 -> 10; exchange 0.000019 x 100000 = 1.900000 -> 1.90; SEBI 0.000002 x 100000 = 0.200000 -> 0.20; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0.000005 x 100000 = 0.500000 -> 0.50; stamp 0 x 100000 = 0 -> 0.00; GST 0.14 x 12.40 (lines brokerage+exchange_txn+clearing) = 1.7360 -> 1.74; total 24.34; deductible 14.34"
+boundary = ["charges.gst[]@2015-11-15:before"]
+[case.input]
+on = 2015-11-14
+instrument_class = "fut_index"
+side = "sell"
+qty = "100"
+price = "1000"
+[case.expect]
+gst = "1.74"
+
+[[case]]
+id = "charges-fut_index-sell-2015-11-15-gst"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage 0.0001 x 100000 = 10.0000; STT 0.0001 x 100000 = 10.0000 -> step 1 -> 10; exchange 0.000019 x 100000 = 1.900000 -> 1.90; SEBI 0.000002 x 100000 = 0.200000 -> 0.20; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0.000005 x 100000 = 0.500000 -> 0.50; stamp 0 x 100000 = 0 -> 0.00; GST 0.145 x 12.40 (lines brokerage+exchange_txn+clearing) = 1.79800 -> 1.80; total 24.40; deductible 14.40"
+boundary = ["charges.gst[]@2015-11-15:after"]
+[case.input]
+on = 2015-11-15
+instrument_class = "fut_index"
+side = "sell"
+qty = "100"
+price = "1000"
+[case.expect]
+gst = "1.80"
+
+[[case]]
+id = "charges-fut_index-sell-2016-04-13-full"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 75 x 8000 = 600000; brokerage lower of flat 100 and 0.0001 x 600000 = 60.0000 -> 60.0000; STT 0.0001 x 600000 = 60.0000 -> step 1 -> 60; exchange 0.000019 x 600000 = 11.400000 -> 11.40; SEBI 0.000002 x 600000 = 1.200000 -> 1.20; IPFT 0.000000001 x 600000 = 0.000600000 -> 0.00; clearing 0.000005 x 600000 = 3.000000 -> 3.00; stamp 0 x 600000 = 0 -> 0.00; GST 0.145 x 74.40 (lines brokerage+exchange_txn+clearing) = 10.78800 -> 10.79; total 146.39; deductible 86.39"
+[case.input]
+on = 2016-04-13
+instrument_class = "fut_index"
+side = "sell"
+qty = "75"
+price = "8000"
+[case.expect]
+brokerage = "60.00"
+stt = "60"
+exchange_txn = "11.40"
+sebi = "1.20"
+ipft = "0.00"
+clearing = "3.00"
+stamp = "0.00"
+gst = "10.79"
+total = "146.39"
+deductible = "86.39"
+turnover = "600000"
+
+[[case]]
+id = "charges-fut_index-sell-2016-05-31-gst"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage lower of flat 100 and 0.0001 x 100000 = 10.0000 -> 10.0000; STT 0.0001 x 100000 = 10.0000 -> step 1 -> 10; exchange 0.000019 x 100000 = 1.900000 -> 1.90; SEBI 0.000002 x 100000 = 0.200000 -> 0.20; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0.000005 x 100000 = 0.500000 -> 0.50; stamp 0 x 100000 = 0 -> 0.00; GST 0.145 x 12.40 (lines brokerage+exchange_txn+clearing) = 1.79800 -> 1.80; total 24.40; deductible 14.40"
+boundary = ["charges.gst[]@2016-06-01:before"]
+[case.input]
+on = 2016-05-31
+instrument_class = "fut_index"
+side = "sell"
+qty = "100"
+price = "1000"
+[case.expect]
+gst = "1.80"
+
+[[case]]
+id = "charges-fut_index-sell-2016-06-01-gst"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage lower of flat 100 and 0.0001 x 100000 = 10.0000 -> 10.0000; STT 0.0001 x 100000 = 10.0000 -> step 1 -> 10; exchange 0.000019 x 100000 = 1.900000 -> 1.90; SEBI 0.000002 x 100000 = 0.200000 -> 0.20; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0.000005 x 100000 = 0.500000 -> 0.50; stamp 0 x 100000 = 0 -> 0.00; GST 0.15 x 12.40 (lines brokerage+exchange_txn+clearing) = 1.8600 -> 1.86; total 24.46; deductible 14.46"
+boundary = ["charges.gst[]@2016-06-01:after"]
+[case.input]
+on = 2016-06-01
+instrument_class = "fut_index"
+side = "sell"
+qty = "100"
+price = "1000"
+[case.expect]
+gst = "1.86"
+
+[[case]]
+id = "charges-fut_index-sell-2017-06-30-gst"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage lower of flat 100 and 0.0001 x 100000 = 10.0000 -> 10.0000; STT 0.0001 x 100000 = 10.0000 -> step 1 -> 10; exchange 0.000019 x 100000 = 1.900000 -> 1.90; SEBI 0.0000015 x 100000 = 0.1500000 -> 0.15; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0.000005 x 100000 = 0.500000 -> 0.50; stamp 0 x 100000 = 0 -> 0.00; GST 0.15 x 12.40 (lines brokerage+exchange_txn+clearing) = 1.8600 -> 1.86; total 24.41; deductible 14.41"
+boundary = ["charges.gst[]@2017-07-01:before"]
+[case.input]
+on = 2017-06-30
+instrument_class = "fut_index"
+side = "sell"
+qty = "100"
+price = "1000"
+[case.expect]
+gst = "1.86"
+
+[[case]]
+id = "charges-fut_index-sell-2017-07-01-gst"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage lower of flat 100 and 0.0001 x 100000 = 10.0000 -> 10.0000; STT 0.0001 x 100000 = 10.0000 -> step 1 -> 10; exchange 0.000019 x 100000 = 1.900000 -> 1.90; SEBI 0.0000015 x 100000 = 0.1500000 -> 0.15; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0.000005 x 100000 = 0.500000 -> 0.50; stamp 0 x 100000 = 0 -> 0.00; GST 0.18 x 12.40 (lines brokerage+exchange_txn+clearing) = 2.2320 -> 2.23; total 24.78; deductible 14.78"
+boundary = ["charges.gst[]@2017-07-01:after"]
+[case.input]
+on = 2017-07-01
+instrument_class = "fut_index"
+side = "sell"
+qty = "100"
+price = "1000"
+[case.expect]
+gst = "2.23"
+
+[[case]]
+id = "charges-fut_index-sell-2020-06-30-stamp"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage lower of flat 20 and 0.0003 x 100000 = 30.0000 -> 20; STT 0.0001 x 100000 = 10.0000 -> step 1 -> 10; exchange 0.000019 x 100000 = 1.900000 -> 1.90; SEBI 0.000001 x 100000 = 0.100000 -> 0.10; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0.000005 x 100000 = 0.500000 -> 0.50; stamp 0 x 100000 = 0 -> 0.00; GST 0.18 x 22.40 (lines brokerage+exchange_txn+clearing) = 4.0320 -> 4.03; total 36.53; deductible 26.53"
+boundary = ["charges.stamp[segment=futures,side=sell]@2020-07-01:before"]
+[case.input]
+on = 2020-06-30
+instrument_class = "fut_index"
+side = "sell"
+qty = "100"
+price = "1000"
+[case.expect]
+stamp = "0.00"
+
+[[case]]
+id = "charges-fut_index-sell-2020-07-01-stamp"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage lower of flat 20 and 0.0003 x 100000 = 30.0000 -> 20; STT 0.0001 x 100000 = 10.0000 -> step 1 -> 10; exchange 0.000019 x 100000 = 1.900000 -> 1.90; SEBI 0.000001 x 100000 = 0.100000 -> 0.10; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0.000005 x 100000 = 0.500000 -> 0.50; stamp 0 x 100000 = 0 -> 0.00; GST 0.18 x 22.40 (lines brokerage+exchange_txn+clearing) = 4.0320 -> 4.03; total 36.53; deductible 26.53"
+boundary = ["charges.stamp[segment=futures,side=sell]@2020-07-01:after"]
+[case.input]
+on = 2020-07-01
+instrument_class = "fut_index"
+side = "sell"
+qty = "100"
+price = "1000"
+[case.expect]
+stamp = "0.00"
+
+[[case]]
+id = "charges-fut_index-sell-2023-03-31-stt"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage lower of flat 20 and 0.0003 x 100000 = 30.0000 -> 20; STT 0.0001 x 100000 = 10.0000 -> step 1 -> 10; exchange 0.00002 x 100000 = 2.00000 -> 2.00; SEBI 0.000001 x 100000 = 0.100000 -> 0.10; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0.000005 x 100000 = 0.500000 -> 0.50; stamp 0 x 100000 = 0 -> 0.00; GST 0.18 x 22.50 (lines brokerage+exchange_txn+clearing) = 4.0500 -> 4.05; total 36.65; deductible 26.65"
+boundary = ["charges.stt[instrument_class=fut_index,side=sell]@2023-04-01:before"]
+[case.input]
+on = 2023-03-31
+instrument_class = "fut_index"
+side = "sell"
+qty = "100"
+price = "1000"
+[case.expect]
+stt = "10"
+
+[[case]]
+id = "charges-fut_index-sell-2023-04-01-full"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 75 x 17800 = 1335000; brokerage lower of flat 20 and 0.0003 x 1335000 = 400.5000 -> 20; STT 0.000125 x 1335000 = 166.875000 -> step 1 -> 167; exchange 0.000019 x 1335000 = 25.365000 -> 25.37; SEBI 0.000001 x 1335000 = 1.335000 -> 1.34; IPFT 0.000001 x 1335000 = 1.335000 -> 1.34; clearing 0.000005 x 1335000 = 6.675000 -> 6.68; stamp 0 x 1335000 = 0 -> 0.00; GST 0.18 x 52.05 (lines brokerage+exchange_txn+clearing) = 9.3690 -> 9.37; total 231.10; deductible 64.10"
+[case.input]
+on = 2023-04-01
+instrument_class = "fut_index"
+side = "sell"
+qty = "75"
+price = "17800"
+[case.expect]
+brokerage = "20.00"
+stt = "167"
+exchange_txn = "25.37"
+sebi = "1.34"
+ipft = "1.34"
+clearing = "6.68"
+stamp = "0.00"
+gst = "9.37"
+total = "231.10"
+deductible = "64.10"
+turnover = "1335000"
+
+[[case]]
+id = "charges-fut_index-sell-2023-04-01-stt"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage lower of flat 20 and 0.0003 x 100000 = 30.0000 -> 20; STT 0.000125 x 100000 = 12.500000 -> step 1 -> 13; exchange 0.000019 x 100000 = 1.900000 -> 1.90; SEBI 0.000001 x 100000 = 0.100000 -> 0.10; IPFT 0.000001 x 100000 = 0.100000 -> 0.10; clearing 0.000005 x 100000 = 0.500000 -> 0.50; stamp 0 x 100000 = 0 -> 0.00; GST 0.18 x 22.40 (lines brokerage+exchange_txn+clearing) = 4.0320 -> 4.03; total 39.63; deductible 26.63"
+boundary = ["charges.stt[instrument_class=fut_index,side=sell]@2023-04-01:after"]
+[case.input]
+on = 2023-04-01
+instrument_class = "fut_index"
+side = "sell"
+qty = "100"
+price = "1000"
+[case.expect]
+stt = "13"
+
+[[case]]
+id = "charges-fut_index-sell-2023-06-04-gst"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage lower of flat 20 and 0.0003 x 100000 = 30.0000 -> 20; STT 0.000125 x 100000 = 12.500000 -> step 1 -> 13; exchange 0.000019 x 100000 = 1.900000 -> 1.90; SEBI 0.000001 x 100000 = 0.100000 -> 0.10; IPFT 0.000001 x 100000 = 0.100000 -> 0.10; clearing 0.000005 x 100000 = 0.500000 -> 0.50; stamp 0 x 100000 = 0 -> 0.00; GST 0.18 x 22.40 (lines brokerage+exchange_txn+clearing) = 4.0320 -> 4.03; total 39.63; deductible 26.63"
+boundary = ["charges.gst[]@2023-06-05:before"]
+[case.input]
+on = 2023-06-04
+instrument_class = "fut_index"
+side = "sell"
+qty = "100"
+price = "1000"
+[case.expect]
+gst = "4.03"
+
+[[case]]
+id = "charges-fut_index-sell-2023-06-05-gst"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage lower of flat 20 and 0.0003 x 100000 = 30.0000 -> 20; STT 0.000125 x 100000 = 12.500000 -> step 1 -> 13; exchange 0.000019 x 100000 = 1.900000 -> 1.90; SEBI 0.000001 x 100000 = 0.100000 -> 0.10; IPFT 0.000001 x 100000 = 0.100000 -> 0.10; clearing 0.000005 x 100000 = 0.500000 -> 0.50; stamp 0 x 100000 = 0 -> 0.00; GST 0.18 x 22.50 (lines brokerage+exchange_txn+clearing+sebi) = 4.0500 -> 4.05; total 39.65; deductible 26.65"
+boundary = ["charges.gst[]@2023-06-05:after"]
+[case.input]
+on = 2023-06-05
+instrument_class = "fut_index"
+side = "sell"
+qty = "100"
+price = "1000"
+[case.expect]
+gst = "4.05"
+
+[[case]]
+id = "charges-fut_index-sell-2024-09-30-stt"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage lower of flat 20 and 0.0003 x 100000 = 30.0000 -> 20; STT 0.000125 x 100000 = 12.500000 -> step 1 -> 13; exchange 0.0000188 x 100000 = 1.8800000 -> 1.88; SEBI 0.000001 x 100000 = 0.100000 -> 0.10; IPFT 0.000001 x 100000 = 0.100000 -> 0.10; clearing 0.000005 x 100000 = 0.500000 -> 0.50; stamp 0 x 100000 = 0 -> 0.00; GST 0.18 x 22.48 (lines brokerage+exchange_txn+clearing+sebi) = 4.0464 -> 4.05; total 39.63; deductible 26.63"
+boundary = ["charges.stt[instrument_class=fut_index,side=sell]@2024-10-01:before"]
+[case.input]
+on = 2024-09-30
+instrument_class = "fut_index"
+side = "sell"
+qty = "100"
+price = "1000"
+[case.expect]
+stt = "13"
+
+[[case]]
+id = "charges-fut_index-sell-2024-10-01-stt"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage lower of flat 20 and 0.0003 x 100000 = 30.0000 -> 20; STT 0.0002 x 100000 = 20.0000 -> step 1 -> 20; exchange 0.0000173 x 100000 = 1.7300000 -> 1.73; SEBI 0.000001 x 100000 = 0.100000 -> 0.10; IPFT 0.000001 x 100000 = 0.100000 -> 0.10; clearing 0.000005 x 100000 = 0.500000 -> 0.50; stamp 0 x 100000 = 0 -> 0.00; GST 0.18 x 22.33 (lines brokerage+exchange_txn+clearing+sebi) = 4.0194 -> 4.02; total 46.45; deductible 26.45"
+boundary = ["charges.stt[instrument_class=fut_index,side=sell]@2024-10-01:after"]
+[case.input]
+on = 2024-10-01
+instrument_class = "fut_index"
+side = "sell"
+qty = "100"
+price = "1000"
+[case.expect]
+stt = "20"
+
+[[case]]
+id = "charges-fut_index-sell-2025-03-16-gst"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage lower of flat 20 and 0.0003 x 100000 = 30.0000 -> 20; STT 0.0002 x 100000 = 20.0000 -> step 1 -> 20; exchange 0.0000173 x 100000 = 1.7300000 -> 1.73; SEBI 0.000001 x 100000 = 0.100000 -> 0.10; IPFT 0.000001 x 100000 = 0.100000 -> 0.10; clearing 0.000005 x 100000 = 0.500000 -> 0.50; stamp 0 x 100000 = 0 -> 0.00; GST 0.18 x 22.33 (lines brokerage+exchange_txn+clearing+sebi) = 4.0194 -> 4.02; total 46.45; deductible 26.45"
+boundary = ["charges.gst[]@2025-03-17:before"]
+[case.input]
+on = 2025-03-16
+instrument_class = "fut_index"
+side = "sell"
+qty = "100"
+price = "1000"
+[case.expect]
+gst = "4.02"
+
+[[case]]
+id = "charges-fut_index-sell-2025-03-17-gst"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage lower of flat 20 and 0.0003 x 100000 = 30.0000 -> 20; STT 0.0002 x 100000 = 20.0000 -> step 1 -> 20; exchange 0.0000173 x 100000 = 1.7300000 -> 1.73; SEBI 0.000001 x 100000 = 0.100000 -> 0.10; IPFT 0.000001 x 100000 = 0.100000 -> 0.10; clearing 0.000005 x 100000 = 0.500000 -> 0.50; stamp 0 x 100000 = 0 -> 0.00; GST 0.18 x 22.43 (lines brokerage+exchange_txn+clearing+sebi+ipft) = 4.0374 -> 4.04; total 46.47; deductible 26.47"
+boundary = ["charges.gst[]@2025-03-17:after"]
+[case.input]
+on = 2025-03-17
+instrument_class = "fut_index"
+side = "sell"
+qty = "100"
+price = "1000"
+[case.expect]
+gst = "4.04"
+
+[[case]]
+id = "charges-fut_index-sell-2026-03-01-full"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 75 x 24500 = 1837500; brokerage lower of flat 20 and 0.0003 x 1837500 = 551.2500 -> 20; STT 0.0002 x 1837500 = 367.5000 -> step 1 -> 368; exchange 0.000018299 x 1837500 = 33.624412500 -> 33.62; SEBI 0.000001 x 1837500 = 1.837500 -> 1.84; IPFT 0.000000001 x 1837500 = 0.001837500 -> 0.00; clearing 0.000005 x 1837500 = 9.187500 -> 9.19; stamp 0 x 1837500 = 0 -> 0.00; GST 0.18 x 64.65 (lines brokerage+exchange_txn+clearing+sebi+ipft) = 11.6370 -> 11.64; total 444.29; deductible 76.29"
+[case.input]
+on = 2026-03-01
+instrument_class = "fut_index"
+side = "sell"
+qty = "75"
+price = "24500"
+[case.expect]
+brokerage = "20.00"
+stt = "368"
+exchange_txn = "33.62"
+sebi = "1.84"
+ipft = "0.00"
+clearing = "9.19"
+stamp = "0.00"
+gst = "11.64"
+total = "444.29"
+deductible = "76.29"
+turnover = "1837500"
+
+[[case]]
+id = "charges-fut_index-sell-2026-03-31-stt"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage lower of flat 20 and 0.0003 x 100000 = 30.0000 -> 20; STT 0.0002 x 100000 = 20.0000 -> step 1 -> 20; exchange 0.000018299 x 100000 = 1.829900000 -> 1.83; SEBI 0.000001 x 100000 = 0.100000 -> 0.10; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0.000005 x 100000 = 0.500000 -> 0.50; stamp 0 x 100000 = 0 -> 0.00; GST 0.18 x 22.43 (lines brokerage+exchange_txn+clearing+sebi+ipft) = 4.0374 -> 4.04; total 46.47; deductible 26.47"
+boundary = ["charges.stt[instrument_class=fut_index,side=sell]@2026-04-01:before"]
+[case.input]
+on = 2026-03-31
+instrument_class = "fut_index"
+side = "sell"
+qty = "100"
+price = "1000"
+[case.expect]
+stt = "20"
+
+[[case]]
+id = "charges-fut_index-sell-2026-04-01-full"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 75 x 24500 = 1837500; brokerage lower of flat 20 and 0.0003 x 1837500 = 551.2500 -> 20; STT 0.0005 x 1837500 = 918.7500 -> step 1 -> 919; exchange 0.000018299 x 1837500 = 33.624412500 -> 33.62; SEBI 0.000001 x 1837500 = 1.837500 -> 1.84; IPFT 0.000000001 x 1837500 = 0.001837500 -> 0.00; clearing 0.000005 x 1837500 = 9.187500 -> 9.19; stamp 0 x 1837500 = 0 -> 0.00; GST 0.18 x 64.65 (lines brokerage+exchange_txn+clearing+sebi+ipft) = 11.6370 -> 11.64; total 995.29; deductible 76.29"
+[case.input]
+on = 2026-04-01
+instrument_class = "fut_index"
+side = "sell"
+qty = "75"
+price = "24500"
+[case.expect]
+brokerage = "20.00"
+stt = "919"
+exchange_txn = "33.62"
+sebi = "1.84"
+ipft = "0.00"
+clearing = "9.19"
+stamp = "0.00"
+gst = "11.64"
+total = "995.29"
+deductible = "76.29"
+turnover = "1837500"
+
+[[case]]
+id = "charges-fut_index-sell-2026-04-01-stt"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; brokerage lower of flat 20 and 0.0003 x 100000 = 30.0000 -> 20; STT 0.0005 x 100000 = 50.0000 -> step 1 -> 50; exchange 0.000018299 x 100000 = 1.829900000 -> 1.83; SEBI 0.000001 x 100000 = 0.100000 -> 0.10; IPFT 0.000000001 x 100000 = 0.000100000 -> 0.00; clearing 0.000005 x 100000 = 0.500000 -> 0.50; stamp 0 x 100000 = 0 -> 0.00; GST 0.18 x 22.43 (lines brokerage+exchange_txn+clearing+sebi+ipft) = 4.0374 -> 4.04; total 76.47; deductible 26.47"
+boundary = ["charges.stt[instrument_class=fut_index,side=sell]@2026-04-01:after"]
+[case.input]
+on = 2026-04-01
+instrument_class = "fut_index"
+side = "sell"
+qty = "100"
+price = "1000"
+[case.expect]
+stt = "50"
+
+[[case]]
+id = "charges-mf_debt-buy-2010-04-01-stt"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; STT 0 x 100000 = 0 -> step 1 -> 0; stamp 0 x 100000 = 0 -> 0.00; GST 0.103 x 0 (lines none) = 0.000 -> 0.00; total 0.00; deductible 0.00"
+[case.input]
+on = 2010-04-01
+instrument_class = "mf_debt"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+stt = "0"
+
+[[case]]
+id = "charges-mf_debt-sell-2010-04-01-stt"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; STT 0 x 100000 = 0 -> step 1 -> 0; stamp 0 x 100000 = 0 -> 0.00; GST 0.103 x 0 (lines none) = 0.000 -> 0.00; total 0.00; deductible 0.00"
+[case.input]
+on = 2010-04-01
+instrument_class = "mf_debt"
+side = "sell"
+qty = "100"
+price = "1000"
+[case.expect]
+stt = "0"
+
+[[case]]
+id = "charges-mf_debt-sell-2022-08-10-full"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 120.5 x 1045.7 = 126006.85; STT 0 x 126006.85 = 0.00 -> step 1 -> 0; stamp 0 x 126006.85 = 0.00 -> 0.00; GST 0.18 x 0 (lines none) = 0.00 -> 0.00; total 0.00; deductible 0.00"
+[case.input]
+on = 2022-08-10
+instrument_class = "mf_debt"
+side = "sell"
+qty = "120.5"
+price = "1045.7"
+[case.expect]
+stt = "0"
+stamp = "0.00"
+gst = "0.00"
+total = "0.00"
+deductible = "0.00"
+turnover = "126006.85"
+
+[[case]]
+id = "charges-mf_equity-buy-2010-04-01-stamp"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; STT 0 x 100000 = 0 -> step 1 -> 0; stamp 0 x 100000 = 0 -> 0.00; GST 0.103 x 0 (lines none) = 0.000 -> 0.00; total 0.00; deductible 0.00"
+[case.input]
+on = 2010-04-01
+instrument_class = "mf_equity"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+stamp = "0.00"
+
+[[case]]
+id = "charges-mf_equity-buy-2010-04-01-stt"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; STT 0 x 100000 = 0 -> step 1 -> 0; stamp 0 x 100000 = 0 -> 0.00; GST 0.103 x 0 (lines none) = 0.000 -> 0.00; total 0.00; deductible 0.00"
+[case.input]
+on = 2010-04-01
+instrument_class = "mf_equity"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+stt = "0"
+
+[[case]]
+id = "charges-mf_equity-buy-2013-06-01-full"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 48.213 x 812.4 = 39168.2412; STT 0 x 39168.2412 = 0.0000 -> step 1 -> 0; stamp 0 x 39168.2412 = 0.0000 -> 0.00; GST 0.1236 x 0 (lines none) = 0.0000 -> 0.00; total 0.00; deductible 0.00"
+[case.input]
+on = 2013-06-01
+instrument_class = "mf_equity"
+side = "buy"
+qty = "48.213"
+price = "812.4"
+[case.expect]
+stt = "0"
+stamp = "0.00"
+gst = "0.00"
+total = "0.00"
+deductible = "0.00"
+turnover = "39168.2412"
+
+[[case]]
+id = "charges-mf_equity-buy-2020-06-30-stamp"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; STT 0 x 100000 = 0 -> step 1 -> 0; stamp 0 x 100000 = 0 -> 0.00; GST 0.18 x 0 (lines none) = 0.00 -> 0.00; total 0.00; deductible 0.00"
+boundary = ["charges.stamp[segment=mf,side=buy]@2020-07-01:before"]
+[case.input]
+on = 2020-06-30
+instrument_class = "mf_equity"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+stamp = "0.00"
+
+[[case]]
+id = "charges-mf_equity-buy-2020-07-01-stamp"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; STT 0 x 100000 = 0 -> step 1 -> 0; stamp 0.00005 x 100000 = 5.00000 -> 5.00; GST 0.18 x 0 (lines none) = 0.00 -> 0.00; total 5.00; deductible 5.00"
+boundary = ["charges.stamp[segment=mf,side=buy]@2020-07-01:after"]
+[case.input]
+on = 2020-07-01
+instrument_class = "mf_equity"
+side = "buy"
+qty = "100"
+price = "1000"
+[case.expect]
+stamp = "5.00"
+
+[[case]]
+id = "charges-mf_equity-sell-2010-04-01-stamp"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; STT 0.0025 x 100000 = 250.0000 -> step 1 -> 250; stamp 0 x 100000 = 0 -> 0.00; GST 0.103 x 0 (lines none) = 0.000 -> 0.00; total 250.00; deductible 0.00"
+[case.input]
+on = 2010-04-01
+instrument_class = "mf_equity"
+side = "sell"
+qty = "100"
+price = "1000"
+[case.expect]
+stamp = "0.00"
+
+[[case]]
+id = "charges-mf_equity-sell-2010-04-01-stt"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; STT 0.0025 x 100000 = 250.0000 -> step 1 -> 250; stamp 0 x 100000 = 0 -> 0.00; GST 0.103 x 0 (lines none) = 0.000 -> 0.00; total 250.00; deductible 0.00"
+[case.input]
+on = 2010-04-01
+instrument_class = "mf_equity"
+side = "sell"
+qty = "100"
+price = "1000"
+[case.expect]
+stt = "250"
+
+[[case]]
+id = "charges-mf_equity-sell-2013-05-31-stt"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; STT 0.0025 x 100000 = 250.0000 -> step 1 -> 250; stamp 0 x 100000 = 0 -> 0.00; GST 0.1236 x 0 (lines none) = 0.0000 -> 0.00; total 250.00; deductible 0.00"
+boundary = ["charges.stt[instrument_class=mf_equity,side=sell]@2013-06-01:before"]
+[case.input]
+on = 2013-05-31
+instrument_class = "mf_equity"
+side = "sell"
+qty = "100"
+price = "1000"
+[case.expect]
+stt = "250"
+
+[[case]]
+id = "charges-mf_equity-sell-2013-06-01-full"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 48.213 x 812.4 = 39168.2412; STT 0.00001 x 39168.2412 = 0.391682412 -> step 1 -> 0; stamp 0 x 39168.2412 = 0.0000 -> 0.00; GST 0.1236 x 0 (lines none) = 0.0000 -> 0.00; total 0.00; deductible 0.00"
+[case.input]
+on = 2013-06-01
+instrument_class = "mf_equity"
+side = "sell"
+qty = "48.213"
+price = "812.4"
+[case.expect]
+stt = "0"
+stamp = "0.00"
+gst = "0.00"
+total = "0.00"
+deductible = "0.00"
+turnover = "39168.2412"
+
+[[case]]
+id = "charges-mf_equity-sell-2013-06-01-stt"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; STT 0.00001 x 100000 = 1.00000 -> step 1 -> 1; stamp 0 x 100000 = 0 -> 0.00; GST 0.1236 x 0 (lines none) = 0.0000 -> 0.00; total 1.00; deductible 0.00"
+boundary = ["charges.stt[instrument_class=mf_equity,side=sell]@2013-06-01:after"]
+[case.input]
+on = 2013-06-01
+instrument_class = "mf_equity"
+side = "sell"
+qty = "100"
+price = "1000"
+[case.expect]
+stt = "1"
+
+[[case]]
+id = "charges-mf_equity-sell-2020-06-30-stamp"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; STT 0.00001 x 100000 = 1.00000 -> step 1 -> 1; stamp 0 x 100000 = 0 -> 0.00; GST 0.18 x 0 (lines none) = 0.00 -> 0.00; total 1.00; deductible 0.00"
+boundary = ["charges.stamp[segment=mf,side=sell]@2020-07-01:before"]
+[case.input]
+on = 2020-06-30
+instrument_class = "mf_equity"
+side = "sell"
+qty = "100"
+price = "1000"
+[case.expect]
+stamp = "0.00"
+
+[[case]]
+id = "charges-mf_equity-sell-2020-07-01-stamp"
+kind = "charges"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "turnover 100 x 1000 = 100000; STT 0.00001 x 100000 = 1.00000 -> step 1 -> 1; stamp 0 x 100000 = 0 -> 0.00; GST 0.18 x 0 (lines none) = 0.00 -> 0.00; total 1.00; deductible 0.00"
+boundary = ["charges.stamp[segment=mf,side=sell]@2020-07-01:after"]
+[case.input]
+on = 2020-07-01
+instrument_class = "mf_equity"
+side = "sell"
+qty = "100"
+price = "1000"
+[case.expect]
+stamp = "0.00"
+
+[[case]]
+id = "dp-2010-04-01"
+kind = "dp"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "broker 20 + depository 5.5 = 25.5; GST 0.103 x 25.5 = 2.63; total 28.13; basis per_sale"
+[case.input]
+on = 2010-04-01
+[case.expect]
+total = "28.13"
+basis = "per_sale"
+
+[[case]]
+id = "dp-2012-03-31"
+kind = "dp"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "broker 20 + depository 5.5 = 25.5; GST 0.103 x 25.5 = 2.63; total 28.13; basis per_sale"
+boundary = ["charges.gst[]@2012-04-01:before"]
+[case.input]
+on = 2012-03-31
+[case.expect]
+total = "28.13"
+basis = "per_sale"
+
+[[case]]
+id = "dp-2012-04-01"
+kind = "dp"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "broker 20 + depository 5.5 = 25.5; GST 0.1236 x 25.5 = 3.15; total 28.65; basis per_sale"
+boundary = ["charges.gst[]@2012-04-01:after"]
+[case.input]
+on = 2012-04-01
+[case.expect]
+total = "28.65"
+basis = "per_sale"
+
+[[case]]
+id = "dp-2015-05-31"
+kind = "dp"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "broker 20 + depository 5.5 = 25.5; GST 0.1236 x 25.5 = 3.15; total 28.65; basis per_sale"
+boundary = ["charges.gst[]@2015-06-01:before"]
+[case.input]
+on = 2015-05-31
+[case.expect]
+total = "28.65"
+basis = "per_sale"
+
+[[case]]
+id = "dp-2015-06-01"
+kind = "dp"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "broker 20 + depository 5.5 = 25.5; GST 0.14 x 25.5 = 3.57; total 29.07; basis per_sale"
+boundary = ["charges.gst[]@2015-06-01:after"]
+[case.input]
+on = 2015-06-01
+[case.expect]
+total = "29.07"
+basis = "per_sale"
+
+[[case]]
+id = "dp-2015-11-14"
+kind = "dp"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "broker 20 + depository 5.5 = 25.5; GST 0.14 x 25.5 = 3.57; total 29.07; basis per_sale"
+boundary = ["charges.gst[]@2015-11-15:before"]
+[case.input]
+on = 2015-11-14
+[case.expect]
+total = "29.07"
+basis = "per_sale"
+
+[[case]]
+id = "dp-2015-11-15"
+kind = "dp"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "broker 20 + depository 5.5 = 25.5; GST 0.145 x 25.5 = 3.70; total 29.20; basis per_sale"
+boundary = ["charges.gst[]@2015-11-15:after"]
+[case.input]
+on = 2015-11-15
+[case.expect]
+total = "29.20"
+basis = "per_sale"
+
+[[case]]
+id = "dp-2016-05-31"
+kind = "dp"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "broker 20 + depository 5.5 = 25.5; GST 0.145 x 25.5 = 3.70; total 29.20; basis per_sale"
+boundary = ["charges.gst[]@2016-06-01:before"]
+[case.input]
+on = 2016-05-31
+[case.expect]
+total = "29.20"
+basis = "per_sale"
+
+[[case]]
+id = "dp-2016-06-01"
+kind = "dp"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "broker 20 + depository 5.5 = 25.5; GST 0.15 x 25.5 = 3.83; total 29.33; basis per_sale"
+boundary = ["charges.gst[]@2016-06-01:after"]
+[case.input]
+on = 2016-06-01
+[case.expect]
+total = "29.33"
+basis = "per_sale"
+
+[[case]]
+id = "dp-2017-06-30"
+kind = "dp"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "broker 20 + depository 5.5 = 25.5; GST 0.15 x 25.5 = 3.83; total 29.33; basis per_sale"
+boundary = ["charges.gst[]@2017-07-01:before"]
+[case.input]
+on = 2017-06-30
+[case.expect]
+total = "29.33"
+basis = "per_sale"
+
+[[case]]
+id = "dp-2017-07-01"
+kind = "dp"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "broker 20 + depository 5.5 = 25.5; GST 0.18 x 25.5 = 4.59; total 30.09; basis per_sale"
+boundary = ["charges.gst[]@2017-07-01:after"]
+[case.input]
+on = 2017-07-01
+[case.expect]
+total = "30.09"
+basis = "per_sale"
+
+[[case]]
+id = "dp-2018-09-14"
+kind = "dp"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "broker 20 + depository 5.5 = 25.5; GST 0.18 x 25.5 = 4.59; total 30.09; basis per_sale"
+boundary = ["fyers.dp[]@2018-09-15:before"]
+[case.input]
+on = 2018-09-14
+[case.expect]
+total = "30.09"
+basis = "per_sale"
+
+[[case]]
+id = "dp-2018-09-15"
+kind = "dp"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "broker 20 + depository 5.5 = 25.5; GST 0.18 x 25.5 = 4.59; total 30.09; basis per_sale"
+boundary = ["fyers.dp[]@2018-09-15:after"]
+[case.input]
+on = 2018-09-15
+[case.expect]
+total = "30.09"
+basis = "per_sale"
+
+[[case]]
+id = "dp-2019-11-14"
+kind = "dp"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "broker 20 + depository 5.5 = 25.5; GST 0.18 x 25.5 = 4.59; total 30.09; basis per_sale"
+boundary = ["charges.dp_depository[]@2019-11-15:before", "fyers.dp[]@2019-11-15:before"]
+[case.input]
+on = 2019-11-14
+[case.expect]
+total = "30.09"
+basis = "per_sale"
+
+[[case]]
+id = "dp-2019-11-15"
+kind = "dp"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "broker 10 + depository 5.5 = 15.5; GST 0.18 x 15.5 = 2.79; total 18.29; basis per_sale"
+boundary = ["charges.dp_depository[]@2019-11-15:after", "fyers.dp[]@2019-11-15:after"]
+[case.input]
+on = 2019-11-15
+[case.expect]
+total = "18.29"
+basis = "per_sale"
+
+[[case]]
+id = "dp-2021-08-12"
+kind = "dp"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "broker 10 + depository 5.5 = 15.5; GST 0.18 x 15.5 = 2.79; total 18.29; basis per_sale"
+boundary = ["fyers.dp[]@2021-08-13:before"]
+[case.input]
+on = 2021-08-12
+[case.expect]
+total = "18.29"
+basis = "per_sale"
+
+[[case]]
+id = "dp-2021-08-13"
+kind = "dp"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "broker 7 + depository 5.5 = 12.5; GST 0.18 x 12.5 = 2.25; total 14.75; basis per_sale"
+boundary = ["fyers.dp[]@2021-08-13:after"]
+[case.input]
+on = 2021-08-13
+[case.expect]
+total = "14.75"
+basis = "per_sale"
+
+[[case]]
+id = "dp-2023-06-04"
+kind = "dp"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "broker 7 + depository 5.5 = 12.5; GST 0.18 x 12.5 = 2.25; total 14.75; basis per_sale"
+boundary = ["charges.gst[]@2023-06-05:before"]
+[case.input]
+on = 2023-06-04
+[case.expect]
+total = "14.75"
+basis = "per_sale"
+
+[[case]]
+id = "dp-2023-06-05"
+kind = "dp"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "broker 7 + depository 5.5 = 12.5; GST 0.18 x 12.5 = 2.25; total 14.75; basis per_sale"
+boundary = ["charges.gst[]@2023-06-05:after"]
+[case.input]
+on = 2023-06-05
+[case.expect]
+total = "14.75"
+basis = "per_sale"
+
+[[case]]
+id = "dp-2024-09-30"
+kind = "dp"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "broker 7 + depository 5.5 = 12.5; GST 0.18 x 12.5 = 2.25; total 14.75; basis per_sale"
+boundary = ["charges.dp_depository[]@2024-10-01:before", "fyers.dp[]@2024-10-01:before"]
+[case.input]
+on = 2024-09-30
+[case.expect]
+total = "14.75"
+basis = "per_sale"
+
+[[case]]
+id = "dp-2024-10-01"
+kind = "dp"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "broker 0 + depository 3.5 = 3.5; GST 0.18 x 3.5 = 0.63; total 4.13; basis per_sale"
+boundary = ["charges.dp_depository[]@2024-10-01:after", "fyers.dp[]@2024-10-01:after"]
+[case.input]
+on = 2024-10-01
+[case.expect]
+total = "4.13"
+basis = "per_sale"
+
+[[case]]
+id = "dp-2025-03-16"
+kind = "dp"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "broker 0 + depository 3.5 = 3.5; GST 0.18 x 3.5 = 0.63; total 4.13; basis per_sale"
+boundary = ["charges.gst[]@2025-03-17:before"]
+[case.input]
+on = 2025-03-16
+[case.expect]
+total = "4.13"
+basis = "per_sale"
+
+[[case]]
+id = "dp-2025-03-17"
+kind = "dp"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "broker 0 + depository 3.5 = 3.5; GST 0.18 x 3.5 = 0.63; total 4.13; basis per_sale"
+boundary = ["charges.gst[]@2025-03-17:after"]
+[case.input]
+on = 2025-03-17
+[case.expect]
+total = "4.13"
+basis = "per_sale"
+
+[[case]]
+id = "dp-2025-06-01"
+kind = "dp"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "broker 0 + depository 3.5 = 3.5; GST 0.18 x 3.5 = 0.63; total 4.13; basis per_sale"
+boundary = ["fyers.dp[]@2025-06-02:before"]
+[case.input]
+on = 2025-06-01
+[case.expect]
+total = "4.13"
+basis = "per_sale"
+
+[[case]]
+id = "dp-2025-06-02"
+kind = "dp"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "broker 9 + depository 3.5 = 12.5; GST 0.18 x 12.5 = 2.25; total 14.75; basis per_isin_per_day"
+boundary = ["fyers.dp[]@2025-06-02:after"]
+[case.input]
+on = 2025-06-02
+[case.expect]
+total = "14.75"
+basis = "per_isin_per_day"
+
+[[case]]
+id = "opening-2010-04-01"
+kind = "account_opening"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "opening fee 0 on 2010-04-01; GST 0.103 x 0 = 0.00; total 0.00"
+[case.input]
+opened = 2010-04-01
+[case.expect]
+total = "0.00"
+
+[[case]]
+id = "opening-2020-03-31"
+kind = "account_opening"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "opening fee 0 on 2020-03-31; GST 0.18 x 0 = 0.00; total 0.00"
+boundary = ["fyers.account_opening[]@2020-04-01:before"]
+[case.input]
+opened = 2020-03-31
+[case.expect]
+total = "0.00"
+
+[[case]]
+id = "opening-2020-04-01"
+kind = "account_opening"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "opening fee 400 on 2020-04-01; GST 0.18 x 400 = 72.00; total 472.00"
+boundary = ["fyers.account_opening[]@2020-04-01:after"]
+[case.input]
+opened = 2020-04-01
+[case.expect]
+total = "472.00"
+
+[[case]]
+id = "opening-2020-11-23"
+kind = "account_opening"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "opening fee 400 on 2020-11-23; GST 0.18 x 400 = 72.00; total 472.00"
+boundary = ["fyers.account_opening[]@2020-11-24:before"]
+[case.input]
+opened = 2020-11-23
+[case.expect]
+total = "472.00"
+
+[[case]]
+id = "opening-2020-11-24"
+kind = "account_opening"
+source = "rates from the sources via tests/golden/charges_rules.toml and fyers.toml (S1 to S39); arithmetic worked independently, see work"
+work = "opening fee 0 on 2020-11-24; GST 0.18 x 0 = 0.00; total 0.00"
+boundary = ["fyers.account_opening[]@2020-11-24:after"]
+[case.input]
+opened = 2020-11-24
+[case.expect]
+total = "0.00"

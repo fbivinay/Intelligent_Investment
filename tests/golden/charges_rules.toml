@@ -1,0 +1,1009 @@
+[[case]]
+id = "charges.stt-etf_equity-buy-2012-06-30"
+kind = "rule_value"
+source = "S18 delivery-based units of an equity oriented fund: existing 0.125%"
+table = "charges.stt"
+on = 2012-06-30
+key = { instrument_class = "etf_equity", side = "buy" }
+boundary = ["charges.stt[instrument_class=etf_equity,side=buy]@2012-07-01:before"]
+[case.expect]
+value = "0.00125"
+round_step = "1"
+
+[[case]]
+id = "charges.stt-etf_equity-buy-2012-07-01"
+kind = "rule_value"
+source = "S18 reduced to 0.1% w.e.f. 1st July 2012"
+table = "charges.stt"
+on = 2012-07-01
+key = { instrument_class = "etf_equity", side = "buy" }
+boundary = ["charges.stt[instrument_class=etf_equity,side=buy]@2012-07-01:after"]
+[case.expect]
+value = "0.001"
+round_step = "1"
+
+[[case]]
+id = "charges.stt-etf_equity-buy-2013-05-31"
+kind = "rule_value"
+source = "S19 existing rate 0.1% before June 2013"
+table = "charges.stt"
+on = 2013-05-31
+key = { instrument_class = "etf_equity", side = "buy" }
+boundary = ["charges.stt[instrument_class=etf_equity,side=buy]@2013-06-01:before"]
+[case.expect]
+value = "0.001"
+round_step = "1"
+
+[[case]]
+id = "charges.stt-etf_equity-buy-2013-06-01"
+kind = "rule_value"
+source = "S19 delivery based purchase of units of an equity oriented fund: Nil"
+table = "charges.stt"
+on = 2013-06-01
+key = { instrument_class = "etf_equity", side = "buy" }
+boundary = ["charges.stt[instrument_class=etf_equity,side=buy]@2013-06-01:after"]
+[case.expect]
+value = "0"
+round_step = "1"
+
+[[case]]
+id = "charges.stt-etf_equity-sell-2012-06-30"
+kind = "rule_value"
+source = "S18 delivery-based units of an equity oriented fund: existing 0.125%"
+table = "charges.stt"
+on = 2012-06-30
+key = { instrument_class = "etf_equity", side = "sell" }
+boundary = ["charges.stt[instrument_class=etf_equity,side=sell]@2012-07-01:before"]
+[case.expect]
+value = "0.00125"
+round_step = "1"
+
+[[case]]
+id = "charges.stt-etf_equity-sell-2012-07-01"
+kind = "rule_value"
+source = "S18 reduced to 0.1% w.e.f. 1st July 2012"
+table = "charges.stt"
+on = 2012-07-01
+key = { instrument_class = "etf_equity", side = "sell" }
+boundary = ["charges.stt[instrument_class=etf_equity,side=sell]@2012-07-01:after"]
+[case.expect]
+value = "0.001"
+round_step = "1"
+
+[[case]]
+id = "charges.stt-etf_equity-sell-2013-05-31"
+kind = "rule_value"
+source = "S19 existing rate 0.1% before June 2013"
+table = "charges.stt"
+on = 2013-05-31
+key = { instrument_class = "etf_equity", side = "sell" }
+boundary = ["charges.stt[instrument_class=etf_equity,side=sell]@2013-06-01:before"]
+[case.expect]
+value = "0.001"
+round_step = "1"
+
+[[case]]
+id = "charges.stt-etf_equity-sell-2013-06-01"
+kind = "rule_value"
+source = "S19 delivery based sale of units of an equity oriented fund: 0.001 per cent"
+table = "charges.stt"
+on = 2013-06-01
+key = { instrument_class = "etf_equity", side = "sell" }
+boundary = ["charges.stt[instrument_class=etf_equity,side=sell]@2013-06-01:after"]
+[case.expect]
+value = "0.00001"
+round_step = "1"
+
+[[case]]
+id = "charges.stt-mf_equity-buy-2010-04-01"
+kind = "rule_value"
+source = "S19 only sales of units are taxable; no STT on subscription"
+table = "charges.stt"
+on = 2010-04-01
+key = { instrument_class = "mf_equity", side = "buy" }
+[case.expect]
+value = "0"
+round_step = "1"
+
+[[case]]
+id = "charges.stt-mf_equity-sell-2013-05-31"
+kind = "rule_value"
+source = "S19 sale of a unit of an equity oriented fund to the mutual fund: existing 0.25"
+table = "charges.stt"
+on = 2013-05-31
+key = { instrument_class = "mf_equity", side = "sell" }
+boundary = ["charges.stt[instrument_class=mf_equity,side=sell]@2013-06-01:before"]
+[case.expect]
+value = "0.0025"
+round_step = "1"
+
+[[case]]
+id = "charges.stt-mf_equity-sell-2013-06-01"
+kind = "rule_value"
+source = "S19 sale to the mutual fund: 0.001 per cent from 1st June 2013"
+table = "charges.stt"
+on = 2013-06-01
+key = { instrument_class = "mf_equity", side = "sell" }
+boundary = ["charges.stt[instrument_class=mf_equity,side=sell]@2013-06-01:after"]
+[case.expect]
+value = "0.00001"
+round_step = "1"
+
+[[case]]
+id = "charges.stt-etf_gold-buy-2010-04-01"
+kind = "rule_value"
+source = "S23 no STT item for units that are not equity oriented"
+table = "charges.stt"
+on = 2010-04-01
+key = { instrument_class = "etf_gold", side = "buy" }
+[case.expect]
+value = "0"
+round_step = "1"
+
+[[case]]
+id = "charges.stt-etf_gold-sell-2010-04-01"
+kind = "rule_value"
+source = "S23 no STT item for units that are not equity oriented"
+table = "charges.stt"
+on = 2010-04-01
+key = { instrument_class = "etf_gold", side = "sell" }
+[case.expect]
+value = "0"
+round_step = "1"
+
+[[case]]
+id = "charges.stt-mf_debt-buy-2010-04-01"
+kind = "rule_value"
+source = "S23 no STT item for units that are not equity oriented"
+table = "charges.stt"
+on = 2010-04-01
+key = { instrument_class = "mf_debt", side = "buy" }
+[case.expect]
+value = "0"
+round_step = "1"
+
+[[case]]
+id = "charges.stt-mf_debt-sell-2010-04-01"
+kind = "rule_value"
+source = "S23 no STT item for units that are not equity oriented"
+table = "charges.stt"
+on = 2010-04-01
+key = { instrument_class = "mf_debt", side = "sell" }
+[case.expect]
+value = "0"
+round_step = "1"
+
+[[case]]
+id = "charges.stt-fut_index-buy-2010-04-01"
+kind = "rule_value"
+source = "S23 STT on futures is payable by the seller"
+table = "charges.stt"
+on = 2010-04-01
+key = { instrument_class = "fut_index", side = "buy" }
+[case.expect]
+value = "0"
+round_step = "1"
+
+[[case]]
+id = "charges.stt-fut_index-sell-2013-05-31"
+kind = "rule_value"
+source = "S19 sale of a futures in securities: existing 0.017 per cent"
+table = "charges.stt"
+on = 2013-05-31
+key = { instrument_class = "fut_index", side = "sell" }
+boundary = ["charges.stt[instrument_class=fut_index,side=sell]@2013-06-01:before"]
+[case.expect]
+value = "0.00017"
+round_step = "1"
+
+[[case]]
+id = "charges.stt-fut_index-sell-2013-06-01"
+kind = "rule_value"
+source = "S19 futures 0.01 per cent from 1st June 2013"
+table = "charges.stt"
+on = 2013-06-01
+key = { instrument_class = "fut_index", side = "sell" }
+boundary = ["charges.stt[instrument_class=fut_index,side=sell]@2013-06-01:after"]
+[case.expect]
+value = "0.0001"
+round_step = "1"
+
+[[case]]
+id = "charges.stt-fut_index-sell-2023-03-31"
+kind = "rule_value"
+source = "S21 up to March 31, 2023 the rate on futures was 0.01%"
+table = "charges.stt"
+on = 2023-03-31
+key = { instrument_class = "fut_index", side = "sell" }
+boundary = ["charges.stt[instrument_class=fut_index,side=sell]@2023-04-01:before"]
+[case.expect]
+value = "0.0001"
+round_step = "1"
+
+[[case]]
+id = "charges.stt-fut_index-sell-2023-04-01"
+kind = "rule_value"
+source = "S21 futures revised to 0.0125% from April 1, 2023"
+table = "charges.stt"
+on = 2023-04-01
+key = { instrument_class = "fut_index", side = "sell" }
+boundary = ["charges.stt[instrument_class=fut_index,side=sell]@2023-04-01:after"]
+[case.expect]
+value = "0.000125"
+round_step = "1"
+
+[[case]]
+id = "charges.stt-fut_index-sell-2024-09-30"
+kind = "rule_value"
+source = "S22 up to September 30, 2024 the rate on futures was 0.0125%"
+table = "charges.stt"
+on = 2024-09-30
+key = { instrument_class = "fut_index", side = "sell" }
+boundary = ["charges.stt[instrument_class=fut_index,side=sell]@2024-10-01:before"]
+[case.expect]
+value = "0.000125"
+round_step = "1"
+
+[[case]]
+id = "charges.stt-fut_index-sell-2024-10-01"
+kind = "rule_value"
+source = "S22 futures revised to 0.02% from October 1, 2024"
+table = "charges.stt"
+on = 2024-10-01
+key = { instrument_class = "fut_index", side = "sell" }
+boundary = ["charges.stt[instrument_class=fut_index,side=sell]@2024-10-01:after"]
+[case.expect]
+value = "0.0002"
+round_step = "1"
+
+[[case]]
+id = "charges.stt-fut_index-sell-2026-03-31"
+kind = "rule_value"
+source = "S23 up to March 31, 2026 the rate on futures was 0.02%"
+table = "charges.stt"
+on = 2026-03-31
+key = { instrument_class = "fut_index", side = "sell" }
+boundary = ["charges.stt[instrument_class=fut_index,side=sell]@2026-04-01:before"]
+[case.expect]
+value = "0.0002"
+round_step = "1"
+
+[[case]]
+id = "charges.stt-fut_index-sell-2026-04-01"
+kind = "rule_value"
+source = "S23 futures 0.05% w.e.f. April 1, 2026"
+table = "charges.stt"
+on = 2026-04-01
+key = { instrument_class = "fut_index", side = "sell" }
+boundary = ["charges.stt[instrument_class=fut_index,side=sell]@2026-04-01:after"]
+[case.expect]
+value = "0.0005"
+round_step = "1"
+
+[[case]]
+id = "charges.exchange_txn-NSE-delivery-2020-12-31"
+kind = "rule_value"
+source = "S25 existing Rs 3.25 each side per lakh (cash)"
+table = "charges.exchange_txn"
+on = 2020-12-31
+key = { exchange = "NSE", segment = "delivery" }
+boundary = ["charges.exchange_txn[exchange=NSE,segment=delivery]@2021-01-01:before"]
+[case.expect]
+value = "0.0000325"
+
+[[case]]
+id = "charges.exchange_txn-NSE-delivery-2021-01-01"
+kind = "rule_value"
+source = "S25 revised Rs 3.45 each side per lakh from January 01, 2021"
+table = "charges.exchange_txn"
+on = 2021-01-01
+key = { exchange = "NSE", segment = "delivery" }
+boundary = ["charges.exchange_txn[exchange=NSE,segment=delivery]@2021-01-01:after"]
+[case.expect]
+value = "0.0000345"
+
+[[case]]
+id = "charges.exchange_txn-NSE-delivery-2023-03-31"
+kind = "rule_value"
+source = "S26 existing Rs 3.45 before April 01, 2023"
+table = "charges.exchange_txn"
+on = 2023-03-31
+key = { exchange = "NSE", segment = "delivery" }
+boundary = ["charges.exchange_txn[exchange=NSE,segment=delivery]@2023-04-01:before"]
+[case.expect]
+value = "0.0000345"
+
+[[case]]
+id = "charges.exchange_txn-NSE-delivery-2023-04-01"
+kind = "rule_value"
+source = "S26 cash revised Rs 3.25 from April 01, 2023"
+table = "charges.exchange_txn"
+on = 2023-04-01
+key = { exchange = "NSE", segment = "delivery" }
+boundary = ["charges.exchange_txn[exchange=NSE,segment=delivery]@2023-04-01:after"]
+[case.expect]
+value = "0.0000325"
+
+[[case]]
+id = "charges.exchange_txn-NSE-delivery-2024-03-31"
+kind = "rule_value"
+source = "S27 existing Rs 3.25 before April 01, 2024"
+table = "charges.exchange_txn"
+on = 2024-03-31
+key = { exchange = "NSE", segment = "delivery" }
+boundary = ["charges.exchange_txn[exchange=NSE,segment=delivery]@2024-04-01:before"]
+[case.expect]
+value = "0.0000325"
+
+[[case]]
+id = "charges.exchange_txn-NSE-delivery-2024-04-01"
+kind = "rule_value"
+source = "S27 cash revised Rs 3.22 from April 01, 2024"
+table = "charges.exchange_txn"
+on = 2024-04-01
+key = { exchange = "NSE", segment = "delivery" }
+boundary = ["charges.exchange_txn[exchange=NSE,segment=delivery]@2024-04-01:after"]
+[case.expect]
+value = "0.0000322"
+
+[[case]]
+id = "charges.exchange_txn-NSE-delivery-2024-09-30"
+kind = "rule_value"
+source = "S28 old charge Rs 3.22 before October 1, 2024"
+table = "charges.exchange_txn"
+on = 2024-09-30
+key = { exchange = "NSE", segment = "delivery" }
+boundary = ["charges.exchange_txn[exchange=NSE,segment=delivery]@2024-10-01:before"]
+[case.expect]
+value = "0.0000322"
+
+[[case]]
+id = "charges.exchange_txn-NSE-delivery-2024-10-01"
+kind = "rule_value"
+source = "S28 cash Rs. 2.97 each side per lakh from October 1, 2024"
+table = "charges.exchange_txn"
+on = 2024-10-01
+key = { exchange = "NSE", segment = "delivery" }
+boundary = ["charges.exchange_txn[exchange=NSE,segment=delivery]@2024-10-01:after"]
+[case.expect]
+value = "0.0000297"
+
+[[case]]
+id = "charges.exchange_txn-NSE-delivery-2026-02-28"
+kind = "rule_value"
+source = "S29 existing Rs 297 per crore before March 1, 2026"
+table = "charges.exchange_txn"
+on = 2026-02-28
+key = { exchange = "NSE", segment = "delivery" }
+boundary = ["charges.exchange_txn[exchange=NSE,segment=delivery]@2026-03-01:before"]
+[case.expect]
+value = "0.0000297"
+
+[[case]]
+id = "charges.exchange_txn-NSE-delivery-2026-03-01"
+kind = "rule_value"
+source = "S29 cash Rs. 306.99 each side per crore from March 1, 2026"
+table = "charges.exchange_txn"
+on = 2026-03-01
+key = { exchange = "NSE", segment = "delivery" }
+boundary = ["charges.exchange_txn[exchange=NSE,segment=delivery]@2026-03-01:after"]
+[case.expect]
+value = "0.000030699"
+
+[[case]]
+id = "charges.exchange_txn-NSE-futures-2020-12-31"
+kind = "rule_value"
+source = "S25 existing Rs 1.90 each side per lakh (equity futures)"
+table = "charges.exchange_txn"
+on = 2020-12-31
+key = { exchange = "NSE", segment = "futures" }
+boundary = ["charges.exchange_txn[exchange=NSE,segment=futures]@2021-01-01:before"]
+[case.expect]
+value = "0.000019"
+
+[[case]]
+id = "charges.exchange_txn-NSE-futures-2021-01-01"
+kind = "rule_value"
+source = "S25 revised Rs 2.00 each side per lakh from January 01, 2021"
+table = "charges.exchange_txn"
+on = 2021-01-01
+key = { exchange = "NSE", segment = "futures" }
+boundary = ["charges.exchange_txn[exchange=NSE,segment=futures]@2021-01-01:after"]
+[case.expect]
+value = "0.00002"
+
+[[case]]
+id = "charges.exchange_txn-NSE-futures-2023-03-31"
+kind = "rule_value"
+source = "S26 existing Rs 2.00 before April 01, 2023"
+table = "charges.exchange_txn"
+on = 2023-03-31
+key = { exchange = "NSE", segment = "futures" }
+boundary = ["charges.exchange_txn[exchange=NSE,segment=futures]@2023-04-01:before"]
+[case.expect]
+value = "0.00002"
+
+[[case]]
+id = "charges.exchange_txn-NSE-futures-2023-04-01"
+kind = "rule_value"
+source = "S26 equity futures revised Rs 1.90 from April 01, 2023"
+table = "charges.exchange_txn"
+on = 2023-04-01
+key = { exchange = "NSE", segment = "futures" }
+boundary = ["charges.exchange_txn[exchange=NSE,segment=futures]@2023-04-01:after"]
+[case.expect]
+value = "0.000019"
+
+[[case]]
+id = "charges.exchange_txn-NSE-futures-2024-03-31"
+kind = "rule_value"
+source = "S27 existing Rs 1.90 before April 01, 2024"
+table = "charges.exchange_txn"
+on = 2024-03-31
+key = { exchange = "NSE", segment = "futures" }
+boundary = ["charges.exchange_txn[exchange=NSE,segment=futures]@2024-04-01:before"]
+[case.expect]
+value = "0.000019"
+
+[[case]]
+id = "charges.exchange_txn-NSE-futures-2024-04-01"
+kind = "rule_value"
+source = "S27 equity futures revised Rs 1.88 from April 01, 2024"
+table = "charges.exchange_txn"
+on = 2024-04-01
+key = { exchange = "NSE", segment = "futures" }
+boundary = ["charges.exchange_txn[exchange=NSE,segment=futures]@2024-04-01:after"]
+[case.expect]
+value = "0.0000188"
+
+[[case]]
+id = "charges.exchange_txn-NSE-futures-2024-09-30"
+kind = "rule_value"
+source = "S28 old charge 0.001880% before October 1, 2024 (also S14)"
+table = "charges.exchange_txn"
+on = 2024-09-30
+key = { exchange = "NSE", segment = "futures" }
+boundary = ["charges.exchange_txn[exchange=NSE,segment=futures]@2024-10-01:before"]
+[case.expect]
+value = "0.0000188"
+
+[[case]]
+id = "charges.exchange_txn-NSE-futures-2024-10-01"
+kind = "rule_value"
+source = "S28 equity futures Rs. 1.73 each side per lakh from October 1, 2024"
+table = "charges.exchange_txn"
+on = 2024-10-01
+key = { exchange = "NSE", segment = "futures" }
+boundary = ["charges.exchange_txn[exchange=NSE,segment=futures]@2024-10-01:after"]
+[case.expect]
+value = "0.0000173"
+
+[[case]]
+id = "charges.exchange_txn-NSE-futures-2026-02-28"
+kind = "rule_value"
+source = "S29 existing Rs 173 per crore before March 1, 2026"
+table = "charges.exchange_txn"
+on = 2026-02-28
+key = { exchange = "NSE", segment = "futures" }
+boundary = ["charges.exchange_txn[exchange=NSE,segment=futures]@2026-03-01:before"]
+[case.expect]
+value = "0.0000173"
+
+[[case]]
+id = "charges.exchange_txn-NSE-futures-2026-03-01"
+kind = "rule_value"
+source = "S29 equity futures Rs. 182.99 each side per crore from March 1, 2026"
+table = "charges.exchange_txn"
+on = 2026-03-01
+key = { exchange = "NSE", segment = "futures" }
+boundary = ["charges.exchange_txn[exchange=NSE,segment=futures]@2026-03-01:after"]
+[case.expect]
+value = "0.000018299"
+
+[[case]]
+id = "charges.ipft-NSE-delivery-2023-03-31"
+kind = "rule_value"
+source = "S26 existing Rs.0.01 per crore of the traded value"
+table = "charges.ipft"
+on = 2023-03-31
+key = { exchange = "NSE", segment = "delivery" }
+boundary = ["charges.ipft[exchange=NSE,segment=delivery]@2023-04-01:before"]
+[case.expect]
+value = "0.000000001"
+
+[[case]]
+id = "charges.ipft-NSE-delivery-2023-04-01"
+kind = "rule_value"
+source = "S26 recalibrated to Rs.10 per crore of the traded value from April 01, 2023"
+table = "charges.ipft"
+on = 2023-04-01
+key = { exchange = "NSE", segment = "delivery" }
+boundary = ["charges.ipft[exchange=NSE,segment=delivery]@2023-04-01:after"]
+[case.expect]
+value = "0.000001"
+
+[[case]]
+id = "charges.ipft-NSE-delivery-2026-02-28"
+kind = "rule_value"
+source = "S29 existing contribution Rs. 10 each side per crore"
+table = "charges.ipft"
+on = 2026-02-28
+key = { exchange = "NSE", segment = "delivery" }
+boundary = ["charges.ipft[exchange=NSE,segment=delivery]@2026-03-01:before"]
+[case.expect]
+value = "0.000001"
+
+[[case]]
+id = "charges.ipft-NSE-delivery-2026-03-01"
+kind = "rule_value"
+source = "S29 contribution to NSE IPFT Rs. 0.01 each side per crore from March 1, 2026"
+table = "charges.ipft"
+on = 2026-03-01
+key = { exchange = "NSE", segment = "delivery" }
+boundary = ["charges.ipft[exchange=NSE,segment=delivery]@2026-03-01:after"]
+[case.expect]
+value = "0.000000001"
+
+[[case]]
+id = "charges.ipft-NSE-futures-2023-03-31"
+kind = "rule_value"
+source = "S26 existing Rs.0.01 per crore of the traded value"
+table = "charges.ipft"
+on = 2023-03-31
+key = { exchange = "NSE", segment = "futures" }
+boundary = ["charges.ipft[exchange=NSE,segment=futures]@2023-04-01:before"]
+[case.expect]
+value = "0.000000001"
+
+[[case]]
+id = "charges.ipft-NSE-futures-2023-04-01"
+kind = "rule_value"
+source = "S26 recalibrated to Rs.10 per crore of the traded value from April 01, 2023"
+table = "charges.ipft"
+on = 2023-04-01
+key = { exchange = "NSE", segment = "futures" }
+boundary = ["charges.ipft[exchange=NSE,segment=futures]@2023-04-01:after"]
+[case.expect]
+value = "0.000001"
+
+[[case]]
+id = "charges.ipft-NSE-futures-2026-02-28"
+kind = "rule_value"
+source = "S29 existing contribution Rs. 10 each side per crore"
+table = "charges.ipft"
+on = 2026-02-28
+key = { exchange = "NSE", segment = "futures" }
+boundary = ["charges.ipft[exchange=NSE,segment=futures]@2026-03-01:before"]
+[case.expect]
+value = "0.000001"
+
+[[case]]
+id = "charges.ipft-NSE-futures-2026-03-01"
+kind = "rule_value"
+source = "S29 contribution to NSE IPFT Rs. 0.01 each side per crore from March 1, 2026"
+table = "charges.ipft"
+on = 2026-03-01
+key = { exchange = "NSE", segment = "futures" }
+boundary = ["charges.ipft[exchange=NSE,segment=futures]@2026-03-01:after"]
+[case.expect]
+value = "0.000000001"
+
+[[case]]
+id = "charges.sebi-2017-03-31"
+kind = "rule_value"
+source = "S34 Rs 20 per crore before the January 2017 cut took effect"
+table = "charges.sebi"
+on = 2017-03-31
+key = {  }
+boundary = ["charges.sebi[]@2017-04-01:before"]
+[case.expect]
+value = "0.000002"
+
+[[case]]
+id = "charges.sebi-2017-04-01"
+kind = "rule_value"
+source = "S34 Rs 15 per crore after the cut"
+table = "charges.sebi"
+on = 2017-04-01
+key = {  }
+boundary = ["charges.sebi[]@2017-04-01:after"]
+[case.expect]
+value = "0.0000015"
+
+[[case]]
+id = "charges.sebi-2019-03-31"
+kind = "rule_value"
+source = "S32 Board memorandum March 2019: current fee Rs.15/- per crore"
+table = "charges.sebi"
+on = 2019-03-31
+key = {  }
+boundary = ["charges.sebi[]@2019-04-01:before"]
+[case.expect]
+value = "0.0000015"
+
+[[case]]
+id = "charges.sebi-2019-04-01"
+kind = "rule_value"
+source = "S32 0.00010 per cent of turnover (Rs 10 per crore) from April 01, 2019"
+table = "charges.sebi"
+on = 2019-04-01
+key = {  }
+boundary = ["charges.sebi[]@2019-04-01:after"]
+[case.expect]
+value = "0.000001"
+
+[[case]]
+id = "charges.clearing-delivery-2010-04-01"
+kind = "rule_value"
+source = "S1 delivery clearing charges: 0"
+table = "charges.clearing"
+on = 2010-04-01
+key = { segment = "delivery" }
+[case.expect]
+value = "0"
+
+[[case]]
+id = "charges.clearing-futures-2018-03-03"
+kind = "rule_value"
+source = "S31 futures 0.0024% = 0.0019% + 0.0005% clearing (2018 calculator)"
+table = "charges.clearing"
+on = 2018-03-03
+key = { segment = "futures" }
+boundary = ["charges.clearing[segment=futures]@2018-03-04:before"]
+[case.expect]
+value = "0.000005"
+
+[[case]]
+id = "charges.clearing-futures-2018-03-04"
+kind = "rule_value"
+source = "S30 clearing charge 0.0005% for equity futures"
+table = "charges.clearing"
+on = 2018-03-04
+key = { segment = "futures" }
+boundary = ["charges.clearing[segment=futures]@2018-03-04:after"]
+[case.expect]
+value = "0.000005"
+
+[[case]]
+id = "charges.stamp-delivery-buy-2020-06-30"
+kind = "rule_value"
+source = "S31 Maharashtra delivery stamp duty 0.01% in Fyers' calculator"
+table = "charges.stamp"
+on = 2020-06-30
+key = { segment = "delivery", side = "buy" }
+boundary = ["charges.stamp[segment=delivery,side=buy]@2020-07-01:before"]
+[case.expect]
+value = "0.0001"
+
+[[case]]
+id = "charges.stamp-delivery-buy-2020-07-01"
+kind = "rule_value"
+source = "S35 delivery basis 0.015% Buyer from 1 July 2020"
+table = "charges.stamp"
+on = 2020-07-01
+key = { segment = "delivery", side = "buy" }
+boundary = ["charges.stamp[segment=delivery,side=buy]@2020-07-01:after"]
+[case.expect]
+value = "0.00015"
+
+[[case]]
+id = "charges.stamp-delivery-sell-2020-06-30"
+kind = "rule_value"
+source = "S31 buy side only in broker practice"
+table = "charges.stamp"
+on = 2020-06-30
+key = { segment = "delivery", side = "sell" }
+boundary = ["charges.stamp[segment=delivery,side=sell]@2020-07-01:before"]
+[case.expect]
+value = "0"
+
+[[case]]
+id = "charges.stamp-delivery-sell-2020-07-01"
+kind = "rule_value"
+source = "S35 levied only on the buyer"
+table = "charges.stamp"
+on = 2020-07-01
+key = { segment = "delivery", side = "sell" }
+boundary = ["charges.stamp[segment=delivery,side=sell]@2020-07-01:after"]
+[case.expect]
+value = "0"
+
+[[case]]
+id = "charges.stamp-futures-buy-2020-06-30"
+kind = "rule_value"
+source = "S31 Maharashtra futures stamp duty 0.002%"
+table = "charges.stamp"
+on = 2020-06-30
+key = { segment = "futures", side = "buy" }
+boundary = ["charges.stamp[segment=futures,side=buy]@2020-07-01:before"]
+[case.expect]
+value = "0.00002"
+
+[[case]]
+id = "charges.stamp-futures-buy-2020-07-01"
+kind = "rule_value"
+source = "S35 equity futures 0.002% Buyer"
+table = "charges.stamp"
+on = 2020-07-01
+key = { segment = "futures", side = "buy" }
+boundary = ["charges.stamp[segment=futures,side=buy]@2020-07-01:after"]
+[case.expect]
+value = "0.00002"
+
+[[case]]
+id = "charges.stamp-futures-sell-2020-06-30"
+kind = "rule_value"
+source = "S31 buy side only in broker practice"
+table = "charges.stamp"
+on = 2020-06-30
+key = { segment = "futures", side = "sell" }
+boundary = ["charges.stamp[segment=futures,side=sell]@2020-07-01:before"]
+[case.expect]
+value = "0"
+
+[[case]]
+id = "charges.stamp-futures-sell-2020-07-01"
+kind = "rule_value"
+source = "S35 levied only on the buyer"
+table = "charges.stamp"
+on = 2020-07-01
+key = { segment = "futures", side = "sell" }
+boundary = ["charges.stamp[segment=futures,side=sell]@2020-07-01:after"]
+[case.expect]
+value = "0"
+
+[[case]]
+id = "charges.stamp-mf-buy-2020-06-30"
+kind = "rule_value"
+source = "S36 stamp duty on mutual fund purchases starts July 1, 2020"
+table = "charges.stamp"
+on = 2020-06-30
+key = { segment = "mf", side = "buy" }
+boundary = ["charges.stamp[segment=mf,side=buy]@2020-07-01:before"]
+[case.expect]
+value = "0"
+
+[[case]]
+id = "charges.stamp-mf-buy-2020-07-01"
+kind = "rule_value"
+source = "S36 0.005% on purchase of mutual fund units from July 1, 2020"
+table = "charges.stamp"
+on = 2020-07-01
+key = { segment = "mf", side = "buy" }
+boundary = ["charges.stamp[segment=mf,side=buy]@2020-07-01:after"]
+[case.expect]
+value = "0.00005"
+
+[[case]]
+id = "charges.stamp-mf-sell-2020-06-30"
+kind = "rule_value"
+source = "S36 not charged on redemption"
+table = "charges.stamp"
+on = 2020-06-30
+key = { segment = "mf", side = "sell" }
+boundary = ["charges.stamp[segment=mf,side=sell]@2020-07-01:before"]
+[case.expect]
+value = "0"
+
+[[case]]
+id = "charges.stamp-mf-sell-2020-07-01"
+kind = "rule_value"
+source = "S36 not charged on redemption"
+table = "charges.stamp"
+on = 2020-07-01
+key = { segment = "mf", side = "sell" }
+boundary = ["charges.stamp[segment=mf,side=sell]@2020-07-01:after"]
+[case.expect]
+value = "0"
+
+[[case]]
+id = "charges.gst-2012-03-31"
+kind = "rule_value"
+source = "S37 service tax 10.30% until 31 March 2012"
+table = "charges.gst"
+on = 2012-03-31
+key = {  }
+boundary = ["charges.gst[]@2012-04-01:before"]
+[case.expect]
+value = "0.103"
+applies_to = ["brokerage", "exchange_txn", "clearing", "dp", "amc", "account_opening"]
+
+[[case]]
+id = "charges.gst-2012-04-01"
+kind = "rule_value"
+source = "S37 service tax 12.36% from 1 April 2012"
+table = "charges.gst"
+on = 2012-04-01
+key = {  }
+boundary = ["charges.gst[]@2012-04-01:after"]
+[case.expect]
+value = "0.1236"
+applies_to = ["brokerage", "exchange_txn", "clearing", "dp", "amc", "account_opening"]
+
+[[case]]
+id = "charges.gst-2015-05-31"
+kind = "rule_value"
+source = "S37 12.36% until 31 May 2015"
+table = "charges.gst"
+on = 2015-05-31
+key = {  }
+boundary = ["charges.gst[]@2015-06-01:before"]
+[case.expect]
+value = "0.1236"
+applies_to = ["brokerage", "exchange_txn", "clearing", "dp", "amc", "account_opening"]
+
+[[case]]
+id = "charges.gst-2015-06-01"
+kind = "rule_value"
+source = "S37 service tax 14% from 1 June 2015"
+table = "charges.gst"
+on = 2015-06-01
+key = {  }
+boundary = ["charges.gst[]@2015-06-01:after"]
+[case.expect]
+value = "0.14"
+applies_to = ["brokerage", "exchange_txn", "clearing", "dp", "amc", "account_opening"]
+
+[[case]]
+id = "charges.gst-2015-11-14"
+kind = "rule_value"
+source = "S37 14% until 14 November 2015"
+table = "charges.gst"
+on = 2015-11-14
+key = {  }
+boundary = ["charges.gst[]@2015-11-15:before"]
+[case.expect]
+value = "0.14"
+applies_to = ["brokerage", "exchange_txn", "clearing", "dp", "amc", "account_opening"]
+
+[[case]]
+id = "charges.gst-2015-11-15"
+kind = "rule_value"
+source = "S37 14.5% with Swachh Bharat Cess from 15 November 2015"
+table = "charges.gst"
+on = 2015-11-15
+key = {  }
+boundary = ["charges.gst[]@2015-11-15:after"]
+[case.expect]
+value = "0.145"
+applies_to = ["brokerage", "exchange_txn", "clearing", "dp", "amc", "account_opening"]
+
+[[case]]
+id = "charges.gst-2016-05-31"
+kind = "rule_value"
+source = "S37 14.5% until 31 May 2016"
+table = "charges.gst"
+on = 2016-05-31
+key = {  }
+boundary = ["charges.gst[]@2016-06-01:before"]
+[case.expect]
+value = "0.145"
+applies_to = ["brokerage", "exchange_txn", "clearing", "dp", "amc", "account_opening"]
+
+[[case]]
+id = "charges.gst-2016-06-01"
+kind = "rule_value"
+source = "S37 15% with Krishi Kalyan Cess from 1 June 2016"
+table = "charges.gst"
+on = 2016-06-01
+key = {  }
+boundary = ["charges.gst[]@2016-06-01:after"]
+[case.expect]
+value = "0.15"
+applies_to = ["brokerage", "exchange_txn", "clearing", "dp", "amc", "account_opening"]
+
+[[case]]
+id = "charges.gst-2017-06-30"
+kind = "rule_value"
+source = "S37 15% until 30 June 2017"
+table = "charges.gst"
+on = 2017-06-30
+key = {  }
+boundary = ["charges.gst[]@2017-07-01:before"]
+[case.expect]
+value = "0.15"
+applies_to = ["brokerage", "exchange_txn", "clearing", "dp", "amc", "account_opening"]
+
+[[case]]
+id = "charges.gst-2017-07-01"
+kind = "rule_value"
+source = "S30 GST 18% on brokerage and total transaction charges (exchange + clearing)"
+table = "charges.gst"
+on = 2017-07-01
+key = {  }
+boundary = ["charges.gst[]@2017-07-01:after"]
+[case.expect]
+value = "0.18"
+applies_to = ["brokerage", "exchange_txn", "clearing", "dp", "amc", "account_opening"]
+
+[[case]]
+id = "charges.gst-2023-06-04"
+kind = "rule_value"
+source = "S39 copy of 2023-01-29: 18% on (Brokerage + Transaction charges)"
+table = "charges.gst"
+on = 2023-06-04
+key = {  }
+boundary = ["charges.gst[]@2023-06-05:before"]
+[case.expect]
+value = "0.18"
+applies_to = ["brokerage", "exchange_txn", "clearing", "dp", "amc", "account_opening"]
+
+[[case]]
+id = "charges.gst-2023-06-05"
+kind = "rule_value"
+source = "S39 copy of 2023-06-05: 18% on (Brokerage + Exchange Transaction charges + Clearing charges + SEBI Turnover Fee)"
+table = "charges.gst"
+on = 2023-06-05
+key = {  }
+boundary = ["charges.gst[]@2023-06-05:after"]
+[case.expect]
+value = "0.18"
+applies_to = ["brokerage", "exchange_txn", "clearing", "sebi", "dp", "amc", "account_opening"]
+
+[[case]]
+id = "charges.gst-2025-03-16"
+kind = "rule_value"
+source = "S39 copy of 2024-11-13: no NSE IPFT in the base"
+table = "charges.gst"
+on = 2025-03-16
+key = {  }
+boundary = ["charges.gst[]@2025-03-17:before"]
+[case.expect]
+value = "0.18"
+applies_to = ["brokerage", "exchange_txn", "clearing", "sebi", "dp", "amc", "account_opening"]
+
+[[case]]
+id = "charges.gst-2025-03-17"
+kind = "rule_value"
+source = "S1 18% on (Brokerage + Exchange Transaction charges + Clearing charges + SEBI Turnover Fee + NSE IPFT)"
+table = "charges.gst"
+on = 2025-03-17
+key = {  }
+boundary = ["charges.gst[]@2025-03-17:after"]
+[case.expect]
+value = "0.18"
+applies_to = ["brokerage", "exchange_txn", "clearing", "sebi", "ipft", "dp", "amc", "account_opening"]
+
+[[case]]
+id = "charges.dp_depository-2019-11-14"
+kind = "rule_value"
+source = "S7 depository charges at actuals; Rs 5.5 stand-in"
+table = "charges.dp_depository"
+on = 2019-11-14
+key = {  }
+boundary = ["charges.dp_depository[]@2019-11-15:before"]
+[case.expect]
+value = "5.5"
+
+[[case]]
+id = "charges.dp_depository-2019-11-15"
+kind = "rule_value"
+source = "S8 Rs 10 + Rs 5.50 (CDSL Charges)"
+table = "charges.dp_depository"
+on = 2019-11-15
+key = {  }
+boundary = ["charges.dp_depository[]@2019-11-15:after"]
+[case.expect]
+value = "5.5"
+
+[[case]]
+id = "charges.dp_depository-2024-09-30"
+kind = "rule_value"
+source = "S13 Rs 7 + Rs 5.5 (CDSL Charges) on 2024-07-19; S14 total Rs 12.5"
+table = "charges.dp_depository"
+on = 2024-09-30
+key = {  }
+boundary = ["charges.dp_depository[]@2024-10-01:before"]
+[case.expect]
+value = "5.5"
+
+[[case]]
+id = "charges.dp_depository-2024-10-01"
+kind = "rule_value"
+source = "S38 uniform tariff of Rs. 3.50 per debit transaction from October 01, 2024"
+table = "charges.dp_depository"
+on = 2024-10-01
+key = {  }
+boundary = ["charges.dp_depository[]@2024-10-01:after"]
+[case.expect]
+value = "3.5"

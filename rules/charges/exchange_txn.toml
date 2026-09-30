@@ -1,0 +1,129 @@
+# NSE transaction charge per side as a fraction of turnover, at the first (highest) volume slab until 2024-09-30 and
+# the uniform rate after. It excludes the investor protection fund contribution (charges.ipft).
+[meta]
+keys = ["exchange", "segment"]
+coverage_from = 2010-04-01
+
+[[row]]
+exchange = "NSE"
+segment = "delivery"
+from = 2010-04-01
+to = 2020-12-31
+value = "0.0000325"
+source = "S25 existing Rs 3.25 each side per lakh of traded value (cash market); S31 and S30 0.00325%"
+verified_on = 2026-09-30
+confidence = "assumed"
+note = "Confirmed for 2018 to 2020 (Fyers calculator scripts, S31, S30) and for 2020-12-18 (NSE circular S25). The same rate is used back to 2010: earlier NSE rates and any ETF concessions were not researched."
+
+[[row]]
+exchange = "NSE"
+segment = "delivery"
+from = 2021-01-01
+to = 2023-03-31
+value = "0.0000345"
+source = "S25 revised Rs 3.45 each side per lakh, applicable with effect from January 01, 2021"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Fyers' published tables of 2022 and 2023 still showed 0.00325%; the NSE first-slab rate is used."
+
+[[row]]
+exchange = "NSE"
+segment = "delivery"
+from = 2023-04-01
+to = 2024-03-31
+value = "0.0000325"
+source = "S26 cash market revised Rs 3.25 each side per lakh, applicable with effect from April 01, 2023"
+verified_on = 2026-09-30
+confidence = "primary"
+
+[[row]]
+exchange = "NSE"
+segment = "delivery"
+from = 2024-04-01
+to = 2024-09-30
+value = "0.0000322"
+source = "S27 cash market revised Rs 3.22 each side per lakh, applicable with effect from April 01, 2024"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Fyers' notice S14 calls 0.003220% the old charge."
+
+[[row]]
+exchange = "NSE"
+segment = "delivery"
+from = 2024-10-01
+to = 2026-02-28
+value = "0.0000297"
+source = "S28 Cash Market: Rs. 2.97 each side per lakh of traded value, with effect from October 1, 2024"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Uniform rate under SEBI's true-to-label circular."
+
+[[row]]
+exchange = "NSE"
+segment = "delivery"
+from = 2026-03-01
+value = "0.000030699"
+source = "S29 Cash Market transaction charges Rs. 306.99 each side per crore of traded value, with effect from March 1, 2026"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "The exchange moved part of the charge out of the IPFT contribution; total outflow unchanged."
+
+[[row]]
+exchange = "NSE"
+segment = "futures"
+from = 2010-04-01
+to = 2020-12-31
+value = "0.000019"
+source = "S25 existing Rs 1.90 each side per lakh (equity futures); S30 exchange txn charge 0.0019%"
+verified_on = 2026-09-30
+confidence = "assumed"
+note = "Confirmed for 2018 to 2020 (Fyers calculator scripts, S31, S30) and for 2020-12-18 (NSE circular S25). The same rate is used back to 2010: earlier NSE rates and any ETF concessions were not researched."
+
+[[row]]
+exchange = "NSE"
+segment = "futures"
+from = 2021-01-01
+to = 2023-03-31
+value = "0.00002"
+source = "S25 revised Rs 2.00 each side per lakh, applicable with effect from January 01, 2021"
+verified_on = 2026-09-30
+confidence = "primary"
+
+[[row]]
+exchange = "NSE"
+segment = "futures"
+from = 2023-04-01
+to = 2024-03-31
+value = "0.000019"
+source = "S26 equity futures revised Rs 1.90 each side per lakh, applicable with effect from April 01, 2023"
+verified_on = 2026-09-30
+confidence = "primary"
+
+[[row]]
+exchange = "NSE"
+segment = "futures"
+from = 2024-04-01
+to = 2024-09-30
+value = "0.0000188"
+source = "S27 equity futures revised Rs 1.88 each side per lakh, applicable with effect from April 01, 2024"
+verified_on = 2026-09-30
+confidence = "primary"
+
+[[row]]
+exchange = "NSE"
+segment = "futures"
+from = 2024-10-01
+to = 2026-02-28
+value = "0.0000173"
+source = "S28 Equity Futures: Rs. 1.73 each side per lakh of traded value, with effect from October 1, 2024"
+verified_on = 2026-09-30
+confidence = "primary"
+
+[[row]]
+exchange = "NSE"
+segment = "futures"
+from = 2026-03-01
+value = "0.000018299"
+source = "S29 Equity futures transaction charges Rs. 182.99 each side per crore of traded value, with effect from March 1, 2026"
+verified_on = 2026-09-30
+confidence = "primary"

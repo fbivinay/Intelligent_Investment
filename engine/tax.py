@@ -1,0 +1,513 @@
+"""Income tax for one financial year on investment items. Every rate comes from rules/."""
+from __future__ import annotations
+
+import calendar
+from dataclasses import dataclass
+from datetime import date
+from decimal import Decimal
+
+from engine.money import D
+from engine.rules import Rules
+from engine.trace import (Node, RuleRef, add, cite, const, div, from_row, from_rule, maxn, minn, mul, rnd,
+                          sub)
+
+ZERO_N = const("Zero", 0)
+
+
+def fy_of(d: date) -> int:
+    """Financial year as its starting calendar year: 1 Apr 2024 to 31 Mar 2025 is 2024."""
+    return d.year if d.month >= 4 else d.year - 1
+
+
+def fy_end(fy: int) -> date:
+    return date(fy + 1, 3, 31)
+
+
+def fy_label(fy: int) -> str:
+    return f"FY{fy}-{str(fy + 1)[2:]}"
+
+
+def add_months(d: date, n: int) -> date:
+    y, m = divmod(d.month - 1 + n, 12)
+    y, m = d.year + y, m + 1
+    return date(y, m, min(d.day, calendar.monthrange(y, m)[1]))
+
+
+@dataclass(frozen=True)
+class TaxProfile:
+    """A general resident individual under 60. Age-based slabs and the women's higher basic exemption of 2010-11 are not modelled."""
+    regime: str            # "old" | "new"; "old" is used in years before the new regime existed
+    other_income: Decimal  # other taxable income for the year, after deductions
+
+    def __post_init__(self):
+        if self.regime not in ("old", "new"):
+            raise ValueError(f"regime must be 'old' or 'new', not {self.regime!r}")
+        if self.other_income < 0:
+            raise ValueError("other_income cannot be negative")
+
+
+@dataclass(frozen=True)
+class CGEvent:
+    label: str
+    sale_date: date
+    asset_class: str
+    acq_date: date
+    proceeds: Node                 # full value of consideration
+    sale_costs: Node               # transfer costs deductible from the gain (never STT)
+    cost: Node                     # cost of acquisition, buy-side costs included
+    fmv_2018: Node | None = None   # value of these units on 31 Jan 2018 (needed if bought on or before it)
+
+    def __post_init__(self):
+        if self.sale_date < self.acq_date:
+            raise ValueError(f"{self.label!r}: sold {self.sale_date}, before it was bought {self.acq_date}")
+        for name, n in (("proceeds", self.proceeds), ("sale_costs", self.sale_costs), ("cost", self.cost), ("fmv_2018", self.fmv_2018)):
+            if n is not None and n.value < 0:
+                raise ValueError(f"{self.label!r}: {name} cannot be negative ({n.value})")
+
+
+@dataclass(frozen=True)
+class Carry:
+    st: tuple[tuple[int, Node], ...] = ()  # (financial year the loss arose, amount), oldest first
+    lt: tuple[tuple[int, Node], ...] = ()
+    biz: tuple[tuple[int, Node], ...] = ()  # business losses, usable against business income only
+
+
+@dataclass(frozen=True)
+class Business:
+    pnl: Node    # realised profit (+) or loss (-) on futures, before costs
+    costs: Node  # every deductible cost: charges including STT, and any audit fee
+
+    def __post_init__(self):
+        if self.costs.value < 0:
+            raise ValueError("business costs cannot be negative")
+
+
+@dataclass(frozen=True)
+class FYTax:
+    fy: int
+    tax: Node
+    parts: dict[str, Node]
+    carry_out: Carry
+
+
+@dataclass(frozen=True)
+class InvestmentTax:
+    extra: Node
+    with_items: FYTax
+    without_items: FYTax
+
+
+@dataclass
+class Pot:
+    term: str          # short | long | income
+    kind: str          # special | slab | exempt
+    rate: Decimal | None
+    section: str
+    group: str         # exemption group, "" if none
+    ref: RuleRef
+    gains: list[Node]
+    net: Node | None = None
+    left: Node | None = None  # still to tax after loss set-off and exemption
+    loss: Node | None = None
+    included: Node | None = None  # counted in total income: after loss set-off, before the yearly exemption
+
+
+def classify(rules: Rules, e: CGEvent):
+    """Gain of one sale, and which pot it belongs to: (gain node, (term, kind, rate, section, group), rule ref)."""
+    brow = rules.at("tax.buckets", e.acq_date, asset_class=e.asset_class)
+    cg = rules.at("tax.capital_gains", e.sale_date, bucket=brow.data["bucket"])
+    deemed = cg.data.get("always_short", False)  # section 50AA: short-term whatever the holding period
+    months = None if deemed else int(cg.data["lt_months"])
+    long_ = not deemed and e.sale_date > add_months(e.acq_date, months)
+    cost = e.cost
+    gf = cg.data.get("grandfather_acq_upto")
+    if long_ and gf is not None and e.acq_date <= gf:
+        if e.fmv_2018 is None:
+            raise ValueError(f"{e.label}: bought {e.acq_date} (on or before {gf}), so fmv_2018 is required")
+        cost = maxn("Cost after 31 Jan 2018 grandfathering", cost,
+                    minn("Lower of value on 31 Jan 2018 and sale value", e.fmv_2018, e.proceeds))
+    net_sale = sub("Net sale value", e.proceeds, e.sale_costs)
+    series = "1981" if rules.has_fy("tax.cii", fy_of(e.sale_date), series="1981") else "2001"
+
+    def gain_with(indexed: bool, note: str) -> Node:
+        c = cost
+        if indexed:
+            f = div("Indexation factor",
+                    from_row(f"Cost inflation index, year of sale (series {series})", _cii(rules, series, e.sale_date)),
+                    from_row(f"Cost inflation index, year of purchase (series {series})", _cii(rules, series, e.acq_date)))
+            c = mul("Indexed cost of acquisition", cost, f)
+        return sub(f"Taxable gain: {e.label}", net_sale, c, note=note)
+
+    if deemed:
+        held = f"held {e.acq_date} to {e.sale_date}; deemed short-term whatever the holding period ({cg.data['st_section']})"
+    else:
+        held = f"held {e.acq_date} to {e.sale_date}; long-term needs more than {months} months"
+    side = "lt" if long_ else "st"
+    treatment, section = cg.data[f"{side}_treatment"], cg.data[f"{side}_section"]
+    rate = cg.dec(f"{side}_rate") if treatment == "special" else None
+    indexed = long_ and cg.data.get("indexation", False)
+    if long_ and "lt_alt_rate" in cg.data:
+        # The taxpayer may instead pay the option rate on the gain worked out as the option says; the lower tax is used
+        # (and, on a tie, the lower gain: a bigger loss can be carried forward).
+        if rate is None:
+            raise ValueError(f"{cg.ref.rule_id}: lt_alt_rate needs lt_treatment = special")
+        main, alt = gain_with(indexed, held), gain_with(cg.data["lt_alt_indexation"], held)
+        alt_rate = cg.dec("lt_alt_rate")
+        t_main, t_alt = max(main.value, 0) * rate, max(alt.value, 0) * alt_rate
+        if (t_alt, alt.value) < (t_main, main.value):
+            held += (f"; lower tax by the {cg.data['lt_alt_section']}: tax {t_alt} on a gain of {alt.value} "
+                     f"instead of tax {t_main} on {main.value}")
+            indexed, rate, section = cg.data["lt_alt_indexation"], alt_rate, cg.data["lt_alt_section"]
+        else:
+            held += (f"; lower tax by the ordinary route: tax {t_main} on a gain of {main.value} "
+                     f"instead of tax {t_alt} on {alt.value} under the {cg.data['lt_alt_section']}")
+    gain = cite(gain_with(indexed, held), cg.ref, brow.ref)
+    group = cg.data.get("lt_exemption_group", "") if long_ and treatment == "special" else ""
+    return gain, ("long" if long_ else "short", treatment, rate, section, group), cg.ref
+
+
+def _cii(rules: Rules, series: str, on: date):
+    return rules.at_fy("tax.cii", fy_of(on), series=series)
+
+
+def _apply(label: str, loss: Node, pots: list[Pot]) -> Node:
+    """Set `loss` off against each pot in turn; returns what is still unused."""
+    for p in pots:
+        if loss.value <= 0:
+            break
+        if p.left.value <= 0:
+            continue
+        used = minn(f"{label} used against {p.section}", loss, p.left)
+        p.left = sub(f"{p.section} gain after {label.lower()}", p.left, used)
+        loss = sub(f"{label}, unused", loss, used)
+    return loss
+
+
+def _order(pots: list[Pot]) -> list[Pot]:
+    """Highest special rate first, then slab-taxed pots."""
+    return sorted((p for p in pots if p.kind == "special"), key=lambda p: -p.rate) + \
+        [p for p in pots if p.kind == "slab"]
+
+
+def _slab_tax(brackets: list[dict], income: Node, ref: RuleRef) -> Node:
+    pieces, lower = [], ZERO_N
+    for i, b in enumerate(brackets, 1):
+        rate = from_rule(f"Slab {i} rate", b["rate"], ref)
+        if b["upto"] == "":
+            piece = maxn(f"Income in slab {i}", sub(f"Income above slab {i - 1} limit", income, lower), ZERO_N)
+        else:
+            upper = from_rule(f"Slab {i} upper limit", b["upto"], ref)
+            top = minn(f"Income up to slab {i} limit", income, upper)
+            piece = maxn(f"Income in slab {i}", sub(f"Slab {i} income before flooring", top, lower), ZERO_N)
+            lower = upper
+        pieces.append(mul(f"Tax in slab {i}", piece, rate))
+    return add("Tax at slab rates", *pieces)
+
+
+def fy_tax(rules: Rules, fy: int, profile: TaxProfile, events: list[CGEvent],
+           carry_in: Carry = Carry(), dividends: Node | None = None,
+           interest: Node | None = None, business: Business | None = None,
+           dividend_payer: str | None = None) -> FYTax:
+    for kind, losses in (("short-term", carry_in.st), ("long-term", carry_in.lt), ("business", carry_in.biz)):
+        for origin, amt in losses:
+            if origin >= fy:
+                raise ValueError(f"a {kind} loss from {fy_label(origin)} cannot be brought forward into {fy_label(fy)}")
+            if amt.value < 0:
+                raise ValueError(f"a brought-forward {kind} loss cannot be negative")
+    for name, n in (("dividends", dividends), ("interest", interest)):
+        if n is not None and n.value < 0:
+            raise ValueError(f"{name} cannot be negative")
+    if dividends is not None and dividend_payer is None:
+        raise ValueError("dividend_payer is needed with dividends: 'fund' (units of a mutual fund or ETF) or 'company' (shares)")
+    for e in events:
+        if fy_of(e.sale_date) != fy:
+            raise ValueError(f"{e.label!r} sold {e.sale_date} is not in {fy_label(fy)}")
+    loss_row = rules.at_fy("tax.loss_rules", fy, kind="capital")
+    years = int(loss_row.value)
+    conv_setoff = rules.at_fy("tax.conventions", fy, name="setoff_order")
+    conv_short = rules.at_fy("tax.conventions", fy, name="shortfall_order")
+    conv_round = rules.at_fy("tax.conventions", fy, name="tax_round_step")
+    reg = profile.regime if rules.has_fy("tax.slabs", fy, regime=profile.regime) else "old"
+
+    pots: dict[tuple, Pot] = {}
+    for e in events:
+        gain, key, ref = classify(rules, e)
+        pots.setdefault(key, Pot(*key, ref=ref, gains=[])).gains.append(gain)
+    live: list[Pot] = []
+    for p in pots.values():
+        p.net = add(f"Net {p.section} gains ({p.term}-term)", *p.gains)
+        if p.kind == "exempt":  # neither taxed nor available to set off
+            continue
+        p.left = maxn(f"{p.section} gain to tax", p.net, ZERO_N)
+        p.loss = maxn(f"{p.section} loss", sub("Net gain below zero", ZERO_N, p.net), ZERO_N)
+        live.append(p)
+
+    before = {id(p): p.left.value for p in live}
+
+    # Loss set-off. Order: this year's ST loss on ST gains, LT loss on LT gains, leftover ST loss on LT
+    # gains, then losses brought forward (LT, then ST), oldest first.
+    st, lt = [p for p in live if p.term == "short"], [p for p in live if p.term == "long"]
+    st_o, lt_o = _order(st), _order(lt)
+    st_loss = _apply("Short-term loss this year", add("Short-term losses this year", *[p.loss for p in st]), st_o)
+    lt_loss = _apply("Long-term loss this year", add("Long-term losses this year", *[p.loss for p in lt]), lt_o)
+    st_loss = _apply("Short-term loss this year, leftover", st_loss, lt_o)
+    new_st: list[tuple[int, Node]] = []
+    new_lt: list[tuple[int, Node]] = []
+    lapsed: list[str] = []  # losses past their carry-forward limit: not used, and said so on the year's tax
+    for origin, amt in sorted(carry_in.lt, key=lambda t: t[0]):
+        if fy - origin > years:
+            lapsed.append(f"long-term loss from {fy_label(origin)} of Rs {amt.value:,.2f} (more than {years} years ago)")
+            continue
+        rem = _apply(f"Long-term loss brought forward from {fy_label(origin)}", amt, lt_o)
+        if rem.value > 0:
+            new_lt.append((origin, rem))
+    for origin, amt in sorted(carry_in.st, key=lambda t: t[0]):
+        if fy - origin > years:
+            lapsed.append(f"short-term loss from {fy_label(origin)} of Rs {amt.value:,.2f} (more than {years} years ago)")
+            continue
+        rem = _apply(f"Short-term loss brought forward from {fy_label(origin)}", amt, st_o)
+        rem = _apply(f"Short-term loss brought forward from {fy_label(origin)}, leftover", rem, lt_o)
+        if rem.value > 0:
+            new_st.append((origin, rem))
+    if lt_loss.value > 0:
+        new_lt.append((fy, lt_loss))
+    if st_loss.value > 0:
+        new_st.append((fy, st_loss))
+    setoff_happened = any(p.left.value != before[id(p)] for p in live)
+    for p in live:
+        p.included = p.left  # the yearly exemption below lowers the tax base, not the income
+
+    # Yearly exemption on long-term gains, per group.
+    groups: dict[str, list[Pot]] = {}
+    for p in lt:
+        if p.group:
+            groups.setdefault(p.group, []).append(p)
+    for g, ps in groups.items():
+        ex = rules.at_fy("tax.lt_exemption", fy, group=g)
+        room = from_row(f"Yearly long-term gains exemption ({g})", ex)
+        for p in sorted(ps, key=lambda p: p.rate, reverse=ex.data["order"] == "highest_rate_first"):
+            if room.value <= 0:
+                break
+            used = minn(f"Exemption used against {p.section} at {p.rate}", room, p.left)
+            p.left = sub(f"{p.section} gain after exemption", p.left, used)
+            room = sub("Exemption unused", room, used)
+
+    # Income taxed at slab rates, and gains taxed at special rates.
+    other = const("Other taxable income", profile.other_income)
+    parts = [other]
+    parts += [p.left for p in live if p.kind == "slab"]
+    if interest is not None:
+        parts.append(interest)
+    specials = [p for p in live if p.kind == "special"]
+    div_ref = None
+    div_slab = None  # dividends taxed at slab rates: inside `ordinary`, but the surcharge treats them on their own
+    if dividends is not None:
+        drow = rules.at_fy("tax.dividend", fy, payer=dividend_payer)
+        div_ref, mode = drow.ref, drow.data["mode"]
+        if mode == "slab":
+            div_slab = cite(dividends, drow.ref)
+            parts.append(div_slab)
+        elif mode == "above_threshold":
+            over = maxn("Dividends above the threshold",
+                        sub("Dividends less threshold", dividends,
+                            from_row("Dividend threshold", drow, "threshold")), ZERO_N)
+            specials.append(Pot("income", "special", drow.dec("rate"), "115BBDA", "", drow.ref, [],
+                                left=over, included=over))
+        elif mode != "exempt":
+            raise ValueError(f"unknown dividend mode {mode!r}")
+    # Futures income is business income at slab rates. A loss is set off against interest, dividends and gains taxed at slab rates
+    # only: never against the other income given (it may be salary, section 71(2A)) and never against gains taxed at special rates
+    # (the business_loss_setoff convention). The rest is carried forward for business income.
+    new_biz: list[tuple[int, Node]] = []
+    biz_row = biz_conv = None
+    if business is not None or carry_in.biz:
+        biz_row = rules.at_fy("tax.loss_rules", fy, kind="business")
+        old = []
+        for o, a in sorted(carry_in.biz, key=lambda t: t[0]):
+            if fy - o <= int(biz_row.value):
+                old.append((o, a))
+            else:
+                lapsed.append(f"business loss from {fy_label(o)} of Rs {a.value:,.2f} (more than {int(biz_row.value)} years ago)")
+        net = sub("Business income after costs", business.pnl, business.costs) if business else ZERO_N
+        if net.value >= 0:
+            left = net
+            for o, a in old:
+                if left.value <= 0:
+                    new_biz.append((o, a))
+                    continue
+                used = minn(f"Business loss from {fy_label(o)} used", a, left)
+                left = sub("Business income after that loss", left, used)
+                rest = sub(f"Business loss from {fy_label(o)}, unused", a, used)
+                if rest.value > 0:
+                    new_biz.append((o, rest))
+            parts.append(left)
+        else:
+            biz_conv = rules.at_fy("tax.conventions", fy, name="business_loss_setoff")
+            loss = sub("Business loss this year", ZERO_N, net)
+            room = maxn("Slab income a business loss can reach",
+                        add("Slab income before the business loss, without the other income given",
+                            *[x for x in parts if x is not other]), ZERO_N)
+            used = minn("Business loss set off", loss, room)
+            parts.append(sub("Business loss set off, taken off slab income", ZERO_N, used))
+            rest = sub("Business loss carried forward", loss, used)
+            new_biz = old + ([(fy, rest)] if rest.value > 0 else [])
+    ordinary = add("Income taxed at slab rates", *parts)
+    slab = rules.at_fy("tax.slabs", fy, regime=reg)
+    brackets = slab.data["brackets"]
+    ordinary_tax = _slab_tax(brackets, ordinary, slab.ref)
+
+    # A resident individual's unused basic exemption shelters gains taxed at special rates.
+    basic = from_rule("Basic exemption limit", brackets[0]["upto"] if D(brackets[0]["rate"]) == 0 else 0, slab.ref)
+    by_rate = sorted(specials, key=lambda p: -p.rate)
+
+    def special_taxes(slab_income: Node, lefts: dict[int, Node], at: str = ""):
+        """Taxable amount and tax of each special-rate gain, highest rate first, once the unused basic exemption has sheltered them.
+        `at` labels the nodes of a what-if (the income at a surcharge threshold)."""
+        shortfall = maxn(f"Basic exemption unused by slab income{at}",
+                         sub(f"Basic exemption less slab income{at}", basic, slab_income), ZERO_N)
+        taxable_, tax_ = {}, {}
+        for p in by_rate:
+            cur = lefts[id(p)]
+            if shortfall.value > 0 and cur.value > 0 and p.term != "income":  # section 115BBDA allows no such adjustment
+                used = minn(f"Shortfall used against {p.section}{at}", shortfall, cur)
+                cur = sub(f"{p.section} gain after basic-exemption adjustment{at}", cur, used)
+                shortfall = sub(f"Shortfall unused{at}", shortfall, used)
+            taxable_[id(p)] = cur
+            tax_[id(p)] = mul(f"Tax on {p.section} at {p.rate}{at}", cur, from_rule(f"{p.section} rate", p.rate, p.ref))
+        return taxable_, tax_
+
+    taxable, tax_of = special_taxes(ordinary, {id(p): p.left for p in specials})
+    shortfall_used = any(taxable[id(p)].value != p.left.value for p in specials)
+    special_tax = add("Tax at special rates", *[tax_of[id(p)] for p in by_rate])
+
+    # Total income counts the gains in full, whatever the yearly exemption or the basic-exemption shortfall did to the tax base.
+    total = add("Total income", ordinary, *[p.included for p in specials])
+    tax_before = add("Tax before rebate", ordinary_tax, special_tax)
+
+    reb = rules.at_fy("tax.rebate_87a", fy, regime=reg)
+    limit = from_row("Rebate income limit", reb, "income_limit")
+    if reb.data["applies_to_special"]:
+        left_out = set(reb.data.get("excluded_sections", []))
+        base = add("Tax the rebate is taken from", ordinary_tax,
+                   *[tax_of[id(p)] for p in by_rate if p.section not in left_out])
+    else:
+        base = ordinary_tax
+    if total.value <= limit.value:
+        rebate = minn("Section 87A rebate", from_row("Maximum rebate", reb, "max_rebate"), base)
+    elif reb.data.get("marginal_relief", False):
+        over = sub("Income over the rebate limit", total, limit)
+        rebate = maxn("Marginal relief at the rebate limit", sub("Tax above the income over the limit", base, over), ZERO_N)
+    else:
+        rebate = from_rule("No rebate: income above the limit", 0, reb.ref)
+    after_rebate = sub("Tax after rebate", tax_before, rebate)
+
+    sc = rules.at_fy("tax.surcharge", fy, regime=reg)
+    for tier in sc.data["tiers"]:
+        if "basis" in tier:
+            raise ValueError(f"{sc.ref.rule_id}: a tier says `basis`; it now lists the sections it leaves out in `test_excludes`")
+    cap = D(sc.data["cap_special"]) if sc.data.get("cap_special") else None
+    if cap is not None and "cap_sections" not in sc.data:
+        raise ValueError(f"{sc.ref.rule_id}: cap_special needs cap_sections (the gain sections, or `dividend`, whose tax it caps)")
+    cap_labels = sc.data.get("cap_sections", [])
+    ordinary_ex_div = sub("Slab income without dividends", ordinary, div_slab) if div_slab is not None else ordinary
+
+    def tested_on(tier):  # the 25% and 37% tiers leave out the incomes that their `test_excludes` names
+        labels = tier.get("test_excludes", [])
+        if not labels:
+            return total
+        left_out = [p.included for p in specials if p.section in labels]
+        if div_slab is not None and "dividend" in labels:
+            left_out.append(div_slab)
+        return sub(f"Income the {tier['rate']} tier is tested on", total, add("Income left out of that test", *left_out))
+
+    crossed = [t for t in sc.data["tiers"] if tested_on(t).value > D(t["above"])]
+    gains_cut = False
+    if crossed:
+        rate, prev = D(crossed[-1]["rate"]), (D(crossed[-2]["rate"]) if len(crossed) > 1 else D(0))
+        capped_ids = {id(p) for p in by_rate if p.section in cap_labels}
+        div_capped = div_slab is not None and "dividend" in cap_labels
+
+        def rates(r):  # (rate on the tax that is not capped, rate on the tax that is)
+            return r, (min(r, cap) if cap is not None else r)
+
+        def surcharge_at(slab_amt, slab_tax_amt, taxes, r_full, r_cap, at=""):
+            """Surcharge on the tax of one income: slab tax (the part on dividends may be capped) and tax on gains (some capped)."""
+            if div_capped:
+                without = _slab_tax(brackets, sub(f"Slab income without dividends{at}", slab_amt, div_slab), slab.ref)
+                div_tax = sub(f"Slab tax on the dividends{at}", slab_tax_amt, without)
+            else:
+                div_tax = ZERO_N
+            capped = add(f"Tax whose surcharge is capped{at}", div_tax, *[taxes[id(p)] for p in by_rate if id(p) in capped_ids])
+            free = add(f"Tax whose surcharge is not capped{at}", sub(f"Slab tax not on dividends{at}", slab_tax_amt, div_tax),
+                       *[taxes[id(p)] for p in by_rate if id(p) not in capped_ids])
+            return add(f"Surcharge{at}", mul(f"Surcharge on the tax that is not capped{at}", free, from_rule("Surcharge rate", r_full, sc.ref)),
+                       mul(f"Surcharge on the tax that is capped{at}", capped, from_rule("Surcharge rate on capped tax", r_cap, sc.ref)))
+
+        (r1, r2), (p1, p2) = rates(rate), rates(prev)
+        surcharge = surcharge_at(ordinary, ordinary_tax, tax_of, r1, r2)
+        threshold = from_rule("Surcharge threshold", crossed[-1]["above"], sc.ref)
+        excess = sub("Income above the surcharge threshold", tested_on(crossed[-1]), threshold)
+        # Marginal relief: tax and surcharge may not pass the tax on the threshold income plus the excess. The threshold income is this
+        # income less the excess, taken from slab income first (not the dividends if the tier leaves them out), then from gains at special
+        # rates that the tier does not leave out, lowest rate first (the marginal_relief_order convention: it leaves the highest-rate
+        # income in the threshold amount, which gives the least relief).
+        left_out_labels = crossed[-1].get("test_excludes", [])
+        pool = ordinary_ex_div if (div_slab is not None and "dividend" in left_out_labels) else ordinary
+        cut_slab = minn("Slab income given up at the threshold", excess, pool)
+        slab_t = sub("Slab income at the threshold", ordinary, cut_slab)
+        still = sub("Excess left to take from gains", excess, cut_slab)
+        lefts_t = {}
+        for p in sorted(specials, key=lambda p: p.rate):
+            if p.section in left_out_labels:
+                lefts_t[id(p)] = p.left
+                continue
+            cut = minn(f"{p.section} gain given up at the threshold", still, p.left)
+            lefts_t[id(p)] = sub(f"{p.section} gain at the threshold", p.left, cut)
+            still = sub("Excess left to take from gains", still, cut)
+        gains_cut = excess.value > pool.value
+        tax_t = _slab_tax(brackets, slab_t, slab.ref)
+        _, tax_of_t = special_taxes(slab_t, lefts_t, " at the threshold")
+        special_t = add("Tax at special rates at the threshold", *[tax_of_t[id(p)] for p in by_rate])
+        at_t = add("Tax and surcharge at the threshold", tax_t, special_t,
+                   surcharge_at(slab_t, tax_t, tax_of_t, p1, p2, " at the threshold"))
+        ceiling = add("Most tax and surcharge may be", at_t, excess)
+        now = add("Tax and surcharge now", ordinary_tax, special_tax, surcharge)
+        relief = maxn("Marginal relief", sub("Tax and surcharge over the ceiling", now, ceiling), ZERO_N)
+        surcharge_final = sub("Surcharge after marginal relief", surcharge, relief)
+    else:
+        surcharge_final = from_rule("No surcharge", 0, sc.ref)
+
+    cess_row = rules.at_fy("tax.cess", fy)
+    cess = mul("Health and education cess", add("Tax and surcharge", after_rebate, surcharge_final),
+               from_row("Cess rate", cess_row))
+    unrounded = add("Tax before rounding", after_rebate, surcharge_final, cess)
+    tax = rnd(f"Income tax for {fy_label(fy)}", unrounded, from_row("Tax rounding step", conv_round),
+              note=("Losses that lapsed and were not used: " + "; ".join(lapsed)) if lapsed else "")
+    if setoff_happened:
+        tax = cite(tax, conv_setoff.ref)
+    if shortfall_used:
+        tax = cite(tax, conv_short.ref)
+    if carry_in.st or carry_in.lt or new_st or new_lt:
+        tax = cite(tax, loss_row.ref)
+    if div_ref is not None:
+        tax = cite(tax, div_ref)
+    if biz_row is not None:
+        tax = cite(tax, biz_row.ref)
+    if biz_conv is not None:
+        tax = cite(tax, biz_conv.ref)
+    if gains_cut:
+        tax = cite(tax, rules.at_fy("tax.conventions", fy, name="marginal_relief_order").ref)
+    return FYTax(fy, tax, {"ordinary_income": ordinary, "ordinary_tax": ordinary_tax, "special_tax": special_tax,
+                           "total_income": total, "rebate": rebate, "surcharge": surcharge_final,
+                           "cess": cess, "before_rounding": unrounded},
+                 Carry(tuple(new_st), tuple(new_lt), tuple(new_biz)))
+
+
+def investment_tax(rules: Rules, fy: int, profile: TaxProfile, events: list[CGEvent],
+                   carry_in: Carry = Carry(), dividends: Node | None = None,
+                   interest: Node | None = None, business: Business | None = None,
+                   dividend_payer: str | None = None) -> InvestmentTax:
+    """Tax caused by the investments: the year's tax with them minus the year's tax without."""
+    w = fy_tax(rules, fy, profile, events, carry_in, dividends, interest, business, dividend_payer)
+    wo = fy_tax(rules, fy, profile, [], Carry(), None, None)
+    return InvestmentTax(sub(f"Tax caused by your investments in {fy_label(fy)}", w.tax, wo.tax), w, wo)

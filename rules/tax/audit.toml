@@ -1,0 +1,49 @@
+# Tax audit (section 44AB) for a person trading index futures, whose profit or loss is ordinary business income (S75 section 43(5)).
+# turnover_limit: audit turnover above this in the financial year needs a tax audit. The turnover of futures is the sum of the absolute
+# profit or loss of each closed trade (S77); engine/business.py works it out. fee: what the audit costs, rupees, assumed.
+# From FY2019-20 the higher limit (Rs 5 crore, then Rs 10 crore) needs cash receipts and cash payments each to be at most 5% of the
+# total. Money that moves between a bank account and a broker account meets that, so the higher limit is used here. If it were not
+# met, the limit would stay Rs 1 crore.
+[meta]
+keys = []
+coverage_from = 2010-04-01
+granularity = "financial_year"
+
+[[row]]
+from = 2010-04-01
+to = 2012-03-31
+turnover_limit = "6000000"
+fee = "25000"
+source = "S71 Finance Bill 2010 memorandum: the limit for business goes from forty lakh to sixty lakh rupees, effective assessment year 2011-12, i.e. financial year 2010-11; fee S78"
+verified_on = 2026-09-30
+confidence = "assumed"
+note = "turnover_limit is from the source (primary). fee is assumed: no law or ICAI scale fixes it. F&O specialist firms quote Rs 14,000 for audit, accounts and return together, and a general fee guide puts audits of Rs 1 crore to 5 crore of turnover at Rs 25,000 to 60,000 and below Rs 1 crore at Rs 10,000 to 25,000 (S78); Rs 25,000 is where those ranges meet. One nominal figure is used for every year, taken as all-in (GST included) and deducted as a business cost. Asking prices of 2026, not the fees of the year."
+
+[[row]]
+from = 2012-04-01
+to = 2019-03-31
+turnover_limit = "10000000"
+fee = "25000"
+source = "S72 Finance Bill 2012 memorandum: the limit for business goes from sixty lakh to one crore rupees, effective assessment year 2013-14, i.e. financial year 2012-13; fee S78"
+verified_on = 2026-09-30
+confidence = "assumed"
+note = "turnover_limit is from the source (primary). fee is assumed, as in the first row: Rs 25,000, all-in, one nominal figure for every year (S78)."
+
+[[row]]
+from = 2019-04-01
+to = 2020-03-31
+turnover_limit = "50000000"
+fee = "25000"
+source = "S73 Finance Bill 2020 memorandum: one crore becomes five crore rupees where cash receipts and cash payments are each at most five per cent, effective assessment year 2020-21, i.e. financial year 2019-20; fee S78"
+verified_on = 2026-09-30
+confidence = "assumed"
+note = "turnover_limit is from the source (primary) and assumes the two cash tests are met (see the top of this file); without them it is Rs 1 crore. fee is assumed: Rs 25,000, all-in (S78)."
+
+[[row]]
+from = 2020-04-01
+turnover_limit = "100000000"
+fee = "25000"
+source = "S74 Finance Bill 2021 memorandum: five crore becomes ten crore rupees on the same two cash tests, effective assessment year 2021-22, i.e. financial year 2020-21; S76 Income-tax Act 2025 section 63(1) keeps one crore and ten crore from 2026-04-01; fee S78"
+verified_on = 2026-09-30
+confidence = "assumed"
+note = "turnover_limit is from the sources (primary) and assumes the two cash tests are met (see the top of this file); without them it is Rs 1 crore. fee is assumed: Rs 25,000, all-in (S78)."

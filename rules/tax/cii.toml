@@ -1,0 +1,234 @@
+# Cost inflation index by financial year (1 April to 31 March). series 1981 = the old base (1981-82 = 100), used when the SALE is on
+# or before 2017-03-31; series 2001 = the base 2001-02 = 100, used for sales from 2017-04-01 (S44). Both the sale year and the purchase
+# year are read from the series that applies to the sale date. The 1981 rows end on 2017-03-31, so a sale date inside them selects it.
+[meta]
+keys = ["series"]
+coverage_from = 2010-04-01
+granularity = "financial_year"
+open_ended = false
+
+[[row]]
+series = "1981"
+value = "711"
+from = 2010-04-01
+to = 2011-03-31
+source = "S50 notification No. 59/2010 of 2010-07-21: 2010-11 = 711"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Old base. Used for sales up to 2017-03-31 (S44)."
+
+[[row]]
+series = "1981"
+value = "785"
+from = 2011-04-01
+to = 2012-03-31
+source = "S50 notification No. 35/2011 of 2011-06-23: 2011-12 = 785"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Old base. Used for sales up to 2017-03-31 (S44)."
+
+[[row]]
+series = "1981"
+value = "852"
+from = 2012-04-01
+to = 2013-03-31
+source = "S50 notification No. 38/2012 of 2012-09-17: 2012-13 = 852"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Old base. Used for sales up to 2017-03-31 (S44)."
+
+[[row]]
+series = "1981"
+value = "939"
+from = 2013-04-01
+to = 2014-03-31
+source = "S50 notification No. 40/2013 of 2013-06-06: 2013-14 = 939"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Old base. Used for sales up to 2017-03-31 (S44)."
+
+[[row]]
+series = "1981"
+value = "1024"
+from = 2014-04-01
+to = 2015-03-31
+source = "S50 notification No. 31/2014 of 2014-06-11: 2014-15 = 1024"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Old base. Used for sales up to 2017-03-31 (S44)."
+
+[[row]]
+series = "1981"
+value = "1081"
+from = 2015-04-01
+to = 2016-03-31
+source = "S50 notification No. 60/2015 of 2015-07-24: 2015-16 = 1081"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Old base. Used for sales up to 2017-03-31 (S44)."
+
+[[row]]
+series = "1981"
+value = "1125"
+from = 2016-04-01
+to = 2017-03-31
+source = "S50 notification No. 42/2016 of 2016-06-02: 2016-17 = 1125"
+verified_on = 2026-09-30
+confidence = "secondary"
+note = "Old base. Used for sales up to 2017-03-31 (S44). Value confirmed by the TaxGuru table; the notification itself was read only as a news report."
+
+[[row]]
+series = "2001"
+value = "167"
+from = 2010-04-01
+to = 2011-03-31
+source = "S51 table 2001-02 = 100: 2010-11 = 167"
+verified_on = 2026-09-30
+confidence = "primary"
+
+[[row]]
+series = "2001"
+value = "184"
+from = 2011-04-01
+to = 2012-03-31
+source = "S51 table 2001-02 = 100: 2011-12 = 184"
+verified_on = 2026-09-30
+confidence = "primary"
+
+[[row]]
+series = "2001"
+value = "200"
+from = 2012-04-01
+to = 2013-03-31
+source = "S51 table 2001-02 = 100: 2012-13 = 200"
+verified_on = 2026-09-30
+confidence = "primary"
+
+[[row]]
+series = "2001"
+value = "220"
+from = 2013-04-01
+to = 2014-03-31
+source = "S51 table 2001-02 = 100: 2013-14 = 220"
+verified_on = 2026-09-30
+confidence = "primary"
+
+[[row]]
+series = "2001"
+value = "240"
+from = 2014-04-01
+to = 2015-03-31
+source = "S51 table 2001-02 = 100: 2014-15 = 240"
+verified_on = 2026-09-30
+confidence = "primary"
+
+[[row]]
+series = "2001"
+value = "254"
+from = 2015-04-01
+to = 2016-03-31
+source = "S51 table 2001-02 = 100: 2015-16 = 254"
+verified_on = 2026-09-30
+confidence = "primary"
+
+[[row]]
+series = "2001"
+value = "264"
+from = 2016-04-01
+to = 2017-03-31
+source = "S51 table 2001-02 = 100: 2016-17 = 264"
+verified_on = 2026-09-30
+confidence = "primary"
+
+[[row]]
+series = "2001"
+value = "272"
+from = 2017-04-01
+to = 2018-03-31
+source = "S51 table 2001-02 = 100: 2017-18 = 272"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "First year whose sales use the new base (S44)."
+
+[[row]]
+series = "2001"
+value = "280"
+from = 2018-04-01
+to = 2019-03-31
+source = "S51 table 2001-02 = 100: 2018-19 = 280"
+verified_on = 2026-09-30
+confidence = "primary"
+
+[[row]]
+series = "2001"
+value = "289"
+from = 2019-04-01
+to = 2020-03-31
+source = "S51 table 2001-02 = 100: 2019-20 = 289"
+verified_on = 2026-09-30
+confidence = "primary"
+
+[[row]]
+series = "2001"
+value = "301"
+from = 2020-04-01
+to = 2021-03-31
+source = "S51 table 2001-02 = 100: 2020-21 = 301"
+verified_on = 2026-09-30
+confidence = "primary"
+
+[[row]]
+series = "2001"
+value = "317"
+from = 2021-04-01
+to = 2022-03-31
+source = "S52 table 2001-02 = 100: 2021-22 = 317"
+verified_on = 2026-09-30
+confidence = "secondary"
+
+[[row]]
+series = "2001"
+value = "331"
+from = 2022-04-01
+to = 2023-03-31
+source = "S52 table 2001-02 = 100: 2022-23 = 331"
+verified_on = 2026-09-30
+confidence = "secondary"
+
+[[row]]
+series = "2001"
+value = "348"
+from = 2023-04-01
+to = 2024-03-31
+source = "S52 table 2001-02 = 100: 2023-24 = 348"
+verified_on = 2026-09-30
+confidence = "secondary"
+
+[[row]]
+series = "2001"
+value = "363"
+from = 2024-04-01
+to = 2025-03-31
+source = "S52 table 2001-02 = 100: 2024-25 = 363"
+verified_on = 2026-09-30
+confidence = "secondary"
+note = "Indexation is not allowed for sales on or after 2024-07-23 (S46); sales from 2024-04-01 to 2024-07-22 still use this value."
+
+[[row]]
+series = "2001"
+value = "376"
+from = 2025-04-01
+to = 2026-03-31
+source = "S52 table 2001-02 = 100: 2025-26 = 376"
+verified_on = 2026-09-30
+confidence = "secondary"
+note = "Not used for any class modelled here: indexation ended for sales on or after 2024-07-23 (S46). Kept so the series is complete."
+
+[[row]]
+series = "2001"
+value = "384"
+from = 2026-04-01
+source = "S53 CBDT notified 384 for 2026-27"
+verified_on = 2026-09-30
+confidence = "secondary"
+note = "Not used for any class modelled here: indexation ended for sales on or after 2024-07-23 (S46). Kept so the series is complete."
