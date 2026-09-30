@@ -92,3 +92,19 @@ def test_index_names_match_whatever_the_capitalisation_and_come_out_as_we_spell_
     raw = "\n".join([IDX_HEAD, "NIFTY Midcap 100,03-01-2018,1,2,0.5,1.5,0,0,1,1,1,1,1", "Nifty Midcap 150,03-01-2018,1,2,0.5,1.5,0,0,1,1,1,1,1"]).encode()
     rows = nr.read_index(raw, {"Nifty Midcap 100"})
     assert [r["name"] for r in rows] == ["Nifty Midcap 100"]
+
+
+def test_a_two_digit_year_in_the_old_cash_file_is_read_as_20xx():
+    raw = zipped([CASH_OLD_HEAD, "NIFTYBEES,EQ,114.5,115,114,114.86,114.9,114.4,100,100,13-Jul-20,5,INF732E01011,"])
+    assert nr.read_cash(raw, {"NIFTYBEES"})[0]["date"] == "2020-07-13"
+
+
+def test_futures_dates_with_a_two_digit_year_are_read_the_same_way():
+    raw = zipped([FO_OLD_HEAD, "FUTIDX,NIFTY,30-Jul-20,0,XX,10000,10100,9900,10050,10050,1000,1000,500,10,13-Jul-20,"])
+    (row,) = nr.read_fo(raw, {"NIFTY"})
+    assert (row["date"], row["expiry"]) == ("2020-07-13", "2020-07-30")
+
+
+def test_futures_prefilter_keeps_working_when_the_file_has_no_index_futures_at_all():
+    raw = zipped([FO_OLD_HEAD, "OPTIDX,NIFTY,30-Jun-2016,8200,CE,150,160,140,155,155,1000,1000.5,500,10,01-JUN-2016,"])
+    assert nr.read_fo(raw, {"NIFTY"}) == []

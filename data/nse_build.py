@@ -18,6 +18,7 @@ ROOT = Path(__file__).parent
 ETFS = {"NIFTYBEES", "JUNIORBEES", "BANKBEES", "GOLDBEES", "LIQUIDBEES"}
 FUTURES = {"NIFTY", "BANKNIFTY"}
 INDICES = {"Nifty 50", "Nifty Next 50", "Nifty Bank", "Nifty Midcap 100", "India VIX"}
+MAX_PROBLEMS = 50    # stop reading after this many bad files: something systematic is wrong
 OUT = {
     "cash": ("nse_etf_daily.csv", ["date", "symbol", "series", "open", "high", "low", "close", "last", "prev_close", "qty", "value", "trades", "isin"],
              ("date", "symbol", "series")),
@@ -31,6 +32,7 @@ OUT = {
 def build(root: Path = ROOT, etfs=ETFS, futures=FUTURES, indices=INDICES) -> dict[str, int]:
     readers = {"cash": lambda raw: nr.read_cash(raw, etfs), "fo": lambda raw: nr.read_fo(raw, futures), "index": lambda raw: nr.read_index(raw, indices)}
     rows: dict[str, list[dict]] = {k: [] for k in OUT}
+    problems: list[str] = []
     for r in sorted(na.load_days(root), key=lambda r: (r["date"], r["kind"])):
         if r["status"] != "ok":
             continue
@@ -41,10 +43,20 @@ def build(root: Path = ROOT, etfs=ETFS, futures=FUTURES, indices=INDICES) -> dic
         raw = path.read_bytes()
         if hashlib.sha256(raw).hexdigest() != r["sha256"]:
             raise ValueError(f"{tag}: raw file hash differs from the list")
-        for row in readers[r["kind"]](raw):
-            if row["date"] != r["date"]:
-                raise ValueError(f"{tag}: a row is dated {row['date']}")
-            rows[r["kind"]].append(row)
+        try:
+            got = readers[r["kind"]](raw)
+        except ValueError as e:
+            problems.append(f"{tag}: {e}")
+        else:
+            wrong = [x["date"] for x in got if x["date"] != r["date"]]
+            if wrong:
+                problems.append(f"{tag}: a row is dated {wrong[0]}")
+            else:
+                rows[r["kind"]].extend(got)
+        if len(problems) >= MAX_PROBLEMS:
+            break
+    if problems:      # every bad file at once, so a fix does not cost one full build per file
+        raise ValueError(f"{len(problems)} files disagree with the list or are in a layout the reader does not know: " + "; ".join(problems[:20]))
     (root / "processed").mkdir(exist_ok=True)
     for kind, (name, fields, key) in OUT.items():
         with (root / "processed" / name).open("w", newline="") as f:
