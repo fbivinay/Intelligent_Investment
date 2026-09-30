@@ -22,6 +22,7 @@ class RuleRef:
     source: str
     verified_on: date
     confidence: str  # primary | secondary | assumed
+    note: str = ""   # why the row is only assumed or secondary, in the rule file's words
 
 
 @dataclass(frozen=True)
@@ -145,7 +146,7 @@ def to_dict(n: Node, depth: int | None = None) -> dict:
          "rules": [{"id": r.rule_id, "from": r.valid_from.isoformat(),
                     "to": r.valid_to.isoformat() if r.valid_to else None,
                     "source": r.source, "verified_on": r.verified_on.isoformat(),
-                    "confidence": r.confidence} for r in n.rules]}
+                    "confidence": r.confidence, "note": r.note} for r in n.rules]}
     if depth is None or depth > 0:
         d["inputs"] = [to_dict(i, None if depth is None else depth - 1) for i in n.inputs]
     return d

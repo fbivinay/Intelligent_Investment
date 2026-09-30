@@ -101,7 +101,7 @@ class Table:
         key = tuple((k, str(r[k])) for k in self.keys)
         data = {k: v for k, v in r.items() if k not in RESERVED and k not in self.keys}
         ref = RuleRef(rule_id(self.name, key), r["from"], r.get("to"), r["source"],
-                      r["verified_on"], r["confidence"])
+                      r["verified_on"], r["confidence"], str(r.get("note", "")).strip())
         return Row(self.name, key, r["from"], r.get("to"), data, ref)
 
     def _key(self, key: dict) -> tuple[tuple[str, str], ...]:
