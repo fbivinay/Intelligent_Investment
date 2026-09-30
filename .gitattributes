@@ -1,2 +1,3 @@
 data/processed/*.csv -text
 data/manifest.json -text
+data/*.csv -text
