@@ -8,7 +8,7 @@ from decimal import Decimal
 
 from engine.money import D
 from engine.rules import Rules
-from engine.trace import (Node, RuleRef, add, cite, const, div, from_rule, maxn, minn, mul, rnd,
+from engine.trace import (Node, RuleRef, add, cite, const, div, from_row, from_rule, maxn, minn, mul, rnd,
                           sub)
 
 ZERO_N = const("Zero", 0)
@@ -38,6 +38,12 @@ class TaxProfile:
     regime: str            # "old" | "new"; "old" is used in years before the new regime existed
     other_income: Decimal  # other taxable income for the year, after deductions
 
+    def __post_init__(self):
+        if self.regime not in ("old", "new"):
+            raise ValueError(f"regime must be 'old' or 'new', not {self.regime!r}")
+        if self.other_income < 0:
+            raise ValueError("other_income cannot be negative")
+
 
 @dataclass(frozen=True)
 class CGEvent:
@@ -49,6 +55,13 @@ class CGEvent:
     sale_costs: Node               # transfer costs deductible from the gain (never STT)
     cost: Node                     # cost of acquisition, buy-side costs included
     fmv_2018: Node | None = None   # value of these units on 31 Jan 2018 (needed if bought on or before it)
+
+    def __post_init__(self):
+        if self.sale_date < self.acq_date:
+            raise ValueError(f"{self.label!r}: sold {self.sale_date}, before it was bought {self.acq_date}")
+        for name, n in (("proceeds", self.proceeds), ("sale_costs", self.sale_costs), ("cost", self.cost), ("fmv_2018", self.fmv_2018)):
+            if n is not None and n.value < 0:
+                raise ValueError(f"{self.label!r}: {name} cannot be negative ({n.value})")
 
 
 @dataclass(frozen=True)
@@ -62,6 +75,10 @@ class Carry:
 class Business:
     pnl: Node    # realised profit (+) or loss (-) on futures, before costs
     costs: Node  # every deductible cost: charges including STT, and any audit fee
+
+    def __post_init__(self):
+        if self.costs.value < 0:
+            raise ValueError("business costs cannot be negative")
 
 
 @dataclass(frozen=True)
@@ -109,14 +126,14 @@ def classify(rules: Rules, e: CGEvent):
         cost = maxn("Cost after 31 Jan 2018 grandfathering", cost,
                     minn("Lower of value on 31 Jan 2018 and sale value", e.fmv_2018, e.proceeds))
     net_sale = sub("Net sale value", e.proceeds, e.sale_costs)
-    series = "1981" if rules.has("tax.cii", e.sale_date, series="1981") else "2001"
+    series = "1981" if rules.has_fy("tax.cii", fy_of(e.sale_date), series="1981") else "2001"
 
     def gain_with(indexed: bool, note: str) -> Node:
         c = cost
         if indexed:
             f = div("Indexation factor",
-                    from_rule(f"Cost inflation index, year of sale (series {series})", *_cii(rules, series, e.sale_date)),
-                    from_rule(f"Cost inflation index, year of purchase (series {series})", *_cii(rules, series, e.acq_date)))
+                    from_row(f"Cost inflation index, year of sale (series {series})", _cii(rules, series, e.sale_date)),
+                    from_row(f"Cost inflation index, year of purchase (series {series})", _cii(rules, series, e.acq_date)))
             c = mul("Indexed cost of acquisition", cost, f)
         return sub(f"Taxable gain: {e.label}", net_sale, c, note=note)
 
@@ -149,8 +166,7 @@ def classify(rules: Rules, e: CGEvent):
 
 
 def _cii(rules: Rules, series: str, on: date):
-    row = rules.at("tax.cii", on, series=series)
-    return row.value, row.ref
+    return rules.at_fy("tax.cii", fy_of(on), series=series)
 
 
 def _apply(label: str, loss: Node, pots: list[Pot]) -> Node:
@@ -190,18 +206,24 @@ def _slab_tax(brackets: list[dict], income: Node, ref: RuleRef) -> Node:
 def fy_tax(rules: Rules, fy: int, profile: TaxProfile, events: list[CGEvent],
            carry_in: Carry = Carry(), dividends: Node | None = None,
            interest: Node | None = None, business: Business | None = None) -> FYTax:
-    start, end = date(fy, 4, 1), fy_end(fy)
-    if profile.other_income < 0:
-        raise ValueError("other_income cannot be negative")
+    for kind, losses in (("short-term", carry_in.st), ("long-term", carry_in.lt), ("business", carry_in.biz)):
+        for origin, amt in losses:
+            if origin >= fy:
+                raise ValueError(f"a {kind} loss from {fy_label(origin)} cannot be brought forward into {fy_label(fy)}")
+            if amt.value < 0:
+                raise ValueError(f"a brought-forward {kind} loss cannot be negative")
+    for name, n in (("dividends", dividends), ("interest", interest)):
+        if n is not None and n.value < 0:
+            raise ValueError(f"{name} cannot be negative")
     for e in events:
         if fy_of(e.sale_date) != fy:
             raise ValueError(f"{e.label!r} sold {e.sale_date} is not in {fy_label(fy)}")
-    loss_row = rules.at("tax.loss_rules", end, kind="capital")
+    loss_row = rules.at_fy("tax.loss_rules", fy, kind="capital")
     years = int(loss_row.value)
-    conv_setoff = rules.at("tax.conventions", end, name="setoff_order")
-    conv_short = rules.at("tax.conventions", end, name="shortfall_order")
-    conv_round = rules.at("tax.conventions", end, name="tax_round_step")
-    reg = profile.regime if rules.has("tax.slabs", start, regime=profile.regime) else "old"
+    conv_setoff = rules.at_fy("tax.conventions", fy, name="setoff_order")
+    conv_short = rules.at_fy("tax.conventions", fy, name="shortfall_order")
+    conv_round = rules.at_fy("tax.conventions", fy, name="tax_round_step")
+    reg = profile.regime if rules.has_fy("tax.slabs", fy, regime=profile.regime) else "old"
 
     pots: dict[tuple, Pot] = {}
     for e in events:
@@ -227,14 +249,17 @@ def fy_tax(rules: Rules, fy: int, profile: TaxProfile, events: list[CGEvent],
     st_loss = _apply("Short-term loss this year, leftover", st_loss, lt_o)
     new_st: list[tuple[int, Node]] = []
     new_lt: list[tuple[int, Node]] = []
+    lapsed: list[str] = []  # losses past their carry-forward limit: not used, and said so on the year's tax
     for origin, amt in sorted(carry_in.lt, key=lambda t: t[0]):
         if fy - origin > years:
+            lapsed.append(f"long-term loss from {fy_label(origin)} of Rs {amt.value:,.2f} (more than {years} years ago)")
             continue
         rem = _apply(f"Long-term loss brought forward from {fy_label(origin)}", amt, lt_o)
         if rem.value > 0:
             new_lt.append((origin, rem))
     for origin, amt in sorted(carry_in.st, key=lambda t: t[0]):
         if fy - origin > years:
+            lapsed.append(f"short-term loss from {fy_label(origin)} of Rs {amt.value:,.2f} (more than {years} years ago)")
             continue
         rem = _apply(f"Short-term loss brought forward from {fy_label(origin)}", amt, st_o)
         rem = _apply(f"Short-term loss brought forward from {fy_label(origin)}, leftover", rem, lt_o)
@@ -254,8 +279,8 @@ def fy_tax(rules: Rules, fy: int, profile: TaxProfile, events: list[CGEvent],
         if p.group:
             groups.setdefault(p.group, []).append(p)
     for g, ps in groups.items():
-        ex = rules.at("tax.lt_exemption", end, group=g)
-        room = from_rule(f"Yearly long-term gains exemption ({g})", ex.value, ex.ref)
+        ex = rules.at_fy("tax.lt_exemption", fy, group=g)
+        room = from_row(f"Yearly long-term gains exemption ({g})", ex)
         for p in sorted(ps, key=lambda p: p.rate, reverse=ex.data["order"] == "highest_rate_first"):
             if room.value <= 0:
                 break
@@ -272,14 +297,14 @@ def fy_tax(rules: Rules, fy: int, profile: TaxProfile, events: list[CGEvent],
     specials = [p for p in live if p.kind == "special"]
     div_ref = None
     if dividends is not None:
-        drow = rules.at("tax.dividend", end)
+        drow = rules.at_fy("tax.dividend", fy)
         div_ref, mode = drow.ref, drow.data["mode"]
         if mode == "slab":
             parts.append(cite(dividends, drow.ref))
         elif mode == "above_threshold":
             over = maxn("Dividends above the threshold",
                         sub("Dividends less threshold", dividends,
-                            from_rule("Dividend threshold", drow.dec("threshold"), drow.ref)), ZERO_N)
+                            from_row("Dividend threshold", drow, "threshold")), ZERO_N)
             specials.append(Pot("income", "special", drow.dec("rate"), "115BBDA", "", drow.ref, [],
                                 left=over, included=over))
         elif mode != "exempt":
@@ -290,8 +315,13 @@ def fy_tax(rules: Rules, fy: int, profile: TaxProfile, events: list[CGEvent],
     new_biz: list[tuple[int, Node]] = []
     biz_row = biz_conv = None
     if business is not None or carry_in.biz:
-        biz_row = rules.at("tax.loss_rules", end, kind="business")
-        old = [(o, a) for o, a in sorted(carry_in.biz, key=lambda t: t[0]) if fy - o <= int(biz_row.value)]
+        biz_row = rules.at_fy("tax.loss_rules", fy, kind="business")
+        old = []
+        for o, a in sorted(carry_in.biz, key=lambda t: t[0]):
+            if fy - o <= int(biz_row.value):
+                old.append((o, a))
+            else:
+                lapsed.append(f"business loss from {fy_label(o)} of Rs {a.value:,.2f} (more than {int(biz_row.value)} years ago)")
         net = sub("Business income after costs", business.pnl, business.costs) if business else ZERO_N
         if net.value >= 0:
             left = net
@@ -306,7 +336,7 @@ def fy_tax(rules: Rules, fy: int, profile: TaxProfile, events: list[CGEvent],
                     new_biz.append((o, rest))
             parts.append(left)
         else:
-            biz_conv = rules.at("tax.conventions", end, name="business_loss_setoff")
+            biz_conv = rules.at_fy("tax.conventions", fy, name="business_loss_setoff")
             loss = sub("Business loss this year", ZERO_N, net)
             room = maxn("Slab income a business loss can reach",
                         add("Slab income before the business loss, without the other income given",
@@ -316,7 +346,7 @@ def fy_tax(rules: Rules, fy: int, profile: TaxProfile, events: list[CGEvent],
             rest = sub("Business loss carried forward", loss, used)
             new_biz = old + ([(fy, rest)] if rest.value > 0 else [])
     ordinary = add("Income taxed at slab rates", *parts)
-    slab = rules.at("tax.slabs", start, regime=reg)
+    slab = rules.at_fy("tax.slabs", fy, regime=reg)
     brackets = slab.data["brackets"]
     ordinary_tax = _slab_tax(brackets, ordinary, slab.ref)
 
@@ -348,8 +378,8 @@ def fy_tax(rules: Rules, fy: int, profile: TaxProfile, events: list[CGEvent],
     total = add("Total income", ordinary, *[p.included for p in specials])
     tax_before = add("Tax before rebate", ordinary_tax, special_tax)
 
-    reb = rules.at("tax.rebate_87a", start, regime=reg)
-    limit = from_rule("Rebate income limit", reb.dec("income_limit"), reb.ref)
+    reb = rules.at_fy("tax.rebate_87a", fy, regime=reg)
+    limit = from_row("Rebate income limit", reb, "income_limit")
     if reb.data["applies_to_special"]:
         left_out = set(reb.data.get("excluded_sections", []))
         base = add("Tax the rebate is taken from", ordinary_tax,
@@ -357,7 +387,7 @@ def fy_tax(rules: Rules, fy: int, profile: TaxProfile, events: list[CGEvent],
     else:
         base = ordinary_tax
     if total.value <= limit.value:
-        rebate = minn("Section 87A rebate", from_rule("Maximum rebate", reb.dec("max_rebate"), reb.ref), base)
+        rebate = minn("Section 87A rebate", from_row("Maximum rebate", reb, "max_rebate"), base)
     elif reb.data.get("marginal_relief", False):
         over = sub("Income over the rebate limit", total, limit)
         rebate = maxn("Marginal relief at the rebate limit", sub("Tax above the income over the limit", base, over), ZERO_N)
@@ -365,7 +395,7 @@ def fy_tax(rules: Rules, fy: int, profile: TaxProfile, events: list[CGEvent],
         rebate = from_rule("No rebate: income above the limit", 0, reb.ref)
     after_rebate = sub("Tax after rebate", tax_before, rebate)
 
-    sc = rules.at("tax.surcharge", start, regime=reg)
+    sc = rules.at_fy("tax.surcharge", fy, regime=reg)
 
     def tested_on(tier):  # the 25% and 37% tiers look at income without dividends and special-rate gains
         return ordinary if tier.get("basis") == "excluding_special" else total
@@ -420,11 +450,12 @@ def fy_tax(rules: Rules, fy: int, profile: TaxProfile, events: list[CGEvent],
     else:
         surcharge_final = from_rule("No surcharge", 0, sc.ref)
 
-    cess_row = rules.at("tax.cess", start)
+    cess_row = rules.at_fy("tax.cess", fy)
     cess = mul("Health and education cess", add("Tax and surcharge", after_rebate, surcharge_final),
-               from_rule("Cess rate", cess_row.value, cess_row.ref))
+               from_row("Cess rate", cess_row))
     unrounded = add("Tax before rounding", after_rebate, surcharge_final, cess)
-    tax = rnd(f"Income tax for {fy_label(fy)}", unrounded, from_rule("Tax rounding step", conv_round.value, conv_round.ref))
+    tax = rnd(f"Income tax for {fy_label(fy)}", unrounded, from_row("Tax rounding step", conv_round),
+              note=("Losses that lapsed and were not used: " + "; ".join(lapsed)) if lapsed else "")
     if setoff_happened:
         tax = cite(tax, conv_setoff.ref)
     if shortfall_used:
@@ -438,7 +469,7 @@ def fy_tax(rules: Rules, fy: int, profile: TaxProfile, events: list[CGEvent],
     if biz_conv is not None:
         tax = cite(tax, biz_conv.ref)
     if gains_cut:
-        tax = cite(tax, rules.at("tax.conventions", end, name="marginal_relief_order").ref)
+        tax = cite(tax, rules.at_fy("tax.conventions", fy, name="marginal_relief_order").ref)
     return FYTax(fy, tax, {"ordinary_income": ordinary, "ordinary_tax": ordinary_tax, "special_tax": special_tax,
                            "total_income": total, "rebate": rebate, "surcharge": surcharge_final,
                            "cess": cess, "before_rounding": unrounded},

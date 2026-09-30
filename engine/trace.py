@@ -56,6 +56,11 @@ def from_rule(label, value, ref: RuleRef, note="", tags=()) -> Node:
     return _n(label, D(value), "rule", rules=(ref,), note=note, tags=tags)
 
 
+def from_row(label, row, field="value", note="", tags=()) -> Node:
+    """A leaf whose number is a field of a rule row: the value and the reference come from the same row, so they cannot drift apart."""
+    return from_rule(label, row.dec(field), row.ref, note=note, tags=tags)
+
+
 def add(label, *xs, note="", tags=()) -> Node:
     return _n(label, sum((x.value for x in xs), ZERO), "add", xs, note=note, tags=tags)
 

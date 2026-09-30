@@ -56,8 +56,16 @@ class Table:
         self.name, self.path = name, path
         self.keys: list[str] = list(meta["keys"])
         self.open_ended: bool = meta.get("open_ended", True)
+        # "day": looked up by the date of a transaction, rows may change on any day. "financial_year": looked up by the year, so
+        # every row must start on 1 April and end on 31 March (a change in mid-year would be answered for the whole year).
+        self.granularity: str = meta.get("granularity", "day")
+        if self.granularity not in ("day", "financial_year"):
+            raise RuleTableError(f"{path}: granularity must be 'day' or 'financial_year', not {self.granularity!r}")
         late = [({k: str(v) for k, v in e.items() if k != "from"}, e["from"])
                 for e in meta.get("late_keys", [])]
+        if self.granularity == "financial_year":
+            for _, f in late:
+                self._check_year_edge(f, "starts", path)
         self.groups: dict[tuple, list[Row]] = {}
         for i, r in enumerate(raw.get("row", [])):
             row = self._row(r, i)
@@ -102,7 +110,18 @@ class Table:
         data = {k: v for k, v in r.items() if k not in RESERVED and k not in self.keys}
         ref = RuleRef(rule_id(self.name, key), r["from"], r.get("to"), r["source"],
                       r["verified_on"], r["confidence"], str(r.get("note", "")).strip())
+        if self.granularity == "financial_year":
+            self._check_year_edge(r["from"], "starts", at)
+            if "to" in r:
+                self._check_year_edge(r["to"], "ends", at)
         return Row(self.name, key, r["from"], r.get("to"), data, ref)
+
+    @staticmethod
+    def _check_year_edge(d: date, what: str, at) -> None:
+        good = (d.month, d.day) == ((4, 1) if what == "starts" else (3, 31))
+        if not good:
+            raise RuleTableError(f"{at}: a financial-year table row {what} on {d}, "
+                                 f"but must {'start on 1 April' if what == 'starts' else 'end on 31 March'}")
 
     def _key(self, key: dict) -> tuple[tuple[str, str], ...]:
         if set(key) != set(self.keys):
@@ -118,6 +137,19 @@ class Table:
             if row.covers(on):
                 return row
         raise RuleNotFound(f"{self.name} {dict(k)} on {on}: no rule covers this date")
+
+    def _fy_only(self) -> None:
+        if self.granularity != "financial_year":
+            raise RuleTableError(f"{self.name} is looked up by date, not by financial year")
+
+    def at_fy(self, fy: int, **key) -> Row:
+        """The row in force for the financial year that starts on 1 April `fy` (tables that are looked up by year only)."""
+        self._fy_only()
+        return self.at(date(fy, 4, 1), **key)
+
+    def has_fy(self, fy: int, **key) -> bool:
+        self._fy_only()
+        return self.has(date(fy, 4, 1), **key)
 
     def all_rows(self) -> Iterator[Row]:
         for rows in self.groups.values():
@@ -151,6 +183,12 @@ class Rules:
 
     def has(self, table: str, on: date, **key) -> bool:
         return self._t(table).has(on, **key)
+
+    def at_fy(self, table: str, fy: int, **key) -> Row:
+        return self._t(table).at_fy(fy, **key)
+
+    def has_fy(self, table: str, fy: int, **key) -> bool:
+        return self._t(table).has_fy(fy, **key)
 
     def all_rows(self) -> Iterator[Row]:
         for t in self.tables.values():

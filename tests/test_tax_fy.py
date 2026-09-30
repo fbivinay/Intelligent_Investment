@@ -2,7 +2,7 @@ from decimal import Decimal as Dc
 
 import pytest
 
-from engine.tax import Carry, TaxProfile, fy_tax, investment_tax
+from engine.tax import Business, Carry, TaxProfile, fy_tax, investment_tax
 from engine.trace import assert_balanced, const, flags, rules_used
 from tests.helpers import make_rules
 from tests.synth_tax import TAX
@@ -242,3 +242,73 @@ def test_zero_income_and_no_events_is_zero_tax(rules):
 @pytest.mark.parametrize("regime, fy", [("old", 2015), ("old", 2019), ("new", 2021)])
 def test_tax_is_never_negative(rules, income, regime, fy):
     assert fy_tax(rules, fy, TaxProfile(regime, Dc(income)), []).tax.value >= 0
+
+
+# ---- inputs the engine refuses instead of quietly reading -----------------------
+
+@pytest.mark.parametrize("regime", ["New", "OLD", "", "newer", None])
+def test_an_unknown_regime_is_refused_not_read_as_the_old_regime(regime):
+    with pytest.raises(ValueError, match="regime"):
+        TaxProfile(regime, Dc("1000000"))
+
+
+def test_a_sale_dated_before_its_purchase_is_refused():
+    with pytest.raises(ValueError, match="before it was bought"):
+        ev("2019-06-02", "2019-06-01", "10", "20")
+    ev("2019-06-01", "2019-06-01", "10", "20")            # bought and sold the same day is allowed
+
+
+@pytest.mark.parametrize("what", ["proceeds", "sale_costs", "cost", "fmv"])
+def test_negative_proceeds_costs_or_values_are_refused(what):
+    args = dict(proceeds="20", sale_costs="0", cost="10", fmv="5")
+    args[what] = "-1"
+    with pytest.raises(ValueError, match="negative"):
+        ev("2016-06-01", "2019-06-01", args["cost"], args["proceeds"], sale_costs=args["sale_costs"], fmv=args["fmv"])
+
+
+def test_zero_proceeds_and_zero_cost_are_allowed():
+    ev("2019-06-01", "2019-12-01", "10", "0")              # a worthless sale
+    ev("2019-06-01", "2019-12-01", "0", "10")              # bonus units cost nothing
+
+
+@pytest.mark.parametrize("kind", ["st", "lt", "biz"])
+@pytest.mark.parametrize("origin", [2019, 2020, 2030])
+def test_a_loss_from_the_same_or_a_later_year_cannot_be_brought_forward(rules, kind, origin):
+    with pytest.raises(ValueError, match="cannot be brought forward"):
+        fy_tax(rules, 2019, TaxProfile("old", Dc("1000000")), [], Carry(**{kind: ((origin, const("loss", "1000")),)}))
+
+
+def test_a_negative_brought_forward_loss_is_refused(rules):
+    with pytest.raises(ValueError, match="negative"):
+        fy_tax(rules, 2019, TaxProfile("old", Dc("1000000")), [], Carry(st=((2018, const("loss", "-1000")),)))
+
+
+def test_negative_dividends_interest_or_business_costs_are_refused(rules):
+    p = TaxProfile("old", Dc("1000000"))
+    with pytest.raises(ValueError, match="negative"):
+        fy_tax(rules, 2019, p, [], dividends=const("d", "-1"))
+    with pytest.raises(ValueError, match="negative"):
+        fy_tax(rules, 2019, p, [], interest=const("i", "-1"))
+    with pytest.raises(ValueError, match="negative"):
+        Business(const("p", "10"), const("c", "-1"))
+
+
+def test_the_new_regime_before_it_existed_still_falls_back_to_the_old_one(rules):
+    # the one deliberate fallback: the answer for a year with no new regime is the old regime, and a valid name is never guessed at
+    assert fy_tax(rules, 2015, TaxProfile("new", Dc("1000000")), []).tax.value == fy_tax(rules, 2015, TaxProfile("old", Dc("1000000")), []).tax.value
+
+
+# ---- losses that lapse are named in the derivation ------------------------------
+
+def test_a_loss_that_lapses_after_eight_years_is_named_on_the_years_tax(rules):
+    carry = Carry(st=((2010, const("old", "40000")),), lt=((2011, const("edge", "60000")),), biz=((2009, const("older", "5000")),))
+    r = fy_tax(rules, 2019, TaxProfile("old", Dc("1000000")), [], carry)
+    note = r.tax.note
+    assert "lapsed" in note and "Rs 40,000.00" in note and "short-term loss from FY2010-11" in note
+    assert "business loss from FY2009-10" in note and "Rs 5,000.00" in note
+    assert "FY2011-12" not in note                                        # a loss in its eighth year is still usable, so it is not named
+
+
+def test_a_year_with_no_lapsed_loss_has_no_lapse_note(rules):
+    r = fy_tax(rules, 2019, TaxProfile("old", Dc("1000000")), [], Carry(st=((2018, const("fresh", "40000")),)))
+    assert "lapsed" not in r.tax.note

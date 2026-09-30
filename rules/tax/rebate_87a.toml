@@ -6,6 +6,7 @@
 [meta]
 keys = ["regime"]
 coverage_from = 2010-04-01
+granularity = "financial_year"
 late_keys = [{ regime = "new", from = 2020-04-01 }]
 
 [[row]]
