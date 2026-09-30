@@ -53,8 +53,8 @@ def _dmy_name(s: str) -> str:
 
 
 def _dmy_num(s: str) -> str:
-    """31-01-2018 to 2018-01-31."""
-    d, m, y = s.split("-")
+    """31-01-2018 (or 31/01/2018, which 59 index files from 2014-06 to 2015-06 use) to 2018-01-31."""
+    d, m, y = s.replace("/", "-").split("-")
     return f"{int(y):04d}-{int(m):02d}-{int(d):02d}"
 
 
@@ -112,7 +112,7 @@ def _index_day(text: str, day: str | None) -> str:
     month-first reading gives that day, it is `day`. A date that fits neither way is returned as written, for the caller's check to refuse."""
     written = _dmy_num(text)
     if day is not None and written != day:
-        d, m, y = text.split("-")
+        d, m, y = text.replace("/", "-").split("-")
         if _dmy_num(f"{m}-{d}-{y}") == day:
             return day
     return written

@@ -88,13 +88,16 @@ def test_a_file_in_another_shape_or_with_an_item_the_reader_does_not_know_is_an_
         nw.read_web(raw_of(item("etf", [{k: v for k, v in ETF_ROW.items() if k != "CH_CLOSING_PRICE"}], symbol="NIFTYBEES", **{"from": "2010-04-01"})))
 
 
-def test_a_file_whose_collection_did_not_finish_cleanly_is_refused_with_what_failed():
-    meta = {"collected": "x", "status": "aborted", "failed": [{"kind": "etf", "key": "GOLDBEES"}], "missing": []}
-    with pytest.raises(ValueError, match="aborted"):
-        nw.read_web(raw_of(item("etf", [ETF_ROW], symbol="NIFTYBEES", **{"from": "2010-04-01"}), meta=meta))
-    meta = {"collected": "x", "status": "finished", "failed": [{"kind": "etf", "key": "GOLDBEES"}], "missing": []}
-    with pytest.raises(ValueError, match="failed"):
-        nw.read_web(raw_of(item("etf", [ETF_ROW], symbol="NIFTYBEES", **{"from": "2010-04-01"}), meta=meta))
+def test_a_part_file_from_a_paused_or_aborted_collection_is_read_and_described_with_what_is_missing():
+    meta = {"collected": "x", "status": "paused", "failed": [{"kind": "fo", "key": "NIFTY", "year": 2013, "month": 0}], "missing": []}
+    raw = raw_of(item("etf", [ETF_ROW], symbol="NIFTYBEES", **{"from": "2010-04-01"}), meta=meta)
+    assert len(nw.read_web(raw)["cash"]) == 1                       # its rows are good; whether the set of files is complete is checked on the rows
+    text = nw.describe(raw)
+    assert "status paused" in text and "not collected: fo NIFTY 2013-01" in text
+    aborted = raw_of(item("etf", [ETF_ROW], symbol="NIFTYBEES", **{"from": "2010-04-01"}), meta=dict(meta, status="aborted", failed=[]))
+    assert "status aborted" in nw.describe(aborted)
+    finished = raw_of(item("etf", [ETF_ROW], symbol="NIFTYBEES", **{"from": "2010-04-01"}), meta={"collected": "x", "status": "finished", "failed": [], "missing": []})
+    assert "status" not in nw.describe(finished)
 
 
 def test_months_with_no_contract_found_are_reported_by_the_reader_not_hidden():
@@ -152,3 +155,23 @@ def test_a_futures_reply_for_another_symbol_is_refused():
 def test_digits_are_kept_as_written_including_a_trailing_zero():
     text = json.dumps({"meta": {}, "items": [item("etf", [ETF_ROW], symbol="NIFTYBEES", **{"from": "2010-04-01"})]}).replace('"CH_CLOSING_PRICE": 533.87', '"CH_CLOSING_PRICE": 533.50')
     assert nw.read_web(text.encode())["cash"][0]["close"] == "533.50"
+
+
+NO_TRADES = {k: None for k in ("FH_OPENING_PRICE", "FH_TRADE_HIGH_PRICE", "FH_TRADE_LOW_PRICE", "FH_CLOSING_PRICE", "FH_PREV_CLS", "FH_SETTLE_PRICE", "FH_TOT_TRADED_QTY",
+                               "FH_TOT_TRADED_VAL", "FH_OPEN_INT", "FH_CHANGE_IN_OI", "FH_MARKET_LOT", "FH_UNDERLYING_VALUE", "FH_LAST_TRADED_PRICE", "FH_MARKET_TYPE",
+                               "CALCULATED_PREMIUM_VAL")}
+
+
+def test_a_listed_contract_nobody_traded_that_day_has_no_row_and_the_description_counts_them():
+    empty = dict(FO_ROW, **NO_TRADES, FH_TIMESTAMP="24-Mar-2010")
+    raw = raw_of(item("fo", [FO_ROW, empty], symbol="NIFTY", expiry="2010-03-25"))
+    assert [r["date"] for r in nw.read_web(raw)["fo"]] == ["2010-03-25"]
+    assert "fo 1 rows" in nw.describe(raw) and "1 futures rows without trades left out" in nw.describe(raw)
+
+
+def test_a_futures_row_with_only_some_values_missing_is_an_error_and_a_missing_underlying_is_just_blank():
+    half = dict(FO_ROW, FH_CLOSING_PRICE=None)
+    with pytest.raises(ValueError, match="FH_CLOSING_PRICE"):
+        nw.read_web(raw_of(item("fo", [half], symbol="NIFTY", expiry="2010-03-25")))
+    no_und = dict(FO_ROW, FH_UNDERLYING_VALUE=None)
+    assert nw.read_web(raw_of(item("fo", [no_und], symbol="NIFTY", expiry="2010-03-25")))["fo"][0]["underlying"] == ""
