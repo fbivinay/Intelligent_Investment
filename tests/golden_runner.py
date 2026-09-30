@@ -86,3 +86,53 @@ def missing_coverage(rules: Rules, cases: list[dict]) -> list[str]:
     tagged = {t for c in cases for t in c.get("boundary", [])}
     return [f"{rid}@{d}:{phase}" for rid, d in all_boundaries(rules) for phase in ("before", "after")
             if f"{rid}@{d}:{phase}" not in tagged]
+
+
+@kind("charges")
+def _charges(rules: Rules, c: dict):
+    """Order charges: each named line, `total`, `deductible` or `turnover` equals the hand-worked value."""
+    from engine.charges import Order, order_charges
+    from engine.trace import assert_balanced, rules_used
+    i = c["input"]
+    ch = order_charges(rules, Order(i["on"], i["instrument_class"], i["side"], D(i["qty"]), D(i["price"])))
+    named = {**ch.lines, "total": ch.total, "deductible": ch.deductible, "turnover": ch.turnover}
+    for name, want in c["expect"].items():
+        assert same(named[name].value, want), f"{c['id']}: {name} is {named[name].value}, hand-worked {want}"
+    assert_balanced(ch.total)
+    return rules_used(ch.total)
+
+
+@kind("dp")
+def _dp(rules: Rules, c: dict):
+    """One DP charge event (`total`) and, if given, the rule's `basis`."""
+    from engine.charges import dp_basis, dp_charge
+    from engine.trace import assert_balanced, rules_used
+    on = c["input"]["on"]
+    n = dp_charge(rules, on)
+    assert same(n.value, c["expect"]["total"]), f"{c['id']}: total is {n.value}, hand-worked {c['expect']['total']}"
+    if "basis" in c["expect"]:
+        assert dp_basis(rules, on) == c["expect"]["basis"], f"{c['id']}: basis is {dp_basis(rules, on)}, hand-worked {c['expect']['basis']}"
+    assert_balanced(n)
+    return rules_used(n)
+
+
+@kind("amc")
+def _amc(rules: Rules, c: dict):
+    """Yearly AMC due on `on` for an account opened on `opened`."""
+    from engine.charges import amc_fee
+    from engine.trace import assert_balanced, rules_used
+    n = amc_fee(rules, c["input"]["on"], c["input"]["opened"])
+    assert same(n.value, c["expect"]["total"]), f"{c['id']}: total is {n.value}, hand-worked {c['expect']['total']}"
+    assert_balanced(n)
+    return rules_used(n)
+
+
+@kind("account_opening")
+def _account_opening(rules: Rules, c: dict):
+    """Account-opening fee for an account opened on `opened`."""
+    from engine.charges import account_opening_fee
+    from engine.trace import assert_balanced, rules_used
+    n = account_opening_fee(rules, c["input"]["opened"])
+    assert same(n.value, c["expect"]["total"]), f"{c['id']}: total is {n.value}, hand-worked {c['expect']['total']}"
+    assert_balanced(n)
+    return rules_used(n)
