@@ -1,0 +1,631 @@
+[[case]]
+id = "tax.slabs-old-2011-03-31"
+kind = "rule_value"
+source = "S56 Finance Bill 2010: Upto Rs. 1,60,000 Nil; Rs. 1,60,001 to Rs. 5,00,000 10 per cent; Rs. 5,00,001 to Rs. 8,00,000 20 per cent; Above 30 per cent"
+table = "tax.slabs"
+on = 2011-03-31
+key = { regime = "old" }
+boundary = ["tax.slabs[regime=old]@2011-04-01:before"]
+[case.expect]
+brackets = [{ upto = "160000", rate = "0" }, { upto = "500000", rate = "0.10" }, { upto = "800000", rate = "0.20" }, { upto = "", rate = "0.30" }]
+
+[[case]]
+id = "tax.slabs-old-2011-04-01"
+kind = "rule_value"
+source = "S57 Finance Bill 2011: Upto Rs. 1,80,000 Nil; Rs. 1,80,001 to Rs. 5,00,000 10 per cent; to Rs. 8,00,000 20 per cent; Above Rs. 8,00,000 30 per cent"
+table = "tax.slabs"
+on = 2011-04-01
+key = { regime = "old" }
+boundary = ["tax.slabs[regime=old]@2011-04-01:after"]
+[case.expect]
+brackets = [{ upto = "180000", rate = "0" }, { upto = "500000", rate = "0.10" }, { upto = "800000", rate = "0.20" }, { upto = "", rate = "0.30" }]
+
+[[case]]
+id = "tax.slabs-old-2012-03-31"
+kind = "rule_value"
+source = "S57 Finance Bill 2011 rates for financial year 2011-12"
+table = "tax.slabs"
+on = 2012-03-31
+key = { regime = "old" }
+boundary = ["tax.slabs[regime=old]@2012-04-01:before"]
+[case.expect]
+brackets = [{ upto = "180000", rate = "0" }, { upto = "500000", rate = "0.10" }, { upto = "800000", rate = "0.20" }, { upto = "", rate = "0.30" }]
+
+[[case]]
+id = "tax.slabs-old-2012-04-01"
+kind = "rule_value"
+source = "S40 Finance Bill 2012: Upto Rs. 2,00,000 Nil; Rs. 2,00,001 to Rs. 5,00,000 10 per cent; Rs. 5,00,001 to Rs. 10,00,000 20 per cent; Above Rs. 10,00,000 30 per cent"
+table = "tax.slabs"
+on = 2012-04-01
+key = { regime = "old" }
+boundary = ["tax.slabs[regime=old]@2012-04-01:after"]
+[case.expect]
+brackets = [{ upto = "200000", rate = "0" }, { upto = "500000", rate = "0.10" }, { upto = "1000000", rate = "0.20" }, { upto = "", rate = "0.30" }]
+
+[[case]]
+id = "tax.slabs-old-2014-03-31"
+kind = "rule_value"
+source = "S19 Finance Bill 2013: the same rates for 2013-14 (Upto Rs. 2,00,000 Nil)"
+table = "tax.slabs"
+on = 2014-03-31
+key = { regime = "old" }
+boundary = ["tax.slabs[regime=old]@2014-04-01:before"]
+[case.expect]
+brackets = [{ upto = "200000", rate = "0" }, { upto = "500000", rate = "0.10" }, { upto = "1000000", rate = "0.20" }, { upto = "", rate = "0.30" }]
+
+[[case]]
+id = "tax.slabs-old-2014-04-01"
+kind = "rule_value"
+source = "S41 Finance (No.2) Bill 2014: Upto Rs.2,50,000 Nil; Rs. 2,50,001 to Rs. 5,00,000 10 per cent; Rs. 5,00,001 to Rs. 10,00,000 20 per cent; Above 30 per cent"
+table = "tax.slabs"
+on = 2014-04-01
+key = { regime = "old" }
+boundary = ["tax.slabs[regime=old]@2014-04-01:after"]
+[case.expect]
+brackets = [{ upto = "250000", rate = "0" }, { upto = "500000", rate = "0.10" }, { upto = "1000000", rate = "0.20" }, { upto = "", rate = "0.30" }]
+
+[[case]]
+id = "tax.slabs-old-2017-03-31"
+kind = "rule_value"
+source = "S59 Finance Bill 2016: Upto Rs. 2,50,000 Nil; 10 per cent to 5,00,000; 20 per cent to 10,00,000"
+table = "tax.slabs"
+on = 2017-03-31
+key = { regime = "old" }
+boundary = ["tax.slabs[regime=old]@2017-04-01:before"]
+[case.expect]
+brackets = [{ upto = "250000", rate = "0" }, { upto = "500000", rate = "0.10" }, { upto = "1000000", rate = "0.20" }, { upto = "", rate = "0.30" }]
+
+[[case]]
+id = "tax.slabs-old-2017-04-01"
+kind = "rule_value"
+source = "S44 Finance Bill 2017: Rs. 2,50,001 to Rs. 5,00,000 5 per cent; to Rs. 10,00,000 20 per cent; Above Rs. 10,00,000 30 per cent"
+table = "tax.slabs"
+on = 2017-04-01
+key = { regime = "old" }
+boundary = ["tax.slabs[regime=old]@2017-04-01:after"]
+[case.expect]
+brackets = [{ upto = "250000", rate = "0" }, { upto = "500000", rate = "0.05" }, { upto = "1000000", rate = "0.20" }, { upto = "", rate = "0.30" }]
+
+[[case]]
+id = "tax.slabs-new-2023-03-31"
+kind = "rule_value"
+source = "S64 Finance Bill 2023: option under section 115BAC for 2022-23: Up to 2,50,000 Nil; 5% to 5,00,000; 10% to 7,50,000; 15% to 10,00,000; 20% to 12,50,000; 25% to 15,00,000; 30% above"
+table = "tax.slabs"
+on = 2023-03-31
+key = { regime = "new" }
+boundary = ["tax.slabs[regime=new]@2023-04-01:before"]
+[case.expect]
+brackets = [{ upto = "250000", rate = "0" }, { upto = "500000", rate = "0.05" }, { upto = "750000", rate = "0.10" }, { upto = "1000000", rate = "0.15" }, { upto = "1250000", rate = "0.20" }, { upto = "1500000", rate = "0.25" }, { upto = "", rate = "0.30" }]
+
+[[case]]
+id = "tax.slabs-new-2023-04-01"
+kind = "rule_value"
+source = "S64 Finance Bill 2023 section 115BAC(1A): Upto Rs. 3,00,000 Nil; 5 per cent to 6,00,000; 10 per cent to 9,00,000; 15 per cent to 12,00,000; 20 per cent to 15,00,000; 30 per cent above"
+table = "tax.slabs"
+on = 2023-04-01
+key = { regime = "new" }
+boundary = ["tax.slabs[regime=new]@2023-04-01:after"]
+[case.expect]
+brackets = [{ upto = "300000", rate = "0" }, { upto = "600000", rate = "0.05" }, { upto = "900000", rate = "0.10" }, { upto = "1200000", rate = "0.15" }, { upto = "1500000", rate = "0.20" }, { upto = "", rate = "0.30" }]
+
+[[case]]
+id = "tax.slabs-new-2024-03-31"
+kind = "rule_value"
+source = "S64 and S47: the same rates for assessment year 2024-25"
+table = "tax.slabs"
+on = 2024-03-31
+key = { regime = "new" }
+boundary = ["tax.slabs[regime=new]@2024-04-01:before"]
+[case.expect]
+brackets = [{ upto = "300000", rate = "0" }, { upto = "600000", rate = "0.05" }, { upto = "900000", rate = "0.10" }, { upto = "1200000", rate = "0.15" }, { upto = "1500000", rate = "0.20" }, { upto = "", rate = "0.30" }]
+
+[[case]]
+id = "tax.slabs-new-2024-04-01"
+kind = "rule_value"
+source = "S47 Finance (No.2) Bill 2024: Upto Rs. 3,00,000 Nil; 5% to 7,00,000; 10% to 10,00,000; 15% to 12,00,000; 20% to 15,00,000; 30% above"
+table = "tax.slabs"
+on = 2024-04-01
+key = { regime = "new" }
+boundary = ["tax.slabs[regime=new]@2024-04-01:after"]
+[case.expect]
+brackets = [{ upto = "300000", rate = "0" }, { upto = "700000", rate = "0.05" }, { upto = "1000000", rate = "0.10" }, { upto = "1200000", rate = "0.15" }, { upto = "1500000", rate = "0.20" }, { upto = "", rate = "0.30" }]
+
+[[case]]
+id = "tax.slabs-new-2025-03-31"
+kind = "rule_value"
+source = "S65 Finance Bill 2025: assessment year 2025-26 rates as enacted (3,00,000; 7,00,000; 10,00,000; 12,00,000; 15,00,000)"
+table = "tax.slabs"
+on = 2025-03-31
+key = { regime = "new" }
+boundary = ["tax.slabs[regime=new]@2025-04-01:before"]
+[case.expect]
+brackets = [{ upto = "300000", rate = "0" }, { upto = "700000", rate = "0.05" }, { upto = "1000000", rate = "0.10" }, { upto = "1200000", rate = "0.15" }, { upto = "1500000", rate = "0.20" }, { upto = "", rate = "0.30" }]
+
+[[case]]
+id = "tax.slabs-new-2025-04-01"
+kind = "rule_value"
+source = "S65 Finance Bill 2025 clause (iii) of section 115BAC(1A): Upto Rs. 4,00,000 Nil; 5 per cent to 8,00,000; 10 per cent to 12,00,000; 15 per cent to 16,00,000; 20 per cent to 20,00,000; 25 per cent to 24,00,000; 30 per cent above"
+table = "tax.slabs"
+on = 2025-04-01
+key = { regime = "new" }
+boundary = ["tax.slabs[regime=new]@2025-04-01:after"]
+[case.expect]
+brackets = [{ upto = "400000", rate = "0" }, { upto = "800000", rate = "0.05" }, { upto = "1200000", rate = "0.10" }, { upto = "1600000", rate = "0.15" }, { upto = "2000000", rate = "0.20" }, { upto = "2400000", rate = "0.25" }, { upto = "", rate = "0.30" }]
+
+[[case]]
+id = "tax.rebate_87a-old-2013-03-31"
+kind = "rule_value"
+source = "S19 Finance Bill 2013: a new rebate for AY 2014-15; nothing before"
+table = "tax.rebate_87a"
+on = 2013-03-31
+key = { regime = "old" }
+boundary = ["tax.rebate_87a[regime=old]@2013-04-01:before"]
+[case.expect]
+income_limit = "0"
+max_rebate = "0"
+applies_to_special = false
+marginal_relief = false
+excluded_sections = []
+
+[[case]]
+id = "tax.rebate_87a-old-2013-04-01"
+kind = "rule_value"
+source = "S19 Finance Bill 2013: rebate equal to the income-tax payable or an amount of two thousand rupees, whichever is less, total income not exceeding five lakh rupees"
+table = "tax.rebate_87a"
+on = 2013-04-01
+key = { regime = "old" }
+boundary = ["tax.rebate_87a[regime=old]@2013-04-01:after"]
+[case.expect]
+income_limit = "500000"
+max_rebate = "2000"
+applies_to_special = true
+marginal_relief = false
+excluded_sections = []
+
+[[case]]
+id = "tax.rebate_87a-old-2016-03-31"
+kind = "rule_value"
+source = "S59 Finance Bill 2016: existing rebate of two thousand rupees for income up to five hundred thousand rupees"
+table = "tax.rebate_87a"
+on = 2016-03-31
+key = { regime = "old" }
+boundary = ["tax.rebate_87a[regime=old]@2016-04-01:before"]
+[case.expect]
+income_limit = "500000"
+max_rebate = "2000"
+applies_to_special = true
+marginal_relief = false
+excluded_sections = []
+
+[[case]]
+id = "tax.rebate_87a-old-2016-04-01"
+kind = "rule_value"
+source = "S59 Finance Bill 2016: increase the maximum amount of rebate from existing Rs.2,000 to Rs.5,000, from AY 2017-18"
+table = "tax.rebate_87a"
+on = 2016-04-01
+key = { regime = "old" }
+boundary = ["tax.rebate_87a[regime=old]@2016-04-01:after"]
+[case.expect]
+income_limit = "500000"
+max_rebate = "5000"
+applies_to_special = true
+marginal_relief = false
+excluded_sections = []
+
+[[case]]
+id = "tax.rebate_87a-old-2017-03-31"
+kind = "rule_value"
+source = "S59 Rs 5,000 for total income up to Rs 5 lakh for financial year 2016-17"
+table = "tax.rebate_87a"
+on = 2017-03-31
+key = { regime = "old" }
+boundary = ["tax.rebate_87a[regime=old]@2017-04-01:before"]
+[case.expect]
+income_limit = "500000"
+max_rebate = "5000"
+applies_to_special = true
+marginal_relief = false
+excluded_sections = []
+
+[[case]]
+id = "tax.rebate_87a-old-2017-04-01"
+kind = "rule_value"
+source = "S44 Finance Bill 2017: reduce the maximum rebate from Rs. 5000 to Rs. 2500, only to resident individuals whose total income does not exceed Rs. 3,50,000"
+table = "tax.rebate_87a"
+on = 2017-04-01
+key = { regime = "old" }
+boundary = ["tax.rebate_87a[regime=old]@2017-04-01:after"]
+[case.expect]
+income_limit = "350000"
+max_rebate = "2500"
+applies_to_special = true
+marginal_relief = false
+excluded_sections = []
+
+[[case]]
+id = "tax.rebate_87a-old-2018-03-31"
+kind = "rule_value"
+source = "S44 Rs 2500, total income up to Rs 3,50,000, financial year 2017-18"
+table = "tax.rebate_87a"
+on = 2018-03-31
+key = { regime = "old" }
+boundary = ["tax.rebate_87a[regime=old]@2018-04-01:before"]
+[case.expect]
+income_limit = "350000"
+max_rebate = "2500"
+applies_to_special = true
+marginal_relief = false
+excluded_sections = []
+
+[[case]]
+id = "tax.rebate_87a-old-2018-04-01"
+kind = "rule_value"
+source = "S44 Rs 2500 and Rs 3.5 lakh continue; S68 section 112A(6) rebate from the income-tax on the total income as reduced by tax payable on such capital gains"
+table = "tax.rebate_87a"
+on = 2018-04-01
+key = { regime = "old" }
+boundary = ["tax.rebate_87a[regime=old]@2018-04-01:after"]
+[case.expect]
+income_limit = "350000"
+max_rebate = "2500"
+applies_to_special = true
+marginal_relief = false
+excluded_sections = ["112A"]
+
+[[case]]
+id = "tax.rebate_87a-old-2019-03-31"
+kind = "rule_value"
+source = "S44 and S68 for financial year 2018-19"
+table = "tax.rebate_87a"
+on = 2019-03-31
+key = { regime = "old" }
+boundary = ["tax.rebate_87a[regime=old]@2019-04-01:before"]
+[case.expect]
+income_limit = "350000"
+max_rebate = "2500"
+applies_to_special = true
+marginal_relief = false
+excluded_sections = ["112A"]
+
+[[case]]
+id = "tax.rebate_87a-old-2019-04-01"
+kind = "rule_value"
+source = "S60 Finance Bill 2019 clause 8: three hundred fifty thousand to five hundred thousand; two thousand and five hundred to twelve thousand and five hundred, from 1 April 2020"
+table = "tax.rebate_87a"
+on = 2019-04-01
+key = { regime = "old" }
+boundary = ["tax.rebate_87a[regime=old]@2019-04-01:after"]
+[case.expect]
+income_limit = "500000"
+max_rebate = "12500"
+applies_to_special = true
+marginal_relief = false
+excluded_sections = ["112A"]
+
+[[case]]
+id = "tax.rebate_87a-old-2026-03-31"
+kind = "rule_value"
+source = "S64 and S65: the rebate for total income not exceeding Rs 5 lakh continues (100% of tax, Rs 12,500 cap under S60)"
+table = "tax.rebate_87a"
+on = 2026-03-31
+key = { regime = "old" }
+boundary = ["tax.rebate_87a[regime=old]@2026-04-01:before"]
+[case.expect]
+income_limit = "500000"
+max_rebate = "12500"
+applies_to_special = true
+marginal_relief = false
+excluded_sections = ["112A"]
+
+[[case]]
+id = "tax.rebate_87a-old-2026-04-01"
+kind = "rule_value"
+source = "S70 Income-tax Act 2025 section 156(1): 100% of income-tax payable or Rs 12500, total income not exceeding Rs 500000; section 198(7) excludes tax on section 198 gains"
+table = "tax.rebate_87a"
+on = 2026-04-01
+key = { regime = "old" }
+boundary = ["tax.rebate_87a[regime=old]@2026-04-01:after"]
+[case.expect]
+income_limit = "500000"
+max_rebate = "12500"
+applies_to_special = true
+marginal_relief = false
+excluded_sections = ["198 (2025 Act)"]
+
+[[case]]
+id = "tax.rebate_87a-new-2023-03-31"
+kind = "rule_value"
+source = "S64 Finance Bill 2023 IV: a resident individual with total income not exceeding Rs 5 lakh gets a rebate of 100 per cent of the income-tax payable"
+table = "tax.rebate_87a"
+on = 2023-03-31
+key = { regime = "new" }
+boundary = ["tax.rebate_87a[regime=new]@2023-04-01:before"]
+[case.expect]
+income_limit = "500000"
+max_rebate = "12500"
+applies_to_special = true
+marginal_relief = false
+excluded_sections = ["112A"]
+
+[[case]]
+id = "tax.rebate_87a-new-2023-04-01"
+kind = "rule_value"
+source = "S64 from AY 2024-25 rebate of 100 per cent of tax on total income not exceeding Rs 7 lakh under section 115BAC(1A); S65 para 2: up to Rs 25,000 with marginal relief; para 3: special-rate tax not included"
+table = "tax.rebate_87a"
+on = 2023-04-01
+key = { regime = "new" }
+boundary = ["tax.rebate_87a[regime=new]@2023-04-01:after"]
+[case.expect]
+income_limit = "700000"
+max_rebate = "25000"
+applies_to_special = false
+marginal_relief = true
+excluded_sections = []
+
+[[case]]
+id = "tax.rebate_87a-new-2025-03-31"
+kind = "rule_value"
+source = "S65 Finance Bill 2025 paras 2 and 3: Rs 25,000 up to Rs 7,00,000 with marginal relief above; tax on incomes at special rates not included"
+table = "tax.rebate_87a"
+on = 2025-03-31
+key = { regime = "new" }
+boundary = ["tax.rebate_87a[regime=new]@2025-04-01:before"]
+[case.expect]
+income_limit = "700000"
+max_rebate = "25000"
+applies_to_special = false
+marginal_relief = true
+excluded_sections = []
+
+[[case]]
+id = "tax.rebate_87a-new-2025-04-01"
+kind = "rule_value"
+source = "S65 para 4 and 5: Rs 12,00,000 and Rs 60,000 from AY 2026-27; not available on tax on incomes chargeable at special rates"
+table = "tax.rebate_87a"
+on = 2025-04-01
+key = { regime = "new" }
+boundary = ["tax.rebate_87a[regime=new]@2025-04-01:after"]
+[case.expect]
+income_limit = "1200000"
+max_rebate = "60000"
+applies_to_special = false
+marginal_relief = true
+excluded_sections = []
+
+[[case]]
+id = "tax.surcharge-old-2013-03-31"
+kind = "rule_value"
+source = "S40 Finance Bill 2012 and S57 Finance Bill 2011: No surcharge shall be levied in the cases of persons covered under paragraph A"
+table = "tax.surcharge"
+on = 2013-03-31
+key = { regime = "old" }
+boundary = ["tax.surcharge[regime=old]@2013-04-01:before"]
+[case.expect]
+tiers = []
+
+[[case]]
+id = "tax.surcharge-old-2013-04-01"
+kind = "rule_value"
+source = "S19 Finance Bill 2013: surcharge at the rate of ten percent. of such income-tax in case of a person having a total income exceeding one crore rupees"
+table = "tax.surcharge"
+on = 2013-04-01
+key = { regime = "old" }
+boundary = ["tax.surcharge[regime=old]@2013-04-01:after"]
+[case.expect]
+tiers = [{ above = "10000000", rate = "0.10" }]
+
+[[case]]
+id = "tax.surcharge-old-2015-03-31"
+kind = "rule_value"
+source = "S41 Finance Bill 2014: surcharge at the rate of ten percent above one crore rupees"
+table = "tax.surcharge"
+on = 2015-03-31
+key = { regime = "old" }
+boundary = ["tax.surcharge[regime=old]@2015-04-01:before"]
+[case.expect]
+tiers = [{ above = "10000000", rate = "0.10" }]
+
+[[case]]
+id = "tax.surcharge-old-2015-04-01"
+kind = "rule_value"
+source = "S58 Finance Bill 2015: surcharge at the rate of twelve percent above one crore rupees"
+table = "tax.surcharge"
+on = 2015-04-01
+key = { regime = "old" }
+boundary = ["tax.surcharge[regime=old]@2015-04-01:after"]
+[case.expect]
+tiers = [{ above = "10000000", rate = "0.12" }]
+
+[[case]]
+id = "tax.surcharge-old-2016-03-31"
+kind = "rule_value"
+source = "S58 twelve percent for financial year 2015-16"
+table = "tax.surcharge"
+on = 2016-03-31
+key = { regime = "old" }
+boundary = ["tax.surcharge[regime=old]@2016-04-01:before"]
+[case.expect]
+tiers = [{ above = "10000000", rate = "0.12" }]
+
+[[case]]
+id = "tax.surcharge-old-2016-04-01"
+kind = "rule_value"
+source = "S59 Finance Bill 2016: surcharge at the rate of fifteen percent above one crore rupees"
+table = "tax.surcharge"
+on = 2016-04-01
+key = { regime = "old" }
+boundary = ["tax.surcharge[regime=old]@2016-04-01:after"]
+[case.expect]
+tiers = [{ above = "10000000", rate = "0.15" }]
+
+[[case]]
+id = "tax.surcharge-old-2017-03-31"
+kind = "rule_value"
+source = "S59 fifteen percent for financial year 2016-17"
+table = "tax.surcharge"
+on = 2017-03-31
+key = { regime = "old" }
+boundary = ["tax.surcharge[regime=old]@2017-04-01:before"]
+[case.expect]
+tiers = [{ above = "10000000", rate = "0.15" }]
+
+[[case]]
+id = "tax.surcharge-old-2017-04-01"
+kind = "rule_value"
+source = "S44 Finance Bill 2017: ten per cent for total income exceeding fifty lakh rupees but not exceeding one crore; fifteen per cent above one crore"
+table = "tax.surcharge"
+on = 2017-04-01
+key = { regime = "old" }
+boundary = ["tax.surcharge[regime=old]@2017-04-01:after"]
+[case.expect]
+tiers = [{ above = "5000000", rate = "0.10" }, { above = "10000000", rate = "0.15" }]
+
+[[case]]
+id = "tax.surcharge-old-2019-03-31"
+kind = "rule_value"
+source = "S43 Finance Bill 2018: the same two tiers for 2018-19"
+table = "tax.surcharge"
+on = 2019-03-31
+key = { regime = "old" }
+boundary = ["tax.surcharge[regime=old]@2019-04-01:before"]
+[case.expect]
+tiers = [{ above = "5000000", rate = "0.10" }, { above = "10000000", rate = "0.15" }]
+
+[[case]]
+id = "tax.surcharge-old-2019-04-01"
+kind = "rule_value"
+source = "S61 Finance (No.2) Bill 2019: 10%, 15%, 25% above Rs 2 crore, 37% above Rs 5 crore; S66 enhanced surcharge not applicable to section 111A and 112A gains; S45 tiers on income excluding those gains, rate on that part not above 15%"
+table = "tax.surcharge"
+on = 2019-04-01
+key = { regime = "old" }
+boundary = ["tax.surcharge[regime=old]@2019-04-01:after"]
+[case.expect]
+tiers = [{ above = "5000000", rate = "0.10" }, { above = "10000000", rate = "0.15" }, { above = "20000000", rate = "0.25", basis = "excluding_special" }, { above = "50000000", rate = "0.37", basis = "excluding_special" }]
+cap_special = "0.15"
+cap_sections = ["111A", "112A"]
+
+[[case]]
+id = "tax.surcharge-old-2022-03-31"
+kind = "rule_value"
+source = "S62 Finance Bill 2021: tiers (c) and (d) exclude income under section 111A and 112A; surcharge on that part shall not exceed fifteen percent"
+table = "tax.surcharge"
+on = 2022-03-31
+key = { regime = "old" }
+boundary = ["tax.surcharge[regime=old]@2022-04-01:before"]
+[case.expect]
+tiers = [{ above = "5000000", rate = "0.10" }, { above = "10000000", rate = "0.15" }, { above = "20000000", rate = "0.25", basis = "excluding_special" }, { above = "50000000", rate = "0.37", basis = "excluding_special" }]
+cap_special = "0.15"
+cap_sections = ["111A", "112A"]
+
+[[case]]
+id = "tax.surcharge-old-2022-04-01"
+kind = "rule_value"
+source = "S63 Finance Bill 2022: section 111A, 112 and 112A; the rate of surcharge on the amount of income-tax in respect of that part shall not exceed fifteen percent"
+table = "tax.surcharge"
+on = 2022-04-01
+key = { regime = "old" }
+boundary = ["tax.surcharge[regime=old]@2022-04-01:after"]
+[case.expect]
+tiers = [{ above = "5000000", rate = "0.10" }, { above = "10000000", rate = "0.15" }, { above = "20000000", rate = "0.25", basis = "excluding_special" }, { above = "50000000", rate = "0.37", basis = "excluding_special" }]
+cap_special = "0.15"
+
+[[case]]
+id = "tax.surcharge-new-2022-03-31"
+kind = "rule_value"
+source = "S45 and S62: income tax computed under section 115BAC increased by the same surcharge tiers; section 111A and 112A part capped at fifteen percent"
+table = "tax.surcharge"
+on = 2022-03-31
+key = { regime = "new" }
+boundary = ["tax.surcharge[regime=new]@2022-04-01:before"]
+[case.expect]
+tiers = [{ above = "5000000", rate = "0.10" }, { above = "10000000", rate = "0.15" }, { above = "20000000", rate = "0.25", basis = "excluding_special" }, { above = "50000000", rate = "0.37", basis = "excluding_special" }]
+cap_special = "0.15"
+cap_sections = ["111A", "112A"]
+
+[[case]]
+id = "tax.surcharge-new-2022-04-01"
+kind = "rule_value"
+source = "S63 Finance Bill 2022 Part III: as well as income tax computed under section 115BAC; cap covers sections 111A, 112 and 112A"
+table = "tax.surcharge"
+on = 2022-04-01
+key = { regime = "new" }
+boundary = ["tax.surcharge[regime=new]@2022-04-01:after"]
+[case.expect]
+tiers = [{ above = "5000000", rate = "0.10" }, { above = "10000000", rate = "0.15" }, { above = "20000000", rate = "0.25", basis = "excluding_special" }, { above = "50000000", rate = "0.37", basis = "excluding_special" }]
+cap_special = "0.15"
+
+[[case]]
+id = "tax.surcharge-new-2023-03-31"
+kind = "rule_value"
+source = "S63 Finance Bill 2022 for financial year 2022-23"
+table = "tax.surcharge"
+on = 2023-03-31
+key = { regime = "new" }
+boundary = ["tax.surcharge[regime=new]@2023-04-01:before"]
+[case.expect]
+tiers = [{ above = "5000000", rate = "0.10" }, { above = "10000000", rate = "0.15" }, { above = "20000000", rate = "0.25", basis = "excluding_special" }, { above = "50000000", rate = "0.37", basis = "excluding_special" }]
+cap_special = "0.15"
+
+[[case]]
+id = "tax.surcharge-new-2023-04-01"
+kind = "rule_value"
+source = "S64 Finance Bill 2023 section 115BAC(1A): 10% above fifty lakh to one crore; 15% above one crore to two crore; 25% above two crore excluding dividend and section 111A, 112 and 112A income; surcharge on that part not above 15%"
+table = "tax.surcharge"
+on = 2023-04-01
+key = { regime = "new" }
+boundary = ["tax.surcharge[regime=new]@2023-04-01:after"]
+[case.expect]
+tiers = [{ above = "5000000", rate = "0.10" }, { above = "10000000", rate = "0.15" }, { above = "20000000", rate = "0.25", basis = "excluding_special" }]
+cap_special = "0.15"
+
+[[case]]
+id = "tax.cess-2018-03-31"
+kind = "rule_value"
+source = "S44 Finance Bill 2017: Education Cess two per cent. and Secondary and Higher Education Cess one per cent. (three per cent in all)"
+table = "tax.cess"
+on = 2018-03-31
+key = {  }
+boundary = ["tax.cess[]@2018-04-01:before"]
+[case.expect]
+value = "0.03"
+
+[[case]]
+id = "tax.cess-2018-04-01"
+kind = "rule_value"
+source = "S43 Finance Bill 2018: a new cess, Health and Education Cess, at the rate of four per cent of income tax including surcharge"
+table = "tax.cess"
+on = 2018-04-01
+key = {  }
+boundary = ["tax.cess[]@2018-04-01:after"]
+[case.expect]
+value = "0.04"
+
+[[case]]
+id = "tax.conventions-tax_round_step-2010-04-01"
+kind = "rule_value"
+source = "S67 section 288B: rounded off to the nearest multiple of ten rupees"
+table = "tax.conventions"
+on = 2010-04-01
+key = { name = "tax_round_step" }
+[case.expect]
+value = "10"
+
+[[case]]
+id = "tax.conventions-setoff_order-2010-04-01"
+kind = "rule_value"
+source = "S0 assumption: the order coded in engine/tax.py"
+table = "tax.conventions"
+on = 2010-04-01
+key = { name = "setoff_order" }
+[case.expect]
+value = "as coded in engine/tax.py"
+
+[[case]]
+id = "tax.conventions-shortfall_order-2010-04-01"
+kind = "rule_value"
+source = "S0 assumption: the order coded in engine/tax.py"
+table = "tax.conventions"
+on = 2010-04-01
+key = { name = "shortfall_order" }
+[case.expect]
+value = "as coded in engine/tax.py"

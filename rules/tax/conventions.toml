@@ -1,0 +1,32 @@
+# Conventions the tax calculation follows where the law leaves room. name: tax_round_step, setoff_order, shortfall_order.
+# setoff_order and shortfall_order describe what engine/tax.py does; they are assumptions (value says so, note says how).
+[meta]
+keys = ["name"]
+coverage_from = 2010-04-01
+
+[[row]]
+name = "tax_round_step"
+value = "10"
+from = 2010-04-01
+source = "S67 section 288B: tax payable is rounded to the nearest multiple of ten rupees, paise ignored, five or more rounds up"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Total income is also rounded to the nearest Rs 10 (section 288A); that is not modelled (it moves tax by at most Rs 1.5)."
+
+[[row]]
+name = "setoff_order"
+value = "as coded in engine/tax.py"
+from = 2010-04-01
+source = "S0 the law fixes only that a short-term loss may be set off against any capital gain and a long-term loss against long-term gains only (S54); S69 says brought-forward losses are set off before the section 112A exemption"
+verified_on = 2026-09-30
+confidence = "assumed"
+note = "As coded: this year's short-term loss on short-term gains, long-term loss on long-term gains, leftover short-term loss on long-term gains, then losses brought forward (long-term first, oldest first), highest special rate first, then slab-taxed gains; then the yearly exemption."
+
+[[row]]
+name = "shortfall_order"
+value = "as coded in engine/tax.py"
+from = 2010-04-01
+source = "S0 the law says only that gains shrink by the unused basic exemption of a resident individual (S55 sections 196(2) and 198(3) of the Income-tax Act 2025, the same as the 1961 Act provisos); S69 says the highest-rate gain is usually taken first"
+verified_on = 2026-09-30
+confidence = "assumed"
+note = "As coded: a resident individual's unused basic exemption is applied to gains taxed at special rates, highest rate first, after the yearly section 112A exemption. S69 reports that the Income Tax portal calculator (June 2025) applied it to equity gains before the section 112A exemption when equity and other long-term gains are both taxed at 12.5%; this model takes the exemption first, which gives the lower tax."

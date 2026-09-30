@@ -1,0 +1,114 @@
+# Surcharge on income-tax for a resident individual, by regime and FINANCIAL YEAR. tiers are ascending: the highest tier whose `above`
+# (total income in rupees) is crossed gives the rate; no tier crossed means no surcharge. basis = excluding_special: the tier is tested
+# on income excluding dividends and gains taxed at special rates (the 25% and 37% tiers); otherwise on total income. cap_special: the
+# surcharge on tax on gains at special rates cannot exceed this rate; cap_sections lists the gains it covers (absent: all special-rate
+# gains). Marginal relief applies at every tier; the health and education cess is in tax.cess.
+[meta]
+keys = ["regime"]
+coverage_from = 2010-04-01
+late_keys = [{ regime = "new", from = 2020-04-01 }]
+
+[[row]]
+regime = "old"
+tiers = []
+from = 2010-04-01
+to = 2013-03-31
+source = "S56, S57 and S40 memoranda: No surcharge shall be levied in the cases of persons covered under paragraph A (individuals)"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Financial years 2010-11 to 2012-13."
+
+[[row]]
+regime = "old"
+tiers = [{ above = "10000000", rate = "0.10" }]
+from = 2013-04-01
+to = 2015-03-31
+source = "S19 Finance Bill 2013 memorandum: surcharge at ten per cent above Rs 1 crore; S41 the 2014 Bill: ten per cent"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Financial years 2013-14 and 2014-15."
+
+[[row]]
+regime = "old"
+tiers = [{ above = "10000000", rate = "0.12" }]
+from = 2015-04-01
+to = 2016-03-31
+source = "S58 Finance Bill 2015 memorandum: surcharge at twelve percent above Rs 1 crore"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Financial year 2015-16."
+
+[[row]]
+regime = "old"
+tiers = [{ above = "10000000", rate = "0.15" }]
+from = 2016-04-01
+to = 2017-03-31
+source = "S59 Finance Bill 2016 memorandum: surcharge at fifteen percent above Rs 1 crore"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Financial year 2016-17."
+
+[[row]]
+regime = "old"
+tiers = [{ above = "5000000", rate = "0.10" }, { above = "10000000", rate = "0.15" }]
+from = 2017-04-01
+to = 2019-03-31
+source = "S44 Finance Bill 2017 memorandum: ten per cent for total income above Rs 50 lakh up to Rs 1 crore, fifteen per cent above; S43 the 2018 Bill keeps it"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Financial years 2017-18 and 2018-19."
+
+[[row]]
+regime = "old"
+tiers = [{ above = "5000000", rate = "0.10" }, { above = "10000000", rate = "0.15" }, { above = "20000000", rate = "0.25", basis = "excluding_special" }, { above = "50000000", rate = "0.37", basis = "excluding_special" }]
+cap_special = "0.15"
+cap_sections = ["111A", "112A"]
+from = 2019-04-01
+to = 2022-03-31
+source = "S61 Finance (No.2) Bill 2019 memorandum: 10%, 15%, 25% and 37% tiers; S66 the enhanced surcharge does not apply to sections 111A and 112A gains; S45 and S62 memoranda: tiers 25% and 37% on income excluding section 111A and 112A gains, surcharge on that tax not above 15%"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Financial years 2019-20 to 2021-22. The 15% cap also covers dividends from 2020-21 (S62); dividends are slab income in this model, so that cap is not applied to them."
+
+[[row]]
+regime = "old"
+tiers = [{ above = "5000000", rate = "0.10" }, { above = "10000000", rate = "0.15" }, { above = "20000000", rate = "0.25", basis = "excluding_special" }, { above = "50000000", rate = "0.37", basis = "excluding_special" }]
+cap_special = "0.15"
+from = 2022-04-01
+source = "S63 Finance Bill 2022 memorandum: the 15% cap now covers dividend and sections 111A, 112 and 112A; S64, S47, S65 and S55 memoranda repeat the tiers and the cap for 2023-24 to 2026-27"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Financial year 2022-23 onward; for 2026-27 the sections are 196, 197 and 198 of the Income-tax Act 2025 (S55)."
+
+[[row]]
+regime = "new"
+tiers = [{ above = "5000000", rate = "0.10" }, { above = "10000000", rate = "0.15" }, { above = "20000000", rate = "0.25", basis = "excluding_special" }, { above = "50000000", rate = "0.37", basis = "excluding_special" }]
+cap_special = "0.15"
+cap_sections = ["111A", "112A"]
+from = 2020-04-01
+to = 2022-03-31
+source = "S45 and S62 memoranda: income-tax computed under section 115BAC is increased by the same surcharge tiers, with the 15% cap on section 111A and 112A tax"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Financial years 2020-21 and 2021-22."
+
+[[row]]
+regime = "new"
+tiers = [{ above = "5000000", rate = "0.10" }, { above = "10000000", rate = "0.15" }, { above = "20000000", rate = "0.25", basis = "excluding_special" }, { above = "50000000", rate = "0.37", basis = "excluding_special" }]
+cap_special = "0.15"
+from = 2022-04-01
+to = 2023-03-31
+source = "S63 Finance Bill 2022 memorandum: the same tiers under section 115BAC; the cap now covers section 112 too"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Financial year 2022-23."
+
+[[row]]
+regime = "new"
+tiers = [{ above = "5000000", rate = "0.10" }, { above = "10000000", rate = "0.15" }, { above = "20000000", rate = "0.25", basis = "excluding_special" }]
+cap_special = "0.15"
+from = 2023-04-01
+source = "S64 Finance Bill 2023 memorandum: under section 115BAC(1A) 10% (Rs 50 lakh to Rs 1 crore), 15% (Rs 1 crore to Rs 2 crore), 25% above Rs 2 crore on income excluding dividend and gains at special rates, else 15%; the tax on such income is capped at 15%; S47, S65 and S55 repeat it"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Financial year 2023-24 onward. The 37% tier does not exist in the new regime."
