@@ -4,9 +4,10 @@ from tests.helpers import table
 OLD = '[ {upto = "250000", rate = "0"}, {upto = "500000", rate = "0.05"}, {upto = "1000000", rate = "0.20"}, {upto = "", rate = "0.30"} ]'
 NEW = '[ {upto = "300000", rate = "0"}, {upto = "600000", rate = "0.05"}, {upto = "900000", rate = "0.10"}, {upto = "", rate = "0.30"} ]'
 TIERS = '[ {above = "5000000", rate = "0.10"}, {above = "10000000", rate = "0.15"} ]'
-# A top tier that looks at income without special-rate gains, as the 25% tier does in the real rules.
+# A top tier tested on income without 111A gains and slab-taxed dividends, as the 25% tier is in the real rules (which leave out
+# more or fewer sections by year). Section 112 gains are NOT left out, so a test can tell the difference.
 TIERS_TOP = ('[ {above = "5000000", rate = "0.10"}, {above = "10000000", rate = "0.15"}, '
-             '{above = "20000000", rate = "0.25", basis = "excluding_special"} ]')
+             '{above = "20000000", rate = "0.25", test_excludes = ["111A", "dividend"]} ]')
 ASSUMED = 'source = "test fixture"\nverified_on = 2026-01-01\nconfidence = "assumed"\nnote = "test convention"'
 LATE_NEW = 'late_keys = [{ regime = "new", from = 2020-04-01 }]'
 FY = 'granularity = "financial_year"'  # looked up by financial year: every row starts on 1 April and ends on 31 March
@@ -59,8 +60,8 @@ TAX = {
         'applies_to_special = false\nmarginal_relief = true',
     ], extra_meta=LATE_NEW + "\n" + FY),
     "tax.surcharge": table(["regime"], [
-        f'regime = "old"\nfrom = 2010-04-01\ntiers = {TIERS_TOP}\ncap_special = "0.15"\ncap_sections = ["111A"]',
-        f'regime = "new"\nfrom = 2020-04-01\ntiers = {TIERS}\ncap_special = "0.15"',
+        f'regime = "old"\nfrom = 2010-04-01\ntiers = {TIERS_TOP}\ncap_special = "0.15"\ncap_sections = ["111A", "dividend"]',
+        f'regime = "new"\nfrom = 2020-04-01\ntiers = {TIERS}\ncap_special = "0.15"\ncap_sections = ["111A", "112"]',
     ], extra_meta=LATE_NEW + "\n" + FY),
     "tax.cess": table([], ['from = 2010-04-01\nvalue = "0.04"'], extra_meta=FY),
     "tax.dividend": table(["payer"], [

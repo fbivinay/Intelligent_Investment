@@ -494,65 +494,93 @@ tiers = [{ above = "5000000", rate = "0.10" }, { above = "10000000", rate = "0.1
 [[case]]
 id = "tax.surcharge-old-2019-04-01"
 kind = "rule_value"
-source = "S61 Finance (No.2) Bill 2019: 10%, 15%, 25% above Rs 2 crore, 37% above Rs 5 crore; S66 enhanced surcharge not applicable to section 111A and 112A gains; S45 tiers on income excluding those gains, rate on that part not above 15%"
+source = "S61 Finance (No.2) Bill 2019: 10%, 15%, 25% above Rs 2 crore, 37% above Rs 5 crore; S45 Finance Bill 2020 Part I clause (a): (iii) and (iv) 'total income (excluding the income under the provisions of section 111A and 112A of the Act)', on that income the surcharge is not above fifteen per cent; S66 the enhanced surcharge does not apply to 111A and 112A gains"
 table = "tax.surcharge"
 on = 2019-04-01
 key = { regime = "old" }
 boundary = ["tax.surcharge[regime=old]@2019-04-01:after"]
 [case.expect]
-tiers = [{ above = "5000000", rate = "0.10" }, { above = "10000000", rate = "0.15" }, { above = "20000000", rate = "0.25", basis = "excluding_special" }, { above = "50000000", rate = "0.37", basis = "excluding_special" }]
+tiers = [{ above = "5000000", rate = "0.10" }, { above = "10000000", rate = "0.15" }, { above = "20000000", rate = "0.25", test_excludes = ["111A", "112A"] }, { above = "50000000", rate = "0.37", test_excludes = ["111A", "112A"] }]
 cap_special = "0.15"
 cap_sections = ["111A", "112A"]
 
 [[case]]
+id = "tax.surcharge-old-2020-03-31"
+kind = "rule_value"
+source = "S45 Finance Bill 2020 Part I clause (a): the 25% and 37% tiers exclude only income under sections 111A and 112A; no dividend is named for financial year 2019-20"
+table = "tax.surcharge"
+on = 2020-03-31
+key = { regime = "old" }
+boundary = ["tax.surcharge[regime=old]@2020-04-01:before"]
+[case.expect]
+tiers = [{ above = "5000000", rate = "0.10" }, { above = "10000000", rate = "0.15" }, { above = "20000000", rate = "0.25", test_excludes = ["111A", "112A"] }, { above = "50000000", rate = "0.37", test_excludes = ["111A", "112A"] }]
+cap_special = "0.15"
+cap_sections = ["111A", "112A"]
+
+[[case]]
+id = "tax.surcharge-old-2020-04-01"
+kind = "rule_value"
+source = "S62 Finance Bill 2021 clause (a): (iii) and (iv) 'having a total income (excluding the income by way of dividend or income under the provisions of section 111A and 112A of the Act)'; proviso: the surcharge on the tax on dividend or 111A and 112A income is not above fifteen percent"
+table = "tax.surcharge"
+on = 2020-04-01
+key = { regime = "old" }
+boundary = ["tax.surcharge[regime=old]@2020-04-01:after"]
+[case.expect]
+tiers = [{ above = "5000000", rate = "0.10" }, { above = "10000000", rate = "0.15" }, { above = "20000000", rate = "0.25", test_excludes = ["dividend", "111A", "112A"] }, { above = "50000000", rate = "0.37", test_excludes = ["dividend", "111A", "112A"] }]
+cap_special = "0.15"
+cap_sections = ["dividend", "111A", "112A"]
+
+[[case]]
 id = "tax.surcharge-old-2022-03-31"
 kind = "rule_value"
-source = "S62 Finance Bill 2021: tiers (c) and (d) exclude income under section 111A and 112A; surcharge on that part shall not exceed fifteen percent"
+source = "S62 Finance Bill 2021: tiers (iii) and (iv) exclude income by way of dividend and under section 111A and 112A; surcharge on that part shall not exceed fifteen percent; section 112 is not named"
 table = "tax.surcharge"
 on = 2022-03-31
 key = { regime = "old" }
 boundary = ["tax.surcharge[regime=old]@2022-04-01:before"]
 [case.expect]
-tiers = [{ above = "5000000", rate = "0.10" }, { above = "10000000", rate = "0.15" }, { above = "20000000", rate = "0.25", basis = "excluding_special" }, { above = "50000000", rate = "0.37", basis = "excluding_special" }]
+tiers = [{ above = "5000000", rate = "0.10" }, { above = "10000000", rate = "0.15" }, { above = "20000000", rate = "0.25", test_excludes = ["dividend", "111A", "112A"] }, { above = "50000000", rate = "0.37", test_excludes = ["dividend", "111A", "112A"] }]
 cap_special = "0.15"
-cap_sections = ["111A", "112A"]
+cap_sections = ["dividend", "111A", "112A"]
 
 [[case]]
 id = "tax.surcharge-old-2022-04-01"
 kind = "rule_value"
-source = "S63 Finance Bill 2022: section 111A, 112 and 112A; the rate of surcharge on the amount of income-tax in respect of that part shall not exceed fifteen percent"
+source = "S63 Finance Bill 2022 Part III: tiers (iii) and (iv) 'excluding the income by way of dividend or income under the provisions of sections 111A, 112 and 112A'; the surcharge on that part shall not exceed fifteen percent; S55 the same three sections are 196, 197 and 198 of the Income-tax Act 2025"
 table = "tax.surcharge"
 on = 2022-04-01
 key = { regime = "old" }
 boundary = ["tax.surcharge[regime=old]@2022-04-01:after"]
 [case.expect]
-tiers = [{ above = "5000000", rate = "0.10" }, { above = "10000000", rate = "0.15" }, { above = "20000000", rate = "0.25", basis = "excluding_special" }, { above = "50000000", rate = "0.37", basis = "excluding_special" }]
+tiers = [{ above = "5000000", rate = "0.10" }, { above = "10000000", rate = "0.15" }, { above = "20000000", rate = "0.25", test_excludes = ["dividend", "111A", "112", "112A", "196 (2025 Act)", "197 (2025 Act)", "198 (2025 Act)"] }, { above = "50000000", rate = "0.37", test_excludes = ["dividend", "111A", "112", "112A", "196 (2025 Act)", "197 (2025 Act)", "198 (2025 Act)"] }]
 cap_special = "0.15"
+cap_sections = ["dividend", "111A", "112", "112A", "196 (2025 Act)", "197 (2025 Act)", "198 (2025 Act)"]
 
 [[case]]
 id = "tax.surcharge-new-2022-03-31"
 kind = "rule_value"
-source = "S45 and S62: income tax computed under section 115BAC increased by the same surcharge tiers; section 111A and 112A part capped at fifteen percent"
+source = "S45 and S62: income tax computed under section 115BAC increased by the same surcharge tiers; the dividend and section 111A and 112A part capped at fifteen percent"
 table = "tax.surcharge"
 on = 2022-03-31
 key = { regime = "new" }
 boundary = ["tax.surcharge[regime=new]@2022-04-01:before"]
 [case.expect]
-tiers = [{ above = "5000000", rate = "0.10" }, { above = "10000000", rate = "0.15" }, { above = "20000000", rate = "0.25", basis = "excluding_special" }, { above = "50000000", rate = "0.37", basis = "excluding_special" }]
+tiers = [{ above = "5000000", rate = "0.10" }, { above = "10000000", rate = "0.15" }, { above = "20000000", rate = "0.25", test_excludes = ["dividend", "111A", "112A"] }, { above = "50000000", rate = "0.37", test_excludes = ["dividend", "111A", "112A"] }]
 cap_special = "0.15"
-cap_sections = ["111A", "112A"]
+cap_sections = ["dividend", "111A", "112A"]
 
 [[case]]
 id = "tax.surcharge-new-2022-04-01"
 kind = "rule_value"
-source = "S63 Finance Bill 2022 Part III: as well as income tax computed under section 115BAC; cap covers sections 111A, 112 and 112A"
+source = "S63 Finance Bill 2022 Part III: as well as income tax computed under section 115BAC; the test and the cap cover dividend and sections 111A, 112 and 112A"
 table = "tax.surcharge"
 on = 2022-04-01
 key = { regime = "new" }
 boundary = ["tax.surcharge[regime=new]@2022-04-01:after"]
 [case.expect]
-tiers = [{ above = "5000000", rate = "0.10" }, { above = "10000000", rate = "0.15" }, { above = "20000000", rate = "0.25", basis = "excluding_special" }, { above = "50000000", rate = "0.37", basis = "excluding_special" }]
+tiers = [{ above = "5000000", rate = "0.10" }, { above = "10000000", rate = "0.15" }, { above = "20000000", rate = "0.25", test_excludes = ["dividend", "111A", "112", "112A"] }, { above = "50000000", rate = "0.37", test_excludes = ["dividend", "111A", "112", "112A"] }]
 cap_special = "0.15"
+cap_sections = ["dividend", "111A", "112", "112A"]
 
 [[case]]
 id = "tax.surcharge-new-2023-03-31"
@@ -563,20 +591,22 @@ on = 2023-03-31
 key = { regime = "new" }
 boundary = ["tax.surcharge[regime=new]@2023-04-01:before"]
 [case.expect]
-tiers = [{ above = "5000000", rate = "0.10" }, { above = "10000000", rate = "0.15" }, { above = "20000000", rate = "0.25", basis = "excluding_special" }, { above = "50000000", rate = "0.37", basis = "excluding_special" }]
+tiers = [{ above = "5000000", rate = "0.10" }, { above = "10000000", rate = "0.15" }, { above = "20000000", rate = "0.25", test_excludes = ["dividend", "111A", "112", "112A"] }, { above = "50000000", rate = "0.37", test_excludes = ["dividend", "111A", "112", "112A"] }]
 cap_special = "0.15"
+cap_sections = ["dividend", "111A", "112", "112A"]
 
 [[case]]
 id = "tax.surcharge-new-2023-04-01"
 kind = "rule_value"
-source = "S64 Finance Bill 2023 section 115BAC(1A): 10% above fifty lakh to one crore; 15% above one crore to two crore; 25% above two crore excluding dividend and section 111A, 112 and 112A income; surcharge on that part not above 15%"
+source = "S64 Finance Bill 2023 section 115BAC(1A): 10% above fifty lakh to one crore; 15% above one crore to two crore; 25% above two crore excluding dividend and section 111A, 112 and 112A income; surcharge on that part not above 15%; S55 the Income-tax Act 2025 sections 196, 197 and 198 from 2026-27"
 table = "tax.surcharge"
 on = 2023-04-01
 key = { regime = "new" }
 boundary = ["tax.surcharge[regime=new]@2023-04-01:after"]
 [case.expect]
-tiers = [{ above = "5000000", rate = "0.10" }, { above = "10000000", rate = "0.15" }, { above = "20000000", rate = "0.25", basis = "excluding_special" }]
+tiers = [{ above = "5000000", rate = "0.10" }, { above = "10000000", rate = "0.15" }, { above = "20000000", rate = "0.25", test_excludes = ["dividend", "111A", "112", "112A", "196 (2025 Act)", "197 (2025 Act)", "198 (2025 Act)"] }]
 cap_special = "0.15"
+cap_sections = ["dividend", "111A", "112", "112A", "196 (2025 Act)", "197 (2025 Act)", "198 (2025 Act)"]
 
 [[case]]
 id = "tax.cess-2018-03-31"
