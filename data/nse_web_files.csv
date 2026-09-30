@@ -1,0 +1,2 @@
+file,bytes,sha256,collected,requests,rows_cash,rows_fo,rows_index,script,script_sha256,registered
+nse_web_2010-2016_partial.json,6188482,eddf8b9e634712b8bbc0aace4188f85f0310f626880f4194c0a89ca18bc17582,2026-09-30T17:18:56.372Z,268,7792,2003,6145,data/nse_web_collect.js,f8df080bb850facaf348d1e806ecab7dccab0a67a9eb4b3118aacc408de86c23,2026-09-30
