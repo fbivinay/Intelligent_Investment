@@ -1,0 +1,284 @@
+# Capital-gains treatment by BUCKET (tax.buckets) and SALE date.
+# lt_months: long-term when held for MORE than this many months. always_short = true: the gain is deemed short-term whatever the
+#   holding period (section 50AA), so lt_months and the lt_* fields are absent and not used.
+# st_treatment and lt_treatment: special = taxed on its own at st_rate or lt_rate; slab = added to income and taxed at slab rates;
+#   exempt = not taxed, and a loss on it cannot be set off or carried forward.
+# indexation = true: cost is multiplied by CII of the sale year over CII of the purchase year (tax.cii) before the gain is computed.
+# lt_alt_rate, lt_alt_indexation, lt_alt_section: an option the taxpayer has instead (section 112 proviso, units sold up to
+#   2014-07-10): tax at lt_alt_rate on the gain worked out with lt_alt_indexation. The lower tax is used.
+# lt_exemption_group: the yearly exemption pool in tax.lt_exemption. grandfather_acq_upto: for holdings bought on or before this
+#   date the cost is the higher of the actual cost and the lower of the 31 Jan 2018 value and the sale value.
+# st_section and lt_section are labels shown in the calculation. The Income-tax Act 2025 applies to sales from 2026-04-01.
+[meta]
+keys = ["bucket"]
+coverage_from = 2010-04-01
+late_keys = [{ bucket = "gold_post_apr2023", from = 2023-04-01 }, { bucket = "debt_post_apr2023", from = 2023-04-01 }]
+
+[[row]]
+bucket = "equity"
+lt_months = 12
+st_treatment = "special"
+st_rate = "0.15"
+st_section = "111A"
+lt_treatment = "exempt"
+lt_section = "10(38)"
+from = 2010-04-01
+to = 2018-03-31
+source = "S40 section 111A tax on short-term gains is 15%; S43 long-term gains on STT-paid equity and equity oriented fund units are exempt under section 10(38) until withdrawn from 2018-04-01; S41 same benefits: long-term exempt, short-term 15%"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "STT is assumed paid on every sale (exchange sales and redemptions of equity funds). A long-term loss here is not allowed against other gains because the gain would have been exempt."
+
+[[row]]
+bucket = "equity"
+lt_months = 12
+st_treatment = "special"
+st_rate = "0.15"
+st_section = "111A"
+lt_treatment = "special"
+lt_rate = "0.10"
+lt_section = "112A"
+indexation = false
+lt_exemption_group = "equity_112a"
+grandfather_acq_upto = 2018-01-31
+from = 2018-04-01
+to = 2024-07-22
+source = "S43 section 112A: 10% on long-term gains above Rs 1 lakh, no indexation, cost grandfathered to the value on 31 Jan 2018; S46 First Schedule: section 111A 15% and section 112A 10% for transfers before 2024-07-23"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Holding period 12 months. The Rs 1 lakh yearly exemption is in tax.lt_exemption (group equity_112a). For units bought on or before 2018-01-31 the value on 31 Jan 2018 is needed (highest quoted price for listed units, NAV for unlisted units)."
+
+[[row]]
+bucket = "equity"
+lt_months = 12
+st_treatment = "special"
+st_rate = "0.20"
+st_section = "111A"
+lt_treatment = "special"
+lt_rate = "0.125"
+lt_section = "112A"
+indexation = false
+lt_exemption_group = "equity_112a"
+grandfather_acq_upto = 2018-01-31
+from = 2024-07-23
+to = 2026-03-31
+source = "S46 First Schedule: section 111A 20% and section 112A 12.5% for transfers on or after 2024-07-23; S48 the new provisions apply to any transfer on or after 2024-07-23, exemption limit Rs 1.25 lakh"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Holding period stays 12 months for listed securities and equity oriented fund units (S46 clause 3). Grandfathering to 31 Jan 2018 continues."
+
+[[row]]
+bucket = "equity"
+lt_months = 12
+st_treatment = "special"
+st_rate = "0.20"
+st_section = "196 (2025 Act)"
+lt_treatment = "special"
+lt_rate = "0.125"
+lt_section = "198 (2025 Act)"
+indexation = false
+lt_exemption_group = "equity_112a"
+grandfather_acq_upto = 2018-01-31
+from = 2026-04-01
+source = "S55 Income-tax Act 2025 section 196: short-term gains on STT-paid equity 20%; section 198: long-term gains above Rs 1,25,000 at 12.5%"
+verified_on = 2026-09-30
+confidence = "secondary"
+note = "Sale date on or after 2026-04-01 falls under the Income-tax Act 2025. Rates and the exemption limit are from its text. The 12-month holding period and the 31 Jan 2018 grandfathering are assumed to carry over unchanged (the Act was presented as a rewrite without rate changes)."
+
+[[row]]
+bucket = "gold"
+lt_months = 12
+st_treatment = "slab"
+st_section = "normal rates"
+lt_treatment = "special"
+lt_rate = "0.20"
+lt_section = "112"
+indexation = true
+lt_alt_rate = "0.10"
+lt_alt_indexation = false
+lt_alt_section = "112 (10% option)"
+from = 2010-04-01
+to = 2014-07-10
+source = "S41 existing law: a mutual fund unit is long-term after 12 months and the section 112 proviso lets units use 10% without indexation; S42 paras 5.2 and 30.2: the older rules stay for transfers up to 2014-07-10; S47 long-term gains were 20% with indexation under section 112"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Tax is the lower of 20% on the indexed gain and 10% on the gain without indexation (lt_alt_*). Indexation uses the old-base index (tax.cii series 1981)."
+
+[[row]]
+bucket = "gold"
+lt_months = 36
+st_treatment = "slab"
+st_section = "normal rates"
+lt_treatment = "special"
+lt_rate = "0.20"
+lt_section = "112"
+indexation = true
+from = 2014-07-11
+to = 2024-07-22
+source = "S42 paras 5.2 and 30.2: a unit of a mutual fund other than an equity oriented fund is long-term after 36 months and the 10% option is gone, for transfers from 2014-07-11; S47 20% with indexation under section 112"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Indexation uses the old-base index for sales up to 2017-03-31 and the 2001-base index after that (tax.cii)."
+
+[[row]]
+bucket = "gold"
+lt_months = 12
+st_treatment = "slab"
+st_section = "normal rates"
+lt_treatment = "special"
+lt_rate = "0.125"
+lt_section = "112"
+indexation = false
+from = 2024-07-23
+to = 2026-03-31
+source = "S46 clause 3: section 2(42A) now says 12 months for a security listed on a recognised stock exchange, with the words (other than a unit) removed; S49 listed units 12 months from 2024-07-23"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Rate 12.5% without indexation for all long-term gains under section 112 (S46, S48). A listed unit (gold ETF) is long-term after 12 months from 2024-07-23 (the words other than a unit were dropped from the listed-securities rule)."
+
+[[row]]
+bucket = "gold"
+lt_months = 12
+st_treatment = "slab"
+st_section = "normal rates"
+lt_treatment = "special"
+lt_rate = "0.125"
+lt_section = "197 (2025 Act)"
+indexation = false
+from = 2026-04-01
+source = "S55 Income-tax Act 2025 section 197: long-term gains 12.5%"
+verified_on = 2026-09-30
+confidence = "secondary"
+note = "Sale date on or after 2026-04-01 falls under the Income-tax Act 2025. The rate is from its text; the holding period is assumed to carry over unchanged."
+
+[[row]]
+bucket = "debt_pre_apr2023"
+lt_months = 12
+st_treatment = "slab"
+st_section = "normal rates"
+lt_treatment = "special"
+lt_rate = "0.20"
+lt_section = "112"
+indexation = true
+lt_alt_rate = "0.10"
+lt_alt_indexation = false
+lt_alt_section = "112 (10% option)"
+from = 2010-04-01
+to = 2014-07-10
+source = "S41 existing law: a mutual fund unit is long-term after 12 months and the section 112 proviso lets units use 10% without indexation; S42 paras 5.2 and 30.2: the older rules stay for transfers up to 2014-07-10; S47 long-term gains were 20% with indexation under section 112"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Tax is the lower of 20% on the indexed gain and 10% on the gain without indexation (lt_alt_*). Indexation uses the old-base index (tax.cii series 1981)."
+
+[[row]]
+bucket = "debt_pre_apr2023"
+lt_months = 36
+st_treatment = "slab"
+st_section = "normal rates"
+lt_treatment = "special"
+lt_rate = "0.20"
+lt_section = "112"
+indexation = true
+from = 2014-07-11
+to = 2024-07-22
+source = "S42 paras 5.2 and 30.2: a unit of a mutual fund other than an equity oriented fund is long-term after 36 months and the 10% option is gone, for transfers from 2014-07-11; S47 20% with indexation under section 112"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Indexation uses the old-base index for sales up to 2017-03-31 and the 2001-base index after that (tax.cii)."
+
+[[row]]
+bucket = "debt_pre_apr2023"
+lt_months = 24
+st_treatment = "slab"
+st_section = "normal rates"
+lt_treatment = "special"
+lt_rate = "0.125"
+lt_section = "112"
+indexation = false
+from = 2024-07-23
+to = 2026-03-31
+source = "S46 clause 3 and S48: 24 months for assets other than listed securities; S49 unlisted units 24 months from 2024-07-23"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Rate 12.5% without indexation for all long-term gains under section 112 (S46, S48). An unlisted unit (debt or liquid fund) is long-term after 24 months from 2024-07-23."
+
+[[row]]
+bucket = "debt_pre_apr2023"
+lt_months = 24
+st_treatment = "slab"
+st_section = "normal rates"
+lt_treatment = "special"
+lt_rate = "0.125"
+lt_section = "197 (2025 Act)"
+indexation = false
+from = 2026-04-01
+source = "S55 Income-tax Act 2025 section 197: long-term gains 12.5%"
+verified_on = 2026-09-30
+confidence = "secondary"
+note = "Sale date on or after 2026-04-01 falls under the Income-tax Act 2025. The rate is from its text; the holding period is assumed to carry over unchanged."
+
+[[row]]
+bucket = "gold_post_apr2023"
+always_short = true
+st_treatment = "slab"
+st_section = "50AA"
+from = 2023-04-01
+to = 2025-03-31
+source = "S46 clause 21: section 50AA deems the gain on a unit of a Specified Mutual Fund acquired on or after 2023-04-01 to be short-term; S47 the not-more-than-35%-in-equity test covered gold ETFs; S49 gold ETFs are Specified Mutual Funds for FY 2024-25"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Taxed at slab rates whatever the holding period; no indexation. Ends for sales from 2025-04-01 when the definition changes (S47)."
+
+[[row]]
+bucket = "gold_post_apr2023"
+lt_months = 12
+st_treatment = "slab"
+st_section = "normal rates"
+lt_treatment = "special"
+lt_rate = "0.125"
+lt_section = "112"
+indexation = false
+from = 2025-04-01
+to = 2026-03-31
+source = "S46 clause 21(b): new Specified Mutual Fund definition (more than 65% in debt and money market instruments) from 2026-04-01, i.e. AY 2026-27; S47 the new definition applies from AY 2026-27; S49 from FY 2025-26 only debt-oriented schemes are covered"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "A gold ETF is no longer a Specified Mutual Fund for sales from 2025-04-01, so the ordinary rules apply: 12 months (listed unit), 12.5% without indexation."
+
+[[row]]
+bucket = "gold_post_apr2023"
+lt_months = 12
+st_treatment = "slab"
+st_section = "normal rates"
+lt_treatment = "special"
+lt_rate = "0.125"
+lt_section = "197 (2025 Act)"
+indexation = false
+from = 2026-04-01
+source = "S55 Income-tax Act 2025 section 197: long-term gains 12.5%"
+verified_on = 2026-09-30
+confidence = "secondary"
+note = "Sale date on or after 2026-04-01 falls under the Income-tax Act 2025. The rate is from its text; the holding period and the Specified Mutual Fund test are assumed to carry over unchanged."
+
+[[row]]
+bucket = "debt_post_apr2023"
+always_short = true
+st_treatment = "slab"
+st_section = "50AA"
+from = 2023-04-01
+to = 2026-03-31
+source = "S46 clause 21 and S47: section 50AA deems gains on units of a Specified Mutual Fund acquired on or after 2023-04-01 short-term; S49 debt, liquid, money market and gilt funds are Specified Mutual Funds in FY 2024-25 and after the 2025-26 change"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Taxed at slab rates whatever the holding period; no indexation."
+
+[[row]]
+bucket = "debt_post_apr2023"
+always_short = true
+st_treatment = "slab"
+st_section = "50AA equivalent (2025 Act)"
+from = 2026-04-01
+source = "S49 debt-oriented funds stay Specified Mutual Funds; S55 the Income-tax Act 2025 rewrites the 1961 sections"
+verified_on = 2026-09-30
+confidence = "secondary"
+note = "Sale date on or after 2026-04-01 falls under the Income-tax Act 2025. That the deemed short-term rule carries over is assumed: its new section number was not verified."
