@@ -91,7 +91,7 @@ the login already on this machine:
 | Stage | Where | Work |
 |---|---|---|
 | Snapshot | local to Kaggle Dataset | `panel`, `features`, rule constants, code package, each with its SHA-256 in `manifest.json` |
-| 1 | Kaggle GPU (PyTorch; JAX if the image has it) | pre-tax, after-cost screening of all parameter sets on every training window, vectorised; deep-learning training each April with several seeds and architectures |
+| 1 | Kaggle GPU (PyTorch: the same code runs on the CPU here and on the GPU there; numba for the sequential lot-based simulator) | pre-tax, after-cost screening of all parameter sets on every training window, vectorised; deep-learning training each April with several seeds and architectures |
 | 2 | Kaggle CPU or local, multiprocess | exact after-tax simulation of the survivors (the number fixed by rule before results are seen: best 25 per risk level per April, plus S0) |
 | 3 | local | selector, diagnostics, signal artifact; replay through `engine/` and compare with the fast simulator |
 
