@@ -322,18 +322,25 @@ def fy_tax(rules: Rules, fy: int, profile: TaxProfile, events: list[CGEvent],
 
     # A resident individual's unused basic exemption shelters gains taxed at special rates.
     basic = from_rule("Basic exemption limit", brackets[0]["upto"] if D(brackets[0]["rate"]) == 0 else 0, slab.ref)
-    shortfall = maxn("Basic exemption unused by slab income", sub("Basic exemption less slab income", basic, ordinary), ZERO_N)
-    taxable: dict[int, Node] = {}
-    tax_of: dict[int, Node] = {}
     by_rate = sorted(specials, key=lambda p: -p.rate)
-    for p in by_rate:
-        cur = p.left
-        if shortfall.value > 0 and cur.value > 0:
-            used = minn(f"Shortfall used against {p.section}", shortfall, cur)
-            cur = sub(f"{p.section} gain after basic-exemption adjustment", cur, used)
-            shortfall = sub("Shortfall unused", shortfall, used)
-        taxable[id(p)] = cur
-        tax_of[id(p)] = mul(f"Tax on {p.section} at {p.rate}", cur, from_rule(f"{p.section} rate", p.rate, p.ref))
+
+    def special_taxes(slab_income: Node, lefts: dict[int, Node], at: str = ""):
+        """Taxable amount and tax of each special-rate gain, highest rate first, once the unused basic exemption has sheltered them.
+        `at` labels the nodes of a what-if (the income at a surcharge threshold)."""
+        shortfall = maxn(f"Basic exemption unused by slab income{at}",
+                         sub(f"Basic exemption less slab income{at}", basic, slab_income), ZERO_N)
+        taxable_, tax_ = {}, {}
+        for p in by_rate:
+            cur = lefts[id(p)]
+            if shortfall.value > 0 and cur.value > 0:
+                used = minn(f"Shortfall used against {p.section}{at}", shortfall, cur)
+                cur = sub(f"{p.section} gain after basic-exemption adjustment{at}", cur, used)
+                shortfall = sub(f"Shortfall unused{at}", shortfall, used)
+            taxable_[id(p)] = cur
+            tax_[id(p)] = mul(f"Tax on {p.section} at {p.rate}{at}", cur, from_rule(f"{p.section} rate", p.rate, p.ref))
+        return taxable_, tax_
+
+    taxable, tax_of = special_taxes(ordinary, {id(p): p.left for p in specials})
     shortfall_used = any(taxable[id(p)].value != p.left.value for p in specials)
     special_tax = add("Tax at special rates", *[tax_of[id(p)] for p in by_rate])
 
@@ -364,17 +371,21 @@ def fy_tax(rules: Rules, fy: int, profile: TaxProfile, events: list[CGEvent],
         return ordinary if tier.get("basis") == "excluding_special" else total
 
     crossed = [t for t in sc.data["tiers"] if tested_on(t).value > D(t["above"])]
+    gains_cut = False
     if crossed:
         rate, prev = D(crossed[-1]["rate"]), (D(crossed[-2]["rate"]) if len(crossed) > 1 else D(0))
         cap = D(sc.data["cap_special"]) if sc.data.get("cap_special") else None
         cap_sections = sc.data.get("cap_sections")
-        capped = [p for p in by_rate if cap is not None and (cap_sections is None or p.section in cap_sections)]
-        capped_tax = add("Tax on gains whose surcharge is capped", *[tax_of[id(p)] for p in capped])
-        free_tax = add("Tax on gains whose surcharge is not capped", *[tax_of[id(p)] for p in by_rate if p not in capped])
+        capped_ids = {id(p) for p in by_rate if cap is not None and (cap_sections is None or p.section in cap_sections)}
+
+        def split(taxes: dict[int, Node], at: str = ""):  # (tax on gains whose surcharge is capped, tax on the others)
+            return (add(f"Tax on gains whose surcharge is capped{at}", *[taxes[id(p)] for p in by_rate if id(p) in capped_ids]),
+                    add(f"Tax on gains whose surcharge is not capped{at}", *[taxes[id(p)] for p in by_rate if id(p) not in capped_ids]))
 
         def rates(r):  # (rate on slab tax and uncapped gains, rate on capped gains)
             return r, (min(r, cap) if cap is not None else r)
 
+        capped_tax, free_tax = split(tax_of)
         (r1, r2), (p1, p2) = rates(rate), rates(prev)
         surcharge = add("Surcharge",
                         mul("Surcharge on slab tax", ordinary_tax, from_rule("Surcharge rate", r1, sc.ref)),
@@ -382,18 +393,29 @@ def fy_tax(rules: Rules, fy: int, profile: TaxProfile, events: list[CGEvent],
                         mul("Surcharge on capped special-rate tax", capped_tax, from_rule("Surcharge rate on capped tax", r2, sc.ref)))
         threshold = from_rule("Surcharge threshold", crossed[-1]["above"], sc.ref)
         excess = sub("Income above the surcharge threshold", tested_on(crossed[-1]), threshold)
-        if excess.value <= ordinary.value:  # ponytail: relief only when the excess is slab income
-            tax_t = _slab_tax(brackets, sub("Slab income at the threshold", ordinary, excess), slab.ref)
-            at_t = add("Tax and surcharge at the threshold", tax_t, special_tax,
-                       mul("Surcharge at the lower rate", add("Tax at the threshold and uncapped gains", tax_t, free_tax),
-                           from_rule("Lower surcharge rate", p1, sc.ref)),
-                       mul("Surcharge at the lower rate, capped gains", capped_tax, from_rule("Lower surcharge rate, capped", p2, sc.ref)))
-            ceiling = add("Most tax and surcharge may be", at_t, excess)
-            now = add("Tax and surcharge now", ordinary_tax, special_tax, surcharge)
-            relief = maxn("Marginal relief", sub("Tax and surcharge over the ceiling", now, ceiling), ZERO_N)
-        else:
-            relief = from_rule("No marginal relief computed", 0, sc.ref,
-                               note="the income above the threshold is special-rate income; relief not computed")
+        # Marginal relief: tax and surcharge may not pass the tax on the threshold income plus the excess. The threshold income is this
+        # income less the excess, taken from slab income first, then from gains at special rates, lowest rate first (the
+        # marginal_relief_order convention: it leaves the highest-rate income in the threshold amount, which gives the least relief).
+        cut_slab = minn("Slab income given up at the threshold", excess, ordinary)
+        slab_t = sub("Slab income at the threshold", ordinary, cut_slab)
+        still = sub("Excess left to take from gains", excess, cut_slab)
+        lefts_t = {}
+        for p in sorted(specials, key=lambda p: p.rate):
+            cut = minn(f"{p.section} gain given up at the threshold", still, p.left)
+            lefts_t[id(p)] = sub(f"{p.section} gain at the threshold", p.left, cut)
+            still = sub("Excess left to take from gains", still, cut)
+        gains_cut = excess.value > ordinary.value
+        tax_t = _slab_tax(brackets, slab_t, slab.ref)
+        _, tax_of_t = special_taxes(slab_t, lefts_t, " at the threshold")
+        special_t = add("Tax at special rates at the threshold", *[tax_of_t[id(p)] for p in by_rate])
+        capped_t, free_t = split(tax_of_t, " at the threshold")
+        at_t = add("Tax and surcharge at the threshold", tax_t, special_t,
+                   mul("Surcharge at the lower rate", add("Tax at the threshold and uncapped gains", tax_t, free_t),
+                       from_rule("Lower surcharge rate", p1, sc.ref)),
+                   mul("Surcharge at the lower rate, capped gains", capped_t, from_rule("Lower surcharge rate, capped", p2, sc.ref)))
+        ceiling = add("Most tax and surcharge may be", at_t, excess)
+        now = add("Tax and surcharge now", ordinary_tax, special_tax, surcharge)
+        relief = maxn("Marginal relief", sub("Tax and surcharge over the ceiling", now, ceiling), ZERO_N)
         surcharge_final = sub("Surcharge after marginal relief", surcharge, relief)
     else:
         surcharge_final = from_rule("No surcharge", 0, sc.ref)
@@ -415,6 +437,8 @@ def fy_tax(rules: Rules, fy: int, profile: TaxProfile, events: list[CGEvent],
         tax = cite(tax, biz_row.ref)
     if biz_conv is not None:
         tax = cite(tax, biz_conv.ref)
+    if gains_cut:
+        tax = cite(tax, rules.at("tax.conventions", end, name="marginal_relief_order").ref)
     return FYTax(fy, tax, {"ordinary_income": ordinary, "ordinary_tax": ordinary_tax, "special_tax": special_tax,
                            "total_income": total, "rebate": rebate, "surcharge": surcharge_final,
                            "cess": cess, "before_rounding": unrounded},
