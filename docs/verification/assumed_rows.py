@@ -34,7 +34,8 @@ GROUPS = [
     ("tax.cii", False, "A wrong index value by 1 would shift an indexed cost by about 0.3% and the tax by under 0.1% of cost; only sales up to 2024-07-22 use it."),
     ("tax.conventions[name=setoff_order]", True, "The order in which losses are set off can change the tax by the difference between two rates (up to 7.5% of the loss) for an investor with losses and gains at different rates."),
     ("tax.conventions[name=shortfall_order]", True, "Where the unused basic exemption is applied first can change the tax by up to 12.5% of the exemption used (Rs 15,625 in the example of S69) for a low-income investor with more than one kind of long-term gain."),
-    ("tax.conventions[name=business_loss_setoff]", True, "A futures loss is not set off against gains taxed at special rates, which the law allows; an investor with both pays the special rate (up to 20%) on the gain that the loss could have covered."),
+    ("tax.conventions[name=business_loss_setoff]", True, "A futures loss is set off only against interest and income taxed at slab rates, never against the other income given (it may be salary) or gains at special rates; a user whose other income is not salary gets the set-off a year later, and a user with special-rate gains in a loss year pays up to 20% more on the gain the loss could have covered."),
+    ("tax.conventions[name=marginal_relief_order]", True, "The law does not say which income the part above a surcharge threshold is taken from; the engine takes slab income first, then the lowest-rate gains (the least relief). Matters only just above a threshold when most of the income is gains; the relief can differ by the gap between two rates on the excess."),
     ("tax.lt_exemption", True, "In FY2024-25 the order in which the Rs 1.25 lakh exemption is used against gains before and after 2024-07-23 can change the tax by up to Rs 3,125 for an investor with long-term gains on both sides of that date."),
     ("tax.rebate_87a", True, "For FY2023-24 and FY2024-25 the department's reading (no rebate on tax at special rates) is used; if the ITAT view holds, an investor with total income up to Rs 7 lakh and short-term equity gains pays up to Rs 25,000 less."),
 ]
@@ -43,8 +44,9 @@ NOT_MODELLED = [
     "Fyers Prime (a paid yearly plan with lower brokerage) and women or mutual-fund-ISIN discounts on depository charges.",
     "Total income is not rounded to the nearest Rs 10 (section 288A): moves tax by at most Rs 1.5.",
     "ISSL demat holders who may have paid the old AMC until January 2021; the Rs 225 first-year AMC of accounts opened from 2020-12-01.",
-    "Surcharge marginal relief is computed only when the income above the threshold is slab income.",
-    "A business loss is kept only if the return is filed on time (section 80); a business loss cannot be set off against salary (section 71(2A)).",
+    "A business loss is kept only if the return is filed on time (section 80).",
+    "The audit route of section 44AB(e) and 44AD (a trader with presumptive-tax history and profit under 6% may need an audit below the turnover limit).",
+    "The women's higher basic exemption of FY2010-11 (Rs 1.9 lakh).",
     "Alternative minimum tax, advance-tax interest (234B, 234C), deductions (other income is taken after deductions), non-residents and non-individuals.",
 ]
 
@@ -84,7 +86,7 @@ def main():
            "1. **Stamp duty before July 2020.** Which state? Maharashtra is used (delivery 0.01%, futures 0.002% of the purchase value).",
            "2. **Conventions.** Do you accept: losses set off in the coded order (`setoff_order`); the unused basic exemption applied to the "
            "highest-rate gain first, after the yearly exemption (`shortfall_order`); a futures loss set off against slab income only "
-           "(`business_loss_setoff`)?",
+           "(`business_loss_setoff`); the income above a surcharge threshold taken from slab income first, then the lowest-rate gains (`marginal_relief_order`)?",
            "3. **Fyers before it existed.** Brokerage and demat charges from 2010 to 2015 use Fyers' earliest known schedule, and the "
            "old AMC (Rs 400 + GST) is used for accounts opened before 2019-11-15. Accept, or name the broker to copy?",
            "4. **Futures audit.** Fee Rs 25,000 a year, and the higher limit (cash receipts and payments each within 5%). Accept?", "",
