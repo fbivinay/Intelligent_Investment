@@ -33,9 +33,9 @@ note = "As coded: a resident individual's unused basic exemption is applied to g
 
 [[row]]
 name = "business_loss_setoff"
-value = "slab income only, as coded in engine/tax.py"
+value = "interest and slab-taxed income only, not the other income given, as coded in engine/tax.py"
 from = 2010-04-01
-source = "S0 assumption: the law lets a loss under the head business be set off against income under any head, capital gains included (S75 section 71(2)); this engine sets it off against slab income only"
+source = "S0 assumption: the law lets a loss under the head business be set off against income under any head except salary, capital gains included (S75 section 71(1), (2) and (2A)); this engine sets it off against interest and income taxed at slab rates only"
 verified_on = 2026-09-30
 confidence = "assumed"
-note = "Conservative. A futures loss lowers slab income (other income, interest, slab-taxed gains, dividends at slab rates) and is never set off against gains taxed at special rates, so an investor with such gains in the same year pays a little more tax here than the law would ask. What is left over is carried forward for business income only (S75 section 72, S76 section 112). Not modelled: set-off against income from salary is barred by section 71(2A)."
+note = "Conservative. Section 71(2A) bars setting a business loss off against salary, and the other taxable income a user gives may be salary, so it is never touched. A futures loss lowers interest, dividends at slab rates and gains at slab rates, and is never set off against gains taxed at special rates (the law would allow that). What is left over is carried forward for business income only (S75 section 72, S76 section 112). Cost if wrong: a user whose other income is not salary (rent, another business) gets the set-off a year later instead of at once; a user with special-rate gains in a loss year pays more tax that year than the law asks."
