@@ -108,6 +108,41 @@ def test_losses_expire_after_eight_years(rules, origin, expected):
     assert r.extra.value == Dc(expected)
 
 
+def carried_out(r, kind):
+    return [(o, n.value) for o, n in getattr(r.with_items.carry_out, kind)]
+
+
+def test_a_long_term_loss_brought_forward_never_reduces_a_short_term_gain(rules):
+    # section 74(1)(b): a long-term loss is set off against long-term gains only
+    stcg = ev("2019-06-01", "2019-12-01", "10000", "110000")                     # 100,000 short-term gain at 15%
+    r = extra(rules, 2019, [stcg], carry_in=Carry(lt=((2018, const("loss", "60000")),)))
+    assert r.extra.value == Dc("15600")                                          # 100,000 x 15% x 1.04: the loss changes nothing
+    assert carried_out(r, "lt") == [(2018, Dc("60000"))]
+
+
+@pytest.mark.parametrize("origin, expected", [(2011, "0"), (2010, "5200")])
+def test_long_term_losses_expire_after_eight_years(rules, origin, expected):
+    ltcg = ev("2018-03-01", "2019-07-01", "100000", "250000")                    # 150,000 long-term gain, 100,000 of it exempt
+    r = extra(rules, 2019, [ltcg], carry_in=Carry(lt=((origin, const("loss", "60000")),)))
+    assert r.extra.value == Dc(expected)      # usable: 90,000 is under the exemption; expired: 50,000 x 10% x 1.04
+
+
+@pytest.mark.parametrize("kind, gain", [("st", ev("2019-06-01", "2019-12-01", "10000", "50000")),       # 40,000 short-term gain
+                                        ("lt", ev("2018-03-01", "2019-07-01", "100000", "140000"))])   # 40,000 long-term gain
+def test_losses_brought_forward_are_used_oldest_first(rules, kind, gain):
+    losses = ((2018, const("newer", "30000")), (2017, const("older", "30000")))                        # given newest first
+    r = extra(rules, 2019, [gain], carry_in=Carry(**{kind: losses}))
+    assert carried_out(r, kind) == [(2018, Dc("20000"))]                          # all of 2017's 30,000, then 10,000 of 2018's
+
+
+def test_the_unused_basic_exemption_shelters_the_highest_rate_gain_first(rules):
+    events = [ev("2019-06-01", "2019-12-01", "10000", "210000", label="stcg"),                          # 200,000 at 15%
+              ev("2018-03-01", "2019-07-01", "100000", "400000", label="ltcg")]                         # 300,000, 200,000 above the exemption, at 10%
+    r = extra(rules, 2019, events, income="0")
+    # the 250,000 unused basic exemption covers all of the 15% gain, then 50,000 of the 10% gain: 150,000 x 10%
+    assert r.with_items.parts["special_tax"].value == Dc("15000")
+
+
 def test_the_carry_forward_rule_row_is_cited_when_a_carried_loss_is_used(rules):
     carry = Carry(st=((2018, const("old loss", "40000")),))
     r = extra(rules, 2019, [ev("2019-05-01", "2019-09-01", "100000", "200000")], carry_in=carry)

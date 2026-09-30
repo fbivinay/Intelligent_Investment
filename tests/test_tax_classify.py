@@ -48,6 +48,12 @@ def test_grandfathering_raises_cost_to_the_value_on_31_jan_2018(rules):
     assert gain(rules, "2016-01-01", "2019-06-01", "1000000", "2500000", fmv="2000000")[0] == Dc("500000")
 
 
+def test_grandfathering_covers_a_purchase_on_31_january_2018_but_not_the_day_after(rules):
+    # section 55(2)(ac): units acquired before 1 February 2018
+    assert gain(rules, "2018-01-31", "2019-07-01", "100000", "250000", fmv="200000")[0] == Dc("50000")     # cost raised to 200,000
+    assert gain(rules, "2018-02-01", "2019-07-01", "100000", "250000", fmv="200000")[0] == Dc("150000")    # actual cost
+
+
 def test_grandfathering_cannot_push_cost_above_the_sale_value(rules):
     assert gain(rules, "2016-01-01", "2019-06-01", "1000000", "2500000", fmv="3000000")[0] == 0
 
