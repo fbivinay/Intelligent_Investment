@@ -2,7 +2,8 @@
 
 The collector keeps every reply exactly as the site sent it, each with the request that got it. This module turns those replies into rows in the
 same layout the archive readers give (data/nse_read.py), refusing any reply that does not belong to its request (another symbol, a day outside the
-asked window, another expiry) and any file whose collection did not finish cleanly. Numbers are read with their own digits (no float noise).
+asked window, another expiry). A file may be one part of a collection (paused, or stopped by the site): its rows are good, `describe` says what it
+lacks, and whether the files together cover what they should is checked on the rows (data/gaps.py). Numbers are read with their own digits.
 `register` copies a downloaded file into data/raw/nse_web/ and lists it, with its hash, in data/nse_web_files.csv.
 Run:  python -m data.nse_web register <downloaded file>     (or: describe <file>)
 """
@@ -27,6 +28,8 @@ CASH_KEYS = ["CH_SYMBOL", "CH_SERIES", "mTIMESTAMP", "CH_PREVIOUS_CLS_PRICE", "C
              "CH_LAST_TRADED_PRICE", "CH_CLOSING_PRICE", "CH_TOT_TRADED_QTY", "CH_TOT_TRADED_VAL", "CH_TOTAL_TRADES"]
 FO_KEYS = ["FH_INSTRUMENT", "FH_SYMBOL", "FH_EXPIRY_DT", "FH_TIMESTAMP", "FH_OPENING_PRICE", "FH_TRADE_HIGH_PRICE", "FH_TRADE_LOW_PRICE", "FH_CLOSING_PRICE",
            "FH_PREV_CLS", "FH_SETTLE_PRICE", "FH_TOT_TRADED_QTY", "FH_TOT_TRADED_VAL", "FH_OPEN_INT", "FH_CHANGE_IN_OI", "FH_MARKET_LOT", "FH_UNDERLYING_VALUE"]
+FO_TRADE_KEYS = ["FH_OPENING_PRICE", "FH_TRADE_HIGH_PRICE", "FH_TRADE_LOW_PRICE", "FH_CLOSING_PRICE", "FH_PREV_CLS", "FH_SETTLE_PRICE", "FH_TOT_TRADED_QTY",
+                 "FH_TOT_TRADED_VAL", "FH_OPEN_INT", "FH_CHANGE_IN_OI", "FH_MARKET_LOT"]     # all null together on a day a listed contract did not trade
 INDEX_KEYS = ["EOD_TIMESTAMP", "EOD_OPEN_INDEX_VAL", "EOD_HIGH_INDEX_VAL", "EOD_LOW_INDEX_VAL", "EOD_CLOSE_INDEX_VAL", "HIT_TURN_OVER", "HIT_TRADED_QTY"]
 VIX_KEYS = ["EOD_TIMESTAMP", "EOD_OPEN_INDEX_VAL", "EOD_HIGH_INDEX_VAL", "EOD_LOW_INDEX_VAL", "EOD_CLOSE_INDEX_VAL"]
 
@@ -79,6 +82,11 @@ def _fo(it: dict) -> list[dict]:
     out = []
     for r in it["data"]:
         _need(r, FO_KEYS, where)
+        if all(r[k] is None for k in FO_TRADE_KEYS):
+            continue                                   # a contract that is listed but nobody traded that day: the site sends the day with no values
+        gone = [k for k in FO_TRADE_KEYS if r[k] is None]
+        if gone:
+            raise ValueError(f"{where}: a row dated {r['FH_TIMESTAMP']} lacks {gone} but has other values")
         if r["FH_INSTRUMENT"] != "FUTIDX":
             raise ValueError(f"{where}: a row is for instrument {r['FH_INSTRUMENT']}, expected FUTIDX")
         if r["FH_SYMBOL"] != sym:
@@ -129,10 +137,6 @@ def _document(raw: bytes) -> tuple[dict, list]:
 def read_web(raw: bytes) -> dict[str, list[dict]]:
     """{'cash': [...], 'fo': [...], 'index': [...]} in the archive readers' row layout (the caller adds what it needs, such as a source)."""
     meta, items = _document(raw)
-    if meta.get("status") not in (None, "finished"):
-        raise ValueError(f"the collection ended with status {meta['status']!r} ({len(meta.get('failed', []))} requests failed): run it again")
-    if meta.get("failed"):
-        raise ValueError(f"{len(meta['failed'])} requests failed: {meta['failed'][:3]}")
     out: dict[str, list[dict]] = {"cash": [], "fo": [], "index": []}
     for it in items:
         kind = it.get("kind")
@@ -151,9 +155,17 @@ def describe(raw: bytes) -> str:
     meta, items = _document(raw)
     rows = read_web(raw)
     lines = [f"collected {meta.get('collected')}, {len(items)} replies"]
+    if meta.get("status") not in (None, "finished"):
+        lines.append(f"status {meta['status']}: this file is one part of the collection")
+    for f in meta.get("failed", []):
+        when = f"{f['year']}-{int(f['month']) + 1:02d}" if f.get("year") is not None else f"{f.get('from')} to {f.get('to')}"
+        lines.append(f"not collected: {f['kind']} {f['key']} {when}")
     for kind, rs in rows.items():
         days = sorted(r["date"] for r in rs)
         lines.append(f"{kind} {len(rs)} rows" + (f", {days[0]} to {days[-1]}" if days else ""))
+    empty = sum(1 for it in items if it.get("kind") == "fo" for r in it["data"] if all(r.get(k) is None for k in FO_TRADE_KEYS))
+    if empty:
+        lines.append(f"{empty} futures rows without trades left out")
     for m in meta.get("missing", []):
         lines.append(f"no contract found: {m['symbol']} {m['year']}-{int(m['month']):02d}")
     return "\n".join(lines)

@@ -133,3 +133,12 @@ def test_index_names_before_the_november_2015_renaming_are_read_under_todays_nam
                      "CNX Nifty Shariah,06-11-2015,1,2,0.5,1.5,0,0,1,1,1,1,1"]).encode()
     rows = nr.read_index(raw, {"Nifty 50", "Nifty Next 50", "Nifty Bank", "Nifty Midcap 100"})
     assert {r["name"]: r["close"] for r in rows} == {"Nifty 50": "7954.3", "Nifty Next 50": "19561.75", "Nifty Bank": "17086.5", "Nifty Midcap 100": "12995.7"}
+
+
+def test_index_files_that_write_the_date_with_slashes_are_read_like_the_others():
+    # 59 files from 2014-06-09 to 2015-06-10 write 09/06/2014
+    raw = "\n".join([IDX_HEAD, "CNX Nifty,09/06/2014,7600,7700,7590,7650.5,1,0.1,1,1,19.1,2.8,1.4"]).encode()
+    assert nr.read_index(raw, {"Nifty 50"}, day="2014-06-09")[0]["date"] == "2014-06-09"
+    assert nr.read_index(raw, {"Nifty 50"})[0]["date"] == "2014-06-09"
+    month_first = "\n".join([IDX_HEAD, "CNX Nifty,06/09/2014,7600,7700,7590,7650.5,1,0.1,1,1,19.1,2.8,1.4"]).encode()
+    assert nr.read_index(month_first, {"Nifty 50"}, day="2014-06-09")[0]["date"] == "2014-06-09"
