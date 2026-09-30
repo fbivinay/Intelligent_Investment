@@ -86,8 +86,10 @@ One file per table under `rules/`, named by table (`rules/charges/stt.toml` is t
 | Table | Key fields | Payload fields | Read by |
 |---|---|---|---|
 | `fyers.brokerage` | `product` (`delivery`, `futures`) | `mode` (`zero`, `flat`, `pct`, `min_flat_pct`), `flat` ₹, `pct` fraction, optional `round_step` | `charges._brokerage` |
-| `fyers.dp` | none | `value` ₹ per delivery sale per ISIN per day, before GST | `charges.dp_charge` |
-| `fyers.account` | `fee` (`amc_annual`) | `value` ₹ per year, before GST | `charges.amc_fee` |
+| `fyers.dp` | none | `value` ₹, before GST; `basis` (`per_sale` or `per_isin_per_day`) says what one charge covers | `charges.dp_charge`, `charges.dp_basis` |
+| `fyers.amc_cohort` | none | `cohort` (`legacy`, `standard`, `free`); the row's dates are **account-opening** dates | `charges.amc_fee` |
+| `fyers.amc` | `cohort` | `value` ₹ per year, before GST; the row's dates are **charge** dates | `charges.amc_fee` |
+| `fyers.account_opening` | none | `value` ₹ one-off, before GST; the row's dates are opening dates | `charges.account_opening_fee` |
 | `charges.stt` | `instrument_class`, `side` | `value` fraction of turnover, optional `round_step` | `charges.order_charges` |
 | `charges.exchange_txn` | `exchange` (`NSE`), `segment` (`delivery`, `futures`) | `value` fraction | same |
 | `charges.sebi` | none | `value` fraction | same |
@@ -97,16 +99,16 @@ One file per table under `rules/`, named by table (`rules/charges/stt.toml` is t
 | `charges.gst` | none | `value` fraction, `applies_to` list of line names (`brokerage`, `exchange_txn`, `sebi`, `ipft`, `clearing`, `dp`, `amc`) | `charges._gst` |
 | `charges.dp_depository` | none | `value` ₹ per delivery sale per ISIN per day | `charges.dp_charge` |
 | `tax.buckets` | `asset_class` | `bucket` name; the row's dates are **acquisition** dates | `tax.classify` |
-| `tax.capital_gains` | `bucket` | `lt_months` int, `always_short` bool, `st_treatment`, `st_rate`, `st_section`, `lt_treatment`, `lt_rate`, `lt_section` (treatment is `special`, `slab` or `exempt`; rates are strings), `indexation` bool, `lt_exemption_group`, `grandfather_acq_upto` date; the row's dates are **sale** dates | `tax.classify` |
-| `tax.cii` | none | `value` (cost inflation index); one row per financial year | `tax.classify` |
-| `tax.lt_exemption` | `group` | `value` ₹ per financial year, `order` (`lowest_rate_first` or `highest_rate_first`) | `tax.fy_tax` |
+| `tax.capital_gains` | `bucket` | `lt_months` int, `always_short` bool, `st_treatment`, `st_rate`, `st_section`, `lt_treatment`, `lt_rate`, `lt_section` (treatment is `special`, `slab` or `exempt`; rates are strings), `indexation` bool, `lt_exemption_group`, `grandfather_acq_upto` date, `lt_alt_rate` / `lt_alt_indexation` / `lt_alt_section` (the 10% option without indexation, for sales up to 2014-07-10); the row's dates are **sale** dates | `tax.classify` |
+| `tax.cii` | `series` (`1981` for sales up to 2017-03-31, `2001` after) | `value` (cost inflation index); one row per financial year and series | `tax.classify` |
+| `tax.lt_exemption` | `group` (`equity_112a`) | `value` ₹ per financial year, `order` (`lowest_rate_first` or `highest_rate_first`) | `tax.fy_tax` |
 | `tax.dividend` | none | `mode` (`exempt`, `slab`, `above_threshold`), `threshold` ₹, `rate` | same |
 | `tax.loss_rules` | `kind` (`capital`, `business`) | `value` years a loss may be carried forward | same |
 | `tax.slabs` | `regime` (`old`, `new`) | `brackets`: list of `{upto, rate}` in order, last `upto = ""` | same |
-| `tax.rebate_87a` | `regime` | `income_limit`, `max_rebate`, `applies_to_special` bool, optional `marginal_relief` bool | same |
-| `tax.surcharge` | `regime` | `tiers`: list of `{above, rate}` ascending, optional `cap_special` | same |
+| `tax.rebate_87a` | `regime` | `income_limit`, `max_rebate`, `applies_to_special` bool, optional `marginal_relief` bool, optional `excluded_sections` list (sections whose tax the rebate does not cover, for example `112A`) | same |
+| `tax.surcharge` | `regime` | `tiers`: list of `{above, rate}` ascending, a tier optionally with `basis = "excluding_special"` (tested on income without dividends and special-rate gains), optional `cap_special` and `cap_sections` (the sections the cap covers) | same |
 | `tax.cess` | none | `value` fraction | same |
-| `tax.conventions` | `name` (`setoff_order`, `shortfall_order`, `tax_round_step`) | `value` | same |
+| `tax.conventions` | `name` (`setoff_order`, `shortfall_order`, `tax_round_step`, `business_loss_setoff`) | `value` | same |
 | `tax.audit` | none | `turnover_limit` ₹, `fee` ₹ | `business.audit_fee` |
 
 `instrument_class` and `asset_class` share one vocabulary: `etf_equity` (equity-oriented ETF such as Nifty BeES), `etf_gold`, `mf_equity` (equity-oriented fund, arbitrage funds included), `mf_debt` (debt and liquid funds), `fut_index` (index futures). Tables with a second regime that started later (`new` regime from FY2020-21) declare it in `[meta]` with `late_keys`.
@@ -1385,6 +1387,8 @@ List every `assumed` and `secondary` row in the message body.
 **Interfaces:**
 - Consumes: `Rules.at(table, on, **key) -> Row` (Task 3); `Node`, `const`, `from_rule`, `add`, `mul`, `minn`, `rnd` (Task 2); `KINDS`, `kind`, `same`, `D` (Task 4); real tables from Tasks 5 and 6.
 - Produces: `Order(on, instrument_class, side, qty, price)` (frozen, validated); `Charges(total, lines, deductible, turnover)` where `lines` maps `brokerage`, `stt`, `exchange_txn`, `sebi`, `ipft`, `clearing`, `stamp`, `gst` to `Node`s (mutual funds have only `stt`, `stamp`, `gst`); `order_charges(rules, order) -> Charges`; `dp_charge(rules, on) -> Node`; `amc_fee(rules, on) -> Node`; tag constant `DEDUCTIBLE = "cg_deductible"` (every line except STT, which a capital gain may not deduct); golden kinds `charges` (`[case.input]` `on`, `instrument_class`, `side`, `qty`, `price`; `[case.expect]` any line name, `total`, `deductible` or `turnover`), `dp` and `amc` (`[case.input]` `on`; `[case.expect]` `total`).
+
+- **As built (written in Task 15; the code blocks below are the plan as first written, the code in git is the truth):** Task 5 replaced `fyers.account` with `fyers.amc_cohort`, `fyers.amc` and `fyers.account_opening`, because the yearly AMC depends on when the account was opened. So `amc_fee(rules, on, opened) -> Node` takes the opening date (it raises `ValueError` if `on` is before `opened`), `account_opening_fee(rules, opened) -> Node` is new, `dp_basis(rules, on) -> str` returns `per_sale` or `per_isin_per_day`, and `dp_charge` is one charge event. Golden kinds: `charges`, `dp` (optional `basis`), `amc` (input `on` and `opened`), `account_opening`. `tests/test_gates.py` also holds the row gate: every `fyers.`, `charges.` and `tax.` row must be used by an engine golden case, with a short allowlist of rows that no sale can reach.
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -2864,6 +2868,8 @@ git commit -m "feat: financial-year tax with loss set-off, exemption, slabs, reb
   - `engine.scenario`: `Bar(on, high, close)`, `Result(net, waterfall, units, bought_on, ended_on, sold)`, `buy_and_hold(rules, *, instrument, instrument_class, bars, dividends, amount, start, end, profile, sell_at_end=True) -> Result`.
   - `engine.report`: `render_html(title, sections, notes) -> str`, `main(argv) -> Path` (`python -m engine.report --amount 100000 --start 2014-01-01 --income 1500000 --regime new`).
 - Simplifications (all printed on the report): buys and sells at the day's close, cash earns nothing, dividends are kept as cash, whole units only. The Yahoo Finance chart API is unofficial and, when this plan was written, returned no dividend records for NIFTYBEES.NS at all, so the source understates total return until the data layer replaces it.
+
+- **As built (written in Task 15):** `buy_and_hold` takes the account as opened on the purchase day and charges the opening fee once (waterfall key `account_opening`) and one full yearly AMC (`amc_fee(rules, on, opened)`) for each financial year from the purchase to the end date. `Result.waterfall` keys: `initial`, `gross_profit`, `gross_end`, `buy_charges`, `sale_charges`, `account_opening`, `amc`, `charges`, `tax`, `net`. `data.fetch_yahoo` also has `verify(root) -> list[str]` (files against `manifest.json`) and reads `data/corrections.json`: bars to leave out and dividends to add by hand, each with its reason, recorded in the manifest. The Yahoo series turned out to be split-adjusted without a split event, with three bad bars and no dividends before 2012 (see `docs/verification/checkpoint-1.md`).
 
 - [ ] **Step 1: Write the failing tests**
 
