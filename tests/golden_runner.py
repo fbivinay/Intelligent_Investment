@@ -141,7 +141,7 @@ def _account_opening(rules: Rules, c: dict):
 @kind("tax_fy")
 def _tax_fy(rules: Rules, c: dict):
     """One year's tax: `extra` (caused by the investments), `tax_with`, `tax_without` or any part."""
-    from engine.tax import Carry, CGEvent, TaxProfile, investment_tax
+    from engine.tax import Business, Carry, CGEvent, TaxProfile, investment_tax
     from engine.trace import assert_balanced, const, rules_used
     i = c["input"]
     events = [CGEvent(e.get("label", "sale"), e["sale_date"], e["asset_class"], e["acq_date"],
@@ -153,13 +153,31 @@ def _tax_fy(rules: Rules, c: dict):
     def carried(name):
         return tuple((x["origin"], const("Loss brought forward", x["amount"])) for x in i.get(name, []))
 
+    b = i.get("business")
+    business = Business(const("Futures P&L", b["pnl"]), const("Costs", b["costs"])) if b else None
     r = investment_tax(rules, i["fy"], TaxProfile(i["regime"], D(i["other_income"])), events,
-                       carry_in=Carry(carried("carry_st"), carried("carry_lt")),
+                       carry_in=Carry(carried("carry_st"), carried("carry_lt"), carried("carry_biz")),
                        dividends=const("Dividends", i["dividends"]) if "dividends" in i else None,
-                       interest=const("Interest", i["interest"]) if "interest" in i else None)
+                       interest=const("Interest", i["interest"]) if "interest" in i else None,
+                       business=business)
     named = {"extra": r.extra, "tax_with": r.with_items.tax, "tax_without": r.without_items.tax,
              **r.with_items.parts}
     for name, want in c["expect"].items():
         assert same(named[name].value, want), f"{c['id']}: {name} is {named[name].value}, hand-worked {want}"
     assert_balanced(r.extra)
     return rules_used(r.extra)
+
+
+@kind("audit")
+def _audit(rules: Rules, c: dict):
+    """Audit fee for a year, from the profit or loss of each closed futures trade."""
+    from engine.business import audit_fee, futures_turnover
+    from engine.trace import assert_balanced, const, rules_used
+    i = c["input"]
+    turnover = futures_turnover([const("Trade", p) for p in i["trade_pnls"]])
+    if "turnover" in c["expect"]:
+        assert same(turnover.value, c["expect"]["turnover"]), f"{c['id']}: turnover is {turnover.value}, hand-worked {c['expect']['turnover']}"
+    fee = audit_fee(rules, i["fy"], turnover)
+    assert same(fee.value, c["expect"]["fee"]), f"{c['id']}: fee is {fee.value}, hand-worked {c['expect']['fee']}"
+    assert_balanced(fee)
+    return rules_used(fee)

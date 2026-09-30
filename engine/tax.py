@@ -55,6 +55,13 @@ class CGEvent:
 class Carry:
     st: tuple[tuple[int, Node], ...] = ()  # (financial year the loss arose, amount), oldest first
     lt: tuple[tuple[int, Node], ...] = ()
+    biz: tuple[tuple[int, Node], ...] = ()  # business losses, usable against business income only
+
+
+@dataclass(frozen=True)
+class Business:
+    pnl: Node    # realised profit (+) or loss (-) on futures, before costs
+    costs: Node  # every deductible cost: charges including STT, and any audit fee
 
 
 @dataclass(frozen=True)
@@ -182,7 +189,7 @@ def _slab_tax(brackets: list[dict], income: Node, ref: RuleRef) -> Node:
 
 def fy_tax(rules: Rules, fy: int, profile: TaxProfile, events: list[CGEvent],
            carry_in: Carry = Carry(), dividends: Node | None = None,
-           interest: Node | None = None) -> FYTax:
+           interest: Node | None = None, business: Business | None = None) -> FYTax:
     start, end = date(fy, 4, 1), fy_end(fy)
     if profile.other_income < 0:
         raise ValueError("other_income cannot be negative")
@@ -276,6 +283,35 @@ def fy_tax(rules: Rules, fy: int, profile: TaxProfile, events: list[CGEvent],
                                 left=over, included=over))
         elif mode != "exempt":
             raise ValueError(f"unknown dividend mode {mode!r}")
+    # Futures income is business income at slab rates. A loss is set off against income taxed at slab rates only (never against
+    # gains taxed at special rates: conservative, the business_loss_setoff convention) and the rest is carried forward for
+    # business income.
+    new_biz: list[tuple[int, Node]] = []
+    biz_row = biz_conv = None
+    if business is not None or carry_in.biz:
+        biz_row = rules.at("tax.loss_rules", end, kind="business")
+        old = [(o, a) for o, a in sorted(carry_in.biz, key=lambda t: t[0]) if fy - o <= int(biz_row.value)]
+        net = sub("Business income after costs", business.pnl, business.costs) if business else ZERO_N
+        if net.value >= 0:
+            left = net
+            for o, a in old:
+                if left.value <= 0:
+                    new_biz.append((o, a))
+                    continue
+                used = minn(f"Business loss from {fy_label(o)} used", a, left)
+                left = sub("Business income after that loss", left, used)
+                rest = sub(f"Business loss from {fy_label(o)}, unused", a, used)
+                if rest.value > 0:
+                    new_biz.append((o, rest))
+            parts.append(left)
+        else:
+            biz_conv = rules.at("tax.conventions", end, name="business_loss_setoff")
+            loss = sub("Business loss this year", ZERO_N, net)
+            room = maxn("Slab income not below zero", add("Slab income before the business loss", *parts), ZERO_N)
+            used = minn("Business loss set off against slab income", loss, room)
+            parts.append(sub("Business loss set off", ZERO_N, used))
+            rest = sub("Business loss carried forward", loss, used)
+            new_biz = old + ([(fy, rest)] if rest.value > 0 else [])
     ordinary = add("Income taxed at slab rates", *parts)
     slab = rules.at("tax.slabs", start, regime=reg)
     brackets = slab.data["brackets"]
@@ -372,16 +408,20 @@ def fy_tax(rules: Rules, fy: int, profile: TaxProfile, events: list[CGEvent],
         tax = cite(tax, loss_row.ref)
     if div_ref is not None:
         tax = cite(tax, div_ref)
+    if biz_row is not None:
+        tax = cite(tax, biz_row.ref)
+    if biz_conv is not None:
+        tax = cite(tax, biz_conv.ref)
     return FYTax(fy, tax, {"ordinary_income": ordinary, "ordinary_tax": ordinary_tax, "special_tax": special_tax,
                            "total_income": total, "rebate": rebate, "surcharge": surcharge_final,
                            "cess": cess, "before_rounding": unrounded},
-                 Carry(tuple(new_st), tuple(new_lt)))
+                 Carry(tuple(new_st), tuple(new_lt), tuple(new_biz)))
 
 
 def investment_tax(rules: Rules, fy: int, profile: TaxProfile, events: list[CGEvent],
                    carry_in: Carry = Carry(), dividends: Node | None = None,
-                   interest: Node | None = None) -> InvestmentTax:
+                   interest: Node | None = None, business: Business | None = None) -> InvestmentTax:
     """Tax caused by the investments: the year's tax with them minus the year's tax without."""
-    w = fy_tax(rules, fy, profile, events, carry_in, dividends, interest)
+    w = fy_tax(rules, fy, profile, events, carry_in, dividends, interest, business)
     wo = fy_tax(rules, fy, profile, [], Carry(), None, None)
     return InvestmentTax(sub(f"Tax caused by your investments in {fy_label(fy)}", w.tax, wo.tax), w, wo)

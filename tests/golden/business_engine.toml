@@ -1,0 +1,422 @@
+[[case]]
+id = "tax-business-carried-loss-expired-in-its-ninth-year-2024"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml, tax_slab_rules.toml and business_rules.toml (S40 to S78); arithmetic worked independently, see work"
+work = "a loss of FY2015-16 has lapsed by FY2024-25; futures profit or loss 300000 less costs 0 = 300000; business losses brought forward 100000 from FY2015; slab income 1800000, slab tax 230000.00, special-rate tax 0, total income 1800000, rebate 0, surcharge 0, cess 9200.0000, tax with 239200, without 145600, extra 93600"
+[case.input]
+fy = 2024
+regime = "new"
+other_income = "1500000"
+carry_biz = [{ origin = 2015, amount = "100000" }]
+[case.input.business]
+pnl = "300000"
+costs = "0"
+[case.expect]
+extra = "93600"
+tax_with = "239200"
+tax_without = "145600"
+ordinary_income = "1800000"
+total_income = "1800000"
+
+[[case]]
+id = "tax-business-carried-loss-still-usable-in-its-eighth-year-2024"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml, tax_slab_rules.toml and business_rules.toml (S40 to S78); arithmetic worked independently, see work"
+work = "a loss of FY2016-17 can still be used in FY2024-25, the eighth year after; futures profit or loss 300000 less costs 0 = 300000; business losses brought forward 100000 from FY2016; slab income 1700000, slab tax 200000.00, special-rate tax 0, total income 1700000, rebate 0, surcharge 0, cess 8000.0000, tax with 208000, without 145600, extra 62400"
+[case.input]
+fy = 2024
+regime = "new"
+other_income = "1500000"
+carry_biz = [{ origin = 2016, amount = "100000" }]
+[case.input.business]
+pnl = "300000"
+costs = "0"
+[case.expect]
+extra = "62400"
+tax_with = "208000"
+tax_without = "145600"
+ordinary_income = "1700000"
+total_income = "1700000"
+
+[[case]]
+id = "tax-business-carried-loss-used-new-2024"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml, tax_slab_rules.toml and business_rules.toml (S40 to S78); arithmetic worked independently, see work"
+work = "an earlier loss reduces the profit before it is taxed; futures profit or loss 300000 less costs 0 = 300000; business losses brought forward 100000 from FY2020; slab income 1700000, slab tax 200000.00, special-rate tax 0, total income 1700000, rebate 0, surcharge 0, cess 8000.0000, tax with 208000, without 145600, extra 62400"
+[case.input]
+fy = 2024
+regime = "new"
+other_income = "1500000"
+carry_biz = [{ origin = 2020, amount = "100000" }]
+[case.input.business]
+pnl = "300000"
+costs = "0"
+[case.expect]
+extra = "62400"
+tax_with = "208000"
+tax_without = "145600"
+ordinary_income = "1700000"
+total_income = "1700000"
+
+[[case]]
+id = "tax-business-carried-loss-with-no-business-this-year-2024"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml, tax_slab_rules.toml and business_rules.toml (S40 to S78); arithmetic worked independently, see work"
+work = "a carried loss cannot lower tax by itself: it needs business profit; business losses brought forward 100000 from FY2020; business loss carried out 100000 from FY2020; slab income 1500000, slab tax 140000.00, special-rate tax 0, total income 1500000, rebate 0, surcharge 0, cess 5600.0000, tax with 145600, without 145600, extra 0"
+[case.input]
+fy = 2024
+regime = "new"
+other_income = "1500000"
+carry_biz = [{ origin = 2020, amount = "100000" }]
+[case.expect]
+extra = "0"
+tax_with = "145600"
+
+[[case]]
+id = "tax-business-loss-against-a-slab-taxed-gain-old-2025"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml, tax_slab_rules.toml and business_rules.toml (S40 to S78); arithmetic worked independently, see work"
+work = "a debt fund bought after March 2023 is taxed at slab rates as a short-term gain, and the business loss can be set off against it; debt fund: short-term 50AA gain 300000; futures profit or loss -200000 less costs 0 = -200000; slab income 900000, slab tax 92500.00, special-rate tax 0, total income 900000, rebate 0, surcharge 0, cess 3700.0000, tax with 96200, without 75400, extra 20800"
+[case.input]
+fy = 2025
+regime = "old"
+other_income = "800000"
+[case.input.business]
+pnl = "-200000"
+costs = "0"
+[[case.input.events]]
+label = "debt fund"
+sale_date = 2025-06-01
+acq_date = 2023-05-01
+asset_class = "mf_debt"
+proceeds = "400000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "20800"
+tax_with = "96200"
+tax_without = "75400"
+ordinary_income = "900000"
+total_income = "900000"
+
+[[case]]
+id = "tax-business-loss-and-a-special-rate-gain-old-2024"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml, tax_slab_rules.toml and business_rules.toml (S40 to S78); arithmetic worked independently, see work"
+work = "the loss is set off against slab income only: the Rs 6 lakh short-term gain stays whole in total income and, less the unused basic exemption, pays 20%; stcg: short-term 111A gain 600000; futures profit or loss -700000 less costs 0 = -700000; business loss carried out 100000 from FY2024; slab income 0, slab tax 0.00, special-rate tax 70000.00, total income 600000, rebate 0, surcharge 0, cess 2800.0000, tax with 72800, without 33800, extra 39000"
+[case.input]
+fy = 2024
+regime = "old"
+other_income = "600000"
+[case.input.business]
+pnl = "-700000"
+costs = "0"
+[[case.input.events]]
+label = "stcg"
+sale_date = 2024-11-01
+acq_date = 2024-05-01
+asset_class = "etf_equity"
+proceeds = "700000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "39000"
+tax_with = "72800"
+tax_without = "33800"
+ordinary_income = "0"
+special_tax = "70000.00"
+rebate = "0"
+total_income = "600000"
+
+[[case]]
+id = "tax-business-loss-bigger-than-income-old-2022"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml, tax_slab_rules.toml and business_rules.toml (S40 to S78); arithmetic worked independently, see work"
+work = "the loss only lowers tax to zero, nothing is refunded, the rest is carried forward; futures profit or loss -900000 less costs 0 = -900000; business loss carried out 200000 from FY2022; slab income 0, slab tax 0.00, special-rate tax 0, total income 0, rebate 0.00, surcharge 0, cess 0.0000, tax with 0, without 54600, extra -54600"
+[case.input]
+fy = 2022
+regime = "old"
+other_income = "700000"
+[case.input.business]
+pnl = "-900000"
+costs = "0"
+[case.expect]
+extra = "-54600"
+tax_with = "0"
+tax_without = "54600"
+ordinary_income = "0"
+
+[[case]]
+id = "tax-business-loss-under-the-rebate-limit-2025"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml, tax_slab_rules.toml and business_rules.toml (S40 to S78); arithmetic worked independently, see work"
+work = "the loss (with costs) lowers income below Rs 12 lakh, so the section 87A rebate wipes the tax out; futures profit or loss -300000 less costs 50000 = -350000; slab income 1150000, slab tax 55000.00, special-rate tax 0, total income 1150000, rebate 55000.00, surcharge 0, cess 0.0000, tax with 0, without 109200, extra -109200"
+[case.input]
+fy = 2025
+regime = "new"
+other_income = "1500000"
+[case.input.business]
+pnl = "-300000"
+costs = "50000"
+[case.expect]
+extra = "-109200"
+tax_with = "0"
+tax_without = "109200"
+ordinary_income = "1150000"
+rebate = "55000.00"
+
+[[case]]
+id = "tax-business-profit-new-2024"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml, tax_slab_rules.toml and business_rules.toml (S40 to S78); arithmetic worked independently, see work"
+work = "a profit is taxed with other income at slab rates; futures profit or loss 400000 less costs 60000 = 340000; slab income 1840000, slab tax 242000.00, special-rate tax 0, total income 1840000, rebate 0, surcharge 0, cess 9680.0000, tax with 251680, without 145600, extra 106080"
+[case.input]
+fy = 2024
+regime = "new"
+other_income = "1500000"
+[case.input.business]
+pnl = "400000"
+costs = "60000"
+[case.expect]
+extra = "106080"
+tax_with = "251680"
+tax_without = "145600"
+ordinary_income = "1840000"
+total_income = "1840000"
+
+[[case]]
+id = "tax-business-profit-old-2019"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml, tax_slab_rules.toml and business_rules.toml (S40 to S78); arithmetic worked independently, see work"
+work = "old regime, profit takes income across the 20% and 30% lines; futures profit or loss 250000 less costs 30000 = 220000; slab income 1020000, slab tax 118500.00, special-rate tax 0, total income 1020000, rebate 0, surcharge 0, cess 4740.0000, tax with 123240, without 75400, extra 47840"
+[case.input]
+fy = 2019
+regime = "old"
+other_income = "800000"
+[case.input.business]
+pnl = "250000"
+costs = "30000"
+[case.expect]
+extra = "47840"
+tax_with = "123240"
+tax_without = "75400"
+ordinary_income = "1020000"
+total_income = "1020000"
+
+[[case]]
+id = "tax-business-profit-shares-the-basic-exemption-with-a-gain-new-2024"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml, tax_slab_rules.toml and business_rules.toml (S40 to S78); arithmetic worked independently, see work"
+work = "profit uses up part of the basic exemption first, so less of it is left for the gain; stcg: short-term 111A gain 120000; futures profit or loss 250000 less costs 0 = 250000; slab income 250000, slab tax 0.00, special-rate tax 10500.00, total income 370000, rebate 0.00, surcharge 0, cess 420.0000, tax with 10920, without 0, extra 10920"
+[case.input]
+fy = 2024
+regime = "new"
+other_income = "0"
+[case.input.business]
+pnl = "250000"
+costs = "0"
+[[case.input.events]]
+label = "stcg"
+sale_date = 2024-06-10
+acq_date = 2024-04-10
+asset_class = "etf_equity"
+proceeds = "220000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "10920"
+special_tax = "10500.00"
+ordinary_income = "250000"
+total_income = "370000"
+
+[[case]]
+id = "audit-fy2010-over-the-60-lakh-limit"
+kind = "audit"
+source = "limit from tests/golden/business_rules.toml (S71 to S74 and S76), fee assumed (S78); turnover is the sum of the size of each trade (S77); arithmetic worked independently, see work"
+work = "FY2010-11: size of each trade 3,000,000 + 5,000,000 = 8,000,000, over the limit 6,000,000: audit, fee 25,000"
+[case.input]
+fy = 2010
+trade_pnls = ["-3000000", "5000000"]
+[case.expect]
+turnover = "8000000"
+fee = "25000"
+
+[[case]]
+id = "audit-fy2010-under-the-60-lakh-limit"
+kind = "audit"
+source = "limit from tests/golden/business_rules.toml (S71 to S74 and S76), fee assumed (S78); turnover is the sum of the size of each trade (S77); arithmetic worked independently, see work"
+work = "FY2010-11: size of each trade 1,000,000 + 2,000,000 + 2,999,999 = 5,999,999, not over the limit 6,000,000: no audit, fee 0"
+[case.input]
+fy = 2010
+trade_pnls = ["1000000", "-2000000", "2999999"]
+[case.expect]
+turnover = "5999999"
+fee = "0"
+
+[[case]]
+id = "audit-fy2011-80-lakh"
+kind = "audit"
+source = "limit from tests/golden/business_rules.toml (S71 to S74 and S76), fee assumed (S78); turnover is the sum of the size of each trade (S77); arithmetic worked independently, see work"
+work = "same trades as FY2012 below; FY2011-12: size of each trade 3,000,000 + 5,000,000 = 8,000,000, over the limit 6,000,000: audit, fee 25,000"
+[case.input]
+fy = 2011
+trade_pnls = ["-3000000", "5000000"]
+[case.expect]
+turnover = "8000000"
+fee = "25000"
+
+[[case]]
+id = "audit-fy2011-exactly-at-the-limit"
+kind = "audit"
+source = "limit from tests/golden/business_rules.toml (S71 to S74 and S76), fee assumed (S78); turnover is the sum of the size of each trade (S77); arithmetic worked independently, see work"
+work = "turnover equal to the limit is not above it; FY2011-12: size of each trade 2,000,000 + 4,000,000 = 6,000,000, not over the limit 6,000,000: no audit, fee 0"
+[case.input]
+fy = 2011
+trade_pnls = ["-2000000", "4000000"]
+[case.expect]
+turnover = "6000000"
+fee = "0"
+
+[[case]]
+id = "audit-fy2011-one-rupee-over-the-limit"
+kind = "audit"
+source = "limit from tests/golden/business_rules.toml (S71 to S74 and S76), fee assumed (S78); turnover is the sum of the size of each trade (S77); arithmetic worked independently, see work"
+work = "FY2011-12: size of each trade 2,000,000 + 4,000,001 = 6,000,001, over the limit 6,000,000: audit, fee 25,000"
+[case.input]
+fy = 2011
+trade_pnls = ["-2000000", "4000001"]
+[case.expect]
+turnover = "6000001"
+fee = "25000"
+
+[[case]]
+id = "audit-fy2012-80-lakh"
+kind = "audit"
+source = "limit from tests/golden/business_rules.toml (S71 to S74 and S76), fee assumed (S78); turnover is the sum of the size of each trade (S77); arithmetic worked independently, see work"
+work = "the limit rose to one crore from FY2012-13; FY2012-13: size of each trade 3,000,000 + 5,000,000 = 8,000,000, not over the limit 10,000,000: no audit, fee 0"
+[case.input]
+fy = 2012
+trade_pnls = ["-3000000", "5000000"]
+[case.expect]
+turnover = "8000000"
+fee = "0"
+
+[[case]]
+id = "audit-fy2018-3-crore"
+kind = "audit"
+source = "limit from tests/golden/business_rules.toml (S71 to S74 and S76), fee assumed (S78); turnover is the sum of the size of each trade (S77); arithmetic worked independently, see work"
+work = "same trades as FY2019 below; FY2018-19: size of each trade 10,000,000 + 20,000,000 = 30,000,000, over the limit 10,000,000: audit, fee 25,000"
+[case.input]
+fy = 2018
+trade_pnls = ["-10000000", "20000000"]
+[case.expect]
+turnover = "30000000"
+fee = "25000"
+
+[[case]]
+id = "audit-fy2019-3-crore"
+kind = "audit"
+source = "limit from tests/golden/business_rules.toml (S71 to S74 and S76), fee assumed (S78); turnover is the sum of the size of each trade (S77); arithmetic worked independently, see work"
+work = "the limit rose to five crore from FY2019-20; FY2019-20: size of each trade 10,000,000 + 20,000,000 = 30,000,000, not over the limit 50,000,000: no audit, fee 0"
+[case.input]
+fy = 2019
+trade_pnls = ["-10000000", "20000000"]
+[case.expect]
+turnover = "30000000"
+fee = "0"
+
+[[case]]
+id = "audit-fy2019-8-crore"
+kind = "audit"
+source = "limit from tests/golden/business_rules.toml (S71 to S74 and S76), fee assumed (S78); turnover is the sum of the size of each trade (S77); arithmetic worked independently, see work"
+work = "same trades as FY2020 below; FY2019-20: size of each trade 30,000,000 + 50,000,000 = 80,000,000, over the limit 50,000,000: audit, fee 25,000"
+[case.input]
+fy = 2019
+trade_pnls = ["-30000000", "50000000"]
+[case.expect]
+turnover = "80000000"
+fee = "25000"
+
+[[case]]
+id = "audit-fy2020-8-crore"
+kind = "audit"
+source = "limit from tests/golden/business_rules.toml (S71 to S74 and S76), fee assumed (S78); turnover is the sum of the size of each trade (S77); arithmetic worked independently, see work"
+work = "the limit rose to ten crore from FY2020-21; FY2020-21: size of each trade 30,000,000 + 50,000,000 = 80,000,000, not over the limit 100,000,000: no audit, fee 0"
+[case.input]
+fy = 2020
+trade_pnls = ["-30000000", "50000000"]
+[case.expect]
+turnover = "80000000"
+fee = "0"
+
+[[case]]
+id = "audit-fy2020-a-loss-counts-like-a-profit"
+kind = "audit"
+source = "limit from tests/golden/business_rules.toml (S71 to S74 and S76), fee assumed (S78); turnover is the sum of the size of each trade (S77); arithmetic worked independently, see work"
+work = "a losing year is audited on the size of the loss; FY2020-21: size of each trade 100,000,001 = 100,000,001, over the limit 100,000,000: audit, fee 25,000"
+[case.input]
+fy = 2020
+trade_pnls = ["-100000001"]
+[case.expect]
+turnover = "100000001"
+fee = "25000"
+
+[[case]]
+id = "audit-fy2020-no-trades"
+kind = "audit"
+source = "limit from tests/golden/business_rules.toml (S71 to S74 and S76), fee assumed (S78); turnover is the sum of the size of each trade (S77); arithmetic worked independently, see work"
+work = "FY2020-21: size of each trade no trades = 0, not over the limit 100,000,000: no audit, fee 0"
+[case.input]
+fy = 2020
+trade_pnls = []
+[case.expect]
+turnover = "0"
+fee = "0"
+
+[[case]]
+id = "audit-fy2025-exactly-ten-crore"
+kind = "audit"
+source = "limit from tests/golden/business_rules.toml (S71 to S74 and S76), fee assumed (S78); turnover is the sum of the size of each trade (S77); arithmetic worked independently, see work"
+work = "FY2025-26: size of each trade 50,000,000 + 50,000,000 = 100,000,000, not over the limit 100,000,000: no audit, fee 0"
+[case.input]
+fy = 2025
+trade_pnls = ["-50000000", "50000000"]
+[case.expect]
+turnover = "100000000"
+fee = "0"
+
+[[case]]
+id = "audit-fy2025-one-rupee-over-ten-crore"
+kind = "audit"
+source = "limit from tests/golden/business_rules.toml (S71 to S74 and S76), fee assumed (S78); turnover is the sum of the size of each trade (S77); arithmetic worked independently, see work"
+work = "FY2025-26: size of each trade 100,000,001 = 100,000,001, over the limit 100,000,000: audit, fee 25,000"
+[case.input]
+fy = 2025
+trade_pnls = ["100000001"]
+[case.expect]
+turnover = "100000001"
+fee = "25000"
+
+[[case]]
+id = "audit-fy2026-exactly-ten-crore"
+kind = "audit"
+source = "limit from tests/golden/business_rules.toml (S71 to S74 and S76), fee assumed (S78); turnover is the sum of the size of each trade (S77); arithmetic worked independently, see work"
+work = "tax year 2026-27 under the Income-tax Act 2025; FY2026-27: size of each trade 60,000,000 + 40,000,000 = 100,000,000, not over the limit 100,000,000: no audit, fee 0"
+[case.input]
+fy = 2026
+trade_pnls = ["-60000000", "40000000"]
+[case.expect]
+turnover = "100000000"
+fee = "0"
+
+[[case]]
+id = "audit-fy2026-one-rupee-over-ten-crore"
+kind = "audit"
+source = "limit from tests/golden/business_rules.toml (S71 to S74 and S76), fee assumed (S78); turnover is the sum of the size of each trade (S77); arithmetic worked independently, see work"
+work = "tax year 2026-27 under the Income-tax Act 2025; FY2026-27: size of each trade 60,000,000 + 40,000,001 = 100,000,001, over the limit 100,000,000: audit, fee 25,000"
+[case.input]
+fy = 2026
+trade_pnls = ["-60000000", "40000001"]
+[case.expect]
+turnover = "100000001"
+fee = "25000"
