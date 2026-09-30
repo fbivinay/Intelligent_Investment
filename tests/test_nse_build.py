@@ -47,7 +47,7 @@ def read(path):
 def test_build_writes_one_sorted_csv_per_kind_from_the_raw_files_that_are_listed(tmp_path):
     root = make_root(tmp_path)
     counts = nb.build(root, etfs={"NIFTYBEES", "GOLDBEES"}, futures={"NIFTY"}, indices={"Nifty 50"})
-    assert counts == {"cash": 3, "fo": 1, "index": 1, "index_month_first": 0}
+    assert counts == {"cash": 3, "fo": 1, "index": 1, "index_month_first": 0, "cash_web": 0, "fo_web": 0, "index_web": 0}
     etf = read(root / "processed" / "nse_etf_daily.csv")
     assert [(r["date"], r["symbol"], r["close"]) for r in etf] == [("2016-06-01", "GOLDBEES", "2505"), ("2016-06-01", "NIFTYBEES", "828.85"),
                                                                     ("2016-06-02", "NIFTYBEES", "834.5")]
@@ -108,3 +108,66 @@ def test_build_refuses_two_rows_for_one_key(tmp_path):
     with pytest.raises(ValueError, match="twice"):
         nb.build(tmp_path, {"NIFTYBEES"}, {"NIFTY"}, {"Nifty Midcap 100"})
     assert not (tmp_path / "processed" / "nse_index_daily.csv").exists()
+
+
+def web_file(tmp_path, *items, name="nse_web_test.json"):
+    import json
+    from data import nse_web as nw
+    src = tmp_path / name
+    src.write_text(json.dumps({"meta": {"collected": "2026-10-01T10:00:00.000Z", "status": "finished", "failed": [], "missing": []}, "items": list(items)}))
+    return nw.register(src, tmp_path, tmp_path / "no_script.js", registered=date(2026, 10, 1))
+
+
+WEB_ETF = {"CH_SYMBOL": "NIFTYBEES", "CH_SERIES": "EQ", "mTIMESTAMP": "30-Jun-2010", "CH_PREVIOUS_CLS_PRICE": 530.54, "CH_OPENING_PRICE": 527.5, "CH_TRADE_HIGH_PRICE": 534.99,
+           "CH_TRADE_LOW_PRICE": 527, "CH_LAST_TRADED_PRICE": 533, "CH_CLOSING_PRICE": 533.87, "CH_TOT_TRADED_QTY": 53156, "CH_TOT_TRADED_VAL": 28201570.87, "CH_TOTAL_TRADES": None}
+WEB_INDEX = {"EOD_INDEX_NAME": "S&P CNX NIFTY", "EOD_OPEN_INDEX_VAL": 5254.25, "EOD_HIGH_INDEX_VAL": 5320.35, "EOD_CLOSE_INDEX_VAL": 5312.5, "EOD_LOW_INDEX_VAL": 5210,
+             "HIT_TURN_OVER": 7083.92, "HIT_TRADED_QTY": 183722824, "EOD_TIMESTAMP": "30-JUN-2010"}
+WEB_FO = {"FH_INSTRUMENT": "FUTIDX", "FH_SYMBOL": "NIFTY", "FH_EXPIRY_DT": "29-Jul-2010", "FH_OPENING_PRICE": 5214.95, "FH_TRADE_HIGH_PRICE": 5263.9, "FH_TRADE_LOW_PRICE": 5204,
+          "FH_CLOSING_PRICE": 5260.65, "FH_PREV_CLS": 5226.7, "FH_SETTLE_PRICE": 5260.4, "FH_TOT_TRADED_QTY": 21269100, "FH_TOT_TRADED_VAL": 1111674.68, "FH_OPEN_INT": 11940200,
+          "FH_CHANGE_IN_OI": -4062050, "FH_MARKET_LOT": 50, "FH_TIMESTAMP": "30-Jun-2010", "FH_UNDERLYING_VALUE": 5260.4}
+
+
+def web_items():
+    return [{"kind": "etf", "symbol": "NIFTYBEES", "from": "2010-04-01", "to": "2010-06-30", "data": [WEB_ETF]},
+            {"kind": "index", "index": "NIFTY 50", "from": "2010-04-01", "to": "2010-06-30", "data": [WEB_INDEX]},
+            {"kind": "fo", "symbol": "NIFTY", "expiry": "2010-07-29", "from": "2010-04-01", "to": "2010-06-30", "data": [WEB_FO]}]
+
+
+def test_build_adds_the_website_file_for_the_years_before_the_archive_and_marks_where_each_row_came_from(tmp_path):
+    root = make_root(tmp_path)
+    web_file(root, *web_items())
+    counts = nb.build(root, etfs={"NIFTYBEES", "GOLDBEES"}, futures={"NIFTY"}, indices={"Nifty 50"})
+    assert counts == {"cash": 4, "fo": 2, "index": 2, "index_month_first": 0, "cash_web": 1, "fo_web": 1, "index_web": 1}
+    etf = read(root / "processed" / "nse_etf_daily.csv")
+    assert [(r["date"], r["symbol"], r["source"]) for r in etf] == [("2010-06-30", "NIFTYBEES", "web"), ("2016-06-01", "GOLDBEES", "archive"),
+                                                                     ("2016-06-01", "NIFTYBEES", "archive"), ("2016-06-02", "NIFTYBEES", "archive")]
+    assert etf[0]["close"] == "533.87" and etf[0]["isin"] == "" and etf[0]["trades"] == ""
+    assert [(r["date"], r["source"]) for r in read(root / "processed" / "nse_index_daily.csv")] == [("2010-06-30", "web"), ("2016-06-01", "archive")]
+    fo = read(root / "processed" / "nse_index_futures_daily.csv")
+    assert [(r["date"], r["expiry"], r["source"], r["lot"]) for r in fo] == [("2010-06-30", "2010-07-29", "web", "50"), ("2016-06-01", "2016-06-30", "archive", "")]
+
+
+def test_where_the_archive_and_the_website_both_have_a_row_the_archive_row_is_kept_and_the_overlap_is_not_counted_as_added(tmp_path):
+    root = make_root(tmp_path)
+    same_day = dict(WEB_ETF, mTIMESTAMP="01-Jun-2016", CH_SYMBOL="NIFTYBEES", CH_CLOSING_PRICE=999)
+    web_file(root, {"kind": "etf", "symbol": "NIFTYBEES", "from": "2016-06-01", "to": "2016-06-01", "data": [same_day]})
+    counts = nb.build(root, etfs={"NIFTYBEES", "GOLDBEES"}, futures={"NIFTY"}, indices={"Nifty 50"})
+    assert counts["cash"] == 3 and counts["cash_web"] == 0
+    rows = [r for r in read(root / "processed" / "nse_etf_daily.csv") if r["date"] == "2016-06-01" and r["symbol"] == "NIFTYBEES"]
+    assert [(r["close"], r["source"]) for r in rows] == [("828.85", "archive")]
+
+
+def test_build_refuses_a_website_file_whose_hash_no_longer_matches(tmp_path):
+    import pytest
+    root = make_root(tmp_path)
+    web_file(root, *web_items())
+    (root / "raw" / "nse_web" / "nse_web_test.json").write_bytes(b"{}")
+    with pytest.raises(ValueError, match="hash"):
+        nb.build(root, {"NIFTYBEES"}, {"NIFTY"}, {"Nifty 50"})
+
+
+def test_website_rows_for_an_instrument_outside_the_build_universe_are_left_out(tmp_path):
+    root = make_root(tmp_path)
+    web_file(root, *web_items())
+    counts = nb.build(root, etfs={"GOLDBEES"}, futures={"BANKNIFTY"}, indices={"Nifty Bank"})
+    assert (counts["cash_web"], counts["fo_web"], counts["index_web"]) == (0, 0, 0)
