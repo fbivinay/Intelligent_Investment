@@ -12,8 +12,8 @@ to = 2020-12-31
 value = "0.0000325"
 source = "S25 existing Rs 3.25 each side per lakh of traded value (cash market); S31 and S30 0.00325%"
 verified_on = 2026-09-30
-confidence = "secondary"
-note = "NSE circular S25 gives this as the existing first-slab rate on 2020-12-18; Fyers' own calculator scripts (2018 to 2020) and its 2020 support article use it too. Earlier changes and any ETF-specific NSE concessions (for example a temporary cut in mid-2016) were not researched."
+confidence = "assumed"
+note = "Confirmed for 2018 to 2020 (Fyers calculator scripts, S31, S30) and for 2020-12-18 (NSE circular S25). The same rate is used back to 2010: earlier NSE rates and any ETF concessions were not researched."
 
 [[row]]
 exchange = "NSE"
@@ -76,8 +76,8 @@ to = 2020-12-31
 value = "0.000019"
 source = "S25 existing Rs 1.90 each side per lakh (equity futures); S30 exchange txn charge 0.0019%"
 verified_on = 2026-09-30
-confidence = "secondary"
-note = "NSE circular S25 gives this as the existing first-slab rate on 2020-12-18; Fyers' 2020 support article quotes 0.0019% for equity futures. Earlier changes were not researched."
+confidence = "assumed"
+note = "Confirmed for 2018 to 2020 (Fyers calculator scripts, S31, S30) and for 2020-12-18 (NSE circular S25). The same rate is used back to 2010: earlier NSE rates and any ETF concessions were not researched."
 
 [[row]]
 exchange = "NSE"

@@ -27,7 +27,7 @@ to = 2018-03-31
 source = "S40 section 111A tax on short-term gains is 15%; S43 long-term gains on STT-paid equity and equity oriented fund units are exempt under section 10(38) until withdrawn from 2018-04-01; S41 same benefits: long-term exempt, short-term 15%"
 verified_on = 2026-09-30
 confidence = "primary"
-note = "STT is assumed paid on every sale (exchange sales and redemptions of equity funds). A long-term loss here is not allowed against other gains because the gain would have been exempt."
+note = "The rule covers STT-paid sales, which is every sale in the modelled universe (exchange sales and redemptions of equity funds). A long-term loss here is not allowed against other gains because the gain would have been exempt."
 
 [[row]]
 bucket = "equity"
@@ -82,8 +82,8 @@ grandfather_acq_upto = 2018-01-31
 from = 2026-04-01
 source = "S55 Income-tax Act 2025 section 196: short-term gains on STT-paid equity 20%; section 198: long-term gains above Rs 1,25,000 at 12.5%"
 verified_on = 2026-09-30
-confidence = "secondary"
-note = "Sale date on or after 2026-04-01 falls under the Income-tax Act 2025. Rates and the exemption limit are from its text. The 12-month holding period and the 31 Jan 2018 grandfathering are assumed to carry over unchanged (the Act was presented as a rewrite without rate changes)."
+confidence = "assumed"
+note = "Sale date on or after 2026-04-01 falls under the Income-tax Act 2025. Rates and the exemption limit are from sections 196 to 198 (S55). The 12 and 24 month holding periods are as the Act 2025 defines them (section 2(101), read in secondary summaries only); the 31 Jan 2018 grandfathering and the section 50AA carry-over were not checked against the Act text and are taken as unchanged."
 
 [[row]]
 bucket = "gold"
@@ -148,8 +148,8 @@ indexation = false
 from = 2026-04-01
 source = "S55 Income-tax Act 2025 section 197: long-term gains 12.5%"
 verified_on = 2026-09-30
-confidence = "secondary"
-note = "Sale date on or after 2026-04-01 falls under the Income-tax Act 2025. The rate is from its text; the holding period is assumed to carry over unchanged."
+confidence = "assumed"
+note = "Sale date on or after 2026-04-01 falls under the Income-tax Act 2025. Rates and the exemption limit are from sections 196 to 198 (S55). The 12 and 24 month holding periods are as the Act 2025 defines them (section 2(101), read in secondary summaries only); the 31 Jan 2018 grandfathering and the section 50AA carry-over were not checked against the Act text and are taken as unchanged."
 
 [[row]]
 bucket = "debt_pre_apr2023"
@@ -214,8 +214,8 @@ indexation = false
 from = 2026-04-01
 source = "S55 Income-tax Act 2025 section 197: long-term gains 12.5%"
 verified_on = 2026-09-30
-confidence = "secondary"
-note = "Sale date on or after 2026-04-01 falls under the Income-tax Act 2025. The rate is from its text; the holding period is assumed to carry over unchanged."
+confidence = "assumed"
+note = "Sale date on or after 2026-04-01 falls under the Income-tax Act 2025. Rates and the exemption limit are from sections 196 to 198 (S55). The 12 and 24 month holding periods are as the Act 2025 defines them (section 2(101), read in secondary summaries only); the 31 Jan 2018 grandfathering and the section 50AA carry-over were not checked against the Act text and are taken as unchanged."
 
 [[row]]
 bucket = "gold_post_apr2023"
@@ -257,8 +257,8 @@ indexation = false
 from = 2026-04-01
 source = "S55 Income-tax Act 2025 section 197: long-term gains 12.5%"
 verified_on = 2026-09-30
-confidence = "secondary"
-note = "Sale date on or after 2026-04-01 falls under the Income-tax Act 2025. The rate is from its text; the holding period and the Specified Mutual Fund test are assumed to carry over unchanged."
+confidence = "assumed"
+note = "Sale date on or after 2026-04-01 falls under the Income-tax Act 2025. Rates and the exemption limit are from sections 196 to 198 (S55). The 12 and 24 month holding periods are as the Act 2025 defines them (section 2(101), read in secondary summaries only); the 31 Jan 2018 grandfathering and the section 50AA carry-over were not checked against the Act text and are taken as unchanged."
 
 [[row]]
 bucket = "debt_post_apr2023"
@@ -280,5 +280,5 @@ st_section = "50AA equivalent (2025 Act)"
 from = 2026-04-01
 source = "S49 debt-oriented funds stay Specified Mutual Funds; S55 the Income-tax Act 2025 rewrites the 1961 sections"
 verified_on = 2026-09-30
-confidence = "secondary"
-note = "Sale date on or after 2026-04-01 falls under the Income-tax Act 2025. That the deemed short-term rule carries over is assumed: its new section number was not verified."
+confidence = "assumed"
+note = "Sale date on or after 2026-04-01 falls under the Income-tax Act 2025. Rates and the exemption limit are from sections 196 to 198 (S55). The 12 and 24 month holding periods are as the Act 2025 defines them (section 2(101), read in secondary summaries only); the 31 Jan 2018 grandfathering and the section 50AA carry-over were not checked against the Act text and are taken as unchanged."

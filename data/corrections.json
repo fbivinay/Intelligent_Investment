@@ -10,6 +10,9 @@
         "per_unit": "1.0000",
         "source": "Trendlyne NIFTYBEES dividend history: Rs 10.00 per unit, ex-date 12 Mar 2012; divided by 10 because Yahoo's prices are adjusted for the 1-for-10 unit split of 2019-12-19; the scheme's practice of paying out income to keep NAV near 1/10th of the Nifty is confirmed by Value Research (Rs 3, record date 21 Aug 2003)"
       }
+    },
+    "adjusted": {
+      "2019-12-19": "1-for-10 unit split (face value Rs 10 to Rs 1, ex-date 2019-12-19, Trendlyne split history): Yahoo divides every earlier price by 10 without listing a split event, so units before this date are counted in post-split units and a real unit cost ten of them; whole-unit rounding before 2019 is therefore understated"
     }
   }
 }

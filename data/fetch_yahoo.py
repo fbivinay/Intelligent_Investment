@@ -33,7 +33,10 @@ def fetch(symbol: str) -> bytes:
 
 
 def parse(raw: bytes) -> tuple[list[tuple[date, Decimal, Decimal]], dict[date, Decimal]]:
-    """(bars of date, high, close), dividends per unit by ex-date. Refuses split-adjusted data."""
+    """(bars of date, high, close), dividends per unit by ex-date.
+
+    Refuses a reply that LISTS split events, because its prices are then adjusted in a way this layer does not handle. It cannot see
+    a series adjusted without listing a split (Yahoo's NIFTYBEES.NS is one: see `adjusted` in data/corrections.json and the manifest)."""
     chart = json.loads(raw)["chart"]
     if not chart.get("result"):
         raise ValueError(f"Yahoo returned no data: {chart.get('error')}")
@@ -78,7 +81,8 @@ def save(symbol: str, raw: bytes, retrieved: date, root: Path = ROOT, correction
         w = csv.writer(f, lineterminator="\n")
         w.writerow(["date", "high", "close"])
         w.writerows(bars)
-    with (root / "processed" / f"{symbol.split('.')[0]}_dividends.csv").open("w", newline="") as f:
+    div_out = root / "processed" / f"{symbol.split('.')[0]}_dividends.csv"
+    with div_out.open("w", newline="") as f:
         w = csv.writer(f, lineterminator="\n")
         w.writerow(["ex_date", "per_unit"])
         w.writerows(sorted(divs.items()))
@@ -88,7 +92,9 @@ def save(symbol: str, raw: bytes, retrieved: date, root: Path = ROOT, correction
                           "raw_sha256": hashlib.sha256(raw).hexdigest(),
                           "csv_sha256": hashlib.sha256(out.read_bytes()).hexdigest(),
                           "rows": len(bars), "first": bars[0][0].isoformat(), "last": bars[-1][0].isoformat(),
-                          "dividend_events": len(divs), "excluded": excluded, "manual_dividends": manual}
+                          "dividend_events": len(divs), "excluded": excluded, "manual_dividends": manual,
+                          "dividends_csv": div_out.name, "dividends_csv_sha256": hashlib.sha256(div_out.read_bytes()).hexdigest(),
+                          "adjusted": dict(corrections.get("adjusted", {}))}
     mpath.write_bytes((json.dumps(manifest, indent=2, sort_keys=True) + "\n").encode())
     return out
 
@@ -107,6 +113,19 @@ def verify(root: Path = ROOT) -> list[str]:
             rows = list(csv.DictReader(f))
         if len(rows) != m["rows"] or rows[0]["date"] != m["first"] or rows[-1]["date"] != m["last"]:
             problems.append(f"{name}: rows or dates differ from the manifest")
+        div_name = m.get("dividends_csv")
+        if not div_name or "dividends_csv_sha256" not in m:
+            problems.append(f"{name}: the manifest has no hash for its dividends file")
+            continue
+        div_path = root / "processed" / div_name
+        if not div_path.exists():
+            problems.append(f"{div_name}: file is missing")
+        elif hashlib.sha256(div_path.read_bytes()).hexdigest() != m["dividends_csv_sha256"]:
+            problems.append(f"{div_name}: hash differs from the manifest")
+        else:
+            with div_path.open(newline="") as f:
+                if len(list(csv.DictReader(f))) != m["dividend_events"]:
+                    problems.append(f"{div_name}: rows differ from the manifest")
     return problems
 
 

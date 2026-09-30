@@ -26,3 +26,26 @@ def test_surcharge_section_names_are_names_the_engine_can_meet():
         for tier in row.data["tiers"]:
             named |= set(tier.get("test_excludes", []))
         assert named <= known, f"{row.ref.rule_id} from {row.valid_from} names {sorted(named - known)}, which no gain or dividend is called"
+
+
+def test_every_source_id_a_row_mentions_is_listed_in_sources_md():
+    for row in RULES.all_rows():
+        for sid in re.findall(r"\bS\d+\b", row.ref.source):
+            assert sid in SOURCE_IDS, f"{row.ref.rule_id} from {row.valid_from} cites {sid}, which rules/SOURCES.md does not list"
+
+
+def test_a_row_with_no_usable_source_is_assumed():
+    for row in RULES.all_rows():
+        if re.match(r"S0\b", row.ref.source):
+            assert row.ref.confidence == "assumed", f"{row.ref.rule_id} from {row.valid_from} has source S0, so it can only be assumed"
+
+
+ADMISSIONS = ("not researched", "stand-in", "assumed", "not found", "extrapolat", "back-fill", "were not checked", "not checked")
+
+
+def test_a_row_that_says_in_its_note_that_it_is_a_stand_in_or_an_assumption_is_marked_assumed():
+    for row in RULES.all_rows():
+        note = row.ref.note.lower()
+        if row.ref.confidence != "assumed":
+            said = [w for w in ADMISSIONS if w in note]
+            assert not said, f"{row.ref.rule_id} from {row.valid_from} is {row.ref.confidence} but its note says {said}: mark it assumed"

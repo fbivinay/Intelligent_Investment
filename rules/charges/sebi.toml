@@ -18,8 +18,8 @@ to = 2019-03-31
 value = "0.0000015"
 source = "S34 Rs 15 per crore after the January 2017 cut; S32 Board memorandum of March 2019: current fee Rs.15/- per crore; S31 0.00015% in 2018 and 2019"
 verified_on = 2026-09-30
-confidence = "secondary"
-note = "The effective date of the 2017 cut was not found; 2017-04-01 is assumed."
+confidence = "assumed"
+note = "Rs 15 per crore is confirmed for 2018 and 2019 (S31) and March 2019 (S32). The date of the January 2017 cut was not found, so 2017-04-01 is used."
 
 [[row]]
 from = 2019-04-01
