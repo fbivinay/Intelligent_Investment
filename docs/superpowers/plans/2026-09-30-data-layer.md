@@ -24,7 +24,7 @@
 
 ## Tasks
 
-Status 2026-09-30: tasks 1 to 6 DONE (code, tests, real data, committed on `v3/data-layer`); task 7 waits for the owner. Results are in `data/gaps.md` (generated) and `data/README.md`.
+Status 2026-10-01: tasks 1 to 7 DONE (code, tests, real data, committed on `v3/data-layer`). Task 7 was done through the owner's Brave browser in the end (Chrome's connection to the site was refused). Results are in `data/gaps.md` (generated) and `data/README.md`.
 
 1. **Archive downloader** `data/nse_archive.py`: URL builders (both layouts, tried in order), day fetch with retry and status classification, threaded sync that resumes from `data/nse_days.csv`, `verify_days`. Tests: injected opener. DONE, with the firewall handling above.
 2. **Readers**: cash bhavcopy, index-futures rows, index closes (old and new layouts) to typed rows. Tests: real header and rows copied as fixtures. DONE; also handles a two-digit year (one 2020 file), three 2023 index files that write the date month first, and the Midcap 100 renaming.
@@ -32,4 +32,4 @@ Status 2026-09-30: tasks 1 to 6 DONE (code, tests, real data, committed on `v3/d
 4. **Corporate actions and adjustment**: split and bonus candidates from price gaps, confirmation from AMFI NAV, `data/corporate_actions.csv`, `data/adjust.py`. DONE: three splits, all on 2019-12-19 (Nifty BeES 1:10, Bank BeES 1:10, Gold BeES 1:100), each confirmed by the fund's NAV, which switches two trading days later (`nav_ex_date`). The equity ETFs pay no dividends out (checked in `gaps.md`).
 5. **AMFI NAV** via mfapi with a check against the AMFI report. DONE: 27 schemes, 352 NAVs compared with AMFI's own report, no difference.
 6. **Gaps and cross-check**: trading calendar, gaps report, cross-check against Yahoo (`data/README` table of results). DONE, plus futures lot sizes per contract (`data/lots.py`).
-7. **On hold, owner's decision:** 2010-04 to 2016-05 exact NSE prices through the owner's Chrome (the per-symbol and index and futures history reports work in a real browser; moving the data out of the page to disk was blocked by the safety layer, so it needs the owner's explicit go-ahead or a click on Chrome's download prompt). Fallback: AMFI NAV plus Yahoo, labelled proxy.
+7. **2010-04 to 2015-12 from the website's history reports** through the owner's browser: DONE. `data/nse_web_collect.js` (tested under node against a fake site) collected ETFs, Nifty 50, Next 50, Bank, India VIX and both index futures, one request at a time; the owner let the browser download each file to Downloads; `data/nse_web.py` reads them; the website rows equal the archive rows on every overlap day (615 ETF rows, all fields; index rows except India VIX by at most 0.04%; futures except a rounding of value). The earlier route (sending the data from the page to a local server) was refused by the safety layer and was never retried.

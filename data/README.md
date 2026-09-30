@@ -32,8 +32,10 @@ The exchange's firewall blocks fast downloads: it answered every request with 40
 second, files that exist included. `nse_archive.py` therefore paces itself (one request per 0.6 s), tells a block from a missing file by asking
 for a file that certainly exists, waits and carries on. A 403 is never taken to mean "no such file". The website reports refuse scripts outright,
 so `nse_web_collect.js` runs inside the owner's Chrome tab on nseindia.com (same origin, the site's own cookies), one request at a time with a
-pause, keeps every reply exactly as received, and stops by itself when the site refuses. After about 270 requests in 7 minutes the browser's own
-connection to `www.nseindia.com` was refused for a long time (the archive host stayed reachable): hence the collection may come in parts.
+pause, keeps every reply exactly as received, and stops by itself when the site refuses. After about 270 requests in 7 minutes the Chrome tab's own
+connection to `www.nseindia.com` was refused for a long time (the archive host stayed reachable, and Brave on the same machine reached the site fine), so the
+collection came in three files: part 1 (Chrome: ETFs, indices, VIX, NIFTY futures to 2012-12), part 2 (Brave: the rest of the futures) and part 3 (Brave: the two
+February 2014 contracts, see the quirks below). `nse_web.py` reads them together; a row in two files is one row.
 
 ## Files
 
@@ -49,6 +51,8 @@ connection to `www.nseindia.com` was refused for a long time (the archive host s
 | `processed/amfi_nav_daily.csv` | date, code, nav (as published) |
 | `lot_sizes.csv` | index futures lot per contract: symbol, expiry, lot, agree, basis (`published`, or `inferred` from traded value, see below) |
 | `corporate_actions.csv` | splits with evidence; `nav_ex_date` is the day AMFI's NAV switches to the new unit size |
+| `nav_units.csv` | unit changes of fund NAVs with evidence (liquid funds x100 in 2012 and 2013, gold ETF splits, the 2019 ETF splits as the NAV shows them); `processed/amfi_nav_adjusted.csv` puts every earlier NAV on the new scale |
+| `contract_redates.csv` | the two February 2014 futures contracts the website kept under two expiry dates, read as one |
 | `gaps.md` | generated: day list, calendar and price cross-checks, website against archive, coverage of the years before the archive |
 | `nse_web_collect.js`, `nse_web.py` | the browser collector and the reader of what it collected |
 
@@ -73,8 +77,8 @@ Building twice gives the same bytes; every raw file is checked against its liste
 - **Before 2010-04** there is nothing exact. The five ETFs have no AMFI NAV either from 2011-08-18 to 2016-11-06 (the schemes were
   re-registered under new codes). Continuous stand-ins exist (Nifty 50, Next 50, gold, arbitrage and liquid funds) and are listed in
   `amfi_nav.py`, but they are proxies, not the ETFs.
-- **Index futures before 2016** are only as complete as `gaps.md` (Coverage section) says: the website file may have been collected in parts,
-  and the site stopped answering the browser before all contracts were fetched.
+- **Index futures before 2016** are complete: every one of the 1,433 trading days from 2010-04-01 to 2016-01-03 has 3 contracts for NIFTY and for
+  BANKNIFTY (`gaps.md`, Coverage). Days on which a listed contract did not trade carry no row.
 - **Nifty Midcap 100 before 2012-07** is not available: the website report returns nothing for any spelling of its name.
 - **India VIX** starts 2010-07 (website) and is continuous from there; the archive files carry it only from 2014-05.
 - **LIQUIDBEES** trades and reports its NAV at Rs 1,000 all the time: its return is a daily cash dividend that no file carries. For a cash
@@ -100,6 +104,11 @@ Building twice gives the same bytes; every raw file is checked against its liste
   `Nifty Free Float Midcap 100` in the files from 2016-04 to 2018-03. Closes are continuous across every renaming (checked on the days either
   side). `Nifty Full Midcap 100` is a different index and is not read.
 - The Nifty BeES, Bank BeES and Gold BeES splits of 2019-12-19 show in AMFI's NAV two trading days later than in the exchange price.
+- The February 2014 contracts: the website holds one contract under two expiry dates (27-Feb-2014 up to 2013-12-27, 26-Feb-2014 from 2013-12-30), because the
+  27th was a market holiday and the expiry moved to the 26th. The dates run on without a gap or overlap and the settle moves with the index
+  (evidence in `contract_redates.csv`); the collector now also asks the earlier candidate days when a contract's rows stop well before its expiry.
+- Fund NAVs: a liquid fund's NAV jumps x100 once (Nippon regular 2012-08-05, Kotak 2013-01-20) and three gold ETFs split (2021 to 2022); listed in
+  `nav_units.csv`, `python -m data.adjust` stops if a jump has no listed change. Without this a cash-leg return over those days would be 10,000%.
 - Website replies: a reply is cut off at the newest 70 rows (the collector asks for windows of 90 days and halves any window that fills the cap);
   on 2011-05-06, 2011-08-09 and 2011-10-24 a reply holds the same row twice (read once; two different rows with the same key are an error);
   a listed futures contract nobody traded on a day comes as a row with no values (left out, counted by `python -m data.nse_web describe`);
