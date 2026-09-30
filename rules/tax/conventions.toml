@@ -39,3 +39,12 @@ source = "S0 assumption: the law lets a loss under the head business be set off 
 verified_on = 2026-09-30
 confidence = "assumed"
 note = "Conservative. Section 71(2A) bars setting a business loss off against salary, and the other taxable income a user gives may be salary, so it is never touched. A futures loss lowers interest, dividends at slab rates and gains at slab rates, and is never set off against gains taxed at special rates (the law would allow that). What is left over is carried forward for business income only (S75 section 72, S76 section 112). Cost if wrong: a user whose other income is not salary (rent, another business) gets the set-off a year later instead of at once; a user with special-rate gains in a loss year pays more tax that year than the law asks."
+
+[[row]]
+name = "marginal_relief_order"
+value = "the income above a surcharge threshold is taken from slab income first, then from gains at special rates, lowest rate first, as coded in engine/tax.py"
+from = 2010-04-01
+source = "S0 assumption: the provisos on surcharge (see rules/tax/surcharge.toml, S61 and S62) limit tax and surcharge to the tax on the threshold income plus the income above it, without saying which income counts as the income above it"
+verified_on = 2026-09-30
+confidence = "assumed"
+note = "Conservative. Taking the excess from slab income first and then from the lowest-rate gains leaves the highest-rate income in the threshold amount, which gives the least relief. It matters only when the income above a threshold is mostly gains taxed at special rates (a large sale in a year with little pay). The part of a gain that the yearly section 112A exemption leaves untaxed stays in the threshold amount. Cost if wrong: the relief is off by up to the difference of two rates on the excess, in a band of a few lakh above a threshold."

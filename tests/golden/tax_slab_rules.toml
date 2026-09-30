@@ -629,3 +629,13 @@ on = 2010-04-01
 key = { name = "shortfall_order" }
 [case.expect]
 value = "as coded in engine/tax.py"
+
+[[case]]
+id = "tax.conventions-marginal_relief_order-2010-04-01"
+kind = "rule_value"
+source = "S0 assumption: the order coded in engine/tax.py (slab income first, then gains at special rates, lowest rate first)"
+table = "tax.conventions"
+on = 2010-04-01
+key = { name = "marginal_relief_order" }
+[case.expect]
+value = "the income above a surcharge threshold is taken from slab income first, then from gains at special rates, lowest rate first, as coded in engine/tax.py"

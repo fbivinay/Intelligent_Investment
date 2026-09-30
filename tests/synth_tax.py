@@ -76,6 +76,7 @@ TAX = {
         f'name = "setoff_order"\nfrom = 2010-04-01\nvalue = "as coded"\n{ASSUMED}',
         f'name = "shortfall_order"\nfrom = 2010-04-01\nvalue = "as coded"\n{ASSUMED}',
         f'name = "business_loss_setoff"\nfrom = 2010-04-01\nvalue = "slab income only"\n{ASSUMED}',
+        f'name = "marginal_relief_order"\nfrom = 2010-04-01\nvalue = "as coded"\n{ASSUMED}',
         'name = "tax_round_step"\nfrom = 2010-04-01\nvalue = "10"',
     ]),
 }

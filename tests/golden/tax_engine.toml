@@ -1157,6 +1157,48 @@ cost = "100000"
 extra = "14250"
 
 [[case]]
+id = "tax-cii-series-switch-2017-04-01-after"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "the last sale day of the old index series and the first of the new one; gold: long-term 112 gain 87125.7485029940119760479042; slab income 1000000, slab tax 112500.00, special-rate tax 17425.14970059880239520958084, total income 1087125.748502994011976047904, rebate 0, surcharge 0, cess 3897.754491017964071856287424, tax with 133820, without 115880, extra 17940"
+[case.input]
+fy = 2017
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "gold"
+sale_date = 2017-04-01
+acq_date = 2010-06-01
+asset_class = "etf_gold"
+proceeds = "250000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "17940"
+tax_with = "133820"
+
+[[case]]
+id = "tax-cii-series-switch-2017-04-01-before"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "the last sale day of the old index series and the first of the new one; gold: long-term 112 gain 91772.1518987341772151898734; slab income 1000000, slab tax 125000.00, special-rate tax 18354.43037974683544303797468, total income 1091772.151898734177215189873, rebate 0, surcharge 0, cess 4300.632911392405063291139241, tax with 147660, without 128750, extra 18910"
+[case.input]
+fy = 2016
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "gold"
+sale_date = 2017-03-31
+acq_date = 2010-06-01
+asset_class = "etf_gold"
+proceeds = "250000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "18910"
+tax_with = "147660"
+
+[[case]]
 id = "tax-dividend-old-2016-04-01-after"
 kind = "tax_fy"
 source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
@@ -2310,6 +2352,323 @@ tax_without = "0"
 total_income = "300000"
 rebate = "10000.00"
 surcharge = "0"
+
+[[case]]
+id = "tax-relief-gains-only-new-fy2025-ltcg-10000250"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "Rs 250 over Rs 1 crore: relief down to the tax at the lower surcharge rate plus the excess; ltcg: long-term 112A gain 10000250; slab income 0, slab tax 0.00, special-rate tax 1184406.250, total income 10000250, rebate 0, surcharge 118656.25000, cess 52122.5000000, tax with 1355190, without 0, extra 1355190"
+[case.input]
+fy = 2025
+regime = "new"
+other_income = "0"
+[[case.input.events]]
+label = "ltcg"
+sale_date = 2025-12-01
+acq_date = 2018-06-01
+asset_class = "etf_equity"
+proceeds = "11000250"
+sale_costs = "0"
+cost = "1000000"
+[case.expect]
+extra = "1355190"
+tax_with = "1355190"
+surcharge = "118656.25000"
+total_income = "10000250"
+before_rounding = "1355185.0000000"
+
+[[case]]
+id = "tax-relief-gains-only-new-fy2025-ltcg-5000000"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "long-term gain exactly at the Rs 50 lakh threshold: no surcharge; ltcg: long-term 112A gain 5000000; slab income 0, slab tax 0.00, special-rate tax 559375.000, total income 5000000, rebate 0, surcharge 0, cess 22375.00000, tax with 581750, without 0, extra 581750"
+[case.input]
+fy = 2025
+regime = "new"
+other_income = "0"
+[[case.input.events]]
+label = "ltcg"
+sale_date = 2025-12-01
+acq_date = 2018-06-01
+asset_class = "etf_equity"
+proceeds = "6000000"
+sale_costs = "0"
+cost = "1000000"
+[case.expect]
+extra = "581750"
+tax_with = "581750"
+surcharge = "0"
+total_income = "5000000"
+before_rounding = "581750.00000"
+
+[[case]]
+id = "tax-relief-gains-only-new-fy2025-ltcg-5000250"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "Rs 250 over the threshold: tax and surcharge may be only Rs 250 more than at the threshold; ltcg: long-term 112A gain 5000250; slab income 0, slab tax 0.00, special-rate tax 559406.250, total income 5000250, rebate 0, surcharge 218.75000, cess 22385.0000000, tax with 582010, without 0, extra 582010"
+[case.input]
+fy = 2025
+regime = "new"
+other_income = "0"
+[[case.input.events]]
+label = "ltcg"
+sale_date = 2025-12-01
+acq_date = 2018-06-01
+asset_class = "etf_equity"
+proceeds = "6000250"
+sale_costs = "0"
+cost = "1000000"
+[case.expect]
+extra = "582010"
+tax_with = "582010"
+surcharge = "218.75000"
+total_income = "5000250"
+before_rounding = "582010.0000000"
+
+[[case]]
+id = "tax-relief-gains-only-new-fy2025-stcg-5000250"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "the same for a short-term gain; stcg: short-term 111A gain 5000250; slab income 0, slab tax 0.00, special-rate tax 920050.00, total income 5000250, rebate 0, surcharge 200.0000, cess 36810.000000, tax with 957060, without 0, extra 957060"
+[case.input]
+fy = 2025
+regime = "new"
+other_income = "0"
+[[case.input.events]]
+label = "stcg"
+sale_date = 2025-12-01
+acq_date = 2025-10-01
+asset_class = "etf_equity"
+proceeds = "6000250"
+sale_costs = "0"
+cost = "1000000"
+[case.expect]
+extra = "957060"
+tax_with = "957060"
+surcharge = "200.0000"
+total_income = "5000250"
+before_rounding = "957060.000000"
+
+[[case]]
+id = "tax-relief-gains-only-old-fy2019-ltcg-5000250"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "financial year 2019-20: 10% long-term rate and Rs 1 lakh yearly exemption; ltcg: long-term 112A gain 5000250; slab income 0, slab tax 0.00, special-rate tax 465025.00, total income 5000250, rebate 0, surcharge 225.0000, cess 18610.000000, tax with 483860, without 0, extra 483860"
+[case.input]
+fy = 2019
+regime = "old"
+other_income = "0"
+[[case.input.events]]
+label = "ltcg"
+sale_date = 2019-12-01
+acq_date = 2018-06-01
+asset_class = "etf_equity"
+proceeds = "6000250"
+sale_costs = "0"
+cost = "1000000"
+[case.expect]
+extra = "483860"
+tax_with = "483860"
+surcharge = "225.0000"
+total_income = "5000250"
+before_rounding = "483860.000000"
+
+[[case]]
+id = "tax-relief-gains-only-old-fy2022-stcg-10000250"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "financial year 2022-23, old regime; stcg: short-term 111A gain 10000250; slab income 0, slab tax 0.00, special-rate tax 1462537.50, total income 10000250, rebate 0, surcharge 146462.5000, cess 64360.000000, tax with 1673360, without 0, extra 1673360"
+[case.input]
+fy = 2022
+regime = "old"
+other_income = "0"
+[[case.input.events]]
+label = "stcg"
+sale_date = 2022-12-01
+acq_date = 2022-10-01
+asset_class = "etf_equity"
+proceeds = "11000250"
+sale_costs = "0"
+cost = "1000000"
+[case.expect]
+extra = "1673360"
+tax_with = "1673360"
+surcharge = "146462.5000"
+total_income = "10000250"
+before_rounding = "1673360.000000"
+
+[[case]]
+id = "tax-relief-gains-only-old-fy2025-ltcg-5000250"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "old regime, long-term gain Rs 250 over Rs 50 lakh; ltcg: long-term 112A gain 5000250; slab income 0, slab tax 0.00, special-rate tax 578156.250, total income 5000250, rebate 0, surcharge 218.75000, cess 23135.0000000, tax with 601510, without 0, extra 601510"
+[case.input]
+fy = 2025
+regime = "old"
+other_income = "0"
+[[case.input.events]]
+label = "ltcg"
+sale_date = 2025-12-01
+acq_date = 2018-06-01
+asset_class = "etf_equity"
+proceeds = "6000250"
+sale_costs = "0"
+cost = "1000000"
+[case.expect]
+extra = "601510"
+tax_with = "601510"
+surcharge = "218.75000"
+total_income = "5000250"
+before_rounding = "601510.0000000"
+
+[[case]]
+id = "tax-relief-gains-only-old-fy2025-stcg-10000250"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "old regime, short-term gain Rs 250 over Rs 1 crore; stcg: short-term 111A gain 10000250; slab income 0, slab tax 0.00, special-rate tax 1950050.00, total income 10000250, rebate 0, surcharge 195200.0000, cess 85810.000000, tax with 2231060, without 0, extra 2231060"
+[case.input]
+fy = 2025
+regime = "old"
+other_income = "0"
+[[case.input.events]]
+label = "stcg"
+sale_date = 2025-12-01
+acq_date = 2025-10-01
+asset_class = "etf_equity"
+proceeds = "11000250"
+sale_costs = "0"
+cost = "1000000"
+[case.expect]
+extra = "2231060"
+tax_with = "2231060"
+surcharge = "195200.0000"
+total_income = "10000250"
+before_rounding = "2231060.000000"
+
+[[case]]
+id = "tax-relief-pay-1-lakh-and-ltcg-over-fy2025-new"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "pay is used up by an excess of Rs 100,000, the rest of the excess is taken from the gain; ltcg: long-term 112A gain 5000000; slab income 100000, slab tax 0.00, special-rate tax 571875.000, total income 5100000, rebate 0, surcharge 57187.50000, cess 25162.5000000, tax with 654230, without 0, extra 654230"
+[case.input]
+fy = 2025
+regime = "new"
+other_income = "100000"
+[[case.input.events]]
+label = "ltcg"
+sale_date = 2025-12-01
+acq_date = 2018-06-01
+asset_class = "etf_equity"
+proceeds = "6000000"
+sale_costs = "0"
+cost = "1000000"
+[case.expect]
+extra = "654230"
+tax_with = "654230"
+surcharge = "57187.50000"
+total_income = "5100000"
+
+[[case]]
+id = "tax-relief-pay-10-lakh-and-ltcg-fy2025-new"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "the Rs 250 over the threshold comes out of pay; ltcg: long-term 112A gain 4000250; slab income 1000000, slab tax 40000.00, special-rate tax 484406.250, total income 5000250, rebate 0, surcharge 225.00000, cess 20985.2500000, tax with 545620, without 0, extra 545620"
+[case.input]
+fy = 2025
+regime = "new"
+other_income = "1000000"
+[[case.input.events]]
+label = "ltcg"
+sale_date = 2025-12-01
+acq_date = 2018-06-01
+asset_class = "etf_equity"
+proceeds = "5000250"
+sale_costs = "0"
+cost = "1000000"
+[case.expect]
+extra = "545620"
+tax_with = "545620"
+surcharge = "225.00000"
+total_income = "5000250"
+
+[[case]]
+id = "tax-relief-pay-100-and-ltcg-fy2025-new"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "Rs 300 over the threshold: Rs 100 of pay is given up first, the other Rs 200 comes out of the gain, and the threshold income gets the whole basic exemption; ltcg: long-term 112A gain 5000200; slab income 100, slab tax 0.00, special-rate tax 559412.500, total income 5000300, rebate 0, surcharge 262.50000, cess 22387.0000000, tax with 582060, without 0, extra 582060"
+[case.input]
+fy = 2025
+regime = "new"
+other_income = "100"
+[[case.input.events]]
+label = "ltcg"
+sale_date = 2025-12-01
+acq_date = 2018-06-01
+asset_class = "etf_equity"
+proceeds = "6000200"
+sale_costs = "0"
+cost = "1000000"
+[case.expect]
+extra = "582060"
+tax_with = "582060"
+surcharge = "262.50000"
+total_income = "5000300"
+before_rounding = "582062.0000000"
+
+[[case]]
+id = "tax-relief-pay-30-lakh-and-ltcg-fy2025-new"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "the Rs 250 over the threshold comes out of pay; ltcg: long-term 112A gain 2000250; slab income 3000000, slab tax 480000.00, special-rate tax 234406.250, total income 5000250, rebate 0, surcharge 175.00000, cess 28583.2500000, tax with 743160, without 499200, extra 243960"
+[case.input]
+fy = 2025
+regime = "new"
+other_income = "3000000"
+[[case.input.events]]
+label = "ltcg"
+sale_date = 2025-12-01
+acq_date = 2018-06-01
+asset_class = "etf_equity"
+proceeds = "3000250"
+sale_costs = "0"
+cost = "1000000"
+[case.expect]
+extra = "243960"
+tax_with = "743160"
+surcharge = "175.00000"
+total_income = "5000250"
+
+[[case]]
+id = "tax-relief-two-kinds-of-gain-fy2025-new"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "Rs 250 over the threshold, taken out of the 12.5% gain, not the 20% one; stcg: short-term 111A gain 3000000; ltcg: long-term 112A gain 2000250; slab income 0, slab tax 0.00, special-rate tax 754406.250, total income 5000250, rebate 0, surcharge 218.75000, cess 30185.0000000, tax with 784810, without 0, extra 784810"
+[case.input]
+fy = 2025
+regime = "new"
+other_income = "0"
+[[case.input.events]]
+label = "stcg"
+sale_date = 2025-12-01
+acq_date = 2025-10-01
+asset_class = "etf_equity"
+proceeds = "4000000"
+sale_costs = "0"
+cost = "1000000"
+[[case.input.events]]
+label = "ltcg"
+sale_date = 2025-12-01
+acq_date = 2018-06-01
+asset_class = "etf_equity"
+proceeds = "3000250"
+sale_costs = "0"
+cost = "1000000"
+[case.expect]
+extra = "784810"
+tax_with = "784810"
+surcharge = "218.75000"
+total_income = "5000250"
+special_tax = "754406.250"
 
 [[case]]
 id = "tax-slabs-new-2023-04-01-after"
