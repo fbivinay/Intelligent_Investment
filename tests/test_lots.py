@@ -1,68 +1,64 @@
-from datetime import date
-from decimal import Decimal as Dc
+import csv
+from decimal import Decimal
 
-import pytest
-
-from engine.lots import Inventory
-from engine.trace import assert_balanced, const
+from data import lots
 
 
-def inv_with_two_lots():
-    inv = Inventory()
-    inv.buy("X", date(2020, 1, 1), Dc("10"), const("cost1", "1000"))
-    inv.buy("X", date(2021, 1, 1), Dc("10"), const("cost2", "3000"))
-    return inv
+def fut(d, sym, contracts, close, value, lot="", expiry="2016-06-30"):
+    return {"date": d, "symbol": sym, "expiry": expiry, "close": close, "settle": close, "contracts": contracts, "value_rs": value, "lot": lot}
 
 
-def test_fifo_takes_oldest_first_and_splits_cost_exactly():
-    inv = inv_with_two_lots()
-    first = inv.sell("X", Dc("4"))
-    assert [(s.acq_date, s.qty, s.cost.value) for s in first] == [(date(2020, 1, 1), Dc("4"), Dc("400"))]
-    second = inv.sell("X", Dc("8"))   # 6 left of lot 1, then 2 of lot 2
-    assert [(s.acq_date, s.qty) for s in second] == [(date(2020, 1, 1), Dc("6")), (date(2021, 1, 1), Dc("2"))]
-    assert [s.cost.value for s in second] == [Dc("600"), Dc("600")]
-    assert inv.units("X") == Dc("8")
-    for s in first + second:
-        assert_balanced(s.cost)
+def test_the_lot_is_traded_value_over_contracts_over_price_when_enough_contracts_traded():
+    assert lots.implied_lot(fut("2016-06-01", "NIFTY", "125472", "8194.55", "77170904000.00")) == Decimal("77170904000.00") / Decimal("125472") / Decimal("8194.55")
+    assert lots.daily_lots([fut("2016-06-01", "NIFTY", "10000", "8000", str(10000 * 8000 * Decimal("72.9")))]) == {("NIFTY", "2016-06-01"): 75}   # value uses traded prices, not the close
+    assert lots.implied_lot(fut("2016-06-01", "NIFTY", "999", "8194.55", "1")) is None                # too few contracts: value over contracts is noise
+    assert lots.implied_lot(fut("2016-06-01", "NIFTY", "0", "8194.55", "0")) is None
 
 
-def test_cost_of_sold_plus_kept_equals_original_even_when_not_divisible():
-    inv = Inventory()
-    inv.buy("X", date(2020, 1, 1), Dc("3"), const("cost", "100"))
-    sold = inv.sell("X", Dc("1"))[0].cost.value
-    kept = inv.sell("X", Dc("2"))[0].cost.value
-    assert sold + kept == Dc("100")
+def test_a_day_takes_the_lot_most_contracts_agree_on_and_skips_a_day_with_no_agreement():
+    good = [fut("2016-06-01", "NIFTY", "10000", "8000", str(10000 * 75 * 8000), expiry=e) for e in ("2016-06-30", "2016-07-28")]
+    odd = [fut("2016-06-01", "NIFTY", "10000", "8000", str(10000 * 60 * 8000), expiry="2016-08-25")]     # a far contract traded at odd prices
+    assert lots.daily_lots(good + odd) == {("NIFTY", "2016-06-01"): 75}
+    split = [fut("2016-06-02", "NIFTY", "10000", "8000", str(10000 * 75 * 8000), expiry="2016-06-30"),
+             fut("2016-06-02", "NIFTY", "10000", "8000", str(10000 * 50 * 8000), expiry="2016-07-28")]
+    assert lots.daily_lots(split) == {}
 
 
-def test_cannot_sell_more_than_held_or_zero():
-    inv = inv_with_two_lots()
-    with pytest.raises(ValueError, match="only 20"):
-        inv.sell("X", Dc("21"))
-    with pytest.raises(ValueError):
-        inv.sell("X", Dc("0"))
-    with pytest.raises(ValueError):
-        Inventory().sell("nothing", Dc("1"))
+def test_history_merges_days_with_the_same_lot_and_starts_a_new_run_when_it_changes():
+    daily = {("NIFTY", "2016-06-01"): 75, ("NIFTY", "2016-06-02"): 75, ("NIFTY", "2016-06-03"): 50, ("BANKNIFTY", "2016-06-01"): 40}
+    assert lots.history(daily) == [("BANKNIFTY", "2016-06-01", "2016-06-01", 40), ("NIFTY", "2016-06-01", "2016-06-02", 75), ("NIFTY", "2016-06-03", "2016-06-03", 50)]
 
 
-def test_split_multiplies_units_and_keeps_cost_and_dates():
-    inv = inv_with_two_lots()
-    inv.split("X", Dc("2"))
-    s = inv.sell("X", Dc("20"))[0]
-    assert (s.acq_date, s.qty, s.cost.value) == (date(2020, 1, 1), Dc("20"), Dc("1000"))
+def test_the_inference_is_checked_against_the_lot_the_exchange_publishes_from_2024():
+    rows = [fut("2025-01-01", "NIFTY", "10000", "24000", str(10000 * 75 * 24000), lot="75"),
+            fut("2025-01-02", "NIFTY", "10000", "24000", str(10000 * 25 * 24000), lot="75")]
+    assert lots.check_published(rows) == {"compared": 2, "differ": [("NIFTY", "2025-01-02", 25, 75)]}
 
 
-def test_fractional_fund_units_split_cost_without_losing_a_paisa():
-    inv = Inventory()
-    inv.buy("F", date(2020, 1, 1), Dc("12.345"), const("cost1", "5000.00"))
-    inv.buy("F", date(2020, 6, 1), Dc("7.655"), const("cost2", "3500.50"))
-    a = inv.sell("F", Dc("0.001"))
-    b = inv.sell("F", Dc("19.999"))
-    assert sum((s.qty for s in a + b), Dc(0)) == Dc("20") and inv.units("F") == 0
-    assert sum((s.cost.value for s in a + b), Dc(0)) == Dc("8500.50")
+def test_build_writes_the_history_and_refuses_to_run_without_the_futures_file(tmp_path):
+    import pytest
+    with pytest.raises(FileNotFoundError):
+        lots.build(tmp_path)
+    (tmp_path / "processed").mkdir()
+    with (tmp_path / "processed" / "nse_index_futures_daily.csv").open("w", newline="") as f:
+        w = csv.DictWriter(f, ["date", "symbol", "expiry", "close", "settle", "contracts", "value_rs", "lot"], lineterminator="\n")
+        w.writeheader()
+        w.writerow(fut("2016-06-01", "NIFTY", "10000", "8000", str(10000 * 75 * 8000)))
+    assert lots.build(tmp_path) == {"runs": 1, "days": 1, "differ": 0}
+    (row,) = list(csv.DictReader((tmp_path / "lot_sizes.csv").open(newline="")))
+    assert (row["symbol"], row["first_seen"], row["last_seen"], row["lot"]) == ("NIFTY", "2016-06-01", "2016-06-01", "75")
 
 
-@pytest.mark.parametrize("instrument, ratio", [("nothing", "2"), ("X", "0"), ("X", "-2")])
-def test_a_split_of_something_not_held_or_by_a_bad_ratio_is_refused(instrument, ratio):
-    inv = inv_with_two_lots()
-    with pytest.raises(ValueError):
-        inv.split(instrument, Dc(ratio))
+def test_exactly_the_minimum_number_of_contracts_is_enough():
+    assert lots.implied_lot(fut("2016-06-01", "NIFTY", "1000", "8000", str(1000 * 75 * 8000))) == Decimal(75)
+
+
+def test_a_day_is_decided_by_contracts_traded_not_by_the_number_of_contracts_listed():
+    big = [fut("2016-06-01", "NIFTY", "20000", "8000", str(20000 * 75 * 8000), expiry="2016-06-30")]
+    small = [fut("2016-06-01", "NIFTY", "1500", "8000", str(1500 * 60 * 8000), expiry=e) for e in ("2016-07-28", "2016-08-25")]
+    assert lots.daily_lots(big + small) == {("NIFTY", "2016-06-01"): 75}
+
+
+def test_two_symbols_with_the_same_lot_are_two_runs():
+    assert lots.history({("BANKNIFTY", "2016-06-01"): 50, ("NIFTY", "2016-06-01"): 50}) == [("BANKNIFTY", "2016-06-01", "2016-06-01", 50),
+                                                                                          ("NIFTY", "2016-06-01", "2016-06-01", 50)]
