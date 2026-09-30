@@ -1,0 +1,36 @@
+{
+  "library": "https://assets.fyers.in/Lib/calculators/3.0/brokrage-calc.js",
+  "retrieved": "2026-09-30",
+  "equity_delivery_nse": {
+    "brokerage_upper_cap": 20,
+    "brokerage_percentage": 0.003,
+    "stt_on_buy_side": 0.001,
+    "stt_on_sell_side": 0.001,
+    "exch_transaction_charge_buy": 0.000030699,
+    "exch_transaction_charge_sell": 0.000030699,
+    "cm_transaction_buy": 0,
+    "cm_transaction_sell": 0,
+    "gst": 0.18,
+    "sebi_fees": 0.000001,
+    "stamp_duty_buy": 0.00015,
+    "stamp_duty_sell": 0,
+    "nse_ipft": 1e-9,
+    "lot_size": 1
+  },
+  "futures_nse": {
+    "brokerage_upper_cap": 20,
+    "brokerage_percentage": 0.0003,
+    "stt_on_buy_side": 0,
+    "stt_on_sell_side": 0.0005,
+    "exch_transaction_charge_buy": 0.000018299,
+    "exch_transaction_charge_sell": 0.000018299,
+    "cm_transaction_buy": 0.000005,
+    "cm_transaction_sell": 0.000005,
+    "gst": 0.18,
+    "sebi_fees": 0.000001,
+    "stamp_duty_buy": 0.00002,
+    "stamp_duty_sell": 0,
+    "nse_ipft": 1e-9,
+    "lot_size": 1
+  }
+}

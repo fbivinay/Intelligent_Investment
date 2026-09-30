@@ -1,0 +1,20 @@
+{
+  "NIFTYBEES.csv": {
+    "csv_sha256": "779dd76e467c887bb404fc7e7424e2bbbf1215c9ae7bc3ce1d064c323fe43b40",
+    "dividend_events": 1,
+    "excluded": {
+      "2010-10-06": "closing price 52.50 sits 15% below both neighbouring closes (62.10 and 61.62) and 16% below the same day's high of 62.49: a bad print",
+      "2019-12-19": "price shown ten times too low (13.02 against 129.25 the day before): the 1-for-10 unit split with ex-date 2019-12-19 (Trendlyne split history) is adjusted twice in Yahoo's series on this bar",
+      "2019-12-20": "same glitch as 2019-12-19: 13.03 against 129.93 on the next trading day"
+    },
+    "first": "2009-01-02",
+    "last": "2026-09-30",
+    "manual_dividends": {
+      "2012-03-12": "Trendlyne NIFTYBEES dividend history: Rs 10.00 per unit, ex-date 12 Mar 2012; divided by 10 because Yahoo's prices are adjusted for the 1-for-10 unit split of 2019-12-19; the scheme's practice of paying out income to keep NAV near 1/10th of the Nifty is confirmed by Value Research (Rs 3, record date 21 Aug 2003)"
+    },
+    "raw_sha256": "89b43a78cbddab4f7590e721c860657d6da32b80248ef43d1183818815a5a9b1",
+    "retrieved": "2026-09-30",
+    "rows": 4374,
+    "source": "https://query1.finance.yahoo.com/v8/finance/chart/NIFTYBEES.NS?period1=0&period2=<retrieval time>&interval=1d&events=div%7Csplit"
+  }
+}
