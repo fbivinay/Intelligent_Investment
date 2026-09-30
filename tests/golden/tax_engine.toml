@@ -1199,7 +1199,7 @@ extra = "18910"
 tax_with = "147660"
 
 [[case]]
-id = "tax-dividend-old-2016-04-01-after"
+id = "tax-dividend-company-old-2016-04-01-after"
 kind = "tax_fy"
 source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
 work = "slab income 1000000, slab tax 125000.00, special-rate tax 50000.00, total income 1500000, rebate 0, surcharge 0, cess 5250.0000, tax with 180250, without 128750, extra 51500"
@@ -1208,6 +1208,7 @@ fy = 2016
 regime = "old"
 other_income = "1000000"
 dividends = "1500000"
+dividend_payer = "company"
 [case.expect]
 extra = "51500"
 tax_with = "180250"
@@ -1217,7 +1218,7 @@ rebate = "0"
 surcharge = "0"
 
 [[case]]
-id = "tax-dividend-old-2016-04-01-before"
+id = "tax-dividend-company-old-2016-04-01-before"
 kind = "tax_fy"
 source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
 work = "slab income 1000000, slab tax 125000.00, special-rate tax 0, total income 1000000, rebate 0, surcharge 0, cess 3750.0000, tax with 128750, without 128750, extra 0"
@@ -1226,6 +1227,7 @@ fy = 2015
 regime = "old"
 other_income = "1000000"
 dividends = "1500000"
+dividend_payer = "company"
 [case.expect]
 extra = "0"
 tax_with = "128750"
@@ -1235,7 +1237,7 @@ rebate = "0"
 surcharge = "0"
 
 [[case]]
-id = "tax-dividend-old-2020-04-01-after"
+id = "tax-dividend-company-old-2020-04-01-after"
 kind = "tax_fy"
 source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
 work = "slab income 2500000, slab tax 562500.00, special-rate tax 0, total income 2500000, rebate 0, surcharge 0, cess 22500.0000, tax with 585000, without 117000, extra 468000"
@@ -1244,6 +1246,7 @@ fy = 2020
 regime = "old"
 other_income = "1000000"
 dividends = "1500000"
+dividend_payer = "company"
 [case.expect]
 extra = "468000"
 tax_with = "585000"
@@ -1253,7 +1256,7 @@ rebate = "0"
 surcharge = "0"
 
 [[case]]
-id = "tax-dividend-old-2020-04-01-before"
+id = "tax-dividend-company-old-2020-04-01-before"
 kind = "tax_fy"
 source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
 work = "slab income 1000000, slab tax 112500.00, special-rate tax 50000.00, total income 1500000, rebate 0, surcharge 0, cess 6500.0000, tax with 169000, without 117000, extra 52000"
@@ -1262,11 +1265,88 @@ fy = 2019
 regime = "old"
 other_income = "1000000"
 dividends = "1500000"
+dividend_payer = "company"
 [case.expect]
 extra = "52000"
 tax_with = "169000"
 tax_without = "117000"
 total_income = "1500000"
+rebate = "0"
+surcharge = "0"
+
+[[case]]
+id = "tax-dividend-fund-old-2016-04-01-after"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "slab income 1000000, slab tax 125000.00, special-rate tax 0, total income 1000000, rebate 0, surcharge 0, cess 3750.0000, tax with 128750, without 128750, extra 0"
+[case.input]
+fy = 2016
+regime = "old"
+other_income = "1000000"
+dividends = "1500000"
+dividend_payer = "fund"
+[case.expect]
+extra = "0"
+tax_with = "128750"
+tax_without = "128750"
+total_income = "1000000"
+rebate = "0"
+surcharge = "0"
+
+[[case]]
+id = "tax-dividend-fund-old-2016-04-01-before"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "slab income 1000000, slab tax 125000.00, special-rate tax 0, total income 1000000, rebate 0, surcharge 0, cess 3750.0000, tax with 128750, without 128750, extra 0"
+[case.input]
+fy = 2015
+regime = "old"
+other_income = "1000000"
+dividends = "1500000"
+dividend_payer = "fund"
+[case.expect]
+extra = "0"
+tax_with = "128750"
+tax_without = "128750"
+total_income = "1000000"
+rebate = "0"
+surcharge = "0"
+
+[[case]]
+id = "tax-dividend-fund-old-2020-04-01-after"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "slab income 2500000, slab tax 562500.00, special-rate tax 0, total income 2500000, rebate 0, surcharge 0, cess 22500.0000, tax with 585000, without 117000, extra 468000"
+[case.input]
+fy = 2020
+regime = "old"
+other_income = "1000000"
+dividends = "1500000"
+dividend_payer = "fund"
+[case.expect]
+extra = "468000"
+tax_with = "585000"
+tax_without = "117000"
+total_income = "2500000"
+rebate = "0"
+surcharge = "0"
+
+[[case]]
+id = "tax-dividend-fund-old-2020-04-01-before"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "slab income 1000000, slab tax 112500.00, special-rate tax 0, total income 1000000, rebate 0, surcharge 0, cess 4500.0000, tax with 117000, without 117000, extra 0"
+[case.input]
+fy = 2019
+regime = "old"
+other_income = "1000000"
+dividends = "1500000"
+dividend_payer = "fund"
+[case.expect]
+extra = "0"
+tax_with = "117000"
+tax_without = "117000"
+total_income = "1000000"
 rebate = "0"
 surcharge = "0"
 
@@ -1322,7 +1402,24 @@ cost = "100000"
 extra = "31200"
 
 [[case]]
-id = "tax-full-dividend-above-threshold-2017"
+id = "tax-full-dividend-115bbda-gets-no-basic-exemption-2017"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "other income leaves Rs 100,000 of the basic exemption unused, but it does not shelter the dividend over Rs 10 lakh; slab income 150000, slab tax 0.00, special-rate tax 40000.00, total income 550000, rebate 0, surcharge 0, cess 1200.0000, tax with 41200, without 0, extra 41200"
+[case.input]
+fy = 2017
+regime = "old"
+other_income = "150000"
+dividends = "1400000"
+dividend_payer = "company"
+[case.expect]
+extra = "41200"
+special_tax = "40000.00"
+total_income = "550000"
+rebate = "0"
+
+[[case]]
+id = "tax-full-dividend-above-threshold-2017-company"
 kind = "tax_fy"
 source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
 work = "slab income 1000000, slab tax 112500.00, special-rate tax 20000.00, total income 1200000, rebate 0, surcharge 0, cess 3975.0000, tax with 136480, without 115880, extra 20600"
@@ -1331,13 +1428,30 @@ fy = 2017
 regime = "old"
 other_income = "1000000"
 dividends = "1200000"
+dividend_payer = "company"
 [case.expect]
 extra = "20600"
 special_tax = "20000.00"
 total_income = "1200000"
 
 [[case]]
-id = "tax-full-dividend-exempt-2013"
+id = "tax-full-dividend-above-threshold-2017-fund"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "section 115BBDA covers dividends of companies, not unit income; slab income 1000000, slab tax 112500.00, special-rate tax 0, total income 1000000, rebate 0, surcharge 0, cess 3375.0000, tax with 115880, without 115880, extra 0"
+[case.input]
+fy = 2017
+regime = "old"
+other_income = "1000000"
+dividends = "1200000"
+dividend_payer = "fund"
+[case.expect]
+extra = "0"
+special_tax = "0"
+total_income = "1000000"
+
+[[case]]
+id = "tax-full-dividend-exempt-2013-company"
 kind = "tax_fy"
 source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
 work = "slab income 1000000, slab tax 130000.00, special-rate tax 0, total income 1000000, rebate 0, surcharge 0, cess 3900.0000, tax with 133900, without 133900, extra 0"
@@ -1346,12 +1460,28 @@ fy = 2013
 regime = "old"
 other_income = "1000000"
 dividends = "1200000"
+dividend_payer = "company"
 [case.expect]
 extra = "0"
 tax_with = "133900"
 
 [[case]]
-id = "tax-full-dividend-slab-2021"
+id = "tax-full-dividend-exempt-2013-fund"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "slab income 1000000, slab tax 130000.00, special-rate tax 0, total income 1000000, rebate 0, surcharge 0, cess 3900.0000, tax with 133900, without 133900, extra 0"
+[case.input]
+fy = 2013
+regime = "old"
+other_income = "1000000"
+dividends = "1200000"
+dividend_payer = "fund"
+[case.expect]
+extra = "0"
+tax_with = "133900"
+
+[[case]]
+id = "tax-full-dividend-slab-2021-company"
 kind = "tax_fy"
 source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
 work = "slab income 1100000, slab tax 142500.00, special-rate tax 0, total income 1100000, rebate 0, surcharge 0, cess 5700.0000, tax with 148200, without 117000, extra 31200"
@@ -1360,6 +1490,21 @@ fy = 2021
 regime = "old"
 other_income = "1000000"
 dividends = "100000"
+dividend_payer = "company"
+[case.expect]
+extra = "31200"
+
+[[case]]
+id = "tax-full-dividend-slab-2021-fund"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "slab income 1100000, slab tax 142500.00, special-rate tax 0, total income 1100000, rebate 0, surcharge 0, cess 5700.0000, tax with 148200, without 117000, extra 31200"
+[case.input]
+fy = 2021
+regime = "old"
+other_income = "1000000"
+dividends = "100000"
+dividend_payer = "fund"
 [case.expect]
 extra = "31200"
 

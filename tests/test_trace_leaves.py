@@ -78,7 +78,7 @@ def test_a_rule_leaf_is_a_number_in_its_own_row_for_a_spread_of_tax_years():
                           const("f", 150_000) if acq <= date(2018, 1, 31) else None)]
         biz = Business(const("p", rnd.choice([-3_000_000, 500_000])), const("c", 5_000)) if rnd.random() < 0.4 else None
         r = investment_tax(RULES, fy, TaxProfile(rnd.choice(["old", "new"]), Decimal(rnd.choice([0, 400_000, 1_500_000, 30_000_000]))),
-                           events if rnd.random() < 0.8 else [], dividends=const("d", 20_000) if rnd.random() < 0.3 else None,
+                           events if rnd.random() < 0.8 else [], dividends=const("d", 20_000) if rnd.random() < 0.3 else None, dividend_payer=rnd.choice(["fund", "company"]),
                            interest=const("i", 5_000) if rnd.random() < 0.3 else None, business=biz)
         check_leaves(RULES, r.with_items.tax)
         check_leaves(RULES, r.extra)

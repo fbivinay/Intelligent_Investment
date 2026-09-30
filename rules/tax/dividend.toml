@@ -1,34 +1,58 @@
-# Tax on dividends in the holder's hands, by financial year. mode: exempt = not taxed; above_threshold = the part above `threshold`
-# is taxed at `rate` on its own (section 115BBDA); slab = added to income and taxed at slab rates.
+# Tax on dividends and unit income in the holder's hands, by financial year and by who paid it. payer = company: dividends of a domestic
+# company (shares); payer = fund: income from units of a mutual fund or an ETF. mode: exempt = not taxed; above_threshold = the part
+# above `threshold` is taxed at `rate` on its own (section 115BBDA, which covers dividends of domestic companies only, S79); slab =
+# added to income and taxed at slab rates.
 [meta]
-keys = []
+keys = ["payer"]
 coverage_from = 2010-04-01
 granularity = "financial_year"
 
 [[row]]
+payer = "company"
 mode = "exempt"
 from = 2010-04-01
 to = 2016-03-31
-source = "S59 Finance Bill 2016 memorandum: dividend which suffers distribution tax under section 115-O is exempt in the hands of the shareholder under section 10(34); S45 the same for mutual fund income under 10(35)"
+source = "S59 Finance Bill 2016 memorandum: dividend which suffers distribution tax under section 115-O is exempt in the hands of the shareholder under section 10(34)"
 verified_on = 2026-09-30
 confidence = "primary"
 note = "Exempt in full."
 
 [[row]]
+payer = "company"
 mode = "above_threshold"
 threshold = "1000000"
 rate = "0.10"
 from = 2016-04-01
 to = 2020-03-31
-source = "S59 Finance Bill 2016 memorandum: dividend in excess of Rs 10 lakh chargeable at ten percent for a resident individual, HUF or firm from 1 April 2017 (AY 2017-18); S44 confirms; S45 it covers dividends up to 2020-03-31"
+source = "S59 Finance Bill 2016 memorandum: dividend in excess of Rs 10 lakh chargeable at ten percent for a resident individual, HUF or firm from 1 April 2017 (AY 2017-18); S79 section 115BBDA(1): dividends declared, distributed or paid by a domestic company; S44 confirms; S45 it covers dividends up to 2020-03-31"
 verified_on = 2026-09-30
 confidence = "primary"
-note = "Section 115BBDA covers dividends from domestic companies. Unit income of mutual funds stayed exempt in these years; the rule is applied to all dividends here (it only matters above Rs 10 lakh a year)."
+note = "The dividends up to Rs 10 lakh stay exempt. No deduction or set-off of loss is allowed against the taxed part (section 115BBDA(2)), and the unused basic exemption does not shelter it."
 
 [[row]]
+payer = "company"
 mode = "slab"
 from = 2020-04-01
 source = "S45 dividends and unit income received on or after 2020-04-01 are taxed at the holder's applicable rates"
 verified_on = 2026-09-30
 confidence = "primary"
 note = "Added to income at slab rates. Interest expense against it is capped at 20% of the dividend (S45); no such expense is modelled."
+
+[[row]]
+payer = "fund"
+mode = "exempt"
+from = 2010-04-01
+to = 2020-03-31
+source = "S45 Finance Bill 2020 memorandum: before 2020-04-01 dividend and unit income were exempt under sections 10(34) and 10(35) because the payer paid distribution tax; S79 section 115BBDA covers dividends of domestic companies only"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Income from units of mutual funds and ETFs stayed exempt through 2019-20 (section 10(35)); section 115BBDA never applied to it."
+
+[[row]]
+payer = "fund"
+mode = "slab"
+from = 2020-04-01
+source = "S45 dividends and unit income received on or after 2020-04-01 are taxed at the holder's applicable rates"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Added to income at slab rates."

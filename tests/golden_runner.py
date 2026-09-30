@@ -158,6 +158,7 @@ def _tax_fy(rules: Rules, c: dict):
     r = investment_tax(rules, i["fy"], TaxProfile(i["regime"], D(i["other_income"])), events,
                        carry_in=Carry(carried("carry_st"), carried("carry_lt"), carried("carry_biz")),
                        dividends=const("Dividends", i["dividends"]) if "dividends" in i else None,
+                       dividend_payer=i.get("dividend_payer"),           # "fund" or "company"; the engine refuses dividends without one
                        interest=const("Interest", i["interest"]) if "interest" in i else None,
                        business=business)
     named = {"extra": r.extra, "tax_with": r.with_items.tax, "tax_without": r.without_items.tax,
