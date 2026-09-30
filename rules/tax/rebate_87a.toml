@@ -1,0 +1,148 @@
+# Rebate for resident individuals (section 87A; section 156 of the Income-tax Act 2025 from 2026-04-01), by regime and FINANCIAL YEAR.
+# The rebate is the tax or max_rebate, whichever is less, if total income is at most income_limit. marginal_relief = true: just above
+# the limit the rebate is what keeps tax from exceeding the income above the limit. applies_to_special = true: the tax on gains taxed
+# at special rates is part of the tax the rebate is taken from, except gains whose section is in excluded_sections (section 112A,
+# and section 198 of the 2025 Act, are outside the rebate). A row with income_limit 0 means no rebate existed.
+[meta]
+keys = ["regime"]
+coverage_from = 2010-04-01
+granularity = "financial_year"
+late_keys = [{ regime = "new", from = 2020-04-01 }]
+
+[[row]]
+regime = "old"
+income_limit = "0"
+max_rebate = "0"
+applies_to_special = false
+marginal_relief = false
+excluded_sections = []
+from = 2010-04-01
+to = 2013-03-31
+source = "S19 Finance Bill 2013 memorandum: the rebate of Rs 2000 is new, from AY 2014-15"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "No rebate for individuals in financial years 2010-11 to 2012-13."
+
+[[row]]
+regime = "old"
+income_limit = "500000"
+max_rebate = "2000"
+applies_to_special = true
+marginal_relief = false
+excluded_sections = []
+from = 2013-04-01
+to = 2016-03-31
+source = "S19 Finance Bill 2013 memorandum: rebate equal to the tax or Rs 2000, whichever is less, for a resident individual with total income up to Rs 5 lakh, from AY 2014-15; S59 confirms the existing Rs 2000"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Financial years 2013-14 to 2015-16. Taken from the tax on total income, including tax on short-term equity gains (section 87A has no exclusion for them, S68)."
+
+[[row]]
+regime = "old"
+income_limit = "500000"
+max_rebate = "5000"
+applies_to_special = true
+marginal_relief = false
+excluded_sections = []
+from = 2016-04-01
+to = 2017-03-31
+source = "S59 Finance Bill 2016 memorandum: rebate raised from Rs 2,000 to Rs 5,000 from AY 2017-18"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Financial year 2016-17."
+
+[[row]]
+regime = "old"
+income_limit = "350000"
+max_rebate = "2500"
+applies_to_special = true
+marginal_relief = false
+excluded_sections = []
+from = 2017-04-01
+to = 2018-03-31
+source = "S44 Finance Bill 2017 memorandum: rebate cut to Rs 2500 for total income up to Rs 3,50,000, from AY 2018-19"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Financial year 2017-18."
+
+[[row]]
+regime = "old"
+income_limit = "350000"
+max_rebate = "2500"
+applies_to_special = true
+marginal_relief = false
+excluded_sections = ["112A"]
+from = 2018-04-01
+to = 2019-03-31
+source = "S44 Rs 2500 up to Rs 3.5 lakh continues (S60 changes it only from 2020-04-01); S68 section 112A(6): the rebate is taken from the tax on total income reduced by the tax on section 112A gains"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Financial year 2018-19. Section 112A exists from this year."
+
+[[row]]
+regime = "old"
+income_limit = "500000"
+max_rebate = "12500"
+applies_to_special = true
+marginal_relief = false
+excluded_sections = ["112A"]
+from = 2019-04-01
+to = 2026-03-31
+source = "S60 Finance Bill 2019 clause 8: rebate Rs 12,500 for total income up to Rs 5,00,000 from AY 2020-21; S64 and S65 confirm Rs 5 lakh in 2023-24 to 2025-26; S68 section 112A(6)"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Financial years 2019-20 to 2025-26. No marginal relief in this regime: one rupee over Rs 5 lakh loses the whole rebate."
+
+[[row]]
+regime = "old"
+income_limit = "500000"
+max_rebate = "12500"
+applies_to_special = true
+marginal_relief = false
+excluded_sections = ["198 (2025 Act)"]
+from = 2026-04-01
+source = "S70 Income-tax Act 2025 section 156(1): 100% of the tax or Rs 12,500 for total income up to Rs 5,00,000; S55 section 198 is the successor of section 112A"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Financial year 2026-27 (tax year 2026-27)."
+
+[[row]]
+regime = "new"
+income_limit = "500000"
+max_rebate = "12500"
+applies_to_special = true
+marginal_relief = false
+excluded_sections = ["112A"]
+from = 2020-04-01
+to = 2023-03-31
+source = "S64 Finance Bill 2023 memorandum: a resident individual with total income up to Rs 5 lakh gets a rebate of the whole tax (Rs 12,500 at most, S60); the new regime had no exclusion before 2023-24"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Financial years 2020-21 to 2022-23: the same rebate as the old regime."
+
+[[row]]
+regime = "new"
+income_limit = "700000"
+max_rebate = "25000"
+applies_to_special = false
+marginal_relief = true
+excluded_sections = []
+from = 2023-04-01
+to = 2025-03-31
+source = "S64 rebate up to Rs 25,000 for total income up to Rs 7 lakh under section 115BAC(1A) from AY 2024-25, marginal relief above; S65 para 3: tax on income at special rates is not included in the rebate"
+verified_on = 2026-09-30
+confidence = "assumed"
+note = "The limits are from the law. The special-rate part is ASSUMED: the department's stated reading (S65) is that the rebate does not cover tax on section 111A and 112 gains, and its processing denied it, but ITAT Ahmedabad (S68, 12 Aug 2025) allowed it against section 111A tax for AY 2024-25. The department's reading is used, which gives the higher tax."
+
+[[row]]
+regime = "new"
+income_limit = "1200000"
+max_rebate = "60000"
+applies_to_special = false
+marginal_relief = true
+excluded_sections = []
+from = 2025-04-01
+source = "S65 Finance Bill 2025 memorandum para 4 and 5: from AY 2026-27 rebate Rs 60,000 for total income up to Rs 12 lakh, with marginal relief, not available on tax on income at special rates; S70 section 156(2) and (3)"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Financial years 2025-26 and 2026-27."

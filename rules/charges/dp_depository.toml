@@ -1,0 +1,31 @@
+# CDSL's own transaction charge to the depository participant, in rupees per debit (sale), before GST. Fyers' own DP
+# fee is in fyers.dp.
+[meta]
+keys = []
+coverage_from = 2010-04-01
+
+[[row]]
+from = 2010-04-01
+to = 2019-11-14
+value = "5.5"
+source = "S7 depository charges at actuals (Fyers page of 2018-09-15)"
+verified_on = 2026-09-30
+confidence = "assumed"
+note = "Rs 5.5 is the amount Fyers' pages show for CDSL from 2019 and is used as a stand-in for earlier years."
+
+[[row]]
+from = 2019-11-15
+to = 2024-09-30
+value = "5.5"
+source = "S8 Rs 10 + Rs 5.50 (CDSL Charges); S12 and S13 Rs 5.5 (CDSL Charges)"
+verified_on = 2026-09-30
+confidence = "secondary"
+note = "CDSL's tariff to DPs was slab-based, from Rs 3.75 to Rs 5.50, before 2024-10-01 (S38 press coverage); Rs 5.5 is what Fyers passed on."
+
+[[row]]
+from = 2024-10-01
+value = "3.5"
+source = "S38 Uniform tariff of Rs. 3.50 per debit transaction, effective from October 01, 2024"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Women first holders and mutual fund and bond ISINs get Rs 0.25 off; not modelled."

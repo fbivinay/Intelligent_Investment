@@ -1,0 +1,52 @@
+# Yearly demat AMC in rupees before GST, by AMC group (see fyers.amc_cohort). Row dates are the dates the charge falls due.
+# Fyers debits it quarterly; the engine charges one yearly amount at each financial-year end.
+[meta]
+keys = ["cohort"]
+coverage_from = 2010-04-01
+late_keys = [{ cohort = "standard", from = 2020-04-01 }, { cohort = "free", from = 2021-07-25 }]
+
+[[row]]
+cohort = "legacy"
+from = 2010-04-01
+to = 2019-11-14
+value = "400"
+source = "S7 Demat Annual Maintenance Charges levied by IL&FS (ISSL): Rs 400 + Tax"
+verified_on = 2026-09-29
+confidence = "assumed"
+note = "Seen on Fyers pages from 2018-09-15 to 2019-09-23 and assumed for earlier years. Levied by the ISSL demat participant. ISSL holders may have paid it until their migration in January 2021; not modelled."
+
+[[row]]
+cohort = "legacy"
+from = 2019-11-15
+value = "0"
+source = "S8 Demat Annual Maintenance Charges: FREE; S10 accounts opened on or before 31st March 2020 continue with zero AMC"
+verified_on = 2026-09-29
+confidence = "secondary"
+note = "Date is the first archived copy showing Fyers' own demat with no AMC (2019-11-15)."
+
+[[row]]
+cohort = "standard"
+from = 2020-04-01
+to = 2021-09-30
+value = "300"
+source = "S10 With effect from 1st April 2020, the Demat AMC of Rs 300 + GST will be levied per annum"
+verified_on = 2026-09-29
+confidence = "primary"
+note = "Accounts opened from 2020-12-01 pay Rs 225 in their first year (first quarter waived); not modelled, so this can overcharge Rs 75 + GST once."
+
+[[row]]
+cohort = "standard"
+from = 2021-10-01
+value = "0"
+source = "S16 Demat Annual Maintenance Charges (AMC) are waived off for all our existing customers with effect from 1st October 2021"
+verified_on = 2026-09-29
+confidence = "primary"
+
+[[row]]
+cohort = "free"
+from = 2021-07-25
+value = "0"
+source = "S12 Demat AMC: FREE; S16 Free AMC offer extended indefinitely; S1 today: Rs 0"
+verified_on = 2026-09-29
+confidence = "secondary"
+note = "Free for accounts opened from the offer date."

@@ -1,0 +1,29 @@
+# One-time account-opening fee in rupees before GST, by the date the account is opened.
+[meta]
+keys = []
+coverage_from = 2010-04-01
+
+[[row]]
+from = 2010-04-01
+to = 2020-03-31
+value = "0"
+source = "S11 We don't levy any charges to open an account with us (support article archived 2020-01-02)"
+verified_on = 2026-09-29
+confidence = "assumed"
+note = "No account-opening fee appears on any archived Fyers page from 2015-11 to 2020, and S11 (archived 2020-01-02) says none is charged. Fyers did not operate before 2015, so nil is a stand-in for the years before."
+
+[[row]]
+from = 2020-04-01
+to = 2020-11-23
+value = "400"
+source = "S11 With effect from 1st April 2020, the online/offline account opening fees of Rs 400 + GST"
+verified_on = 2026-09-29
+confidence = "primary"
+
+[[row]]
+from = 2020-11-24
+value = "0"
+source = "S11 With effect from 24th November 2020, the account opening charges are Nil"
+verified_on = 2026-09-29
+confidence = "primary"
+note = "Also the notice Removal of Account Opening Charges; Rs 0 today (S1)."

@@ -1,0 +1,29 @@
+# Which AMC group a demat account belongs to, by the date the account was opened (these row dates are OPENING dates).
+[meta]
+keys = []
+coverage_from = 2010-04-01
+
+[[row]]
+from = 2010-04-01
+to = 2020-03-31
+cohort = "legacy"
+source = "S10 all clients who have opened their Demat accounts with us on or before 31st March 2020 will be continued with zero AMC"
+verified_on = 2026-09-29
+confidence = "primary"
+
+[[row]]
+from = 2020-04-01
+to = 2021-07-24
+cohort = "standard"
+source = "S10 With effect from 1st April 2020, the Demat AMC of Rs 300 + GST will be levied per annum"
+verified_on = 2026-09-29
+confidence = "secondary"
+note = "Start date is stated by Fyers. End date is inferred: the free-AMC offer for new clients is first seen on the archived pricing page of 2021-07-25; the copy of 2021-05-16 does not show it."
+
+[[row]]
+from = 2021-07-25
+cohort = "free"
+source = "S12 Demat AMC: FREE (Limited Period Offer Valid Till 31/7/2021); S16 free AMC offer extended indefinitely"
+verified_on = 2026-09-29
+confidence = "secondary"
+note = "Start date inferred from the first archived copy showing the offer (2021-07-25); it may have started up to two months earlier."

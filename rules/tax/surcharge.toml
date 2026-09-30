@@ -1,0 +1,134 @@
+# Surcharge on income-tax for a resident individual, by regime and FINANCIAL YEAR. tiers are ascending: the highest tier whose `above`
+# (total income in rupees) is crossed gives the rate; no tier crossed means no surcharge. A tier with test_excludes is tested on total
+# income less the incomes it names (the 25% and 37% tiers); the names are gain sections as labelled in tax.capital_gains, or `dividend`
+# for dividends taxed at slab rates. cap_special: the surcharge on the tax on the incomes named in cap_sections (same names) cannot
+# exceed this rate. The years differ in what they name (S45 and S62 for 2019-20 to 2021-22, S63 and S64 from 2022-23):
+#   2019-20:          test excludes and cap covers 111A and 112A gains
+#   2020-21, 2021-22: dividends join them; section 112 gains are in the test and not capped
+#   2022-23 onward:   section 112 joins too (from 2026-27 the sections are 196, 197 and 198 of the Income-tax Act 2025)
+# Marginal relief applies at every tier; the health and education cess is in tax.cess.
+[meta]
+keys = ["regime"]
+coverage_from = 2010-04-01
+granularity = "financial_year"
+late_keys = [{ regime = "new", from = 2020-04-01 }]
+
+[[row]]
+regime = "old"
+tiers = []
+from = 2010-04-01
+to = 2013-03-31
+source = "S56, S57 and S40 memoranda: No surcharge shall be levied in the cases of persons covered under paragraph A (individuals)"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Financial years 2010-11 to 2012-13."
+
+[[row]]
+regime = "old"
+tiers = [{ above = "10000000", rate = "0.10" }]
+from = 2013-04-01
+to = 2015-03-31
+source = "S19 Finance Bill 2013 memorandum: surcharge at ten per cent above Rs 1 crore; S41 the 2014 Bill: ten per cent"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Financial years 2013-14 and 2014-15."
+
+[[row]]
+regime = "old"
+tiers = [{ above = "10000000", rate = "0.12" }]
+from = 2015-04-01
+to = 2016-03-31
+source = "S58 Finance Bill 2015 memorandum: surcharge at twelve percent above Rs 1 crore"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Financial year 2015-16."
+
+[[row]]
+regime = "old"
+tiers = [{ above = "10000000", rate = "0.15" }]
+from = 2016-04-01
+to = 2017-03-31
+source = "S59 Finance Bill 2016 memorandum: surcharge at fifteen percent above Rs 1 crore"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Financial year 2016-17."
+
+[[row]]
+regime = "old"
+tiers = [{ above = "5000000", rate = "0.10" }, { above = "10000000", rate = "0.15" }]
+from = 2017-04-01
+to = 2019-03-31
+source = "S44 Finance Bill 2017 memorandum: ten per cent for total income above Rs 50 lakh up to Rs 1 crore, fifteen per cent above; S43 the 2018 Bill keeps it"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Financial years 2017-18 and 2018-19."
+
+[[row]]
+regime = "old"
+tiers = [{ above = "5000000", rate = "0.10" }, { above = "10000000", rate = "0.15" }, { above = "20000000", rate = "0.25", test_excludes = ["111A", "112A"] }, { above = "50000000", rate = "0.37", test_excludes = ["111A", "112A"] }]
+cap_special = "0.15"
+cap_sections = ["111A", "112A"]
+from = 2019-04-01
+to = 2020-03-31
+source = "S61 Finance (No.2) Bill 2019 memorandum: 10%, 15%, 25% and 37% tiers; S66 the enhanced surcharge does not apply to sections 111A and 112A gains; S45 Finance Bill 2020 memorandum, Part I clause (a): (iii) and (iv) 'having a total income (excluding the income under the provisions of section 111A and 112A of the Act)', and the surcharge on the tax on that part is not above 15%"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Financial year 2019-20. Dividends of mutual funds were exempt and company dividends above Rs 10 lakh taxed under 115BBDA, so no dividend is left out or capped here."
+
+[[row]]
+regime = "old"
+tiers = [{ above = "5000000", rate = "0.10" }, { above = "10000000", rate = "0.15" }, { above = "20000000", rate = "0.25", test_excludes = ["dividend", "111A", "112A"] }, { above = "50000000", rate = "0.37", test_excludes = ["dividend", "111A", "112A"] }]
+cap_special = "0.15"
+cap_sections = ["dividend", "111A", "112A"]
+from = 2020-04-01
+to = 2022-03-31
+source = "S62 Finance Bill 2021 memorandum, clause (a) (i) to (v): (iii) and (iv) 'having a total income (excluding the income by way of dividend or income under the provisions of section 111A and 112A of the Act)', and the proviso: on income by way of dividend or under 111A and 112A the surcharge is not above 15%"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Financial years 2020-21 and 2021-22. Section 112 gains are in the test and their tax is not capped."
+
+[[row]]
+regime = "old"
+tiers = [{ above = "5000000", rate = "0.10" }, { above = "10000000", rate = "0.15" }, { above = "20000000", rate = "0.25", test_excludes = ["dividend", "111A", "112", "112A", "196 (2025 Act)", "197 (2025 Act)", "198 (2025 Act)"] }, { above = "50000000", rate = "0.37", test_excludes = ["dividend", "111A", "112", "112A", "196 (2025 Act)", "197 (2025 Act)", "198 (2025 Act)"] }]
+cap_special = "0.15"
+cap_sections = ["dividend", "111A", "112", "112A", "196 (2025 Act)", "197 (2025 Act)", "198 (2025 Act)"]
+from = 2022-04-01
+source = "S63 Finance Bill 2022 memorandum, surcharge at source and on advance tax: (iii) and (iv) 'excluding the income by way of dividend or income under the provisions of sections 111A, 112 and 112A', proviso: not above 15% on that part; S64, S47, S65 and S55 memoranda repeat the tiers and the cap for 2023-24 to 2026-27"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Financial year 2022-23 onward; for 2026-27 the sections are 196, 197 and 198 of the Income-tax Act 2025 (S55), named here beside the old ones."
+
+[[row]]
+regime = "new"
+tiers = [{ above = "5000000", rate = "0.10" }, { above = "10000000", rate = "0.15" }, { above = "20000000", rate = "0.25", test_excludes = ["dividend", "111A", "112A"] }, { above = "50000000", rate = "0.37", test_excludes = ["dividend", "111A", "112A"] }]
+cap_special = "0.15"
+cap_sections = ["dividend", "111A", "112A"]
+from = 2020-04-01
+to = 2022-03-31
+source = "S45 and S62 memoranda: income-tax computed under section 115BAC is increased by the same surcharge tiers, with the 15% cap on dividend and section 111A and 112A tax"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Financial years 2020-21 and 2021-22."
+
+[[row]]
+regime = "new"
+tiers = [{ above = "5000000", rate = "0.10" }, { above = "10000000", rate = "0.15" }, { above = "20000000", rate = "0.25", test_excludes = ["dividend", "111A", "112", "112A"] }, { above = "50000000", rate = "0.37", test_excludes = ["dividend", "111A", "112", "112A"] }]
+cap_special = "0.15"
+cap_sections = ["dividend", "111A", "112", "112A"]
+from = 2022-04-01
+to = 2023-03-31
+source = "S63 Finance Bill 2022 memorandum: the same tiers under section 115BAC; the cap and the test now cover section 112 too"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Financial year 2022-23."
+
+[[row]]
+regime = "new"
+tiers = [{ above = "5000000", rate = "0.10" }, { above = "10000000", rate = "0.15" }, { above = "20000000", rate = "0.25", test_excludes = ["dividend", "111A", "112", "112A", "196 (2025 Act)", "197 (2025 Act)", "198 (2025 Act)"] }]
+cap_special = "0.15"
+cap_sections = ["dividend", "111A", "112", "112A", "196 (2025 Act)", "197 (2025 Act)", "198 (2025 Act)"]
+from = 2023-04-01
+source = "S64 Finance Bill 2023 memorandum: under section 115BAC(1A) 10% (Rs 50 lakh to Rs 1 crore), 15% (Rs 1 crore to Rs 2 crore), 25% above Rs 2 crore on income excluding dividend and gains at special rates, else 15%; the tax on such income is capped at 15%; S47, S65 and S55 repeat it"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "Financial year 2023-24 onward. The 37% tier does not exist in the new regime."

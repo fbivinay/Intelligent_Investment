@@ -1,0 +1,40 @@
+# Yearly exemption on long-term gains, by exemption group and FINANCIAL YEAR (rows run 1 April to 31 March). value is in rupees;
+# gains above it are taxed. order says which taxed pot the exemption is used against first when one group has gains taxed at
+# two different rates in the same year: lowest_rate_first or highest_rate_first.
+[meta]
+keys = ["group"]
+coverage_from = 2010-04-01
+granularity = "financial_year"
+late_keys = [{ group = "equity_112a", from = 2018-04-01 }]
+
+[[row]]
+group = "equity_112a"
+value = "100000"
+order = "lowest_rate_first"
+from = 2018-04-01
+to = 2024-03-31
+source = "S43 section 112A: 10% on long-term gains exceeding Rs 1 lakh"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "One rate in these years, so the order does not matter. Before 2018-04-01 the gains were exempt in full (tax.capital_gains)."
+
+[[row]]
+group = "equity_112a"
+value = "125000"
+order = "lowest_rate_first"
+from = 2024-04-01
+to = 2025-03-31
+source = "S46 clause 31 proviso: the limit of Rs 1.25 lakh applies on the aggregate of the gains before and after 2024-07-23; S48 the limit applies for FY 2024-25"
+verified_on = 2026-09-30
+confidence = "assumed"
+note = "The amount is from the law. The ORDER is assumed: gains before 2024-07-23 (10%) and on or after it (12.5%) can both arise in this year and no source says which one the limit is used against first. The Act lists the 10% part first, and using it there is the less favourable choice for the taxpayer, so lowest_rate_first is used."
+
+[[row]]
+group = "equity_112a"
+value = "125000"
+order = "lowest_rate_first"
+from = 2025-04-01
+source = "S48 the exemption limit of Rs 1.25 lakh applies for FY 2024-25 and later years; S55 section 198(2)(a): Rs 1,25,000"
+verified_on = 2026-09-30
+confidence = "primary"
+note = "One rate from FY 2025-26, so the order does not matter."

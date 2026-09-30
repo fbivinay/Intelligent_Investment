@@ -1,0 +1,130 @@
+# Fyers brokerage per executed order, Standard plan. Fyers Prime (a paid yearly plan with a lower flat fee) is not modelled.
+# product = delivery covers equity and ETF delivery orders; futures covers index futures.
+# mode: pct = fraction of turnover; min_flat_pct = the lower of a flat rupee fee and a fraction of turnover; zero = none.
+[meta]
+keys = ["product"]
+coverage_from = 2010-04-01
+
+[[row]]
+product = "delivery"
+from = 2010-04-01
+to = 2015-11-13
+mode = "pct"
+pct = "0.001"
+source = "S3 Equity Delivery: 0.1% of Turnover on each leg"
+verified_on = 2026-09-29
+confidence = "assumed"
+note = "Fyers was not yet operating (its earliest archived price page is 2015-11-14 and its CEO says it started in 2015). The earliest known schedule is used as a stand-in."
+
+[[row]]
+product = "delivery"
+from = 2015-11-14
+to = 2016-04-12
+mode = "pct"
+pct = "0.001"
+source = "S3 Equity Delivery: 0.1% of Turnover on each leg"
+verified_on = 2026-09-29
+confidence = "secondary"
+note = "First archived copy of the schedule is 2015-11-14; it may have started earlier. Last archived copy with this schedule: 2016-03-16."
+
+[[row]]
+product = "delivery"
+from = 2016-04-13
+to = 2017-08-07
+mode = "min_flat_pct"
+flat = "100"
+pct = "0.001"
+source = "S4 Equity Delivery: 0.1% or Rs 100 per order (whichever is lower)"
+verified_on = 2026-09-29
+confidence = "secondary"
+note = "Date inferred from archived copies: last copy with the old schedule 2016-03-16; first copy with the new one 2016-04-13. from = first copy."
+
+[[row]]
+product = "delivery"
+from = 2017-08-08
+to = 2018-02-05
+mode = "min_flat_pct"
+flat = "20"
+pct = "0.001"
+source = "S5 Equity Delivery: Rs 20 per executed order or 0.1% (whichever is lower)"
+verified_on = 2026-09-29
+confidence = "secondary"
+note = "Date inferred from archived copies: last copy with the old schedule 2016-04-14; first copy with the new one 2017-08-08. from = first copy."
+
+[[row]]
+product = "delivery"
+from = 2018-02-06
+to = 2024-09-30
+mode = "zero"
+source = "S6 With effect from 6th February 2018, we have introduced Zero Brokerage for equity delivery segment"
+verified_on = 2026-09-29
+confidence = "primary"
+note = "Zero brokerage on delivery. Fyers pages up to 2024-09 still list zero delivery brokerage."
+
+[[row]]
+product = "delivery"
+from = 2024-10-01
+mode = "min_flat_pct"
+flat = "20"
+pct = "0.003"
+source = "S14 Equity Delivery: Revised to 0.3% or Rs 20 per executed order, whichever is lower (effective October 1, 2024)"
+verified_on = 2026-09-29
+confidence = "primary"
+note = "Same on today's Standard plan (S1, S2): Rs 20 or 0.3% for Delivery, ETF and MTF."
+
+[[row]]
+product = "futures"
+from = 2010-04-01
+to = 2015-11-13
+mode = "pct"
+pct = "0.0001"
+source = "S3 Equity Futures: 0.01% of Turnover on each leg"
+verified_on = 2026-09-29
+confidence = "assumed"
+note = "Fyers was not yet operating (its earliest archived price page is 2015-11-14 and its CEO says it started in 2015). The earliest known schedule is used as a stand-in."
+
+[[row]]
+product = "futures"
+from = 2015-11-14
+to = 2016-04-12
+mode = "pct"
+pct = "0.0001"
+source = "S3 Equity Futures: 0.01% of Turnover on each leg"
+verified_on = 2026-09-29
+confidence = "secondary"
+note = "First archived copy of the schedule is 2015-11-14; it may have started earlier. Last archived copy with this schedule: 2016-03-16."
+
+[[row]]
+product = "futures"
+from = 2016-04-13
+to = 2017-08-07
+mode = "min_flat_pct"
+flat = "100"
+pct = "0.0001"
+source = "S4 Equity Futures: 0.01% or Rs 100 per order (whichever is lower)"
+verified_on = 2026-09-29
+confidence = "secondary"
+note = "Date inferred from archived copies: last copy with the old schedule 2016-03-16; first copy with the new one 2016-04-13. from = first copy."
+
+[[row]]
+product = "futures"
+from = 2017-08-08
+to = 2020-05-10
+mode = "min_flat_pct"
+flat = "20"
+pct = "0.0001"
+source = "S5 Futures: Rs 20 per executed order or 0.01% (whichever is lower)"
+verified_on = 2026-09-29
+confidence = "secondary"
+note = "Date inferred from archived copies: last copy with the old schedule 2016-04-14; first copy with the new one 2017-08-08. from = first copy."
+
+[[row]]
+product = "futures"
+from = 2020-05-11
+mode = "min_flat_pct"
+flat = "20"
+pct = "0.0003"
+source = "S9 Instead of 0.01%, it will be 0.03% or Rs 20 (whichever is lower) for futures ... with effect from 11th May 2020"
+verified_on = 2026-09-29
+confidence = "primary"
+note = "Notice dated 2020-05-07. Unchanged by the 2024-10-01 revision (S14: F&O no changes) and shown on today's Standard plan (S1, S2)."
