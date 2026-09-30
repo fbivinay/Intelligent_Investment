@@ -67,9 +67,9 @@ class Table:
         for key, rows in self.groups.items():
             rows.sort(key=lambda r: r.valid_from)
             start = next((f for d, f in late if d == dict(key)), meta["coverage_from"])
-            if rows[0].valid_from > start:
+            if rows[0].valid_from != start:  # earlier would answer for dates the rules were never checked for
                 raise RuleTableError(f"{path} {dict(key)}: first row starts {rows[0].valid_from}, "
-                                     f"must start on or before {start}")
+                                     f"must start exactly on {start}")
             for a, b in zip(rows, rows[1:]):
                 if a.valid_to is None or b.valid_from != a.valid_to + ONE_DAY:
                     raise RuleTableError(f"{path} {dict(key)}: gap or overlap between "
