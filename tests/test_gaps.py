@@ -22,8 +22,8 @@ def test_summary_counts_the_days_over_the_tolerance_and_names_the_worst():
     diffs = [("2020-01-01", Decimal(100), Decimal(100), Decimal(0)), ("2020-01-02", Decimal(101), Decimal(100), Decimal(1)),
              ("2020-01-03", Decimal(97), Decimal(100), Decimal(-3))]
     s = gaps.summary(diffs, Decimal("0.5"))
-    assert s == {"days": 3, "over": 2, "max_abs": Decimal(3), "max_day": "2020-01-03", "worst": [("2020-01-03", Decimal(-3)), ("2020-01-02", Decimal(1))]}
-    assert gaps.summary([], Decimal("0.5")) == {"days": 0, "over": 0, "max_abs": Decimal(0), "max_day": None, "worst": []}
+    assert s == {"days": 3, "over": 2, "median_abs": Decimal(1), "max_abs": Decimal(3), "max_day": "2020-01-03", "worst": [("2020-01-03", Decimal(-3)), ("2020-01-02", Decimal(1))]}
+    assert gaps.summary([], Decimal("0.5")) == {"days": 0, "over": 0, "median_abs": Decimal(0), "max_abs": Decimal(0), "max_day": None, "worst": []}
 
 
 def write(path, header, rows):
@@ -53,7 +53,7 @@ def test_report_states_the_day_list_the_calendar_check_and_both_price_cross_chec
     assert "- cash days by year: 2020: 2" in text
     assert "days the NSE cash list has and Yahoo does not: none" in text
     assert "days Yahoo has and the NSE cash list does not: 2020-01-03" in text                      # a real gap, or a day Yahoo wrongly has
-    assert "2 days compared, 1 differ by more than 0.5%, largest 1.00% (2020-01-02)" in text       # 101 against 100
+    assert "2 days compared, 1 differ by more than 0.5%, median 0.50%, largest 1.00% (2020-01-02)" in text       # 101 against 100
     assert "AMFI NAV (scheme 140084): 2 days compared, 0 differ by more than 1%" in text
 
 
@@ -75,7 +75,7 @@ def test_yahoo_is_compared_with_our_split_adjusted_close_and_the_nav_with_the_pu
     write(root / "processed" / "amfi_nav_daily.csv", ["date", "code", "nav"], [["2020-01-01", "140084", "1002"], ["2020-01-02", "140084", "101.5"]])
     (root / "corporate_actions.csv").write_text("symbol,ex_date,kind,factor,nav_ex_date,evidence\nNIFTYBEES,2020-01-02,split,10,2020-01-02,\"x\"\n", newline="")
     text = gaps.report(root, symbol="NIFTYBEES", code="140084", yahoo="NIFTYBEES.csv", start="2020-01-01", end="2020-01-31")
-    assert "2 days compared, 1 differ by more than 0.5%, largest 1.00% (2020-01-02)" in text          # 100 and 101 against Yahoo's 100 and 100
+    assert "2 days compared, 1 differ by more than 0.5%, median 0.50%, largest 1.00% (2020-01-02)" in text          # 100 and 101 against Yahoo's 100 and 100
     assert "AMFI NAV (scheme 140084): 2 days compared, 0 differ by more than 1%" in text              # 1002 on the old scale is 100.2 against 100, 101.5 against 101
 
 
@@ -89,7 +89,7 @@ def test_report_compares_every_listed_etf_with_its_own_nav(tmp_path):
     text = gaps.report(root, symbol="NIFTYBEES", code="140084", yahoo="NIFTYBEES.csv", start="2020-01-01", end="2020-01-31",
                        nav_pairs={"NIFTYBEES": "140084", "GOLDBEES": "140088"})
     assert "- NIFTYBEES split-adjusted close against AMFI NAV (scheme 140084): 2 days compared, 0 differ by more than 1%" in text
-    assert "- GOLDBEES split-adjusted close against AMFI NAV (scheme 140088): 2 days compared, 1 differ by more than 1%, largest 4.00% (2020-01-02)" in text
+    assert "- GOLDBEES split-adjusted close against AMFI NAV (scheme 140088): 2 days compared, 1 differ by more than 1%, median 2.20%, largest 4.00% (2020-01-02)" in text
 
 
 def test_a_nav_that_switches_scale_days_after_the_price_is_compared_on_one_scale(tmp_path):
@@ -120,3 +120,46 @@ def test_two_splits_multiply_when_the_nav_is_put_on_the_latest_unit_size(tmp_pat
     (root / "corporate_actions.csv").write_text("symbol,ex_date,kind,factor,nav_ex_date,evidence\nNIFTYBEES,2020-01-03,split,10,,\"a\"\nNIFTYBEES,2020-01-05,split,2,,\"b\"\n", newline="")
     text = gaps.report(root, symbol="NIFTYBEES", code="140084", yahoo="NIFTYBEES.csv", start="2020-01-01", end="2020-01-31")
     assert "AMFI NAV (scheme 140084): 3 days compared, 0 differ by more than 1%" in text
+
+
+def test_nav_against_its_index_shows_a_payout_as_a_one_day_step_down_and_kept_dividends_as_drift():
+    index = {"2020-01-01": Decimal(1000), "2020-01-02": Decimal(1010), "2020-01-03": Decimal(1020), "2020-01-06": Decimal(1030)}
+    nav = {"2020-01-01": Decimal(100), "2020-01-02": Decimal(101), "2020-01-03": Decimal(100), "2020-01-06": Decimal(103)}      # 2 paid out on the 3rd
+    got = gaps.nav_vs_index(nav, index, Decimal("0.25"))
+    assert got["days"] == 4 and (got["first"], got["last"]) == ("2020-01-01", "2020-01-06")
+    (step,) = got["steps"]
+    assert step[:2] == ("2020-01-02", "2020-01-03") and f"{step[2]:.2f}" == "-1.96"
+    steady = gaps.nav_vs_index({d: v / 10 for d, v in index.items()}, index, Decimal("0.25"))
+    assert steady["steps"] == [] and abs(steady["drift"]) < Decimal("0.0001")
+
+
+def test_a_step_across_a_long_gap_is_not_called_a_one_day_payout():
+    index = {"2020-01-01": Decimal(1000), "2020-02-01": Decimal(1000)}
+    nav = {"2020-01-01": Decimal(100), "2020-02-01": Decimal(90)}
+    assert gaps.nav_vs_index(nav, index, Decimal("0.25"))["steps"] == []
+
+
+def test_report_asks_whether_each_equity_etf_pays_dividends_out(tmp_path):
+    root = make_root(tmp_path)
+    write(root / "processed" / "nse_index_daily.csv", ["date", "name", "close"],
+          [["2020-01-01", "Nifty 50", "1000"], ["2020-01-02", "Nifty 50", "1010"], ["2020-01-03", "Nifty 50", "1020"]])
+    write(root / "processed" / "amfi_nav_daily.csv", ["date", "code", "nav"], [["2020-01-01", "140084", "100"], ["2020-01-02", "140084", "101"], ["2020-01-03", "140084", "100"]])
+    text = gaps.report(root, symbol="NIFTYBEES", code="140084", yahoo="NIFTYBEES.csv", start="2020-01-01", end="2020-01-31", index_pairs={"NIFTYBEES": "Nifty 50"})
+    assert "## Do the equity ETFs pay dividends out?" in text
+    assert "- NIFTYBEES NAV against Nifty 50 (scheme 140084): 3 days" in text and "1 one-day step down over 0.25%" in text and "2020-01-03 -1.96%" in text
+
+
+def test_a_small_wobble_of_the_ratio_below_the_threshold_is_not_a_payout():
+    index = {"2020-01-01": Decimal(1000), "2020-01-02": Decimal(1000)}
+    nav = {"2020-01-01": Decimal(100), "2020-01-02": Decimal("99.9")}                     # -0.1%: tracking noise, not a dividend
+    assert gaps.nav_vs_index(nav, index, Decimal("0.25"))["steps"] == []
+
+
+def test_the_dividend_check_puts_a_split_nav_on_one_unit_size_first(tmp_path):
+    root = make_root(tmp_path)
+    write(root / "processed" / "nse_index_daily.csv", ["date", "name", "close"],
+          [["2020-01-01", "Nifty 50", "1000"], ["2020-01-02", "Nifty 50", "1000"], ["2020-01-03", "Nifty 50", "1000"]])
+    write(root / "processed" / "amfi_nav_daily.csv", ["date", "code", "nav"], [["2020-01-01", "140084", "1000"], ["2020-01-02", "140084", "1000"], ["2020-01-03", "140084", "100"]])
+    (root / "corporate_actions.csv").write_text("symbol,ex_date,kind,factor,nav_ex_date,evidence\nNIFTYBEES,2020-01-02,split,10,2020-01-03,\"x\"\n", newline="")
+    text = gaps.report(root, symbol="NIFTYBEES", code="140084", yahoo="NIFTYBEES.csv", start="2020-01-01", end="2020-01-31", index_pairs={"NIFTYBEES": "Nifty 50"})
+    assert "3 days, ratio drift" in text and "0 one-day step down" in text
