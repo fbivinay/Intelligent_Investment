@@ -134,26 +134,48 @@ def _document(raw: bytes) -> tuple[dict, list]:
     return meta, items
 
 
-def read_web(raw: bytes) -> dict[str, list[dict]]:
-    """{'cash': [...], 'fo': [...], 'index': [...]} in the archive readers' row layout (the caller adds what it needs, such as a source)."""
+KEYS = {"cash": ("date", "symbol", "series"), "fo": ("date", "symbol", "expiry"), "index": ("date", "name")}
+
+
+def _read(raw: bytes) -> tuple[dict[str, list[dict]], int]:
+    """(rows, how many repeated identical rows were dropped). The site sometimes sends the same row twice; the same key with different values is
+    a conflict and an error."""
     meta, items = _document(raw)
-    out: dict[str, list[dict]] = {"cash": [], "fo": [], "index": []}
+    got: dict[str, list[dict]] = {"cash": [], "fo": [], "index": []}
     for it in items:
         kind = it.get("kind")
         if kind == "etf":
-            out["cash"] += _cash(it)
+            got["cash"] += _cash(it)
         elif kind == "fo":
-            out["fo"] += _fo(it)
+            got["fo"] += _fo(it)
         elif kind in ("index", "vix"):
-            out["index"] += _index(it)
+            got["index"] += _index(it)
         else:
             raise ValueError(f"an item of kind {kind!r} is not one this reader knows")
-    return out
+    out: dict[str, list[dict]] = {}
+    dropped = 0
+    for kind, rows in got.items():
+        seen: dict[tuple, dict] = {}
+        for r in rows:
+            key = tuple(r[k] for k in KEYS[kind])
+            if key in seen:
+                if seen[key] != r:
+                    raise ValueError(f"{kind} {key}: two rows with the same key and different values (conflict)")
+                dropped += 1
+                continue
+            seen[key] = r
+        out[kind] = list(seen.values())
+    return out, dropped
+
+
+def read_web(raw: bytes) -> dict[str, list[dict]]:
+    """{'cash': [...], 'fo': [...], 'index': [...]} in the archive readers' row layout (the caller adds what it needs, such as a source)."""
+    return _read(raw)[0]
 
 
 def describe(raw: bytes) -> str:
     meta, items = _document(raw)
-    rows = read_web(raw)
+    rows, dropped = _read(raw)
     lines = [f"collected {meta.get('collected')}, {len(items)} replies"]
     if meta.get("status") not in (None, "finished"):
         lines.append(f"status {meta['status']}: this file is one part of the collection")
@@ -163,6 +185,8 @@ def describe(raw: bytes) -> str:
     for kind, rs in rows.items():
         days = sorted(r["date"] for r in rs)
         lines.append(f"{kind} {len(rs)} rows" + (f", {days[0]} to {days[-1]}" if days else ""))
+    if dropped:
+        lines.append(f"{dropped} repeated identical rows dropped")
     empty = sum(1 for it in items if it.get("kind") == "fo" for r in it["data"] if all(r.get(k) is None for k in FO_TRADE_KEYS))
     if empty:
         lines.append(f"{empty} futures rows without trades left out")

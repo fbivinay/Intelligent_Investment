@@ -7,7 +7,7 @@ import csv
 import json
 import statistics
 from collections import Counter
-from datetime import date
+from datetime import date, timedelta
 from decimal import Decimal
 from pathlib import Path
 
@@ -78,6 +78,21 @@ def compare_sources(web: list[dict], archive: list[dict], key: tuple, fields: li
                     worst, where = pct, tuple(w[k] for k in key)
         out[f] = {"compared": compared, "differ": differ, "worst_pct": worst, "worst_key": where}
     return {"both": len(both), "fields": out}
+
+
+def missing_days(reference: list[str], have: dict[str, set[str]], start: str, end: str) -> dict[str, list[str]]:
+    """{name: the reference days inside the window that the set of days `have[name]` lacks}"""
+    days = [d for d in reference if start <= d <= end]
+    return {name: [d for d in days if d not in s] for name, s in have.items()}
+
+
+def thin_days(reference: list[str], per_day: dict[str, int], minimum: int) -> list[str]:
+    """The reference days on which fewer than `minimum` things were counted (a day not in `per_day` counts zero)."""
+    return [d for d in reference if per_day.get(d, 0) < minimum]
+
+
+ARCHIVE_FIRST = "2016-01-04"     # the first day the archive files have cash and F&O; the website file covers the days before
+WEB_START = "2010-04-01"
 
 
 def _nav_on_latest_scale(nav: dict[str, Decimal], actions: list[dict]) -> dict[str, Decimal]:
@@ -185,6 +200,34 @@ def report(root: Path = ROOT, symbol: str = "NIFTYBEES", code: str = "140084", y
             diffs = [f"{f} {v['differ']} of {v['compared']} (largest {v['worst_pct']:.2f}%, {' '.join(v['worst_key'])})" for f, v in res["fields"].items() if v["differ"]]
             same = "all compared fields equal" if not diffs else "differ: " + "; ".join(diffs)
             out.append(f"- {kind}: {res['both']} rows in both; {same}")
+        out.append("")
+
+    if nw.load_files(root):
+        end_web = (date.fromisoformat(ARCHIVE_FIRST) - timedelta(days=1)).isoformat()
+        def rows_of(kind):
+            path = root / "processed" / WEB_FILES[kind]
+            return _read(path) if path.exists() else []
+
+        idx_rows = rows_of("index")
+        ref = sorted({r["date"] for r in idx_rows if r["name"] == "Nifty 50" and WEB_START <= r["date"] <= end_web})
+        out += [f"## Coverage of the years before the archive ({WEB_START} to {end_web})", "",
+                f"Measured against the {len(ref)} days on which the Nifty 50 has a close (from the index file, whichever source), so a hole shows as a day.", ""]
+        etf_days: dict[str, set[str]] = {}
+        for r in rows_of("cash"):
+            etf_days.setdefault(r["symbol"], set()).add(r["date"])
+        for sym, miss in sorted(missing_days(ref, etf_days, WEB_START, end_web).items()):
+            out.append(f"- {sym}: {len(ref) - len(miss)} of {len(ref)} Nifty 50 days have a row; missing: {_dates(miss)}")
+        vix_days = {r["date"] for r in idx_rows if r["name"] == "India VIX"}
+        if vix_days:
+            after = [d for d in ref if d >= min(vix_days)]
+            miss = [d for d in after if d not in vix_days]
+            out.append(f"- India VIX (from its first day, {min(vix_days)}): {len(after) - len(miss)} of {len(after)} Nifty 50 days have a row; missing: {_dates(miss)}")
+        per: dict[str, dict[str, int]] = {}
+        for r in rows_of("fo"):
+            per.setdefault(r["symbol"], Counter())[r["date"]] += 1
+        for sym, counts in sorted(per.items()):
+            thin = thin_days(ref, counts, 3)
+            out.append(f"- {sym} futures: {len(ref) - len(thin)} of {len(ref)} days have 3 contracts; first day without: {thin[0] if thin else 'none'}")
         out.append("")
 
     out += ["## Processed files", ""]

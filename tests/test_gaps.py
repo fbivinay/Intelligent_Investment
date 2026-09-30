@@ -198,3 +198,38 @@ def test_report_sets_the_website_file_against_the_archive_on_the_days_both_have(
     text = gaps.report(root, symbol="NIFTYBEES", code="140084", yahoo="NIFTYBEES.csv", start="2016-06-01", end="2016-06-30")
     assert "## Website file against the archive files" in text
     assert "- cash: 1 rows in both; differ: close 1 of 1 (largest 20.53%, 2016-06-01 NIFTYBEES EQ)" in text
+
+
+def test_missing_days_lists_the_reference_days_a_series_lacks_inside_the_window():
+    ref = ["2011-12-30", "2012-01-02", "2012-01-03", "2012-01-04", "2016-01-04"]
+    have = {"A": {"2012-01-02", "2012-01-04"}, "B": set(ref)}          # A also lacks the days just outside the window: not reported
+    assert gaps.missing_days(ref, have, "2012-01-01", "2015-12-31") == {"A": ["2012-01-03"], "B": []}
+    assert gaps.missing_days(ref, have, "2012-01-03", "2012-01-03") == {"A": ["2012-01-03"], "B": []}           # both ends of the window are inside it
+
+
+def test_thin_days_lists_the_days_with_fewer_contracts_than_the_minimum_even_when_there_are_none():
+    ref = ["d1", "d2", "d3"]
+    per_day = {"d1": 3, "d2": 2}
+    assert gaps.thin_days(ref, per_day, 3) == ["d2", "d3"]
+
+
+def test_report_states_coverage_of_the_years_before_the_archive_from_the_index_days(tmp_path):
+    import json
+    from data import nse_web as nw
+    root = make_root(tmp_path)
+    write(root / "processed" / "nse_index_daily.csv", ["date", "name", "close", "source"],
+          [["2010-03-31", "Nifty 50", "1", "web"], ["2012-01-02", "Nifty 50", "1", "web"], ["2012-01-03", "Nifty 50", "1", "web"], ["2012-01-04", "Nifty 50", "1", "web"],
+           ["2016-01-04", "Nifty 50", "1", "archive"], ["2012-01-05", "Nifty Bank", "1", "web"],
+           ["2012-01-03", "India VIX", "1", "web"], ["2012-01-04", "India VIX", "1", "web"]])
+    write(root / "processed" / "nse_etf_daily.csv", ["date", "symbol", "series", "close", "source"], [["2012-01-02", "NIFTYBEES", "EQ", "1", "web"], ["2012-01-04", "NIFTYBEES", "EQ", "1", "web"]])
+    write(root / "processed" / "nse_index_futures_daily.csv", ["date", "symbol", "expiry", "close", "source"],
+          [["2012-01-02", "NIFTY", e, "1", "web"] for e in ("2012-01-25", "2012-02-29", "2012-03-28")] + [["2012-01-03", "NIFTY", e, "1", "web"] for e in ("2012-01-25", "2012-02-29")])
+    src = tmp_path / "web.json"
+    src.write_text(json.dumps({"meta": {"collected": "x", "status": "finished", "failed": [], "missing": []}, "items": []}))
+    nw.register(src, root, tmp_path / "none.js", registered=date(2026, 10, 1))
+    text = gaps.report(root, symbol="NIFTYBEES", code="140084", yahoo="NIFTYBEES.csv", start="2016-06-01", end="2016-06-30")
+    assert "## Coverage of the years before the archive (2010-04-01 to 2016-01-03)" in text
+    assert "the 3 days on which the Nifty 50 has a close" in text
+    assert "- NIFTYBEES: 2 of 3 Nifty 50 days have a row; missing: 2012-01-03" in text
+    assert "- India VIX (from its first day, 2012-01-03): 2 of 2 Nifty 50 days have a row; missing: none" in text
+    assert "- NIFTY futures: 1 of 3 days have 3 contracts; first day without: 2012-01-03" in text

@@ -70,12 +70,40 @@ def test_build_writes_one_row_per_contract_and_says_how_many_disagree_with_the_p
         w = csv.DictWriter(f, ["date", "symbol", "expiry", "close", "settle", "contracts", "value_rs", "lot"], lineterminator="\n")
         w.writeheader()
         w.writerows([day("2016-06-01", 75), day("2016-06-02", 75), day("2016-06-01", 75, expiry="2016-07-28"), day("2016-06-01", 40, sym="BANKNIFTY")])
-    assert lots.build(tmp_path) == {"contracts": 3, "runs": 2, "differ": 0}
+    assert lots.build(tmp_path) == {"contracts": 3, "runs": 2, "differ": 0, "published": 0, "inferred": 3}
     rows = list(csv.DictReader((tmp_path / "lot_sizes.csv").open(newline="")))
-    assert [(r["symbol"], r["expiry"], r["lot"], r["agree"]) for r in rows] == [("BANKNIFTY", "2016-06-30", "40", "1.00"), ("NIFTY", "2016-06-30", "75", "1.00"),
-                                                                                  ("NIFTY", "2016-07-28", "75", "1.00")]
+    assert [(r["symbol"], r["expiry"], r["lot"], r["agree"], r["basis"]) for r in rows] == [("BANKNIFTY", "2016-06-30", "40", "1.00", "inferred"),
+                                                                                              ("NIFTY", "2016-06-30", "75", "1.00", "inferred"),
+                                                                                              ("NIFTY", "2016-07-28", "75", "1.00", "inferred")]
 
 
 def test_two_symbols_with_the_same_lot_are_two_runs():
     got = {("BANKNIFTY", "2016-06-30"): (50, 1), ("NIFTY", "2016-06-30"): (50, 1)}
     assert lots.history(got) == [("BANKNIFTY", "2016-06-30", "2016-06-30", 50), ("NIFTY", "2016-06-30", "2016-06-30", 50)]
+
+
+def test_rows_from_the_website_file_are_not_used_to_work_the_lot_out_because_their_contracts_were_made_from_the_lot():
+    web = dict(day("2010-03-01", 50, expiry="2010-03-25"), source="web", lot="50")
+    arc = dict(day("2010-03-01", 50, expiry="2010-04-29"), source="archive", lot="")
+    assert lots.contract_lots([web, arc]) == {("NIFTY", "2010-04-29"): (50, Decimal(1))}
+
+
+def test_a_published_lot_is_used_as_it_is_and_marked_published_and_compared_with_the_working_out(tmp_path):
+    (tmp_path / "processed").mkdir()
+    rows = [dict(day("2016-02-01", 75, expiry="2016-02-25"), source="archive", lot=""), dict(day("2016-02-02", 75, expiry="2016-02-25"), source="archive", lot=""),
+            dict(day("2016-02-01", 75, expiry="2016-02-25"), source="web", lot="75"),
+            dict(day("2010-03-01", 50, expiry="2010-03-25"), source="web", lot="50"),
+            dict(day("2016-02-01", 75, expiry="2016-03-31"), source="archive", lot=""), dict(day("2016-02-01", 75, expiry="2016-03-31"), source="web", lot="70")]
+    with (tmp_path / "processed" / "nse_index_futures_daily.csv").open("w", newline="") as f:
+        w = csv.DictWriter(f, ["date", "symbol", "expiry", "close", "settle", "contracts", "value_rs", "lot", "source"], lineterminator=chr(10))
+        w.writeheader()
+        w.writerows(rows)
+    assert lots.build(tmp_path) == {"contracts": 3, "runs": 3, "differ": 1, "published": 3, "inferred": 0}
+    got = {(r["expiry"]): (r["lot"], r["basis"]) for r in csv.DictReader((tmp_path / "lot_sizes.csv").open(newline=""))}
+    assert got == {"2010-03-25": ("50", "published"), "2016-02-25": ("75", "published"), "2016-03-31": ("70", "published")}
+    assert lots.check_published(rows) == {"compared": 2, "differ": [("NIFTY", "2016-03-31", 75, 70)]}
+
+
+def test_when_a_contracts_published_lots_disagree_the_most_common_one_is_taken_and_the_share_says_how_much():
+    rows = [dict(day(f"2016-02-0{d}", 75, expiry="2016-02-25"), source="web", lot=lot) for d, lot in ((1, "75"), (2, "75"), (3, "75"), (4, "70"))]
+    assert lots.published_lots(rows) == {("NIFTY", "2016-02-25"): (75, Decimal("0.75"))}
