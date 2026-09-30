@@ -35,6 +35,7 @@ def add_months(d: date, n: int) -> date:
 
 @dataclass(frozen=True)
 class TaxProfile:
+    """A general resident individual under 60. Age-based slabs and the women's higher basic exemption of 2010-11 are not modelled."""
     regime: str            # "old" | "new"; "old" is used in years before the new regime existed
     other_income: Decimal  # other taxable income for the year, after deductions
 

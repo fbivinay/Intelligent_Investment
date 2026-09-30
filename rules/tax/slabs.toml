@@ -2,6 +2,9 @@
 # brackets are in order; upto is the top of the bracket in rupees (cumulative), the last one is empty (no top). The first bracket is
 # the nil-rate band: its upto is the basic exemption. regime old = the ordinary slabs; regime new = the section 115BAC regime
 # (optional from 2020-21, the default from 2023-24), which exists only from 2020-04-01.
+# Not modelled: the slabs of senior citizens (60 to 79) and very senior citizens (80 and over), and the higher basic exemption that
+# women had in 2010-11 (Rs 1.9 lakh against Rs 1.6 lakh). Every profile here is the general resident individual, so tax is never
+# understated for someone who was in one of those groups.
 [meta]
 keys = ["regime"]
 coverage_from = 2010-04-01

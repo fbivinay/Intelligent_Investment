@@ -1,4 +1,5 @@
-"""Static HTML report: the waterfall, and a trace under every number (native <details>, no JavaScript)."""
+"""Static HTML report: the waterfall, and a trace under every number (native <details>). A derivation that several rows share is
+written out once and linked from the others; a few lines of script open the closed rows above a link's target."""
 from __future__ import annotations
 
 import argparse
@@ -23,7 +24,11 @@ td.n{text-align:right;font-variant-numeric:tabular-nums}
 details{margin:.15rem 0 .15rem 1rem}summary{cursor:pointer}
 details.root{margin:0}details.root>summary{display:inline;list-style:none;color:#06c}
 .f{color:#888;font-size:.9rem}.rule{font-size:.85rem}.assumed,.secondary{color:#b45309}
+a.jump{font-size:.85rem;margin-left:.5rem}
 """
+JS = ("document.addEventListener('click',function(e){var a=e.target.closest('a.jump');if(!a)return;"
+      "var t=document.getElementById(a.getAttribute('href').slice(1));"
+      "for(var p=t;p;p=p.parentElement){if(p.tagName==='DETAILS')p.open=true}});")
 
 
 def exact(v: Decimal) -> str:
@@ -39,28 +44,51 @@ def why(r) -> str:
     return f'<div class="f">why: {escape(r.note)}</div>' if r.note and r.confidence != "primary" else ""
 
 
-def tree(n: Node) -> str:
+class Page:
+    """What has been written out so far: the same derivation (same label, value, note, rules and inputs) is written once."""
+
+    def __init__(self):
+        self.ids: dict[tuple, int] = {}   # structural signature -> number
+        self.memo: dict[int, int] = {}    # id(node) -> number
+        self.written: set[int] = set()
+
+    def number(self, n: Node) -> int:
+        k = self.memo.get(id(n))
+        if k is None:
+            sig = (n.label, n.value, n.op, n.note, tuple((r.rule_id, r.valid_from, r.note) for r in n.rules),
+                   tuple(self.number(i) for i in n.inputs))
+            k = self.ids.setdefault(sig, len(self.ids))
+            self.memo[id(n)] = k
+        return k
+
+
+def tree(n: Node, page: Page) -> str:
+    k = page.number(n)
+    if k in page.written:
+        return (f'<details class="ref"><summary>{escape(n.label)} = {exact(n.value)}'
+                f'<a class="jump" href="#n{k}">same derivation as above</a></summary></details>')
+    page.written.add(k)
     rules = "".join(
         f'<li class="rule {r.confidence}">rule {escape(r.rule_id)} valid from {r.valid_from}: '
         f"{escape(r.source)} (verified {r.verified_on}, {r.confidence}){why(r)}</li>" for r in n.rules)
     note = f'<div class="f">{escape(n.note)}</div>' if n.note else ""
-    body = f'<div class="f">{escape(n.formula)}</div>{note}<ul>{rules}</ul>' + "".join(tree(i) for i in n.inputs)
-    return f"<details><summary>{escape(n.label)} = {exact(n.value)}</summary>{body}</details>"
+    body = f'<div class="f">{escape(n.formula)}</div>{note}<ul>{rules}</ul>' + "".join(tree(i, page) for i in n.inputs)
+    return f'<details id="n{k}"><summary>{escape(n.label)} = {exact(n.value)}</summary>{body}</details>'
 
 
-def row(label: str, n: Node) -> str:
+def row(label: str, n: Node, page: Page) -> str:
     return (f'<tr><td>{escape(label)}</td><td class="n">{money(n.value)}</td><td>'
-            f'<details class="root"><summary>ⓘ</summary>{tree(n)}</details></td></tr>')
+            f'<details class="root"><summary>ⓘ</summary>{tree(n, page)}</details></td></tr>')
 
 
-def section(heading: str, r: Result) -> str:
+def section(heading: str, r: Result, page: Page) -> str:
     w = r.waterfall
-    rows = [row("Money invested", w["initial"]), row("Gross profit (price gain + dividends)", w["gross_profit"]),
-            row("Gross end value, before any charge or tax", w["gross_end"]),
-            row("Charges on the buy", w["buy_charges"]), row("Charges on the sale", w["sale_charges"]),
-            row("Account opening fee", w["account_opening"]), row("Demat account fees", w["amc"]),
-            row("All charges", w["charges"]),
-            row("Income tax caused by this investment", w["tax"]), row("Final amount", w["net"])]
+    rows = [row("Money invested", w["initial"], page), row("Gross profit (price gain + dividends)", w["gross_profit"], page),
+            row("Gross end value, before any charge or tax", w["gross_end"], page),
+            row("Charges on the buy", w["buy_charges"], page), row("Charges on the sale", w["sale_charges"], page),
+            row("Account opening fee", w["account_opening"], page), row("Demat account fees", w["amc"], page),
+            row("All charges", w["charges"], page),
+            row("Income tax caused by this investment", w["tax"], page), row("Final amount", w["net"], page)]
     return (f"<h2>{escape(heading)}</h2><p>{r.units} units bought on {r.bought_on}, "
             f"{'sold' if r.sold else 'valued, not sold'} on {r.ended_on}. Click ⓘ to see how any number was made.</p>"
             f"<table><tr><th>Step</th><th>Amount</th><th></th></tr>{''.join(rows)}</table>")
@@ -75,11 +103,15 @@ def render_html(title: str, sections: list[tuple[str, Result]], notes: list[str]
                 fl.append(f'<li class="{f.confidence}">{escape(f.rule_id)} from {f.valid_from} is {f.confidence}: '
                           f"{escape(f.source)}{why(f)}</li>")
     ns = "".join(f"<li>{escape(n)}</li>" for n in notes)
+    page = Page()
     return (f"<!doctype html><html lang='en'><meta charset='utf-8'><meta name='viewport' content='width=device-width'>"
             f"<title>{escape(title)}</title><style>{CSS}</style><h1>{escape(title)}</h1>"
-            f"{''.join(section(h, r) for h, r in sections)}"
-            f"<h2>Rules that are not backed by an official source</h2><ul>{''.join(fl) or '<li>None used.</li>'}</ul>"
-            f"<h2>Notes and known gaps</h2><ul>{ns}</ul></html>")
+            f"{''.join(section(h, r, page) for h, r in sections)}"
+            f"<h2>Rules that are not backed by an official source</h2>"
+            f"<p class='f'>Only rules that can move these numbers are listed; a rule that was read but decided nothing (the other side "
+            f"of a comparison, a rate on a zero amount) is not, and still shows inside the derivations.</p>"
+            f"<ul>{''.join(fl) or '<li>None used.</li>'}</ul>"
+            f"<h2>Notes and known gaps</h2><ul>{ns}</ul><script>{JS}</script></html>")
 
 
 def main(argv=None) -> Path:
@@ -122,8 +154,9 @@ def main(argv=None) -> Path:
         "AMC for each financial year touched (the last one in full) are charged to it. A user with an older account would pay neither.",
         "Tax for each financial year is treated as paid from cash at year end. Advance-tax interest is ignored.",
         f"Tax profile: {a.regime} regime, other taxable income {money(Decimal(a.income))} a year, no losses brought forward.",
-        "Not modelled: deductions (other income is taken after them), age-based slabs, alternative minimum tax, interest on late or "
-        "advance tax, non-residents. Every assumed rule and every other modelling limit is listed in docs/verification/assumed-rows.md.",
+        "Not modelled: deductions (other income is taken after them), age-based slabs and the higher basic exemption for women in "
+        "FY2010-11 (Rs 1.9 lakh), alternative minimum tax, interest on late or advance tax, non-residents. Every assumed rule and every "
+        "other modelling limit is listed in docs/verification/assumed-rows.md.",
     ]
     out = Path(a.out)
     out.parent.mkdir(parents=True, exist_ok=True)
