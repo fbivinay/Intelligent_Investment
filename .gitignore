@@ -22,3 +22,6 @@ web/node_modules/
 web/.env*.local
 web/next-env.d.ts
 .playwright-cli/
+
+# A running download holds this while it lists days
+/data/*.lock
