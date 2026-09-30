@@ -78,3 +78,16 @@ def test_build_names_a_listed_day_whose_raw_file_is_missing_instead_of_skipping_
     na.raw_path(root, "fo", date(2016, 6, 1)).unlink()
     with pytest.raises(ValueError, match="missing"):
         nb.build(root, {"NIFTYBEES"}, {"NIFTY"}, {"Nifty 50"})
+
+
+def test_build_names_every_file_whose_rows_or_layout_disagree_in_one_error(tmp_path):
+    import pytest
+    d1, d2, d3 = date(2016, 6, 1), date(2016, 6, 2), date(2016, 6, 3)
+    put(tmp_path, "cash", d1, zipped([CASH_HEAD, "NIFTYBEES,EQ,827,831.75,826,828.85,829.05,826.68,32150,26661845.83,05-JUN-2016,1158,INF732E01011,"]))   # dated wrongly
+    put(tmp_path, "cash", d2, zipped(["A,B,C", "1,2,3"]))                                                                                              # unknown layout
+    put(tmp_path, "cash", d3, zipped([CASH_HEAD, "NIFTYBEES,EQ,827,831.75,826,828.85,829.05,826.68,32150,26661845.83,03-JUN-2016,1158,INF732E01011,"]))  # fine
+    with pytest.raises(ValueError) as e:
+        nb.build(tmp_path, {"NIFTYBEES"}, {"NIFTY"}, {"Nifty 50"})
+    msg = str(e.value)
+    assert "2 files" in msg and "cash 2016-06-01: a row is dated 2016-06-05" in msg and "cash 2016-06-02" in msg and "layout" in msg
+    assert not (tmp_path / "processed" / "nse_etf_daily.csv").exists()                     # nothing is written from a build that found problems

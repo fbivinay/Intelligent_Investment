@@ -22,8 +22,14 @@ def _text(raw: bytes) -> str:
     return raw.decode("utf-8-sig", "replace")
 
 
-def _table(raw: bytes):
-    r = csv.DictReader(io.StringIO(_text(raw)))
+def _table(raw: bytes, only: tuple[str, ...] = ()):
+    """(set of column names, rows as dicts). With `only`, data lines holding none of those pieces of text are dropped before parsing: the F&O file
+    has a few index-futures lines among tens of thousands, and parsing them all made the build slow. Callers still check every field they use."""
+    text = _text(raw)
+    if only:
+        head, _, body = text.partition("\n")
+        text = head + "\n" + "\n".join(line for line in body.splitlines() if any(k in line for k in only))
+    r = csv.DictReader(io.StringIO(text))
     head = {h.strip() for h in (r.fieldnames or []) if h is not None}
     rows = ({(k or "").strip(): (v or "").strip() for k, v in row.items() if k is not None} for row in r)
     return head, rows
@@ -35,9 +41,10 @@ def _need(head: set, what: str, needed: set) -> None:
 
 
 def _dmy_name(s: str) -> str:
-    """01-JUN-2016 or 30-Jun-2016 to 2016-06-01."""
+    """01-JUN-2016 or 30-Jun-2016 to 2016-06-01. One old file (2020-07-13) writes the year with two digits: 13-Jul-20."""
     d, m, y = s.split("-")
-    return f"{int(y):04d}-{MON[m.upper()]:02d}-{int(d):02d}"
+    year = int(y) + 2000 if int(y) < 100 else int(y)
+    return f"{year:04d}-{MON[m.upper()]:02d}-{int(d):02d}"
 
 
 def _dmy_num(s: str) -> str:
@@ -72,7 +79,7 @@ def read_cash(raw: bytes, symbols: set[str]) -> list[dict]:
 def read_fo(raw: bytes, symbols: set[str]) -> list[dict]:
     """Index futures rows (not options, not stock futures). New layout: contracts, value in rupees, lot size and the underlying come as
     published; old layout: value is in lakhs and is turned into rupees, and no lot size or underlying is published."""
-    head, rows = _table(raw)
+    head, rows = _table(raw, only=("FUTIDX,", ",IDF,"))
     out = []
     if "FinInstrmTp" in head:
         _need(head, "F&O bhavcopy", {"TradDt", "FinInstrmTp", "TckrSymb", "XpryDt", "OpnPric", "HghPric", "LwPric", "ClsPric", "PrvsClsgPric",
