@@ -108,3 +108,10 @@ def test_futures_dates_with_a_two_digit_year_are_read_the_same_way():
 def test_futures_prefilter_keeps_working_when_the_file_has_no_index_futures_at_all():
     raw = zipped([FO_OLD_HEAD, "OPTIDX,NIFTY,30-Jun-2016,8200,CE,150,160,140,155,155,1000,1000.5,500,10,01-JUN-2016,"])
     assert nr.read_fo(raw, {"NIFTY"}) == []
+
+
+def test_an_index_file_that_writes_the_date_month_first_is_read_as_the_day_it_was_asked_for():
+    raw = "\n".join([IDX_HEAD, "Nifty 50,04-06-2023,1,2,0.5,1.5,0,0,1,1,1,1,1"]).encode()          # 2023-04-06 written as MM-DD-YYYY
+    assert nr.read_index(raw, {"Nifty 50"}, day="2023-04-06")[0]["date"] == "2023-04-06"
+    assert nr.read_index(raw, {"Nifty 50"})[0]["date"] == "2023-06-04"                               # without a day to hold it to, it is read as written
+    assert nr.read_index(raw, {"Nifty 50"}, day="2023-01-01")[0]["date"] == "2023-06-04"             # a date that fits neither way is not touched

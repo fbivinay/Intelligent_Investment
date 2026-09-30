@@ -30,9 +30,11 @@ OUT = {
 
 
 def build(root: Path = ROOT, etfs=ETFS, futures=FUTURES, indices=INDICES) -> dict[str, int]:
-    readers = {"cash": lambda raw: nr.read_cash(raw, etfs), "fo": lambda raw: nr.read_fo(raw, futures), "index": lambda raw: nr.read_index(raw, indices)}
+    readers = {"cash": lambda raw, day: nr.read_cash(raw, etfs), "fo": lambda raw, day: nr.read_fo(raw, futures),
+               "index": lambda raw, day: nr.read_index(raw, indices, day)}
     rows: dict[str, list[dict]] = {k: [] for k in OUT}
     problems: list[str] = []
+    month_first = 0      # index files that write their date month first (3 in 2023): read as the day they were asked for, and counted
     for r in sorted(na.load_days(root), key=lambda r: (r["date"], r["kind"])):
         if r["status"] != "ok":
             continue
@@ -44,7 +46,7 @@ def build(root: Path = ROOT, etfs=ETFS, futures=FUTURES, indices=INDICES) -> dic
         if hashlib.sha256(raw).hexdigest() != r["sha256"]:
             raise ValueError(f"{tag}: raw file hash differs from the list")
         try:
-            got = readers[r["kind"]](raw)
+            got = readers[r["kind"]](raw, r["date"])
         except ValueError as e:
             problems.append(f"{tag}: {e}")
         else:
@@ -53,6 +55,8 @@ def build(root: Path = ROOT, etfs=ETFS, futures=FUTURES, indices=INDICES) -> dic
                 problems.append(f"{tag}: a row is dated {wrong[0]}")
             else:
                 rows[r["kind"]].extend(got)
+                if r["kind"] == "index" and any(a["date"] != b["date"] for a, b in zip(got, nr.read_index(raw, indices))):
+                    month_first += 1
         if len(problems) >= MAX_PROBLEMS:
             break
     if problems:      # every bad file at once, so a fix does not cost one full build per file
@@ -63,7 +67,7 @@ def build(root: Path = ROOT, etfs=ETFS, futures=FUTURES, indices=INDICES) -> dic
             w = csv.DictWriter(f, fields, lineterminator="\n")
             w.writeheader()
             w.writerows(sorted(rows[kind], key=lambda x: tuple(x[k] for k in key)))
-    return {k: len(v) for k, v in rows.items()}
+    return {k: len(v) for k, v in rows.items()} | {"index_month_first": month_first}
 
 
 if __name__ == "__main__":
