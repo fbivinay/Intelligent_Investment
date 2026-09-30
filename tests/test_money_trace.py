@@ -57,3 +57,8 @@ def test_cite_attaches_a_rule_without_changing_the_value():
     a = RuleRef("u[k=v]", date(2010, 4, 1), None, "guess", date(2026, 1, 1), "assumed")
     n = cite(const("x", "1"), a)
     assert n.value == 1 and [r.rule_id for r in flags(n)] == ["u[k=v]"]
+
+
+def test_to_dict_carries_the_note_of_each_rule():
+    a = RuleRef("u[k=v]", date(2010, 4, 1), None, "guess", date(2026, 1, 1), "assumed", "stand-in, see the rule file")
+    assert to_dict(from_rule("a", "2", a))["rules"][0]["note"] == "stand-in, see the rule file"

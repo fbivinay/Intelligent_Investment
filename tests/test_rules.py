@@ -81,3 +81,13 @@ def test_rows_carry_confidence_and_payload(tmp_path):
     text = table(["seg"], ['seg = "eq"\nfrom = 2010-04-01\nvalue = "1"\nlist = [ "a", "b" ]'])
     row = make_rules(tmp_path, {"t": text}).at("t", date(2020, 1, 1), seg="eq")
     assert row.ref.confidence == "primary" and row.data["list"] == ["a", "b"]
+
+
+def test_a_rows_note_travels_with_its_reference(tmp_path):
+    text = table(["seg"], [
+        'seg = "eq"\nfrom = 2010-04-01\nto = 2016-05-31\nvalue = "1"\nnote = "stand-in for the years before the broker existed"',
+        'seg = "eq"\nfrom = 2016-06-01\nvalue = "2"',
+    ])
+    r = make_rules(tmp_path, {"t": text})
+    assert r.at("t", date(2012, 1, 1), seg="eq").ref.note == "stand-in for the years before the broker existed"
+    assert r.at("t", date(2020, 1, 1), seg="eq").ref.note == ""

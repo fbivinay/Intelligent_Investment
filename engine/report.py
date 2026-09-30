@@ -32,10 +32,15 @@ def money(v: Decimal) -> str:
     return f"₹{v:,.2f}"
 
 
+def why(r) -> str:
+    """The rule file's own words on why a row is only assumed or secondary; official rows need none."""
+    return f'<div class="f">why: {escape(r.note)}</div>' if r.note and r.confidence != "primary" else ""
+
+
 def tree(n: Node) -> str:
     rules = "".join(
         f'<li class="rule {r.confidence}">rule {escape(r.rule_id)} valid from {r.valid_from}: '
-        f"{escape(r.source)} (verified {r.verified_on}, {r.confidence})</li>" for r in n.rules)
+        f"{escape(r.source)} (verified {r.verified_on}, {r.confidence}){why(r)}</li>" for r in n.rules)
     note = f'<div class="f">{escape(n.note)}</div>' if n.note else ""
     body = f'<div class="f">{escape(n.formula)}</div>{note}<ul>{rules}</ul>' + "".join(tree(i) for i in n.inputs)
     return f"<details><summary>{escape(n.label)} = {exact(n.value)}</summary>{body}</details>"
@@ -66,7 +71,7 @@ def render_html(title: str, sections: list[tuple[str, Result]], notes: list[str]
             if (f.rule_id, f.valid_from) not in seen:
                 seen.add((f.rule_id, f.valid_from))
                 fl.append(f'<li class="{f.confidence}">{escape(f.rule_id)} from {f.valid_from} is {f.confidence}: '
-                          f"{escape(f.source)}</li>")
+                          f"{escape(f.source)}{why(f)}</li>")
     ns = "".join(f"<li>{escape(n)}</li>" for n in notes)
     return (f"<!doctype html><html lang='en'><meta charset='utf-8'><meta name='viewport' content='width=device-width'>"
             f"<title>{escape(title)}</title><style>{CSS}</style><h1>{escape(title)}</h1>"
@@ -106,6 +111,8 @@ def main(argv=None) -> Path:
         "AMC for each financial year touched (the last one in full) are charged to it. A user with an older account would pay neither.",
         "Tax for each financial year is treated as paid from cash at year end. Advance-tax interest is ignored.",
         f"Tax profile: {a.regime} regime, other taxable income {money(Decimal(a.income))} a year, no losses brought forward.",
+        "Not modelled: deductions (other income is taken after them), age-based slabs, alternative minimum tax, interest on late or "
+        "advance tax, non-residents. Every assumed rule and every other modelling limit is listed in docs/verification/assumed-rows.md.",
     ]
     out = Path(a.out)
     out.parent.mkdir(parents=True, exist_ok=True)
