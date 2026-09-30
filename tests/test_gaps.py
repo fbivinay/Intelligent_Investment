@@ -233,3 +233,12 @@ def test_report_states_coverage_of_the_years_before_the_archive_from_the_index_d
     assert "- NIFTYBEES: 2 of 3 Nifty 50 days have a row; missing: 2012-01-03" in text
     assert "- India VIX (from its first day, 2012-01-03): 2 of 2 Nifty 50 days have a row; missing: none" in text
     assert "- NIFTY futures: 1 of 3 days have 3 contracts; first day without: 2012-01-03" in text
+
+
+def test_an_etf_whose_nav_is_under_two_scheme_codes_is_compared_with_both_as_one_series(tmp_path):
+    root = make_root(tmp_path)
+    write(root / "processed" / "etf_daily_adjusted.csv", ["date", "symbol", "series", "close", "adj_close", "adj_qty"],
+          [["2010-01-01", "NIFTYBEES", "EQ", "100", "100", "10"], ["2016-12-01", "NIFTYBEES", "EQ", "200", "200", "10"], ["2013-01-01", "NIFTYBEES", "EQ", "150", "150", "10"]])
+    write(root / "processed" / "amfi_nav_daily.csv", ["date", "code", "nav"], [["2010-01-01", "101325", "100"], ["2016-12-01", "140084", "200"]])
+    text = gaps.report(root, symbol="NIFTYBEES", code="140084", yahoo="NIFTYBEES.csv", start="2010-01-01", end="2016-12-31", nav_pairs={"NIFTYBEES": ("101325", "140084")})
+    assert "- NIFTYBEES split-adjusted close against AMFI NAV (scheme 101325+140084): 2 days compared, 0 differ by more than 1%" in text

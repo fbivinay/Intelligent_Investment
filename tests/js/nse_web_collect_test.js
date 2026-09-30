@@ -176,5 +176,13 @@ const test = async (name, fn) => { await fn(); n++; console.log('ok', name); };
     assert.deepStrictEqual(b.queue.map(t => [t.kind, t.from]), [['vix', '2015-04-01']]);
   });
 
+  await test('futMonthsFrom starts one symbol at a later month (to collect what an earlier run did not), and the window still never starts before `from`', async () => {
+    const c = makeCollector(fakeSite().fetch, Object.assign({}, quiet, {from: '2010-04-01', to: '2010-06-30', etf: [], index: [], fut: ['NIFTY', 'BANKNIFTY'], futMonthsFrom: {NIFTY: '2010-06-01'}}));
+    assert.deepStrictEqual(c.queue.map(t => [t.symbol, t.year, t.month]), [['NIFTY', 2010, 5], ['BANKNIFTY', 2010, 3], ['BANKNIFTY', 2010, 4], ['BANKNIFTY', 2010, 5]]);
+    const d = makeCollector(fakeSite({expiries: ['2010-06-24']}).fetch, Object.assign({}, quiet, {from: '2010-04-01', to: '2010-06-30', etf: [], index: [], fut: ['NIFTY'], futMonthsFrom: {NIFTY: '2010-06-01'}}));
+    await d.step(5);
+    assert.strictEqual(d.state.items[0].from, '2010-04-01');
+  });
+
   console.log(n + ' collector tests passed');
 })().catch(e => { console.error(e); process.exit(1); });
