@@ -175,3 +175,21 @@ def test_a_futures_row_with_only_some_values_missing_is_an_error_and_a_missing_u
         nw.read_web(raw_of(item("fo", [half], symbol="NIFTY", expiry="2010-03-25")))
     no_und = dict(FO_ROW, FH_UNDERLYING_VALUE=None)
     assert nw.read_web(raw_of(item("fo", [no_und], symbol="NIFTY", expiry="2010-03-25")))["fo"][0]["underlying"] == ""
+
+
+def test_a_reply_that_repeats_an_identical_row_gives_it_once_and_the_description_counts_the_repeats():
+    # the site does this on some days (2011-05-06, 2011-08-09, 2011-10-24 for every ETF): the same row twice in one reply
+    raw = raw_of(item("etf", [ETF_ROW, ETF_ROW], symbol="NIFTYBEES", **{"from": "2010-04-01"}))
+    assert len(nw.read_web(raw)["cash"]) == 1
+    assert "1 repeated identical rows dropped" in nw.describe(raw)
+    across = raw_of(item("etf", [ETF_ROW], symbol="NIFTYBEES", **{"from": "2010-04-01"}), item("etf", [ETF_ROW], symbol="NIFTYBEES", **{"from": "2010-04-01"}))
+    assert len(nw.read_web(across)["cash"]) == 1
+
+
+def test_the_same_key_with_different_values_is_a_conflict_and_an_error():
+    other = dict(ETF_ROW, CH_CLOSING_PRICE=999)
+    with pytest.raises(ValueError, match="conflict"):
+        nw.read_web(raw_of(item("etf", [ETF_ROW, other], symbol="NIFTYBEES", **{"from": "2010-04-01"})))
+    fo2 = dict(FO_ROW, FH_CLOSING_PRICE=1)
+    with pytest.raises(ValueError, match="conflict"):
+        nw.read_web(raw_of(item("fo", [FO_ROW, fo2], symbol="NIFTY", expiry="2010-03-25")))

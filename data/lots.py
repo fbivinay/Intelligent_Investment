@@ -1,8 +1,10 @@
-"""Lot sizes of the index futures, one per contract. The old daily file (before 2024-07-08) does not carry the lot, so it is worked out from the
-traded value: value / contracts / price = units per contract, rounded to the nearest multiple of 5 (every NIFTY and BANKNIFTY lot NSE has set is
-one). A contract keeps the lot it was listed with (NSE revises a lot for contracts listed after a date), so every day of a contract votes,
-weighted by contracts traded, and a wild day is outvoted. The days from 2024-07-08 do carry the lot; `check_published` compares the working-out
-with it. `lot_sizes.csv` has one row per contract: the lot and the share of votes that agree.
+"""Lot sizes of the index futures, one per contract. Two sources publish the lot: the website file (to 2016-06) and the new daily file (from
+2024-07-08). The old daily file (2016-01 to 2024-07-05) does not, so there the lot is worked out from the traded value: value / contracts / price =
+units per contract, rounded to the nearest multiple of 5 (every NIFTY and BANKNIFTY lot NSE has set is one). A contract keeps the lot it was
+listed with (NSE revises a lot for contracts listed after a date), so every day of a contract votes, weighted by contracts traded, and a wild day is
+outvoted. Website rows are never used for the working-out (their contract counts were made from the lot); `check_published` compares the
+working-out with the published lot wherever a contract has both. `lot_sizes.csv` has one row per contract: the lot, the share of votes that
+agree, and whether it is `published` (used as it is, preferred) or `inferred`.
 Run:  python -m data.lots
 """
 from __future__ import annotations
@@ -26,6 +28,8 @@ def contract_lots(rows: list[dict]) -> dict[tuple[str, str], tuple[int, Decimal]
     """{(symbol, expiry): (lot, share of the votes that agree)}"""
     votes: dict[tuple[str, str], Counter] = defaultdict(Counter)
     for r in rows:
+        if r.get("source", "archive") == "web":
+            continue
         x = implied_lot(r)
         if x is not None:
             votes[(r["symbol"], r["expiry"])][int((x / 5).to_integral_value()) * 5] += int(Decimal(r["contracts"]))
@@ -36,6 +40,15 @@ def contract_lots(rows: list[dict]) -> dict[tuple[str, str], tuple[int, Decimal]
         if share > AGREE:
             out[key] = (lot, share)
     return out
+
+
+def published_lots(rows: list[dict]) -> dict[tuple[str, str], tuple[int, Decimal]]:
+    """{(symbol, expiry): (lot, share of the rows that carry it)} for contracts whose rows carry the lot the exchange published."""
+    votes: dict[tuple[str, str], Counter] = defaultdict(Counter)
+    for r in rows:
+        if r.get("lot"):
+            votes[(r["symbol"], r["expiry"])][int(r["lot"])] += 1
+    return {k: (c.most_common(1)[0][0], Decimal(c.most_common(1)[0][1]) / Decimal(sum(c.values()))) for k, c in votes.items()}
 
 
 def history(found: dict) -> list[tuple[str, str, str, int]]:
@@ -50,30 +63,34 @@ def history(found: dict) -> list[tuple[str, str, str, int]]:
 
 
 def check_published(rows: list[dict]) -> dict:
-    """For contracts whose rows carry the exchange's own lot, compare it with the working-out."""
-    found = contract_lots(rows)
-    published: dict[tuple[str, str], Counter] = defaultdict(Counter)
-    for r in rows:
-        if r["lot"]:
-            published[(r["symbol"], r["expiry"])][int(r["lot"])] += 1
-    common = sorted(k for k in published if k in found)
-    differ = [(s, e, found[(s, e)][0], published[(s, e)].most_common(1)[0][0]) for s, e in common if found[(s, e)][0] != published[(s, e)].most_common(1)[0][0]]
+    """For contracts that have both a published lot and a working-out, compare them."""
+    found, pub = contract_lots(rows), published_lots(rows)
+    common = sorted(k for k in pub if k in found)
+    differ = [(s, e, found[(s, e)][0], pub[(s, e)][0]) for s, e in common if found[(s, e)][0] != pub[(s, e)][0]]
     return {"compared": len(common), "differ": differ}
+
+
+def table(rows: list[dict]) -> dict[tuple[str, str], tuple[int, Decimal, str]]:
+    """{(symbol, expiry): (lot, agree, basis)}: the published lot where there is one, else the working-out."""
+    found, pub = contract_lots(rows), published_lots(rows)
+    return {k: (*pub[k], "published") if k in pub else (*found[k], "inferred") for k in sorted(set(found) | set(pub))}
 
 
 def build(root: Path = ROOT) -> dict[str, int]:
     with (root / "processed" / "nse_index_futures_daily.csv").open(newline="") as f:
         rows = list(csv.DictReader(f))
-    found = contract_lots(rows)
+    t = table(rows)
     with (root / "lot_sizes.csv").open("w", newline="") as f:
-        w = csv.writer(f, lineterminator="\n")
-        w.writerow(["symbol", "expiry", "lot", "agree"])
-        w.writerows((s, e, lot, f"{share:.2f}") for (s, e), (lot, share) in sorted(found.items()))
-    return {"contracts": len(found), "runs": len(history(found)), "differ": len(check_published(rows)["differ"])}
+        w = csv.writer(f, lineterminator=chr(10))
+        w.writerow(["symbol", "expiry", "lot", "agree", "basis"])
+        w.writerows((s, e, lot, f"{share:.2f}", basis) for (s, e), (lot, share, basis) in t.items())
+    n_pub = sum(1 for v in t.values() if v[2] == "published")
+    return {"contracts": len(t), "runs": len(history({k: v[:2] for k, v in t.items()})), "differ": len(check_published(rows)["differ"]),
+            "published": n_pub, "inferred": len(t) - n_pub}
 
 
 if __name__ == "__main__":
     print(build())
     with (ROOT / "processed" / "nse_index_futures_daily.csv").open(newline="") as f:
-        for run in history(contract_lots(list(csv.DictReader(f)))):
+        for run in history({k: v[:2] for k, v in table(list(csv.DictReader(f))).items()}):
             print(run)
