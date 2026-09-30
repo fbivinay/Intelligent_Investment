@@ -86,3 +86,9 @@ def test_a_file_in_a_layout_nobody_taught_the_reader_is_an_error_not_an_empty_re
         nr.read_cash(zipped(["A,B,C", "1,2,3"]), {"NIFTYBEES"})
     with pytest.raises(ValueError, match="layout"):
         nr.read_index(b"A,B\n1,2\n", {"Nifty 50"})
+
+
+def test_index_names_match_whatever_the_capitalisation_and_come_out_as_we_spell_them():
+    raw = "\n".join([IDX_HEAD, "NIFTY Midcap 100,03-01-2018,1,2,0.5,1.5,0,0,1,1,1,1,1", "Nifty Midcap 150,03-01-2018,1,2,0.5,1.5,0,0,1,1,1,1,1"]).encode()
+    rows = nr.read_index(raw, {"Nifty Midcap 100"})
+    assert [r["name"] for r in rows] == ["Nifty Midcap 100"]

@@ -100,10 +100,11 @@ def read_index(raw: bytes, names: set[str]) -> list[dict]:
     _need(head, "index closes", {"Index Name", "Index Date", "Open Index Value", "High Index Value", "Low Index Value", "Closing Index Value",
                                  "Volume", "Turnover (Rs. Cr.)", "P/E", "P/B", "Div Yield"})
     blank = lambda s: "" if s in ("-", "") else s  # noqa: E731
+    ours = {n.casefold(): n for n in names}     # NSE has spelled the same index NIFTY and Nifty; we keep our spelling
     out = []
     for r in rows:
-        name = ALIASES.get(r["Index Name"], r["Index Name"])
-        if name in names:
+        name = ours.get(ALIASES.get(r["Index Name"], r["Index Name"]).casefold())
+        if name is not None:
             out.append(dict(date=_dmy_num(r["Index Date"]), name=name, open=blank(r["Open Index Value"]), high=blank(r["High Index Value"]),
                             low=blank(r["Low Index Value"]), close=blank(r["Closing Index Value"]), volume=blank(r["Volume"]),
                             turnover_cr=blank(r["Turnover (Rs. Cr.)"]), pe=blank(r["P/E"]), pb=blank(r["P/B"]), div_yield=blank(r["Div Yield"])))
