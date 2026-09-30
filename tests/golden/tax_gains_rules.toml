@@ -1013,7 +1013,7 @@ order = "lowest_rate_first"
 [[case]]
 id = "tax.dividend-2016-03-31"
 kind = "rule_value"
-source = "S45 dividend exempt in the hands of shareholders under section 10(34); unit income under 10(35)"
+source = "S59 dividend which suffer DDT is exempt in the hands of the shareholder under clause (34) of section 10; S45 unit income under 10(35)"
 table = "tax.dividend"
 on = 2016-03-31
 key = {  }
@@ -1024,7 +1024,7 @@ mode = "exempt"
 [[case]]
 id = "tax.dividend-2016-04-01"
 kind = "rule_value"
-source = "S44 section 115BBDA with effect from 1 April 2017 (AY 2017-18): dividend in excess of Rs 10 lakh at 10%"
+source = "S59 any income by way of dividend in excess of Rs. 10 lakh chargeable at the rate of ten percent, effective 1 April 2017 (AY 2017-18)"
 table = "tax.dividend"
 on = 2016-04-01
 key = {  }
