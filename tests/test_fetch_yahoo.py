@@ -102,3 +102,36 @@ def test_verify_finds_a_changed_data_file_and_passes_a_clean_one(tmp_path):
 def test_the_frozen_repository_data_matches_its_manifest():
     from data.fetch_yahoo import verify
     assert verify() == []
+
+
+def test_verify_also_checks_the_dividends_file(tmp_path):
+    from data.fetch_yahoo import verify
+    save("NIFTYBEES.NS", payload(divs={"a": {"date": 1517357100, "amount": 0.35}}), date(2026, 9, 29), root=tmp_path)
+    m = json.loads((tmp_path / "manifest.json").read_text())["NIFTYBEES.csv"]
+    assert m["dividends_csv"] == "NIFTYBEES_dividends.csv" and len(m["dividends_csv_sha256"]) == 64
+    assert verify(tmp_path) == []
+    div = tmp_path / "processed" / "NIFTYBEES_dividends.csv"
+    div.write_text(div.read_text().replace("0.3500", "9.0000"))
+    problems = verify(tmp_path)
+    assert len(problems) == 1 and "NIFTYBEES_dividends.csv" in problems[0] and "hash" in problems[0]
+
+
+def test_verify_finds_a_dividends_file_that_is_missing_or_a_manifest_without_its_hash(tmp_path):
+    from data.fetch_yahoo import verify
+    save("NIFTYBEES.NS", payload(), date(2026, 9, 29), root=tmp_path)
+    (tmp_path / "processed" / "NIFTYBEES_dividends.csv").unlink()
+    assert any("NIFTYBEES_dividends.csv" in p and "missing" in p for p in verify(tmp_path))
+    save("NIFTYBEES.NS", payload(), date(2026, 9, 29), root=tmp_path)
+    m = json.loads((tmp_path / "manifest.json").read_text())
+    del m["NIFTYBEES.csv"]["dividends_csv_sha256"]
+    (tmp_path / "manifest.json").write_text(json.dumps(m))
+    assert any("no hash" in p for p in verify(tmp_path))
+
+
+def test_the_manifest_records_what_the_prices_are_adjusted_for(tmp_path):
+    save("NIFTYBEES.NS", payload(), date(2026, 9, 29), root=tmp_path,
+         corrections={"adjusted": {"2019-12-19": "1-for-10 unit split, earlier prices adjusted without a split event"}})
+    m = json.loads((tmp_path / "manifest.json").read_text())["NIFTYBEES.csv"]
+    assert m["adjusted"] == {"2019-12-19": "1-for-10 unit split, earlier prices adjusted without a split event"}
+    save("NIFTYBEES.NS", payload(), date(2026, 9, 29), root=tmp_path)
+    assert json.loads((tmp_path / "manifest.json").read_text())["NIFTYBEES.csv"]["adjusted"] == {}

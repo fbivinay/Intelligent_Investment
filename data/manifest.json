@@ -1,7 +1,12 @@
 {
   "NIFTYBEES.csv": {
+    "adjusted": {
+      "2019-12-19": "1-for-10 unit split (face value Rs 10 to Rs 1, ex-date 2019-12-19, Trendlyne split history): Yahoo divides every earlier price by 10 without listing a split event, so units before this date are counted in post-split units and a real unit cost ten of them; whole-unit rounding before 2019 is therefore understated"
+    },
     "csv_sha256": "779dd76e467c887bb404fc7e7424e2bbbf1215c9ae7bc3ce1d064c323fe43b40",
     "dividend_events": 1,
+    "dividends_csv": "NIFTYBEES_dividends.csv",
+    "dividends_csv_sha256": "7c9b12cfad0853733775ac90b5f4050b557a3ea115b1eda90b7bdcaf4da3ec86",
     "excluded": {
       "2010-10-06": "closing price 52.50 sits 15% below both neighbouring closes (62.10 and 61.62) and 16% below the same day's high of 62.49: a bad print",
       "2019-12-19": "price shown ten times too low (13.02 against 129.25 the day before): the 1-for-10 unit split with ex-date 2019-12-19 (Trendlyne split history) is adjusted twice in Yahoo's series on this bar",

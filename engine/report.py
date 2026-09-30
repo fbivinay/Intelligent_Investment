@@ -2,11 +2,13 @@
 from __future__ import annotations
 
 import argparse
+import json
 from datetime import date
 from decimal import Decimal
 from html import escape
 from pathlib import Path
 
+from data.fetch_yahoo import verify
 from engine.rules import Rules
 from engine.scenario import Result, buy_and_hold
 from engine.tax import TaxProfile
@@ -93,6 +95,14 @@ def main(argv=None) -> Path:
     ap.add_argument("--data", default=str(ROOT / "data" / "processed"))
     ap.add_argument("--out", default=str(ROOT / "out" / "checkpoint1.html"))
     a = ap.parse_args(argv)
+    manifest_path = Path(a.data).parent / "manifest.json"
+    if not manifest_path.exists():
+        raise ValueError(f"no data manifest at {manifest_path}: refusing to report on data that cannot be checked")
+    problems = verify(manifest_path.parent)
+    if problems:
+        raise ValueError("the data files do not match their manifest: " + "; ".join(problems))
+    adjusted = [f"Prices are adjusted for {d}: {why}" for d, why in
+                json.loads(manifest_path.read_text(encoding="utf-8")).get(f"{a.symbol}.csv", {}).get("adjusted", {}).items()]
     rules = Rules.load(Path(a.rules))
     bars = load_bars(Path(a.data) / f"{a.symbol}.csv")
     divs = load_dividends(Path(a.data) / f"{a.symbol}_dividends.csv")
@@ -103,6 +113,7 @@ def main(argv=None) -> Path:
     notes = [
         f"Prices: Yahoo Finance daily series for {a.symbol}, frozen in data/processed (see data/manifest.json). "
         "Unofficial source; the data layer replaces it later.",
+        *adjusted,
         f"Dividends in the source: {len(divs)}. If this is 0 the source has no dividend records for this ETF, "
         "so the result understates the true return.",
         "Buys and sells at the day's close. The real fill model (next open plus slippage) comes with the strategy engine.",

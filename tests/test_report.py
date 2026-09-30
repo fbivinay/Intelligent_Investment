@@ -1,6 +1,8 @@
 import json
 from datetime import date
 
+import pytest
+
 from data.fetch_yahoo import save
 from engine.report import main, render_html
 from engine.scenario import Result
@@ -63,3 +65,36 @@ def test_command_line_writes_a_report_with_both_views(tmp_path):
     assert "If sold on the end date" in html and "If still holding" in html and "ⓘ" in html
     assert "Dividends in the source: 0" in html
     assert "Not modelled" in html and "assumed-rows.md" in html      # the limits that apply to any report, and where the full list is
+
+
+def frozen_etf(tmp_path, corrections=None):
+    ts = [1517357100 + 86400 * i for i in range(0, 900) if (i % 7) < 5]
+    price = [100 + i * 0.05 for i in range(len(ts))]
+    raw = json.dumps({"chart": {"result": [{"meta": {"gmtoffset": 19800}, "timestamp": ts,
+                      "indicators": {"quote": [{"high": price, "close": price}]}}]}}).encode()
+    save("ETF.NS", raw, date(2026, 9, 29), root=tmp_path, corrections=corrections)
+    make_rules(tmp_path / "rules", {**CHARGES, **TAX})
+    return ["--symbol", "ETF", "--amount", "100000", "--start", "2018-02-01", "--end", "2020-06-01",
+            "--rules", str(tmp_path / "rules"), "--data", str(tmp_path / "processed"), "--out", str(tmp_path / "out" / "r.html")]
+
+
+def test_the_report_refuses_data_files_that_do_not_match_their_manifest(tmp_path):
+    args = frozen_etf(tmp_path)
+    main(args)                                                                     # a clean data folder is fine
+    div = tmp_path / "processed" / "ETF_dividends.csv"
+    div.write_text(div.read_text() + "2019-05-01,9.0000\n")                        # a dividend nobody recorded
+    with pytest.raises(ValueError, match="manifest"):
+        main(args)
+
+
+def test_the_report_refuses_a_data_folder_with_no_manifest(tmp_path):
+    args = frozen_etf(tmp_path)
+    (tmp_path / "manifest.json").unlink()
+    with pytest.raises(ValueError, match="manifest"):
+        main(args)
+
+
+def test_the_report_says_what_the_prices_are_adjusted_for(tmp_path):
+    args = frozen_etf(tmp_path, {"adjusted": {"2019-12-19": "1-for-10 unit split, earlier prices adjusted <b>"}})
+    html = main(args).read_text(encoding="utf-8")
+    assert "adjusted for" in html and "2019-12-19" in html and "1-for-10 unit split" in html and "&lt;b&gt;" in html

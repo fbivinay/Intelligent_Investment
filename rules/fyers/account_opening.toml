@@ -9,8 +9,8 @@ to = 2020-03-31
 value = "0"
 source = "S11 We don't levy any charges to open an account with us (support article archived 2020-01-02)"
 verified_on = 2026-09-29
-confidence = "secondary"
-note = "No account-opening fee appears on any archived Fyers page before 2020. The Rs 400 fee starts on the date S11 states."
+confidence = "assumed"
+note = "No account-opening fee appears on any archived Fyers page from 2015-11 to 2020, and S11 (archived 2020-01-02) says none is charged. Fyers did not operate before 2015, so nil is a stand-in for the years before."
 
 [[row]]
 from = 2020-04-01

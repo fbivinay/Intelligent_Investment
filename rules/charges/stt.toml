@@ -13,10 +13,10 @@ from = 2010-04-01
 to = 2012-06-30
 value = "0.00125"
 round_step = "1"
-source = "S18 units of an equity oriented fund, delivery based: existing rate 0.125%"
+source = "S18 units of an equity oriented fund, delivery based: existing rate 0.125%; S71 and S80 memoranda propose no change to STT"
 verified_on = 2026-09-30
-confidence = "secondary"
-note = "The Finance Bill 2012 memorandum gives 0.125% as the existing rate in March 2012. It is assumed to have been the same since 2010-04-01 (it was the original delivery rate in force before the 2012 cut)."
+confidence = "primary"
+note = "The Finance Bill 2012 memorandum (S18) gives 0.125% as the existing rate in March 2012, and neither the Finance Bill 2010 (S71) nor the 2011 memorandum (S80) changes STT, so the rate stood at 0.125% from 2010-04-01 to 2012-06-30."
 
 [[row]]
 instrument_class = "etf_equity"
@@ -47,10 +47,10 @@ from = 2010-04-01
 to = 2012-06-30
 value = "0.00125"
 round_step = "1"
-source = "S18 units of an equity oriented fund, delivery based: existing rate 0.125%"
+source = "S18 units of an equity oriented fund, delivery based: existing rate 0.125%; S71 and S80 memoranda propose no change to STT"
 verified_on = 2026-09-30
-confidence = "secondary"
-note = "The Finance Bill 2012 memorandum gives 0.125% as the existing rate in March 2012. It is assumed to have been the same since 2010-04-01 (it was the original delivery rate in force before the 2012 cut)."
+confidence = "primary"
+note = "The Finance Bill 2012 memorandum (S18) gives 0.125% as the existing rate in March 2012, and neither the Finance Bill 2010 (S71) nor the 2011 memorandum (S80) changes STT, so the rate stood at 0.125% from 2010-04-01 to 2012-06-30."
 
 [[row]]
 instrument_class = "etf_equity"
