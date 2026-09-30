@@ -50,7 +50,7 @@ def test_each_bad_row_is_named(tmp_path):
         "bad confidence": (base + 'source = "x"\nverified_on = 2026-01-01\nconfidence = "sure"\n', "confidence must be"),
         "assumed without note": (base + 'source = "x"\nverified_on = 2026-01-01\nconfidence = "assumed"\n', "note"),
         "future verified_on": (base + 'source = "x"\nverified_on = 2999-01-01\nconfidence = "primary"\n', "future"),
-        "starts late": ('seg = "eq"\nfrom = 2011-01-01\nvalue = "1"\nsource = "x"\nverified_on = 2026-01-01\nconfidence = "primary"\n', "must start on or before"),
+        "starts late": ('seg = "eq"\nfrom = 2011-01-01\nvalue = "1"\nsource = "x"\nverified_on = 2026-01-01\nconfidence = "primary"\n', "must start exactly on"),
     }
     for name, (row, msg) in cases.items():
         text = '[meta]\nkeys = ["seg"]\ncoverage_from = 2010-04-01\n[[row]]\n' + row
@@ -75,6 +75,19 @@ def test_late_keys_may_start_after_coverage(tmp_path):
     r = make_rules(tmp_path, {"tax.slabs": text})
     assert r.has("tax.slabs", date(2021, 1, 1), regime="new")
     assert not r.has("tax.slabs", date(2019, 1, 1), regime="new")
+
+
+def test_a_first_row_that_starts_before_the_coverage_start_is_refused(tmp_path):
+    # a mistyped year (2001 for 2010) would otherwise answer for dates the rules were never checked for
+    early = table(["seg"], ['seg = "eq"\nfrom = 2010-03-31\nvalue = "1"'])
+    with pytest.raises(RuleTableError, match="must start exactly on 2010-04-01"):
+        make_rules(tmp_path / "a", {"t": early})
+    early_late_key = table(["regime"], [
+        'regime = "old"\nfrom = 2010-04-01\nvalue = "1"',
+        'regime = "new"\nfrom = 2020-03-31\nvalue = "2"',
+    ], extra_meta='late_keys = [{ regime = "new", from = 2020-04-01 }]')
+    with pytest.raises(RuleTableError, match="must start exactly on 2020-04-01"):
+        make_rules(tmp_path / "b", {"t": early_late_key})
 
 
 def test_rows_carry_confidence_and_payload(tmp_path):
