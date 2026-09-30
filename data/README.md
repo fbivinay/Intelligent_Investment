@@ -38,8 +38,8 @@ for a file that certainly exists, waits and carries on. A 403 is never taken to 
 | `processed/nse_index_futures_daily.csv` | NIFTY and BANKNIFTY index futures, every expiry: date, symbol, expiry, open, high, low, close, settle, prev_close, contracts, value_rs (rupees), open_int, chg_oi, lot, underlying (lot and underlying only from 2024-07-08) |
 | `processed/nse_index_daily.csv` | Nifty 50, Nifty Next 50, Nifty Bank, Nifty Midcap 100, India VIX: date, name, open, high, low, close, volume, turnover_cr, pe, pb, div_yield |
 | `processed/amfi_nav_daily.csv` | date, code, nav (as published) |
-| `lot_sizes.csv` | index futures lot by run of days (worked out, see below) |
-| `corporate_actions.csv` | splits with evidence |
+| `lot_sizes.csv` | index futures lot per contract: symbol, expiry, lot, agree (worked out from traded value, see below) |
+| `corporate_actions.csv` | splits with evidence; `nav_ex_date` is the day AMFI's NAV switches to the new unit size |
 | `gaps.md` | generated: what the day list contains, calendar and price cross-checks |
 
 ## Rebuild
@@ -62,9 +62,20 @@ Building twice gives the same bytes; every raw file is checked against its liste
   liquid funds) and are listed in `amfi_nav.py`, but they are proxies, not the ETFs.
 - **LIQUIDBEES** trades and reports its NAV at Rs 1,000 all the time: its return is a daily cash dividend that no file carries. For a cash
   return use a liquid fund's growth NAV.
-- **Dividends of the equity ETFs** are not in any file here. Nifty BeES keeps them in its NAV (its NAV rises against the Nifty by about 1.1% a
-  year), so its price already carries them.
-- **Lot sizes** before 2024-07-08 are worked out (traded value / contracts / close, nearest multiple of 5) and checked against the published lot
-  from that date on. The change date lies between one run's `last_seen` and the next run's `first_seen`.
+- **Dividends** are not in any file here. The three equity ETFs (Nifty, Junior, Bank BeES) do not pay them out in 2016 to 2026: `gaps.md` sets each
+  NAV against its index, finds no payout step, and the ratio drifts up (dividends kept in the NAV), so their prices already carry them. Gold BeES
+  pays none. Liquid BeES is the exception (above).
+- **Lot sizes** are per contract (NSE revises a lot for contracts listed after a date). Before 2024-07-08 the file carries none, so each contract's
+  lot is worked out from traded value / contracts / close, nearest multiple of 5, every day of the contract voting; from that date the lot is
+  published and the working-out agrees with it on every contract that has both (`python -m data.lots` prints the count of differences).
 - **Margins, total-return indices, index constituents** are not here.
 - **Special sessions** on weekends are tried and listed (every calendar day is asked for), so a Diwali evening or a Saturday session is not missed.
+
+## Source quirks the readers handle (each has a test)
+
+- One cash file (2020-07-13) writes the year with two digits (`13-Jul-20`).
+- Three index files (2023-04-06, 2023-04-10, 2023-04-11) write the date month first; they are read as the day they were asked for, and the build
+  counts them.
+- The Nifty Midcap 100 is called `Nifty Free Float Midcap 100` in the files up to 2018-03-28 (same index, values continuous).
+- The Nifty BeES, Bank BeES and Gold BeES splits of 2019-12-19 show in AMFI's NAV two trading days later than in the exchange price.
+- Index futures: near-month settle against the index stays within about 1% on every day (checked, nothing odd), three contracts a day.

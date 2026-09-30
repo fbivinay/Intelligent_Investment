@@ -5,7 +5,9 @@ from __future__ import annotations
 
 import csv
 import json
+import statistics
 from collections import Counter
+from datetime import date
 from decimal import Decimal
 from pathlib import Path
 
@@ -30,7 +32,21 @@ def price_diffs(nse: dict[str, Decimal], other: dict[str, Decimal]) -> list[tupl
 def summary(diffs: list, tol: Decimal) -> dict:
     over = sorted(((d, pct) for d, _, _, pct in diffs if abs(pct) > tol), key=lambda x: (-abs(x[1]), x[0]))
     big = max(diffs, key=lambda x: (abs(x[3]), x[0]), default=None)
-    return {"days": len(diffs), "over": len(over), "max_abs": abs(big[3]) if big else Decimal(0), "max_day": big[0] if big else None, "worst": over[:5]}
+    mid = Decimal(str(statistics.median(abs(x[3]) for x in diffs))) if diffs else Decimal(0)
+    return {"days": len(diffs), "over": len(over), "median_abs": mid, "max_abs": abs(big[3]) if big else Decimal(0), "max_day": big[0] if big else None, "worst": over[:5]}
+
+
+def nav_vs_index(nav: dict[str, Decimal], index: dict[str, Decimal], step: Decimal) -> dict:
+    """NAV / index day by day (the NAV already on one unit size). A dividend paid out lowers the NAV and not the index: a one-day step down of the
+    ratio. Dividends kept in the NAV push the ratio up over the years (the index is a price index). A drop over more than 5 calendar days is not
+    taken for a payout: too many things can happen in that time."""
+    common = sorted(nav.keys() & index.keys())
+    ratio = {d: nav[d] / index[d] for d in common}
+    years = (date.fromisoformat(common[-1]) - date.fromisoformat(common[0])).days / 365.25 if common else 0
+    drift = Decimal(str((float(ratio[common[-1]] / ratio[common[0]]) ** (1 / years) - 1) * 100)) if years else Decimal(0)
+    steps = [(a, b, (ratio[b] / ratio[a] - 1) * 100) for a, b in zip(common, common[1:])
+             if (date.fromisoformat(b) - date.fromisoformat(a)).days <= 5 and (ratio[b] / ratio[a] - 1) * 100 < -step]
+    return {"days": len(common), "first": common[0] if common else None, "last": common[-1] if common else None, "drift": drift, "steps": steps}
 
 
 def _nav_on_latest_scale(nav: dict[str, Decimal], actions: list[dict]) -> dict[str, Decimal]:
@@ -55,7 +71,7 @@ def _dates(days: list[str]) -> str:
 
 
 def _line(what: str, s: dict, tol: Decimal) -> list[str]:
-    tail = f", largest {s['max_abs']:.2f}% ({s['max_day']})" if s["days"] else ""
+    tail = f", median {s['median_abs']:.2f}%, largest {s['max_abs']:.2f}% ({s['max_day']})" if s["days"] else ""
     out = [f"- {what}: {s['days']} days compared, {s['over']} differ by more than {tol}%{tail}"]
     if s["worst"]:
         out.append("  - worst: " + ", ".join(f"{d} {pct:+.2f}%" for d, pct in s["worst"]))
@@ -63,8 +79,9 @@ def _line(what: str, s: dict, tol: Decimal) -> list[str]:
 
 
 def report(root: Path = ROOT, symbol: str = "NIFTYBEES", code: str = "140084", yahoo: str = "NIFTYBEES.csv", start: str = "2016-06-01", end: str | None = None,
-           nav_pairs: dict[str, str] | None = None) -> str:
-    """`symbol` is compared with the Yahoo file `yahoo`; every symbol in `nav_pairs` ({symbol: AMFI scheme code}) is compared with its NAV."""
+           nav_pairs: dict[str, str] | None = None, index_pairs: dict[str, str] | None = None) -> str:
+    """`symbol` is compared with the Yahoo file `yahoo`; every symbol in `nav_pairs` ({symbol: AMFI scheme code}) is compared with its NAV, and
+    every symbol in `index_pairs` ({symbol: index name}) has its NAV set against that index to see whether it pays dividends out."""
     nav_pairs = nav_pairs or {symbol: code}
     listed = na.load_days(root)
     end = end or max(r["date"] for r in listed)
@@ -109,6 +126,22 @@ def report(root: Path = ROOT, symbol: str = "NIFTYBEES", code: str = "140084", y
                      summary(price_diffs({d: Decimal(r["adj_close"]) for d, r in adj_of(sym).items()}, nav), NAV_TOL), NAV_TOL)
     out.append("")
 
+    if index_pairs:
+        ipath = root / "processed" / "nse_index_daily.csv"
+        idx_rows = _read(ipath) if ipath.exists() else []
+        out += ["## Do the equity ETFs pay dividends out?", "",
+                "An ETF's NAV set against the price index it follows. A payout lowers the NAV and not the index: a one-day step down. Dividends kept in the NAV "
+                "push the ratio up over the years. Days inside a split's switch are put on one unit size first.", ""]
+        for sym, name in index_pairs.items():
+            c = nav_pairs.get(sym, code)
+            nav = _nav_on_latest_scale({r["date"]: Decimal(r["nav"]) for r in nav_rows if r["code"] == c and start <= r["date"] <= end},
+                                       [a for a in actions if a["symbol"] == sym])
+            got = nav_vs_index(nav, {r["date"]: Decimal(r["close"]) for r in idx_rows if r["name"] == name}, Decimal("0.25"))
+            steps = ", ".join(f"{b} {pct:.2f}%" for _, b, pct in got["steps"][:10])
+            out.append(f"- {sym} NAV against {name} (scheme {c}): {got['days']} days, ratio drift {got['drift']:+.2f}% a year, {len(got['steps'])} one-day step down over 0.25%"
+                       + (f": {steps}" if steps else ""))
+        out.append("")
+
     out += ["## Processed files", ""]
     for name, col in (("nse_etf_daily.csv", "symbol"), ("nse_index_futures_daily.csv", "symbol"), ("nse_index_daily.csv", "name"), ("amfi_nav_daily.csv", "code")):
         path = root / "processed" / name
@@ -121,7 +154,9 @@ def report(root: Path = ROOT, symbol: str = "NIFTYBEES", code: str = "140084", y
 
 ETF_NAVS = {"NIFTYBEES": "140084", "JUNIORBEES": "140085", "BANKBEES": "140087", "GOLDBEES": "140088", "LIQUIDBEES": "140086"}
 
+EQUITY_ETF_INDEX = {"NIFTYBEES": "Nifty 50", "JUNIORBEES": "Nifty Next 50", "BANKBEES": "Nifty Bank"}
+
 if __name__ == "__main__":
-    text = report(nav_pairs=ETF_NAVS)
+    text = report(nav_pairs=ETF_NAVS, index_pairs=EQUITY_ETF_INDEX)
     (ROOT / "gaps.md").write_text(text, newline="\n")
     print(text)
