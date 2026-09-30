@@ -4,6 +4,9 @@ from tests.helpers import table
 OLD = '[ {upto = "250000", rate = "0"}, {upto = "500000", rate = "0.05"}, {upto = "1000000", rate = "0.20"}, {upto = "", rate = "0.30"} ]'
 NEW = '[ {upto = "300000", rate = "0"}, {upto = "600000", rate = "0.05"}, {upto = "900000", rate = "0.10"}, {upto = "", rate = "0.30"} ]'
 TIERS = '[ {above = "5000000", rate = "0.10"}, {above = "10000000", rate = "0.15"} ]'
+# A top tier that looks at income without special-rate gains, as the 25% tier does in the real rules.
+TIERS_TOP = ('[ {above = "5000000", rate = "0.10"}, {above = "10000000", rate = "0.15"}, '
+             '{above = "20000000", rate = "0.25", basis = "excluding_special"} ]')
 ASSUMED = 'source = "test fixture"\nverified_on = 2026-01-01\nconfidence = "assumed"\nnote = "test convention"'
 LATE_NEW = 'late_keys = [{ regime = "new", from = 2020-04-01 }]'
 
@@ -49,12 +52,13 @@ TAX = {
         f'regime = "new"\nfrom = 2020-04-01\nbrackets = {NEW}',
     ], extra_meta=LATE_NEW),
     "tax.rebate_87a": table(["regime"], [
-        'regime = "old"\nfrom = 2010-04-01\nincome_limit = "500000"\nmax_rebate = "12500"\napplies_to_special = true',
+        'regime = "old"\nfrom = 2010-04-01\nincome_limit = "500000"\nmax_rebate = "12500"\napplies_to_special = true\n'
+        'excluded_sections = ["112A"]',
         'regime = "new"\nfrom = 2020-04-01\nincome_limit = "700000"\nmax_rebate = "25000"\n'
         'applies_to_special = false\nmarginal_relief = true',
     ], extra_meta=LATE_NEW),
     "tax.surcharge": table(["regime"], [
-        f'regime = "old"\nfrom = 2010-04-01\ntiers = {TIERS}\ncap_special = "0.15"',
+        f'regime = "old"\nfrom = 2010-04-01\ntiers = {TIERS_TOP}\ncap_special = "0.15"\ncap_sections = ["111A"]',
         f'regime = "new"\nfrom = 2020-04-01\ntiers = {TIERS}\ncap_special = "0.15"',
     ], extra_meta=LATE_NEW),
     "tax.cess": table([], ['from = 2010-04-01\nvalue = "0.04"']),
