@@ -223,3 +223,21 @@ def test_verify_days_finds_a_hash_on_an_absent_day_and_an_unknown_status(tmp_pat
     problems = na.verify_days(tmp_path)
     assert any("2016-06-04" in p and "has a hash" in p for p in problems)
     assert any("2016-06-05" in p and "not ok, absent or denied" in p for p in problems)
+
+
+def test_sync_refuses_to_run_while_another_download_holds_the_lock_and_frees_it_afterwards(tmp_path):
+    d = date(2016, 6, 1)
+    (tmp_path / "nse_days.lock").write_text("held")
+    with pytest.raises(RuntimeError, match="another download"):
+        na.sync(["cash"], d, d, root=tmp_path, opener=fake({}), sleep=NO_SLEEP, workers=1)
+    assert (tmp_path / "nse_days.lock").read_text() == "held"                       # a refused run leaves the other run's lock alone
+    (tmp_path / "nse_days.lock").unlink()
+    na.sync(["cash"], d, d, root=tmp_path, opener=fake({}), sleep=NO_SLEEP, workers=1)
+    assert not (tmp_path / "nse_days.lock").exists()
+
+
+def test_the_lock_is_freed_when_the_run_stops_because_the_exchange_blocks(tmp_path):
+    d = date(2016, 6, 1)
+    with pytest.raises(na.Blocked):
+        na.sync(["cash"], d, d, root=tmp_path, opener=fake({}, blocked={OLD}), sleep=NO_SLEEP, workers=1, max_waits=1)
+    assert not (tmp_path / "nse_days.lock").exists()

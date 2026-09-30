@@ -155,8 +155,21 @@ def append_days(rows: list[dict], root: Path = ROOT) -> None:
         w.writerows(rows)
 
 
-def sync(kinds, start: date, end: date, root: Path = ROOT, opener=default_opener, sleep=time.sleep, workers: int = 3,
-         retrieved: date | None = None, chunk: int = 60, max_waits: int = 8) -> dict[str, int]:
+def sync(kinds, start: date, end: date, root: Path = ROOT, **kw) -> dict[str, int]:
+    """One download at a time: two runs at once both list the same days (that happened once), so a lock file keeps the second one out."""
+    lock = root / "nse_days.lock"
+    try:
+        lock.open("x").close()
+    except FileExistsError:
+        raise RuntimeError(f"another download seems to be running ({lock.name} exists); if none is, delete that file") from None
+    try:
+        return _sync(kinds, start, end, root, **kw)
+    finally:
+        lock.unlink(missing_ok=True)
+
+
+def _sync(kinds, start: date, end: date, root: Path, opener=default_opener, sleep=time.sleep, workers: int = 3,
+          retrieved: date | None = None, chunk: int = 60, max_waits: int = 8) -> dict[str, int]:
     """Fetch every day from start to end that the list does not have yet. Progress is written after every chunk. When the exchange blocks us the
     run waits (2, 4, 8 ... minutes, at most 30) and tries the same days again; after max_waits waits it raises Blocked, and a later run carries on."""
     retrieved = (retrieved or date.today()).isoformat()
