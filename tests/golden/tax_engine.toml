@@ -3054,6 +3054,69 @@ rebate = "0"
 surcharge = "0"
 
 [[case]]
+id = "tax-surcharge-112-gain-is-in-the-test-2021"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "pay is under Rs 2 crore but the section 112 gain is not left out of the test in 2021-22, so the 37% tier applies to both taxes; gold: long-term 112 gain 59867916.66666666666666666667; slab income 15000000, slab tax 4312500.00, special-rate tax 11973583.33333333333333333333, total income 74867916.66666666666666666667, rebate 0, surcharge 6025850.833333333333333333332, cess 892477.3666666666666666666664, tax with 23204410, without 5157750, extra 18046660"
+[case.input]
+fy = 2021
+regime = "old"
+other_income = "15000000"
+[[case.input.events]]
+label = "gold"
+sale_date = 2021-08-01
+acq_date = 2014-06-01
+asset_class = "etf_gold"
+proceeds = "60000000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "18046660"
+tax_with = "23204410"
+surcharge = "6025850.833333333333333333332"
+total_income = "74867916.66666666666666666667"
+
+[[case]]
+id = "tax-surcharge-112-gain-is-left-out-of-the-test-2022"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "from 2022-23 section 112 is left out of the test and its tax is capped at 15%; gold: long-term 112 gain 59862083.33333333333333333333; slab income 15000000, slab tax 4312500.00, special-rate tax 11972416.66666666666666666667, total income 74862083.33333333333333333333, rebate 0, surcharge 2442737.500000000000000000000, cess 749106.1666666666666666666668, tax with 19476760, without 5157750, extra 14319010"
+[case.input]
+fy = 2022
+regime = "old"
+other_income = "15000000"
+[[case.input.events]]
+label = "gold"
+sale_date = 2022-08-01
+acq_date = 2014-06-01
+asset_class = "etf_gold"
+proceeds = "60000000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "14319010"
+tax_with = "19476760"
+surcharge = "2442737.500000000000000000000"
+total_income = "74862083.33333333333333333333"
+
+[[case]]
+id = "tax-surcharge-fund-dividends-are-exempt-2019"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "unit income is exempt until 2019-20; slab income 25000000, slab tax 7312500.00, special-rate tax 0, total income 25000000, rebate 0, surcharge 1828125.0000, cess 365625.000000, tax with 9506250, without 9506250, extra 0"
+[case.input]
+fy = 2019
+regime = "old"
+other_income = "25000000"
+dividends = "6000000"
+dividend_payer = "fund"
+[case.expect]
+extra = "0"
+tax_with = "9506250"
+surcharge = "1828125.0000"
+total_income = "25000000"
+
+[[case]]
 id = "tax-surcharge-new-2022-04-01-after"
 kind = "tax_fy"
 source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
@@ -3344,3 +3407,20 @@ cost = "100000"
 extra = "47700"
 tax_with = "11503950"
 tax_without = "11456250"
+
+[[case]]
+id = "tax-surcharge-slab-dividends-are-left-out-and-capped-2020"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "from 2020-21 the dividends are left out of the test and the surcharge on the slab tax on them is capped at 15%; slab income 31000000, slab tax 9112500.00, special-rate tax 0, total income 31000000, rebate 0, surcharge 2098125.0000, cess 448425.000000, tax with 11659050, without 9506250, extra 2152800"
+[case.input]
+fy = 2020
+regime = "old"
+other_income = "25000000"
+dividends = "6000000"
+dividend_payer = "fund"
+[case.expect]
+extra = "2152800"
+tax_with = "11659050"
+surcharge = "2098125.0000"
+total_income = "31000000"

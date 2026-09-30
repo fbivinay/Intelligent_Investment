@@ -332,3 +332,42 @@ def test_a_loss_that_lapses_after_eight_years_is_named_on_the_years_tax(rules):
 def test_a_year_with_no_lapsed_loss_has_no_lapse_note(rules):
     r = fy_tax(rules, 2019, TaxProfile("old", Dc("1000000")), [], Carry(st=((2018, const("fresh", "40000")),)))
     assert "lapsed" not in r.tax.note
+
+
+# ---- what the top surcharge tiers are tested on, and which tax is capped ----------
+
+def test_a_section_112_gain_counts_in_the_top_tier_test_when_the_rule_does_not_leave_it_out(rules):
+    # Slab income of 15,000,000 is under the 2 crore line. The rule leaves out 111A gains and dividends only, so a long-term gold gain
+    # (section 112, Rs 50,000,000) takes the tested income over it and the 25% tier applies to the tax on both. It is far above the
+    # line, so marginal relief plays no part.
+    gold = ev("2012-06-01", "2019-08-01", "100000", "50100000", cls="etf_gold", label="gold")
+    p = fy_tax(rules, 2019, TaxProfile("old", Dc("15000000")), [gold]).parts
+    gain = Dc(50100000) - Dc(100000) * (Dc(290) / Dc(220))                       # series 2001: 220 -> 290
+    want = Dc("0.25") * (Dc("4312500") + gain * Dc("0.20"))
+    assert abs(p["surcharge"].value - want) < Dc("1e-9")
+
+
+def test_slab_dividends_are_left_out_of_the_top_tier_test_and_their_tax_is_capped(rules):
+    # FY2021, old regime: pay 25,000,000 (slab tax 7,312,500) is in the 25% tier without the dividends of 6,000,000, which are left out
+    # of the test; the slab tax on them (30% of 6,000,000 = 1,800,000) has its surcharge capped at 15%
+    p = fy_tax(rules, 2021, TaxProfile("old", Dc("25000000")), [], dividends=const("Dividends", "6000000"), dividend_payer="fund").parts
+    assert p["ordinary_tax"].value == Dc("9112500")
+    assert p["surcharge"].value == Dc("0.25") * Dc("7312500") + Dc("0.15") * Dc("1800000")
+
+
+def test_dividends_alone_do_not_lift_pay_into_the_top_tier(rules):
+    # pay of 15,000,000 is in the 15% tier; 6,000,000 of dividends on top do not make the tested income pass 20,000,000
+    p = fy_tax(rules, 2021, TaxProfile("old", Dc("15000000")), [], dividends=const("Dividends", "6000000"), dividend_payer="fund").parts
+    assert p["ordinary_tax"].value == Dc("6112500")                              # 4,312,500 on the pay and 1,800,000 on the dividends
+    assert p["surcharge"].value == Dc("0.15") * Dc("6112500")
+
+
+def test_a_tier_that_still_says_basis_and_a_cap_without_sections_are_refused(tmp_path):
+    from tests.helpers import table
+    from tests.synth_tax import FY, TAX
+    old_tier = '[ {above = "5000000", rate = "0.10"}, {above = "20000000", rate = "0.25", basis = "excluding_special"} ]'
+    for name, row, match in (("a", f'regime = "old"\nfrom = 2010-04-01\ntiers = {old_tier}', "test_excludes"),
+                             ("b", 'regime = "old"\nfrom = 2010-04-01\ntiers = [ {above = "5000000", rate = "0.10"} ]\ncap_special = "0.15"', "cap_sections")):
+        rules = make_rules(tmp_path / name, {**TAX, "tax.surcharge": table(["regime"], [row], extra_meta=FY)})
+        with pytest.raises(ValueError, match=match):
+            fy_tax(rules, 2019, TaxProfile("old", Dc("6000000")), [])

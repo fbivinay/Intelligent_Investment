@@ -299,11 +299,13 @@ def fy_tax(rules: Rules, fy: int, profile: TaxProfile, events: list[CGEvent],
         parts.append(interest)
     specials = [p for p in live if p.kind == "special"]
     div_ref = None
+    div_slab = None  # dividends taxed at slab rates: inside `ordinary`, but the surcharge treats them on their own
     if dividends is not None:
         drow = rules.at_fy("tax.dividend", fy, payer=dividend_payer)
         div_ref, mode = drow.ref, drow.data["mode"]
         if mode == "slab":
-            parts.append(cite(dividends, drow.ref))
+            div_slab = cite(dividends, drow.ref)
+            parts.append(div_slab)
         elif mode == "above_threshold":
             over = maxn("Dividends above the threshold",
                         sub("Dividends less threshold", dividends,
@@ -399,53 +401,74 @@ def fy_tax(rules: Rules, fy: int, profile: TaxProfile, events: list[CGEvent],
     after_rebate = sub("Tax after rebate", tax_before, rebate)
 
     sc = rules.at_fy("tax.surcharge", fy, regime=reg)
+    for tier in sc.data["tiers"]:
+        if "basis" in tier:
+            raise ValueError(f"{sc.ref.rule_id}: a tier says `basis`; it now lists the sections it leaves out in `test_excludes`")
+    cap = D(sc.data["cap_special"]) if sc.data.get("cap_special") else None
+    if cap is not None and "cap_sections" not in sc.data:
+        raise ValueError(f"{sc.ref.rule_id}: cap_special needs cap_sections (the gain sections, or `dividend`, whose tax it caps)")
+    cap_labels = sc.data.get("cap_sections", [])
+    ordinary_ex_div = sub("Slab income without dividends", ordinary, div_slab) if div_slab is not None else ordinary
 
-    def tested_on(tier):  # the 25% and 37% tiers look at income without dividends and special-rate gains
-        return ordinary if tier.get("basis") == "excluding_special" else total
+    def tested_on(tier):  # the 25% and 37% tiers leave out the incomes that their `test_excludes` names
+        labels = tier.get("test_excludes", [])
+        if not labels:
+            return total
+        left_out = [p.included for p in specials if p.section in labels]
+        if div_slab is not None and "dividend" in labels:
+            left_out.append(div_slab)
+        return sub(f"Income the {tier['rate']} tier is tested on", total, add("Income left out of that test", *left_out))
 
     crossed = [t for t in sc.data["tiers"] if tested_on(t).value > D(t["above"])]
     gains_cut = False
     if crossed:
         rate, prev = D(crossed[-1]["rate"]), (D(crossed[-2]["rate"]) if len(crossed) > 1 else D(0))
-        cap = D(sc.data["cap_special"]) if sc.data.get("cap_special") else None
-        cap_sections = sc.data.get("cap_sections")
-        capped_ids = {id(p) for p in by_rate if cap is not None and (cap_sections is None or p.section in cap_sections)}
+        capped_ids = {id(p) for p in by_rate if p.section in cap_labels}
+        div_capped = div_slab is not None and "dividend" in cap_labels
 
-        def split(taxes: dict[int, Node], at: str = ""):  # (tax on gains whose surcharge is capped, tax on the others)
-            return (add(f"Tax on gains whose surcharge is capped{at}", *[taxes[id(p)] for p in by_rate if id(p) in capped_ids]),
-                    add(f"Tax on gains whose surcharge is not capped{at}", *[taxes[id(p)] for p in by_rate if id(p) not in capped_ids]))
-
-        def rates(r):  # (rate on slab tax and uncapped gains, rate on capped gains)
+        def rates(r):  # (rate on the tax that is not capped, rate on the tax that is)
             return r, (min(r, cap) if cap is not None else r)
 
-        capped_tax, free_tax = split(tax_of)
+        def surcharge_at(slab_amt, slab_tax_amt, taxes, r_full, r_cap, at=""):
+            """Surcharge on the tax of one income: slab tax (the part on dividends may be capped) and tax on gains (some capped)."""
+            if div_capped:
+                without = _slab_tax(brackets, sub(f"Slab income without dividends{at}", slab_amt, div_slab), slab.ref)
+                div_tax = sub(f"Slab tax on the dividends{at}", slab_tax_amt, without)
+            else:
+                div_tax = ZERO_N
+            capped = add(f"Tax whose surcharge is capped{at}", div_tax, *[taxes[id(p)] for p in by_rate if id(p) in capped_ids])
+            free = add(f"Tax whose surcharge is not capped{at}", sub(f"Slab tax not on dividends{at}", slab_tax_amt, div_tax),
+                       *[taxes[id(p)] for p in by_rate if id(p) not in capped_ids])
+            return add(f"Surcharge{at}", mul(f"Surcharge on the tax that is not capped{at}", free, from_rule("Surcharge rate", r_full, sc.ref)),
+                       mul(f"Surcharge on the tax that is capped{at}", capped, from_rule("Surcharge rate on capped tax", r_cap, sc.ref)))
+
         (r1, r2), (p1, p2) = rates(rate), rates(prev)
-        surcharge = add("Surcharge",
-                        mul("Surcharge on slab tax", ordinary_tax, from_rule("Surcharge rate", r1, sc.ref)),
-                        mul("Surcharge on uncapped special-rate tax", free_tax, from_rule("Surcharge rate", r1, sc.ref)),
-                        mul("Surcharge on capped special-rate tax", capped_tax, from_rule("Surcharge rate on capped tax", r2, sc.ref)))
+        surcharge = surcharge_at(ordinary, ordinary_tax, tax_of, r1, r2)
         threshold = from_rule("Surcharge threshold", crossed[-1]["above"], sc.ref)
         excess = sub("Income above the surcharge threshold", tested_on(crossed[-1]), threshold)
         # Marginal relief: tax and surcharge may not pass the tax on the threshold income plus the excess. The threshold income is this
-        # income less the excess, taken from slab income first, then from gains at special rates, lowest rate first (the
-        # marginal_relief_order convention: it leaves the highest-rate income in the threshold amount, which gives the least relief).
-        cut_slab = minn("Slab income given up at the threshold", excess, ordinary)
+        # income less the excess, taken from slab income first (not the dividends if the tier leaves them out), then from gains at special
+        # rates that the tier does not leave out, lowest rate first (the marginal_relief_order convention: it leaves the highest-rate
+        # income in the threshold amount, which gives the least relief).
+        left_out_labels = crossed[-1].get("test_excludes", [])
+        pool = ordinary_ex_div if (div_slab is not None and "dividend" in left_out_labels) else ordinary
+        cut_slab = minn("Slab income given up at the threshold", excess, pool)
         slab_t = sub("Slab income at the threshold", ordinary, cut_slab)
         still = sub("Excess left to take from gains", excess, cut_slab)
         lefts_t = {}
         for p in sorted(specials, key=lambda p: p.rate):
+            if p.section in left_out_labels:
+                lefts_t[id(p)] = p.left
+                continue
             cut = minn(f"{p.section} gain given up at the threshold", still, p.left)
             lefts_t[id(p)] = sub(f"{p.section} gain at the threshold", p.left, cut)
             still = sub("Excess left to take from gains", still, cut)
-        gains_cut = excess.value > ordinary.value
+        gains_cut = excess.value > pool.value
         tax_t = _slab_tax(brackets, slab_t, slab.ref)
         _, tax_of_t = special_taxes(slab_t, lefts_t, " at the threshold")
         special_t = add("Tax at special rates at the threshold", *[tax_of_t[id(p)] for p in by_rate])
-        capped_t, free_t = split(tax_of_t, " at the threshold")
         at_t = add("Tax and surcharge at the threshold", tax_t, special_t,
-                   mul("Surcharge at the lower rate", add("Tax at the threshold and uncapped gains", tax_t, free_t),
-                       from_rule("Lower surcharge rate", p1, sc.ref)),
-                   mul("Surcharge at the lower rate, capped gains", capped_t, from_rule("Lower surcharge rate, capped", p2, sc.ref)))
+                   surcharge_at(slab_t, tax_t, tax_of_t, p1, p2, " at the threshold"))
         ceiling = add("Most tax and surcharge may be", at_t, excess)
         now = add("Tax and surcharge now", ordinary_tax, special_tax, surcharge)
         relief = maxn("Marginal relief", sub("Tax and surcharge over the ceiling", now, ceiling), ZERO_N)
