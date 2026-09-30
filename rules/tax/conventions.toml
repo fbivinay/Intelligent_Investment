@@ -1,5 +1,5 @@
-# Conventions the tax calculation follows where the law leaves room. name: tax_round_step, setoff_order, shortfall_order.
-# setoff_order and shortfall_order describe what engine/tax.py does; they are assumptions (value says so, note says how).
+# Conventions the tax calculation follows where the law leaves room. name: tax_round_step, setoff_order, shortfall_order, business_loss_setoff.
+# setoff_order, shortfall_order and business_loss_setoff describe what engine/tax.py does; they are assumptions (value says so, note says how).
 [meta]
 keys = ["name"]
 coverage_from = 2010-04-01
@@ -30,3 +30,12 @@ source = "S0 the law says only that gains shrink by the unused basic exemption o
 verified_on = 2026-09-30
 confidence = "assumed"
 note = "As coded: a resident individual's unused basic exemption is applied to gains taxed at special rates, highest rate first, after the yearly section 112A exemption. S69 reports that the Income Tax portal calculator (June 2025) applied it to equity gains before the section 112A exemption when equity and other long-term gains are both taxed at 12.5%; this model takes the exemption first, which gives the lower tax."
+
+[[row]]
+name = "business_loss_setoff"
+value = "slab income only, as coded in engine/tax.py"
+from = 2010-04-01
+source = "S0 assumption: the law lets a loss under the head business be set off against income under any head, capital gains included (S75 section 71(2)); this engine sets it off against slab income only"
+verified_on = 2026-09-30
+confidence = "assumed"
+note = "Conservative. A futures loss lowers slab income (other income, interest, slab-taxed gains, dividends at slab rates) and is never set off against gains taxed at special rates, so an investor with such gains in the same year pays a little more tax here than the law would ask. What is left over is carried forward for business income only (S75 section 72, S76 section 112). Not modelled: set-off against income from salary is barred by section 71(2A)."
