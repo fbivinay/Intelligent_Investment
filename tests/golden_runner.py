@@ -136,3 +136,30 @@ def _account_opening(rules: Rules, c: dict):
     assert same(n.value, c["expect"]["total"]), f"{c['id']}: total is {n.value}, hand-worked {c['expect']['total']}"
     assert_balanced(n)
     return rules_used(n)
+
+
+@kind("tax_fy")
+def _tax_fy(rules: Rules, c: dict):
+    """One year's tax: `extra` (caused by the investments), `tax_with`, `tax_without` or any part."""
+    from engine.tax import Carry, CGEvent, TaxProfile, investment_tax
+    from engine.trace import assert_balanced, const, rules_used
+    i = c["input"]
+    events = [CGEvent(e.get("label", "sale"), e["sale_date"], e["asset_class"], e["acq_date"],
+                      const("Proceeds", e["proceeds"]), const("Sale costs", e.get("sale_costs", "0")),
+                      const("Cost", e["cost"]),
+                      const("Value on 31 Jan 2018", e["fmv_2018"]) if "fmv_2018" in e else None)
+              for e in i.get("events", [])]
+
+    def carried(name):
+        return tuple((x["origin"], const("Loss brought forward", x["amount"])) for x in i.get(name, []))
+
+    r = investment_tax(rules, i["fy"], TaxProfile(i["regime"], D(i["other_income"])), events,
+                       carry_in=Carry(carried("carry_st"), carried("carry_lt")),
+                       dividends=const("Dividends", i["dividends"]) if "dividends" in i else None,
+                       interest=const("Interest", i["interest"]) if "interest" in i else None)
+    named = {"extra": r.extra, "tax_with": r.with_items.tax, "tax_without": r.without_items.tax,
+             **r.with_items.parts}
+    for name, want in c["expect"].items():
+        assert same(named[name].value, want), f"{c['id']}: {name} is {named[name].value}, hand-worked {want}"
+    assert_balanced(r.extra)
+    return rules_used(r.extra)

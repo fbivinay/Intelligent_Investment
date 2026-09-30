@@ -1,0 +1,2842 @@
+[[case]]
+id = "tax-buckets-debt-2023-04-01-after"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "debt: short-term 50AA gain 100000; slab income 1100000, slab tax 142500.00, special-rate tax 0, total income 1100000, rebate 0, surcharge 0, cess 5700.0000, tax with 148200, without 117000, extra 31200"
+[case.input]
+fy = 2025
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "debt"
+sale_date = 2025-06-01
+acq_date = 2023-04-01
+asset_class = "mf_debt"
+proceeds = "200000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "31200"
+
+[[case]]
+id = "tax-buckets-debt-2023-04-01-before"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "debt: long-term 112 gain 100000; slab income 1000000, slab tax 112500.00, special-rate tax 12500.000, total income 1100000, rebate 0, surcharge 0, cess 5000.00000, tax with 130000, without 117000, extra 13000"
+[case.input]
+fy = 2025
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "debt"
+sale_date = 2025-06-01
+acq_date = 2023-03-31
+asset_class = "mf_debt"
+proceeds = "200000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "13000"
+
+[[case]]
+id = "tax-buckets-gold-2023-04-01-after"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "gold: short-term 50AA gain 100000; slab income 1100000, slab tax 142500.00, special-rate tax 0, total income 1100000, rebate 0, surcharge 0, cess 5700.0000, tax with 148200, without 117000, extra 31200"
+[case.input]
+fy = 2024
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "gold"
+sale_date = 2024-08-01
+acq_date = 2023-04-01
+asset_class = "etf_gold"
+proceeds = "200000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "31200"
+
+[[case]]
+id = "tax-buckets-gold-2023-04-01-before"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "gold: long-term 112 gain 100000; slab income 1000000, slab tax 112500.00, special-rate tax 12500.000, total income 1100000, rebate 0, surcharge 0, cess 5000.00000, tax with 130000, without 117000, extra 13000"
+[case.input]
+fy = 2024
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "gold"
+sale_date = 2024-08-01
+acq_date = 2023-03-31
+asset_class = "etf_gold"
+proceeds = "200000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "13000"
+
+[[case]]
+id = "tax-cess-old-2018-04-01-after"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "slab income 1000000, slab tax 112500.00, special-rate tax 0, total income 1000000, rebate 0, surcharge 0, cess 4500.0000, tax with 117000, without 117000, extra 0"
+[case.input]
+fy = 2018
+regime = "old"
+other_income = "1000000"
+[case.expect]
+extra = "0"
+tax_with = "117000"
+tax_without = "117000"
+total_income = "1000000"
+rebate = "0"
+surcharge = "0"
+
+[[case]]
+id = "tax-cess-old-2018-04-01-before"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "slab income 1000000, slab tax 112500.00, special-rate tax 0, total income 1000000, rebate 0, surcharge 0, cess 3375.0000, tax with 115880, without 115880, extra 0"
+[case.input]
+fy = 2017
+regime = "old"
+other_income = "1000000"
+[case.expect]
+extra = "0"
+tax_with = "115880"
+tax_without = "115880"
+total_income = "1000000"
+rebate = "0"
+surcharge = "0"
+
+[[case]]
+id = "tax-cg-debt_post_apr2023-2026-04-01-after"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "debt_post_apr2023: short-term 50AA equivalent (2025 Act) gain 200000; slab income 1200000, slab tax 172500.00, special-rate tax 0, total income 1200000, rebate 0, surcharge 0, cess 6900.0000, tax with 179400, without 117000, extra 62400"
+[case.input]
+fy = 2026
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "debt_post_apr2023"
+sale_date = 2026-04-01
+acq_date = 2023-05-01
+asset_class = "mf_debt"
+proceeds = "300000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "62400"
+
+[[case]]
+id = "tax-cg-debt_post_apr2023-2026-04-01-before"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "debt_post_apr2023: short-term 50AA gain 200000; slab income 1200000, slab tax 172500.00, special-rate tax 0, total income 1200000, rebate 0, surcharge 0, cess 6900.0000, tax with 179400, without 117000, extra 62400"
+[case.input]
+fy = 2025
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "debt_post_apr2023"
+sale_date = 2026-03-31
+acq_date = 2023-05-01
+asset_class = "mf_debt"
+proceeds = "300000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "62400"
+
+[[case]]
+id = "tax-cg-debt_pre_apr2023-2014-07-11-after"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "debt_pre_apr2023: long-term 112 gain 155977.4964838255977496483826; slab income 1000000, slab tax 125000.00, special-rate tax 31195.49929676511954992967652, total income 1155977.496483825597749648383, rebate 0, surcharge 0, cess 4685.864978902953586497890295, tax with 160880, without 128750, extra 32130"
+[case.input]
+fy = 2014
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "debt_pre_apr2023"
+sale_date = 2014-07-11
+acq_date = 2010-06-01
+asset_class = "mf_debt"
+proceeds = "300000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "32130"
+
+[[case]]
+id = "tax-cg-debt_pre_apr2023-2014-07-11-before"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "debt_pre_apr2023: long-term 112 (10% option) gain 200000; slab income 1000000, slab tax 125000.00, special-rate tax 20000.00, total income 1200000, rebate 0, surcharge 0, cess 4350.0000, tax with 149350, without 128750, extra 20600"
+[case.input]
+fy = 2014
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "debt_pre_apr2023"
+sale_date = 2014-07-10
+acq_date = 2010-06-01
+asset_class = "mf_debt"
+proceeds = "300000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "20600"
+
+[[case]]
+id = "tax-cg-debt_pre_apr2023-2024-07-23-after"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "debt_pre_apr2023: long-term 112 gain 200000; slab income 1000000, slab tax 112500.00, special-rate tax 25000.000, total income 1200000, rebate 0, surcharge 0, cess 5500.00000, tax with 143000, without 117000, extra 26000"
+[case.input]
+fy = 2024
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "debt_pre_apr2023"
+sale_date = 2024-07-23
+acq_date = 2022-06-01
+asset_class = "mf_debt"
+proceeds = "300000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "26000"
+
+[[case]]
+id = "tax-cg-debt_pre_apr2023-2024-07-23-before"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "debt_pre_apr2023: short-term normal rates gain 200000; slab income 1200000, slab tax 172500.00, special-rate tax 0, total income 1200000, rebate 0, surcharge 0, cess 6900.0000, tax with 179400, without 117000, extra 62400"
+[case.input]
+fy = 2024
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "debt_pre_apr2023"
+sale_date = 2024-07-22
+acq_date = 2022-06-01
+asset_class = "mf_debt"
+proceeds = "300000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "62400"
+
+[[case]]
+id = "tax-cg-debt_pre_apr2023-2026-04-01-after"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "debt_pre_apr2023: long-term 197 (2025 Act) gain 200000; slab income 1000000, slab tax 112500.00, special-rate tax 25000.000, total income 1200000, rebate 0, surcharge 0, cess 5500.00000, tax with 143000, without 117000, extra 26000"
+[case.input]
+fy = 2026
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "debt_pre_apr2023"
+sale_date = 2026-04-01
+acq_date = 2020-01-15
+asset_class = "mf_debt"
+proceeds = "300000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "26000"
+
+[[case]]
+id = "tax-cg-debt_pre_apr2023-2026-04-01-before"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "debt_pre_apr2023: long-term 112 gain 200000; slab income 1000000, slab tax 112500.00, special-rate tax 25000.000, total income 1200000, rebate 0, surcharge 0, cess 5500.00000, tax with 143000, without 117000, extra 26000"
+[case.input]
+fy = 2025
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "debt_pre_apr2023"
+sale_date = 2026-03-31
+acq_date = 2020-01-15
+asset_class = "mf_debt"
+proceeds = "300000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "26000"
+
+[[case]]
+id = "tax-cg-equity-2018-04-01-after"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "cost grandfathered to 2000000; equity: long-term 112A gain 500000; slab income 1000000, slab tax 112500.00, special-rate tax 40000.00, total income 1500000, rebate 0, surcharge 0, cess 6100.0000, tax with 158600, without 117000, extra 41600"
+[case.input]
+fy = 2018
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "equity"
+sale_date = 2018-04-01
+acq_date = 2016-01-01
+asset_class = "etf_equity"
+proceeds = "2500000"
+sale_costs = "0"
+cost = "1000000"
+fmv_2018 = "2000000"
+[case.expect]
+extra = "41600"
+special_tax = "40000.00"
+
+[[case]]
+id = "tax-cg-equity-2018-04-01-before"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "equity: long-term 10(38) gain 1500000; slab income 1000000, slab tax 112500.00, special-rate tax 0, total income 1000000, rebate 0, surcharge 0, cess 3375.0000, tax with 115880, without 115880, extra 0"
+[case.input]
+fy = 2017
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "equity"
+sale_date = 2018-03-31
+acq_date = 2016-01-01
+asset_class = "etf_equity"
+proceeds = "2500000"
+sale_costs = "0"
+cost = "1000000"
+fmv_2018 = "2000000"
+[case.expect]
+extra = "0"
+special_tax = "0"
+
+[[case]]
+id = "tax-cg-equity-2024-07-23-after"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "equity: long-term 112A gain 200000; slab income 1000000, slab tax 112500.00, special-rate tax 9375.000, total income 1200000, rebate 0, surcharge 0, cess 4875.00000, tax with 126750, without 117000, extra 9750"
+[case.input]
+fy = 2024
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "equity"
+sale_date = 2024-07-23
+acq_date = 2020-01-15
+asset_class = "etf_equity"
+proceeds = "300000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "9750"
+
+[[case]]
+id = "tax-cg-equity-2024-07-23-before"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "equity: long-term 112A gain 200000; slab income 1000000, slab tax 112500.00, special-rate tax 7500.00, total income 1200000, rebate 0, surcharge 0, cess 4800.0000, tax with 124800, without 117000, extra 7800"
+[case.input]
+fy = 2024
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "equity"
+sale_date = 2024-07-22
+acq_date = 2020-01-15
+asset_class = "etf_equity"
+proceeds = "300000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "7800"
+
+[[case]]
+id = "tax-cg-equity-2026-04-01-after"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "equity: long-term 198 (2025 Act) gain 200000; slab income 1000000, slab tax 112500.00, special-rate tax 9375.000, total income 1200000, rebate 0, surcharge 0, cess 4875.00000, tax with 126750, without 117000, extra 9750"
+[case.input]
+fy = 2026
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "equity"
+sale_date = 2026-04-01
+acq_date = 2024-08-01
+asset_class = "etf_equity"
+proceeds = "300000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "9750"
+
+[[case]]
+id = "tax-cg-equity-2026-04-01-before"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "equity: long-term 112A gain 200000; slab income 1000000, slab tax 112500.00, special-rate tax 9375.000, total income 1200000, rebate 0, surcharge 0, cess 4875.00000, tax with 126750, without 117000, extra 9750"
+[case.input]
+fy = 2025
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "equity"
+sale_date = 2026-03-31
+acq_date = 2024-08-01
+asset_class = "etf_equity"
+proceeds = "300000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "9750"
+
+[[case]]
+id = "tax-cg-gold-2014-07-11-after"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "gold: long-term 112 gain 155977.4964838255977496483826; slab income 1000000, slab tax 125000.00, special-rate tax 31195.49929676511954992967652, total income 1155977.496483825597749648383, rebate 0, surcharge 0, cess 4685.864978902953586497890295, tax with 160880, without 128750, extra 32130"
+[case.input]
+fy = 2014
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "gold"
+sale_date = 2014-07-11
+acq_date = 2010-06-01
+asset_class = "etf_gold"
+proceeds = "300000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "32130"
+
+[[case]]
+id = "tax-cg-gold-2014-07-11-before"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "gold: long-term 112 (10% option) gain 200000; slab income 1000000, slab tax 125000.00, special-rate tax 20000.00, total income 1200000, rebate 0, surcharge 0, cess 4350.0000, tax with 149350, without 128750, extra 20600"
+[case.input]
+fy = 2014
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "gold"
+sale_date = 2014-07-10
+acq_date = 2010-06-01
+asset_class = "etf_gold"
+proceeds = "300000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "20600"
+
+[[case]]
+id = "tax-cg-gold-2024-07-23-after"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "gold: long-term 112 gain 200000; slab income 1000000, slab tax 112500.00, special-rate tax 25000.000, total income 1200000, rebate 0, surcharge 0, cess 5500.00000, tax with 143000, without 117000, extra 26000"
+[case.input]
+fy = 2024
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "gold"
+sale_date = 2024-07-23
+acq_date = 2022-08-01
+asset_class = "etf_gold"
+proceeds = "300000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "26000"
+
+[[case]]
+id = "tax-cg-gold-2024-07-23-before"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "gold: short-term normal rates gain 200000; slab income 1200000, slab tax 172500.00, special-rate tax 0, total income 1200000, rebate 0, surcharge 0, cess 6900.0000, tax with 179400, without 117000, extra 62400"
+[case.input]
+fy = 2024
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "gold"
+sale_date = 2024-07-22
+acq_date = 2022-08-01
+asset_class = "etf_gold"
+proceeds = "300000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "62400"
+
+[[case]]
+id = "tax-cg-gold-2026-04-01-after"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "gold: long-term 197 (2025 Act) gain 200000; slab income 1000000, slab tax 112500.00, special-rate tax 25000.000, total income 1200000, rebate 0, surcharge 0, cess 5500.00000, tax with 143000, without 117000, extra 26000"
+[case.input]
+fy = 2026
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "gold"
+sale_date = 2026-04-01
+acq_date = 2020-01-15
+asset_class = "etf_gold"
+proceeds = "300000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "26000"
+
+[[case]]
+id = "tax-cg-gold-2026-04-01-before"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "gold: long-term 112 gain 200000; slab income 1000000, slab tax 112500.00, special-rate tax 25000.000, total income 1200000, rebate 0, surcharge 0, cess 5500.00000, tax with 143000, without 117000, extra 26000"
+[case.input]
+fy = 2025
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "gold"
+sale_date = 2026-03-31
+acq_date = 2020-01-15
+asset_class = "etf_gold"
+proceeds = "300000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "26000"
+
+[[case]]
+id = "tax-cg-gold_post_apr2023-2025-04-01-after"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "gold_post: long-term 112 gain 200000; slab income 1000000, slab tax 112500.00, special-rate tax 25000.000, total income 1200000, rebate 0, surcharge 0, cess 5500.00000, tax with 143000, without 117000, extra 26000"
+[case.input]
+fy = 2025
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "gold_post"
+sale_date = 2025-04-01
+acq_date = 2023-05-01
+asset_class = "etf_gold"
+proceeds = "300000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "26000"
+
+[[case]]
+id = "tax-cg-gold_post_apr2023-2025-04-01-before"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "gold_post: short-term 50AA gain 200000; slab income 1200000, slab tax 172500.00, special-rate tax 0, total income 1200000, rebate 0, surcharge 0, cess 6900.0000, tax with 179400, without 117000, extra 62400"
+[case.input]
+fy = 2024
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "gold_post"
+sale_date = 2025-03-31
+acq_date = 2023-05-01
+asset_class = "etf_gold"
+proceeds = "300000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "62400"
+
+[[case]]
+id = "tax-cg-gold_post_apr2023-2026-04-01-after"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "gold_post_apr2023: long-term 197 (2025 Act) gain 200000; slab income 1000000, slab tax 112500.00, special-rate tax 25000.000, total income 1200000, rebate 0, surcharge 0, cess 5500.00000, tax with 143000, without 117000, extra 26000"
+[case.input]
+fy = 2026
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "gold_post_apr2023"
+sale_date = 2026-04-01
+acq_date = 2023-05-01
+asset_class = "etf_gold"
+proceeds = "300000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "26000"
+
+[[case]]
+id = "tax-cg-gold_post_apr2023-2026-04-01-before"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "gold_post_apr2023: long-term 112 gain 200000; slab income 1000000, slab tax 112500.00, special-rate tax 25000.000, total income 1200000, rebate 0, surcharge 0, cess 5500.00000, tax with 143000, without 117000, extra 26000"
+[case.input]
+fy = 2025
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "gold_post_apr2023"
+sale_date = 2026-03-31
+acq_date = 2023-05-01
+asset_class = "etf_gold"
+proceeds = "300000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "26000"
+
+[[case]]
+id = "tax-cii-1981-acq2010-sale2014"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "gold: long-term 112 gain 105977.4964838255977496483826; slab income 1000000, slab tax 125000.00, special-rate tax 21195.49929676511954992967652, total income 1105977.496483825597749648383, rebate 0, surcharge 0, cess 4385.864978902953586497890295, tax with 150580, without 128750, extra 21830"
+[case.input]
+fy = 2014
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "gold"
+sale_date = 2014-09-01
+acq_date = 2010-06-01
+asset_class = "etf_gold"
+proceeds = "250000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "21830"
+
+[[case]]
+id = "tax-cii-1981-acq2011-sale2015"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "gold: long-term 112 gain 112292.9936305732484076433121; slab income 1000000, slab tax 125000.00, special-rate tax 22458.59872611464968152866242, total income 1112292.993630573248407643312, rebate 0, surcharge 0, cess 4423.757961783439490445859872, tax with 151880, without 128750, extra 23130"
+[case.input]
+fy = 2015
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "gold"
+sale_date = 2015-09-01
+acq_date = 2011-06-01
+asset_class = "etf_gold"
+proceeds = "250000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "23130"
+
+[[case]]
+id = "tax-cii-1981-acq2012-sale2016"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "gold: long-term 112 gain 117957.7464788732394366197183; slab income 1000000, slab tax 125000.00, special-rate tax 23591.54929577464788732394366, total income 1117957.746478873239436619718, rebate 0, surcharge 0, cess 4457.746478873239436619718311, tax with 153050, without 128750, extra 24300"
+[case.input]
+fy = 2016
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "gold"
+sale_date = 2016-09-01
+acq_date = 2012-06-01
+asset_class = "etf_gold"
+proceeds = "250000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "24300"
+
+[[case]]
+id = "tax-cii-1981-acq2013-sale2016"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "gold: long-term 112 gain 130191.6932907348242811501597; slab income 1000000, slab tax 125000.00, special-rate tax 26038.33865814696485623003194, total income 1130191.693290734824281150160, rebate 0, surcharge 0, cess 4531.150159744408945686900957, tax with 155570, without 128750, extra 26820"
+[case.input]
+fy = 2016
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "gold"
+sale_date = 2016-12-01
+acq_date = 2013-06-01
+asset_class = "etf_gold"
+proceeds = "250000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "26820"
+
+[[case]]
+id = "tax-cii-1981-sale2011"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "gold: long-term 112 (10% option) gain 150000; slab income 1000000, slab tax 152000.00, special-rate tax 15000.00, total income 1150000, rebate 0, surcharge 0, cess 5010.0000, tax with 172010, without 156560, extra 15450"
+[case.input]
+fy = 2011
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "gold"
+sale_date = 2012-01-15
+acq_date = 2010-06-01
+asset_class = "etf_gold"
+proceeds = "250000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "15450"
+
+[[case]]
+id = "tax-cii-1981-sale2012"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "gold: long-term 112 (10% option) gain 150000; slab income 1000000, slab tax 130000.00, special-rate tax 15000.00, total income 1150000, rebate 0, surcharge 0, cess 4350.0000, tax with 149350, without 133900, extra 15450"
+[case.input]
+fy = 2012
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "gold"
+sale_date = 2013-01-15
+acq_date = 2010-06-01
+asset_class = "etf_gold"
+proceeds = "250000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "15450"
+
+[[case]]
+id = "tax-cii-1981-sale2013"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "gold: long-term 112 (10% option) gain 150000; slab income 1000000, slab tax 130000.00, special-rate tax 15000.00, total income 1150000, rebate 0, surcharge 0, cess 4350.0000, tax with 149350, without 133900, extra 15450"
+[case.input]
+fy = 2013
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "gold"
+sale_date = 2014-03-15
+acq_date = 2010-06-01
+asset_class = "etf_gold"
+proceeds = "250000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "15450"
+
+[[case]]
+id = "tax-cii-1981-sale2014"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "gold: long-term 112 gain 105977.4964838255977496483826; slab income 1000000, slab tax 125000.00, special-rate tax 21195.49929676511954992967652, total income 1105977.496483825597749648383, rebate 0, surcharge 0, cess 4385.864978902953586497890295, tax with 150580, without 128750, extra 21830"
+[case.input]
+fy = 2014
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "gold"
+sale_date = 2015-03-15
+acq_date = 2010-06-01
+asset_class = "etf_gold"
+proceeds = "250000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "21830"
+
+[[case]]
+id = "tax-cii-2001-acq2010-sale2017-12-01"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "gold: long-term 112 gain 87125.7485029940119760479042; slab income 1000000, slab tax 112500.00, special-rate tax 17425.14970059880239520958084, total income 1087125.748502994011976047904, rebate 0, surcharge 0, cess 3897.754491017964071856287424, tax with 133820, without 115880, extra 17940"
+[case.input]
+fy = 2017
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "gold"
+sale_date = 2017-12-01
+acq_date = 2010-06-01
+asset_class = "etf_gold"
+proceeds = "250000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "17940"
+
+[[case]]
+id = "tax-cii-2001-acq2011-sale2018-12-01"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "gold: long-term 112 gain 97826.0869565217391304347826; slab income 1000000, slab tax 112500.00, special-rate tax 19565.21739130434782608695652, total income 1097826.086956521739130434783, rebate 0, surcharge 0, cess 5282.608695652173913043478260, tax with 137350, without 117000, extra 20350"
+[case.input]
+fy = 2018
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "gold"
+sale_date = 2018-12-01
+acq_date = 2011-06-01
+asset_class = "etf_gold"
+proceeds = "250000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "20350"
+
+[[case]]
+id = "tax-cii-2001-acq2012-sale2019-12-01"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "gold: long-term 112 gain 105500.000; slab income 1000000, slab tax 112500.00, special-rate tax 21100.00000, total income 1105500.000, rebate 0, surcharge 0, cess 5344.0000000, tax with 138940, without 117000, extra 21940"
+[case.input]
+fy = 2019
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "gold"
+sale_date = 2019-12-01
+acq_date = 2012-06-01
+asset_class = "etf_gold"
+proceeds = "250000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "21940"
+
+[[case]]
+id = "tax-cii-2001-acq2013-sale2020-12-01"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "gold: long-term 112 gain 113181.8181818181818181818182; slab income 1000000, slab tax 112500.00, special-rate tax 22636.36363636363636363636364, total income 1113181.818181818181818181818, rebate 0, surcharge 0, cess 5405.454545454545454545454544, tax with 140540, without 117000, extra 23540"
+[case.input]
+fy = 2020
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "gold"
+sale_date = 2020-12-01
+acq_date = 2013-06-01
+asset_class = "etf_gold"
+proceeds = "250000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "23540"
+
+[[case]]
+id = "tax-cii-2001-acq2014-sale2021-12-01"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "gold: long-term 112 gain 117916.6666666666666666666667; slab income 1000000, slab tax 112500.00, special-rate tax 23583.33333333333333333333334, total income 1117916.666666666666666666667, rebate 0, surcharge 0, cess 5443.333333333333333333333332, tax with 141530, without 117000, extra 24530"
+[case.input]
+fy = 2021
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "gold"
+sale_date = 2021-12-01
+acq_date = 2014-06-01
+asset_class = "etf_gold"
+proceeds = "250000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "24530"
+
+[[case]]
+id = "tax-cii-2001-acq2015-sale2022-12-01"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "gold: long-term 112 gain 119685.0393700787401574803150; slab income 1000000, slab tax 112500.00, special-rate tax 23937.00787401574803149606300, total income 1119685.039370078740157480315, rebate 0, surcharge 0, cess 5457.480314960629921259842520, tax with 141890, without 117000, extra 24890"
+[case.input]
+fy = 2022
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "gold"
+sale_date = 2022-12-01
+acq_date = 2015-06-01
+asset_class = "etf_gold"
+proceeds = "250000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "24890"
+
+[[case]]
+id = "tax-cii-2001-acq2016-sale2023-12-01"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "gold: long-term 112 gain 118181.8181818181818181818182; slab income 1000000, slab tax 112500.00, special-rate tax 23636.36363636363636363636364, total income 1118181.818181818181818181818, rebate 0, surcharge 0, cess 5445.454545454545454545454544, tax with 141580, without 117000, extra 24580"
+[case.input]
+fy = 2023
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "gold"
+sale_date = 2023-12-01
+acq_date = 2016-06-01
+asset_class = "etf_gold"
+proceeds = "250000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "24580"
+
+[[case]]
+id = "tax-cii-2001-acq2017-sale2024-06-15"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "gold: long-term 112 gain 116544.1176470588235294117647; slab income 1000000, slab tax 112500.00, special-rate tax 23308.82352941176470588235294, total income 1116544.117647058823529411765, rebate 0, surcharge 0, cess 5432.352941176470588235294116, tax with 141240, without 117000, extra 24240"
+[case.input]
+fy = 2024
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "gold"
+sale_date = 2024-06-15
+acq_date = 2017-06-01
+asset_class = "etf_gold"
+proceeds = "250000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "24240"
+
+[[case]]
+id = "tax-cii-2001-acq2018-sale2024-06-20"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "gold: long-term 112 gain 120357.1428571428571428571429; slab income 1000000, slab tax 112500.00, special-rate tax 24071.42857142857142857142858, total income 1120357.142857142857142857143, rebate 0, surcharge 0, cess 5462.857142857142857142857144, tax with 142030, without 117000, extra 25030"
+[case.input]
+fy = 2024
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "gold"
+sale_date = 2024-06-20
+acq_date = 2018-06-01
+asset_class = "etf_gold"
+proceeds = "250000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "25030"
+
+[[case]]
+id = "tax-cii-2001-acq2019-sale2024-06-21"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "gold: long-term 112 gain 124394.4636678200692041522491; slab income 1000000, slab tax 112500.00, special-rate tax 24878.89273356401384083044982, total income 1124394.463667820069204152249, rebate 0, surcharge 0, cess 5495.155709342560553633217992, tax with 142870, without 117000, extra 25870"
+[case.input]
+fy = 2024
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "gold"
+sale_date = 2024-06-21
+acq_date = 2019-06-01
+asset_class = "etf_gold"
+proceeds = "250000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "25870"
+
+[[case]]
+id = "tax-cii-2001-acq2020-sale2024-06-22"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "gold: long-term 112 gain 129401.9933554817275747508306; slab income 1000000, slab tax 112500.00, special-rate tax 25880.39867109634551495016612, total income 1129401.993355481727574750831, rebate 0, surcharge 0, cess 5535.215946843853820598006644, tax with 143920, without 117000, extra 26920"
+[case.input]
+fy = 2024
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "gold"
+sale_date = 2024-06-22
+acq_date = 2020-06-01
+asset_class = "etf_gold"
+proceeds = "250000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "26920"
+
+[[case]]
+id = "tax-cii-2001-acq2021-sale2024-06-23"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "gold: long-term 112 gain 135488.9589905362776025236593; slab income 1000000, slab tax 112500.00, special-rate tax 27097.79179810725552050473186, total income 1135488.958990536277602523659, rebate 0, surcharge 0, cess 5583.911671924290220820189276, tax with 145180, without 117000, extra 28180"
+[case.input]
+fy = 2024
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "gold"
+sale_date = 2024-06-23
+acq_date = 2021-06-01
+asset_class = "etf_gold"
+proceeds = "250000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "28180"
+
+[[case]]
+id = "tax-cii-2001-sale2017"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "debt: long-term 112 gain 114000.00; slab income 1000000, slab tax 112500.00, special-rate tax 22800.0000, total income 1114000.00, rebate 0, surcharge 0, cess 4059.000000, tax with 139360, without 115880, extra 23480"
+[case.input]
+fy = 2017
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "debt"
+sale_date = 2017-06-01
+acq_date = 2012-06-01
+asset_class = "mf_debt"
+proceeds = "250000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "23480"
+
+[[case]]
+id = "tax-cii-2001-sale2018"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "debt: long-term 112 gain 110000.0; slab income 1000000, slab tax 112500.00, special-rate tax 22000.000, total income 1110000.0, rebate 0, surcharge 0, cess 5380.00000, tax with 139880, without 117000, extra 22880"
+[case.input]
+fy = 2018
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "debt"
+sale_date = 2018-06-01
+acq_date = 2012-06-01
+asset_class = "mf_debt"
+proceeds = "250000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "22880"
+
+[[case]]
+id = "tax-cii-2001-sale2019"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "debt: long-term 112 gain 105500.000; slab income 1000000, slab tax 112500.00, special-rate tax 21100.00000, total income 1105500.000, rebate 0, surcharge 0, cess 5344.0000000, tax with 138940, without 117000, extra 21940"
+[case.input]
+fy = 2019
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "debt"
+sale_date = 2019-06-01
+acq_date = 2012-06-01
+asset_class = "mf_debt"
+proceeds = "250000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "21940"
+
+[[case]]
+id = "tax-cii-2001-sale2020"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "debt: long-term 112 gain 99500.000; slab income 1000000, slab tax 112500.00, special-rate tax 19900.00000, total income 1099500.000, rebate 0, surcharge 0, cess 5296.0000000, tax with 137700, without 117000, extra 20700"
+[case.input]
+fy = 2020
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "debt"
+sale_date = 2020-06-01
+acq_date = 2012-06-01
+asset_class = "mf_debt"
+proceeds = "250000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "20700"
+
+[[case]]
+id = "tax-cii-2001-sale2021"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "debt: long-term 112 gain 91500.000; slab income 1000000, slab tax 112500.00, special-rate tax 18300.00000, total income 1091500.000, rebate 0, surcharge 0, cess 5232.0000000, tax with 136030, without 117000, extra 19030"
+[case.input]
+fy = 2021
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "debt"
+sale_date = 2021-06-01
+acq_date = 2012-06-01
+asset_class = "mf_debt"
+proceeds = "250000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "19030"
+
+[[case]]
+id = "tax-cii-2001-sale2022"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "debt: long-term 112 gain 84500.000; slab income 1000000, slab tax 112500.00, special-rate tax 16900.00000, total income 1084500.000, rebate 0, surcharge 0, cess 5176.0000000, tax with 134580, without 117000, extra 17580"
+[case.input]
+fy = 2022
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "debt"
+sale_date = 2022-06-01
+acq_date = 2012-06-01
+asset_class = "mf_debt"
+proceeds = "250000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "17580"
+
+[[case]]
+id = "tax-cii-2001-sale2023"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "debt: long-term 112 gain 76000.00; slab income 1000000, slab tax 112500.00, special-rate tax 15200.0000, total income 1076000.00, rebate 0, surcharge 0, cess 5108.000000, tax with 132810, without 117000, extra 15810"
+[case.input]
+fy = 2023
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "debt"
+sale_date = 2023-06-01
+acq_date = 2012-06-01
+asset_class = "mf_debt"
+proceeds = "250000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "15810"
+
+[[case]]
+id = "tax-cii-2001-sale2024"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "debt: long-term 112 gain 68500.000; slab income 1000000, slab tax 112500.00, special-rate tax 13700.00000, total income 1068500.000, rebate 0, surcharge 0, cess 5048.0000000, tax with 131250, without 117000, extra 14250"
+[case.input]
+fy = 2024
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "debt"
+sale_date = 2024-06-01
+acq_date = 2012-06-01
+asset_class = "mf_debt"
+proceeds = "250000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "14250"
+
+[[case]]
+id = "tax-dividend-old-2016-04-01-after"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "slab income 1000000, slab tax 125000.00, special-rate tax 50000.00, total income 1500000, rebate 0, surcharge 0, cess 5250.0000, tax with 180250, without 128750, extra 51500"
+[case.input]
+fy = 2016
+regime = "old"
+other_income = "1000000"
+dividends = "1500000"
+[case.expect]
+extra = "51500"
+tax_with = "180250"
+tax_without = "128750"
+total_income = "1500000"
+rebate = "0"
+surcharge = "0"
+
+[[case]]
+id = "tax-dividend-old-2016-04-01-before"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "slab income 1000000, slab tax 125000.00, special-rate tax 0, total income 1000000, rebate 0, surcharge 0, cess 3750.0000, tax with 128750, without 128750, extra 0"
+[case.input]
+fy = 2015
+regime = "old"
+other_income = "1000000"
+dividends = "1500000"
+[case.expect]
+extra = "0"
+tax_with = "128750"
+tax_without = "128750"
+total_income = "1000000"
+rebate = "0"
+surcharge = "0"
+
+[[case]]
+id = "tax-dividend-old-2020-04-01-after"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "slab income 2500000, slab tax 562500.00, special-rate tax 0, total income 2500000, rebate 0, surcharge 0, cess 22500.0000, tax with 585000, without 117000, extra 468000"
+[case.input]
+fy = 2020
+regime = "old"
+other_income = "1000000"
+dividends = "1500000"
+[case.expect]
+extra = "468000"
+tax_with = "585000"
+tax_without = "117000"
+total_income = "2500000"
+rebate = "0"
+surcharge = "0"
+
+[[case]]
+id = "tax-dividend-old-2020-04-01-before"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "slab income 1000000, slab tax 112500.00, special-rate tax 50000.00, total income 1500000, rebate 0, surcharge 0, cess 6500.0000, tax with 169000, without 117000, extra 52000"
+[case.input]
+fy = 2019
+regime = "old"
+other_income = "1000000"
+dividends = "1500000"
+[case.expect]
+extra = "52000"
+tax_with = "169000"
+tax_without = "117000"
+total_income = "1500000"
+rebate = "0"
+surcharge = "0"
+
+[[case]]
+id = "tax-full-112a-not-rebated-old"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "stcg: short-term 111A gain 50000; ltcg: long-term 112A gain 150000; slab income 250000, slab tax 0.00, special-rate tax 12500.00, total income 450000, rebate 7500.00, surcharge 0, cess 200.0000, tax with 5200, without 0, extra 5200"
+[case.input]
+fy = 2019
+regime = "old"
+other_income = "250000"
+[[case.input.events]]
+label = "stcg"
+sale_date = 2019-12-01
+acq_date = 2019-06-01
+asset_class = "etf_equity"
+proceeds = "60000"
+sale_costs = "0"
+cost = "10000"
+[[case.input.events]]
+label = "ltcg"
+sale_date = 2019-06-15
+acq_date = 2018-03-01
+asset_class = "etf_equity"
+proceeds = "250000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "5200"
+rebate = "7500.00"
+special_tax = "12500.00"
+total_income = "450000"
+
+[[case]]
+id = "tax-full-deemed-short-term-debt-fund"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "sale: short-term 50AA gain 100000; slab income 1100000, slab tax 142500.00, special-rate tax 0, total income 1100000, rebate 0, surcharge 0, cess 5700.0000, tax with 148200, without 117000, extra 31200"
+[case.input]
+fy = 2025
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "sale"
+sale_date = 2025-06-01
+acq_date = 2023-05-01
+asset_class = "mf_debt"
+proceeds = "200000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "31200"
+
+[[case]]
+id = "tax-full-dividend-above-threshold-2017"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "slab income 1000000, slab tax 112500.00, special-rate tax 20000.00, total income 1200000, rebate 0, surcharge 0, cess 3975.0000, tax with 136480, without 115880, extra 20600"
+[case.input]
+fy = 2017
+regime = "old"
+other_income = "1000000"
+dividends = "1200000"
+[case.expect]
+extra = "20600"
+special_tax = "20000.00"
+total_income = "1200000"
+
+[[case]]
+id = "tax-full-dividend-exempt-2013"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "slab income 1000000, slab tax 130000.00, special-rate tax 0, total income 1000000, rebate 0, surcharge 0, cess 3900.0000, tax with 133900, without 133900, extra 0"
+[case.input]
+fy = 2013
+regime = "old"
+other_income = "1000000"
+dividends = "1200000"
+[case.expect]
+extra = "0"
+tax_with = "133900"
+
+[[case]]
+id = "tax-full-dividend-slab-2021"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "slab income 1100000, slab tax 142500.00, special-rate tax 0, total income 1100000, rebate 0, surcharge 0, cess 5700.0000, tax with 148200, without 117000, extra 31200"
+[case.input]
+fy = 2021
+regime = "old"
+other_income = "1000000"
+dividends = "100000"
+[case.expect]
+extra = "31200"
+
+[[case]]
+id = "tax-full-exempt-gain-2017-and-its-loss"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "pre-2018 long-term equity gains and losses are both outside tax; win: long-term 10(38) gain 150000; lose: long-term 10(38) gain -100000; slab income 1000000, slab tax 112500.00, special-rate tax 0, total income 1000000, rebate 0, surcharge 0, cess 3375.0000, tax with 115880, without 115880, extra 0"
+[case.input]
+fy = 2017
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "win"
+sale_date = 2017-06-01
+acq_date = 2015-01-01
+asset_class = "etf_equity"
+proceeds = "250000"
+sale_costs = "0"
+cost = "100000"
+[[case.input.events]]
+label = "lose"
+sale_date = 2017-07-01
+acq_date = 2014-01-01
+asset_class = "etf_equity"
+proceeds = "100000"
+sale_costs = "0"
+cost = "200000"
+[case.expect]
+extra = "0"
+special_tax = "0"
+total_income = "1000000"
+
+[[case]]
+id = "tax-full-exempt-part-counts-for-rebate-limit"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "sale: long-term 112A gain 150000; slab income 400000, slab tax 7500.00, special-rate tax 5000.00, total income 550000, rebate 0, surcharge 0, cess 500.0000, tax with 13000, without 0, extra 13000"
+[case.input]
+fy = 2019
+regime = "old"
+other_income = "400000"
+[[case.input.events]]
+label = "sale"
+sale_date = 2019-06-01
+acq_date = 2018-03-01
+asset_class = "etf_equity"
+proceeds = "250000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "13000"
+rebate = "0"
+total_income = "550000"
+
+[[case]]
+id = "tax-full-grandfathering-2019"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "cost grandfathered to 2000000; sale: long-term 112A gain 500000; slab income 1000000, slab tax 112500.00, special-rate tax 40000.00, total income 1500000, rebate 0, surcharge 0, cess 6100.0000, tax with 158600, without 117000, extra 41600"
+[case.input]
+fy = 2019
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "sale"
+sale_date = 2019-06-01
+acq_date = 2016-01-01
+asset_class = "etf_equity"
+proceeds = "2500000"
+sale_costs = "0"
+cost = "1000000"
+fmv_2018 = "2000000"
+[case.expect]
+extra = "41600"
+special_tax = "40000.00"
+
+[[case]]
+id = "tax-full-grandfathering-capped-by-sale"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "cost grandfathered to 2500000; sale: long-term 112A gain 0; slab income 1000000, slab tax 112500.00, special-rate tax 0.00, total income 1000000, rebate 0, surcharge 0, cess 4500.0000, tax with 117000, without 117000, extra 0"
+[case.input]
+fy = 2019
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "sale"
+sale_date = 2019-06-01
+acq_date = 2016-01-01
+asset_class = "etf_equity"
+proceeds = "2500000"
+sale_costs = "0"
+cost = "1000000"
+fmv_2018 = "3000000"
+[case.expect]
+extra = "0"
+special_tax = "0.00"
+
+[[case]]
+id = "tax-full-indexed-loss-old-gold"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "sale: long-term 112 gain -29831.2236286919831223628692; slab income 1000000, slab tax 130000.00, special-rate tax 0.00, total income 1000000, rebate 0, surcharge 0, cess 3900.0000, tax with 133900, without 133900, extra 0"
+[case.input]
+fy = 2012
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "sale"
+sale_date = 2013-03-01
+acq_date = 2010-06-01
+asset_class = "etf_gold"
+proceeds = "90000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "0"
+
+[[case]]
+id = "tax-full-indexed-route-cheaper-old-gold"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "sale: long-term 112 gain -14831.2236286919831223628692; slab income 1000000, slab tax 130000.00, special-rate tax 0.00, total income 1000000, rebate 0, surcharge 0, cess 3900.0000, tax with 133900, without 133900, extra 0"
+[case.input]
+fy = 2012
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "sale"
+sale_date = 2013-03-01
+acq_date = 2010-06-01
+asset_class = "etf_gold"
+proceeds = "105000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "0"
+
+[[case]]
+id = "tax-full-interest-and-gain"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "stcg: short-term 111A gain 50000; slab income 550000, slab tax 22500.00, special-rate tax 7500.00, total income 600000, rebate 0, surcharge 0, cess 1200.0000, tax with 31200, without 0, extra 31200"
+[case.input]
+fy = 2019
+regime = "old"
+other_income = "500000"
+interest = "50000"
+[[case.input.events]]
+label = "stcg"
+sale_date = 2019-12-01
+acq_date = 2019-06-01
+asset_class = "etf_equity"
+proceeds = "60000"
+sale_costs = "0"
+cost = "10000"
+[case.expect]
+extra = "31200"
+total_income = "600000"
+rebate = "0"
+
+[[case]]
+id = "tax-full-loss-carried-in-2019"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "sale: short-term 111A gain 100000; slab income 1000000, slab tax 112500.00, special-rate tax 9000.00, total income 1060000, rebate 0, surcharge 0, cess 4860.0000, tax with 126360, without 117000, extra 9360"
+[case.input]
+fy = 2019
+regime = "old"
+other_income = "1000000"
+carry_st = [{ origin = 2018, amount = "40000" }]
+[[case.input.events]]
+label = "sale"
+sale_date = 2019-09-01
+acq_date = 2019-05-01
+asset_class = "etf_equity"
+proceeds = "200000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "9360"
+
+[[case]]
+id = "tax-full-loss-expires-after-eight-years"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "sale: short-term 111A gain 100000; slab income 1000000, slab tax 112500.00, special-rate tax 15000.00, total income 1100000, rebate 0, surcharge 0, cess 5100.0000, tax with 132600, without 117000, extra 15600"
+[case.input]
+fy = 2019
+regime = "old"
+other_income = "1000000"
+carry_st = [{ origin = 2010, amount = "40000" }]
+[[case.input.events]]
+label = "sale"
+sale_date = 2019-09-01
+acq_date = 2019-05-01
+asset_class = "etf_equity"
+proceeds = "200000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "15600"
+
+[[case]]
+id = "tax-full-loss-last-year-still-usable"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "sale: short-term 111A gain 100000; slab income 1000000, slab tax 112500.00, special-rate tax 9000.00, total income 1060000, rebate 0, surcharge 0, cess 4860.0000, tax with 126360, without 117000, extra 9360"
+[case.input]
+fy = 2019
+regime = "old"
+other_income = "1000000"
+carry_st = [{ origin = 2011, amount = "40000" }]
+[[case.input.events]]
+label = "sale"
+sale_date = 2019-09-01
+acq_date = 2019-05-01
+asset_class = "etf_equity"
+proceeds = "200000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "9360"
+
+[[case]]
+id = "tax-full-ltcl-carried-in"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "a brought-forward long-term loss is used before the yearly exemption; ltcg: long-term 112A gain 250000; slab income 1000000, slab tax 112500.00, special-rate tax 3000.00, total income 1130000, rebate 0, surcharge 0, cess 4620.0000, tax with 120120, without 117000, extra 3120"
+[case.input]
+fy = 2019
+regime = "old"
+other_income = "1000000"
+carry_lt = [{ origin = 2018, amount = "120000" }]
+[[case.input.events]]
+label = "ltcg"
+sale_date = 2019-06-01
+acq_date = 2018-03-01
+asset_class = "etf_equity"
+proceeds = "350000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "3120"
+
+[[case]]
+id = "tax-full-ltcl-only-against-ltcg"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "a long-term loss cannot reduce a short-term gain; ltcl: long-term 112A gain -100000; stcg: short-term 111A gain 100000; slab income 1000000, slab tax 112500.00, special-rate tax 15000.00, total income 1100000, rebate 0, surcharge 0, cess 5100.0000, tax with 132600, without 117000, extra 15600"
+[case.input]
+fy = 2019
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "ltcl"
+sale_date = 2019-06-01
+acq_date = 2018-03-01
+asset_class = "etf_equity"
+proceeds = "200000"
+sale_costs = "0"
+cost = "300000"
+[[case.input.events]]
+label = "stcg"
+sale_date = 2019-09-01
+acq_date = 2019-05-01
+asset_class = "etf_equity"
+proceeds = "200000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "15600"
+special_tax = "15000.00"
+
+[[case]]
+id = "tax-full-mf-equity-lt-2019"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "sale: long-term 112A gain 150000; slab income 1000000, slab tax 112500.00, special-rate tax 5000.00, total income 1150000, rebate 0, surcharge 0, cess 4700.0000, tax with 122200, without 117000, extra 5200"
+[case.input]
+fy = 2019
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "sale"
+sale_date = 2019-06-01
+acq_date = 2018-03-01
+asset_class = "mf_equity"
+proceeds = "250000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "5200"
+
+[[case]]
+id = "tax-full-new-regime-before-it-existed"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "slab income 1000000, slab tax 112500.00, special-rate tax 0, total income 1000000, rebate 0, surcharge 0, cess 4500.0000, tax with 117000, without 117000, extra 0"
+[case.input]
+fy = 2018
+regime = "new"
+other_income = "1000000"
+[case.expect]
+extra = "0"
+tax_with = "117000"
+
+[[case]]
+id = "tax-full-new-regime-rebate-and-gain"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "ltcg: short-term 111A gain 200000; slab income 1100000, slab tax 50000.00, special-rate tax 40000.00, total income 1300000, rebate 0, surcharge 0, cess 3600.0000, tax with 93600, without 0, extra 93600"
+[case.input]
+fy = 2025
+regime = "new"
+other_income = "1100000"
+[[case.input.events]]
+label = "ltcg"
+sale_date = 2025-08-01
+acq_date = 2024-08-01
+asset_class = "etf_equity"
+proceeds = "300000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "93600"
+special_tax = "40000.00"
+rebate = "0"
+
+[[case]]
+id = "tax-full-new-regime-rebate-marginal-relief-2023"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "slab income 710000, slab tax 26000.00, special-rate tax 0, total income 710000, rebate 16000.00, surcharge 0, cess 400.0000, tax with 10400, without 10400, extra 0"
+[case.input]
+fy = 2023
+regime = "new"
+other_income = "710000"
+[case.expect]
+extra = "0"
+rebate = "16000.00"
+tax_with = "10400"
+
+[[case]]
+id = "tax-full-new-regime-rebate-marginal-relief-2025"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "slab income 1210000, slab tax 61500.00, special-rate tax 0, total income 1210000, rebate 51500.00, surcharge 0, cess 400.0000, tax with 10400, without 10400, extra 0"
+[case.input]
+fy = 2025
+regime = "new"
+other_income = "1210000"
+[case.expect]
+extra = "0"
+rebate = "51500.00"
+tax_with = "10400"
+
+[[case]]
+id = "tax-full-new-regime-stcg-no-rebate-cover"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "stcg: short-term 111A gain 100000; slab income 600000, slab tax 15000.00, special-rate tax 20000.00, total income 700000, rebate 15000.00, surcharge 0, cess 800.0000, tax with 20800, without 0, extra 20800"
+[case.input]
+fy = 2024
+regime = "new"
+other_income = "600000"
+[[case.input.events]]
+label = "stcg"
+sale_date = 2024-11-01
+acq_date = 2024-06-01
+asset_class = "etf_equity"
+proceeds = "200000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "20800"
+rebate = "15000.00"
+special_tax = "20000.00"
+
+[[case]]
+id = "tax-full-option-cheaper-old-gold"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "sale: long-term 112 (10% option) gain 200000; slab income 1000000, slab tax 130000.00, special-rate tax 20000.00, total income 1200000, rebate 0, surcharge 0, cess 4500.0000, tax with 154500, without 133900, extra 20600"
+[case.input]
+fy = 2012
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "sale"
+sale_date = 2013-03-01
+acq_date = 2010-06-01
+asset_class = "etf_gold"
+proceeds = "300000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "20600"
+
+[[case]]
+id = "tax-full-stcl-on-ltcg-2019"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "loss: short-term 111A gain -30000; gain: long-term 112A gain 150000; slab income 1000000, slab tax 112500.00, special-rate tax 2000.00, total income 1120000, rebate 0, surcharge 0, cess 4580.0000, tax with 119080, without 117000, extra 2080"
+[case.input]
+fy = 2019
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "loss"
+sale_date = 2019-06-01
+acq_date = 2019-01-10
+asset_class = "etf_equity"
+proceeds = "70000"
+sale_costs = "0"
+cost = "100000"
+[[case.input.events]]
+label = "gain"
+sale_date = 2019-07-01
+acq_date = 2018-03-01
+asset_class = "etf_equity"
+proceeds = "250000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "2080"
+special_tax = "2000.00"
+
+[[case]]
+id = "tax-full-student-some-gain-left"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "a gain bigger than the basic exemption; stcg: short-term 111A gain 300000; slab income 0, slab tax 0.00, special-rate tax 7500.00, total income 300000, rebate 7500.00, surcharge 0, cess 0.0000, tax with 0, without 0, extra 0"
+[case.input]
+fy = 2019
+regime = "old"
+other_income = "0"
+[[case.input.events]]
+label = "stcg"
+sale_date = 2019-12-01
+acq_date = 2019-06-01
+asset_class = "etf_equity"
+proceeds = "310000"
+sale_costs = "0"
+cost = "10000"
+[case.expect]
+extra = "0"
+special_tax = "7500.00"
+
+[[case]]
+id = "tax-full-student-zero-income"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "student: the unused basic exemption shelters the gain; stcg: short-term 111A gain 50000; slab income 0, slab tax 0.00, special-rate tax 0.00, total income 50000, rebate 0.00, surcharge 0, cess 0.0000, tax with 0, without 0, extra 0"
+[case.input]
+fy = 2019
+regime = "old"
+other_income = "0"
+[[case.input.events]]
+label = "stcg"
+sale_date = 2019-12-01
+acq_date = 2019-06-01
+asset_class = "etf_equity"
+proceeds = "60000"
+sale_costs = "0"
+cost = "10000"
+[case.expect]
+extra = "0"
+tax_with = "0"
+special_tax = "0.00"
+
+[[case]]
+id = "tax-full-surcharge-just-above-50-lakh-with-gain"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "stcg: short-term 111A gain 50000; slab income 5000000, slab tax 1312500.00, special-rate tax 7500.00, total income 5050000, rebate 0, surcharge 35000.0000, cess 54200.000000, tax with 1409200, without 1365000, extra 44200"
+[case.input]
+fy = 2019
+regime = "old"
+other_income = "5000000"
+[[case.input.events]]
+label = "stcg"
+sale_date = 2019-12-01
+acq_date = 2019-06-01
+asset_class = "etf_equity"
+proceeds = "60000"
+sale_costs = "0"
+cost = "10000"
+[case.expect]
+extra = "44200"
+surcharge = "35000.0000"
+special_tax = "7500.00"
+
+[[case]]
+id = "tax-full-surcharge-relief-just-above-50-lakh"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "slab income 5010000, slab tax 1315500.00, special-rate tax 0, total income 5010000, rebate 0, surcharge 7000.0000, cess 52900.000000, tax with 1375400, without 1375400, extra 0"
+[case.input]
+fy = 2019
+regime = "old"
+other_income = "5010000"
+[case.expect]
+extra = "0"
+surcharge = "7000.0000"
+tax_with = "1375400"
+
+[[case]]
+id = "tax-full-top-tier-25-percent-2019-gold-uncapped"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "stcg: short-term 111A gain 100000; gold: long-term 112 gain 186220.4724409448818897637795; slab income 25000000, slab tax 7312500.00, special-rate tax 52244.09448818897637795275590, total income 25286220.47244094488188976378, rebate 0, surcharge 1839686.023622047244094488189, cess 368177.2047244094488188976378, tax with 9572610, without 9506250, extra 66360"
+[case.input]
+fy = 2019
+regime = "old"
+other_income = "25000000"
+[[case.input.events]]
+label = "stcg"
+sale_date = 2019-12-01
+acq_date = 2019-06-01
+asset_class = "etf_equity"
+proceeds = "110000"
+sale_costs = "0"
+cost = "10000"
+[[case.input.events]]
+label = "gold"
+sale_date = 2019-08-01
+acq_date = 2015-06-01
+asset_class = "etf_gold"
+proceeds = "300000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "66360"
+
+[[case]]
+id = "tax-full-top-tier-slab-income-below-2-crore"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "stcg: short-term 111A gain 10000000; slab income 15000000, slab tax 4312500.00, special-rate tax 1500000.00, total income 25000000, rebate 0, surcharge 871875.0000, cess 267375.000000, tax with 6951750, without 5157750, extra 1794000"
+[case.input]
+fy = 2022
+regime = "old"
+other_income = "15000000"
+[[case.input.events]]
+label = "stcg"
+sale_date = 2022-12-01
+acq_date = 2022-06-01
+asset_class = "etf_equity"
+proceeds = "10010000"
+sale_costs = "0"
+cost = "10000"
+[case.expect]
+extra = "1794000"
+surcharge = "871875.0000"
+special_tax = "1500000.00"
+
+[[case]]
+id = "tax-full-two-rates-in-2024"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "a gain at 10% and one at 12.5% share the one exemption; before: long-term 112A gain 90000; after: long-term 112A gain 90000; slab income 1000000, slab tax 112500.00, special-rate tax 6875.000, total income 1180000, rebate 0, surcharge 0, cess 4775.00000, tax with 124150, without 117000, extra 7150"
+[case.input]
+fy = 2024
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "before"
+sale_date = 2024-05-10
+acq_date = 2020-01-15
+asset_class = "etf_equity"
+proceeds = "190000"
+sale_costs = "0"
+cost = "100000"
+[[case.input.events]]
+label = "after"
+sale_date = 2024-09-10
+acq_date = 2020-01-15
+asset_class = "etf_equity"
+proceeds = "190000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "7150"
+special_tax = "6875.000"
+total_income = "1180000"
+
+[[case]]
+id = "tax-full-zero-everything"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "slab income 0, slab tax 0.00, special-rate tax 0, total income 0, rebate 0.00, surcharge 0, cess 0.0000, tax with 0, without 0, extra 0"
+[case.input]
+fy = 2019
+regime = "old"
+other_income = "0"
+[case.expect]
+extra = "0"
+tax_with = "0"
+
+[[case]]
+id = "tax-lt_exemption-old-2024-04-01-after"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "ltcg: long-term 112A gain 200000; slab income 1000000, slab tax 112500.00, special-rate tax 7500.00, total income 1200000, rebate 0, surcharge 0, cess 4800.0000, tax with 124800, without 117000, extra 7800"
+[case.input]
+fy = 2024
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "ltcg"
+sale_date = 2024-05-10
+acq_date = 2022-12-01
+asset_class = "etf_equity"
+proceeds = "300000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "7800"
+special_tax = "7500.00"
+total_income = "1200000"
+
+[[case]]
+id = "tax-lt_exemption-old-2024-04-01-before"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "ltcg: long-term 112A gain 200000; slab income 1000000, slab tax 112500.00, special-rate tax 10000.00, total income 1200000, rebate 0, surcharge 0, cess 4900.0000, tax with 127400, without 117000, extra 10400"
+[case.input]
+fy = 2023
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "ltcg"
+sale_date = 2024-03-15
+acq_date = 2022-12-01
+asset_class = "etf_equity"
+proceeds = "300000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "10400"
+special_tax = "10000.00"
+total_income = "1200000"
+
+[[case]]
+id = "tax-lt_exemption-old-2025-04-01-after"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "ltcg: long-term 112A gain 200000; slab income 1000000, slab tax 112500.00, special-rate tax 9375.000, total income 1200000, rebate 0, surcharge 0, cess 4875.00000, tax with 126750, without 117000, extra 9750"
+[case.input]
+fy = 2025
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "ltcg"
+sale_date = 2025-05-10
+acq_date = 2023-12-01
+asset_class = "etf_equity"
+proceeds = "300000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "9750"
+special_tax = "9375.000"
+total_income = "1200000"
+
+[[case]]
+id = "tax-lt_exemption-old-2025-04-01-before"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "ltcg: long-term 112A gain 200000; slab income 1000000, slab tax 112500.00, special-rate tax 9375.000, total income 1200000, rebate 0, surcharge 0, cess 4875.00000, tax with 126750, without 117000, extra 9750"
+[case.input]
+fy = 2024
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "ltcg"
+sale_date = 2025-03-15
+acq_date = 2023-12-01
+asset_class = "etf_equity"
+proceeds = "300000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "9750"
+special_tax = "9375.000"
+total_income = "1200000"
+
+[[case]]
+id = "tax-rebate-new-2023-04-01-after"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "slab income 650000, slab tax 20000.00, special-rate tax 0, total income 650000, rebate 20000.00, surcharge 0, cess 0.0000, tax with 0, without 0, extra 0"
+[case.input]
+fy = 2023
+regime = "new"
+other_income = "650000"
+[case.expect]
+extra = "0"
+tax_with = "0"
+tax_without = "0"
+total_income = "650000"
+rebate = "20000.00"
+surcharge = "0"
+
+[[case]]
+id = "tax-rebate-new-2023-04-01-before"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "slab income 650000, slab tax 27500.00, special-rate tax 0, total income 650000, rebate 0, surcharge 0, cess 1100.0000, tax with 28600, without 28600, extra 0"
+[case.input]
+fy = 2022
+regime = "new"
+other_income = "650000"
+[case.expect]
+extra = "0"
+tax_with = "28600"
+tax_without = "28600"
+total_income = "650000"
+rebate = "0"
+surcharge = "0"
+
+[[case]]
+id = "tax-rebate-new-2025-04-01-after"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "slab income 1100000, slab tax 50000.00, special-rate tax 0, total income 1100000, rebate 50000.00, surcharge 0, cess 0.0000, tax with 0, without 0, extra 0"
+[case.input]
+fy = 2025
+regime = "new"
+other_income = "1100000"
+[case.expect]
+extra = "0"
+tax_with = "0"
+tax_without = "0"
+total_income = "1100000"
+rebate = "50000.00"
+surcharge = "0"
+
+[[case]]
+id = "tax-rebate-new-2025-04-01-before"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "slab income 1100000, slab tax 65000.00, special-rate tax 0, total income 1100000, rebate 0, surcharge 0, cess 2600.0000, tax with 67600, without 67600, extra 0"
+[case.input]
+fy = 2024
+regime = "new"
+other_income = "1100000"
+[case.expect]
+extra = "0"
+tax_with = "67600"
+tax_without = "67600"
+total_income = "1100000"
+rebate = "0"
+surcharge = "0"
+
+[[case]]
+id = "tax-rebate-old-2013-04-01-after"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "slab income 400000, slab tax 20000.00, special-rate tax 0, total income 400000, rebate 2000, surcharge 0, cess 540.0000, tax with 18540, without 18540, extra 0"
+[case.input]
+fy = 2013
+regime = "old"
+other_income = "400000"
+[case.expect]
+extra = "0"
+tax_with = "18540"
+tax_without = "18540"
+total_income = "400000"
+rebate = "2000"
+surcharge = "0"
+
+[[case]]
+id = "tax-rebate-old-2013-04-01-before"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "slab income 400000, slab tax 20000.00, special-rate tax 0, total income 400000, rebate 0, surcharge 0, cess 600.0000, tax with 20600, without 20600, extra 0"
+[case.input]
+fy = 2012
+regime = "old"
+other_income = "400000"
+[case.expect]
+extra = "0"
+tax_with = "20600"
+tax_without = "20600"
+total_income = "400000"
+rebate = "0"
+surcharge = "0"
+
+[[case]]
+id = "tax-rebate-old-2016-04-01-after"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "slab income 400000, slab tax 15000.00, special-rate tax 0, total income 400000, rebate 5000, surcharge 0, cess 300.0000, tax with 10300, without 10300, extra 0"
+[case.input]
+fy = 2016
+regime = "old"
+other_income = "400000"
+[case.expect]
+extra = "0"
+tax_with = "10300"
+tax_without = "10300"
+total_income = "400000"
+rebate = "5000"
+surcharge = "0"
+
+[[case]]
+id = "tax-rebate-old-2016-04-01-before"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "slab income 400000, slab tax 15000.00, special-rate tax 0, total income 400000, rebate 2000, surcharge 0, cess 390.0000, tax with 13390, without 13390, extra 0"
+[case.input]
+fy = 2015
+regime = "old"
+other_income = "400000"
+[case.expect]
+extra = "0"
+tax_with = "13390"
+tax_without = "13390"
+total_income = "400000"
+rebate = "2000"
+surcharge = "0"
+
+[[case]]
+id = "tax-rebate-old-2017-04-01-after"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "slab income 400000, slab tax 7500.00, special-rate tax 0, total income 400000, rebate 0, surcharge 0, cess 225.0000, tax with 7730, without 7730, extra 0"
+[case.input]
+fy = 2017
+regime = "old"
+other_income = "400000"
+[case.expect]
+extra = "0"
+tax_with = "7730"
+tax_without = "7730"
+total_income = "400000"
+rebate = "0"
+surcharge = "0"
+
+[[case]]
+id = "tax-rebate-old-2017-04-01-before"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "slab income 400000, slab tax 15000.00, special-rate tax 0, total income 400000, rebate 5000, surcharge 0, cess 300.0000, tax with 10300, without 10300, extra 0"
+[case.input]
+fy = 2016
+regime = "old"
+other_income = "400000"
+[case.expect]
+extra = "0"
+tax_with = "10300"
+tax_without = "10300"
+total_income = "400000"
+rebate = "5000"
+surcharge = "0"
+
+[[case]]
+id = "tax-rebate-old-2018-04-01-after"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "stcg: short-term 111A gain 50000; slab income 250000, slab tax 0.00, special-rate tax 7500.00, total income 300000, rebate 2500, surcharge 0, cess 200.0000, tax with 5200, without 0, extra 5200"
+[case.input]
+fy = 2018
+regime = "old"
+other_income = "250000"
+[[case.input.events]]
+label = "stcg"
+sale_date = 2018-12-01
+acq_date = 2018-06-01
+asset_class = "etf_equity"
+proceeds = "60000"
+sale_costs = "0"
+cost = "10000"
+[case.expect]
+extra = "5200"
+tax_with = "5200"
+tax_without = "0"
+total_income = "300000"
+rebate = "2500"
+surcharge = "0"
+
+[[case]]
+id = "tax-rebate-old-2018-04-01-before"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "stcg: short-term 111A gain 50000; slab income 250000, slab tax 0.00, special-rate tax 7500.00, total income 300000, rebate 2500, surcharge 0, cess 150.0000, tax with 5150, without 0, extra 5150"
+[case.input]
+fy = 2017
+regime = "old"
+other_income = "250000"
+[[case.input.events]]
+label = "stcg"
+sale_date = 2017-12-01
+acq_date = 2017-06-01
+asset_class = "etf_equity"
+proceeds = "60000"
+sale_costs = "0"
+cost = "10000"
+[case.expect]
+extra = "5150"
+tax_with = "5150"
+tax_without = "0"
+total_income = "300000"
+rebate = "2500"
+surcharge = "0"
+
+[[case]]
+id = "tax-rebate-old-2019-04-01-after"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "slab income 400000, slab tax 7500.00, special-rate tax 0, total income 400000, rebate 7500.00, surcharge 0, cess 0.0000, tax with 0, without 0, extra 0"
+[case.input]
+fy = 2019
+regime = "old"
+other_income = "400000"
+[case.expect]
+extra = "0"
+tax_with = "0"
+tax_without = "0"
+total_income = "400000"
+rebate = "7500.00"
+surcharge = "0"
+
+[[case]]
+id = "tax-rebate-old-2019-04-01-before"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "slab income 400000, slab tax 7500.00, special-rate tax 0, total income 400000, rebate 0, surcharge 0, cess 300.0000, tax with 7800, without 7800, extra 0"
+[case.input]
+fy = 2018
+regime = "old"
+other_income = "400000"
+[case.expect]
+extra = "0"
+tax_with = "7800"
+tax_without = "7800"
+total_income = "400000"
+rebate = "0"
+surcharge = "0"
+
+[[case]]
+id = "tax-rebate-old-2026-04-01-after"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "stcg: short-term 196 (2025 Act) gain 50000; slab income 250000, slab tax 0.00, special-rate tax 10000.00, total income 300000, rebate 10000.00, surcharge 0, cess 0.0000, tax with 0, without 0, extra 0"
+[case.input]
+fy = 2026
+regime = "old"
+other_income = "250000"
+[[case.input.events]]
+label = "stcg"
+sale_date = 2026-12-01
+acq_date = 2026-06-01
+asset_class = "etf_equity"
+proceeds = "60000"
+sale_costs = "0"
+cost = "10000"
+[case.expect]
+extra = "0"
+tax_with = "0"
+tax_without = "0"
+total_income = "300000"
+rebate = "10000.00"
+surcharge = "0"
+
+[[case]]
+id = "tax-rebate-old-2026-04-01-before"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "stcg: short-term 111A gain 50000; slab income 250000, slab tax 0.00, special-rate tax 10000.00, total income 300000, rebate 10000.00, surcharge 0, cess 0.0000, tax with 0, without 0, extra 0"
+[case.input]
+fy = 2025
+regime = "old"
+other_income = "250000"
+[[case.input.events]]
+label = "stcg"
+sale_date = 2025-12-01
+acq_date = 2025-06-01
+asset_class = "etf_equity"
+proceeds = "60000"
+sale_costs = "0"
+cost = "10000"
+[case.expect]
+extra = "0"
+tax_with = "0"
+tax_without = "0"
+total_income = "300000"
+rebate = "10000.00"
+surcharge = "0"
+
+[[case]]
+id = "tax-slabs-new-2023-04-01-after"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "slab income 1000000, slab tax 60000.00, special-rate tax 0, total income 1000000, rebate 0, surcharge 0, cess 2400.0000, tax with 62400, without 62400, extra 0"
+[case.input]
+fy = 2023
+regime = "new"
+other_income = "1000000"
+[case.expect]
+extra = "0"
+tax_with = "62400"
+tax_without = "62400"
+total_income = "1000000"
+rebate = "0"
+surcharge = "0"
+
+[[case]]
+id = "tax-slabs-new-2023-04-01-before"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "slab income 1000000, slab tax 75000.00, special-rate tax 0, total income 1000000, rebate 0, surcharge 0, cess 3000.0000, tax with 78000, without 78000, extra 0"
+[case.input]
+fy = 2022
+regime = "new"
+other_income = "1000000"
+[case.expect]
+extra = "0"
+tax_with = "78000"
+tax_without = "78000"
+total_income = "1000000"
+rebate = "0"
+surcharge = "0"
+
+[[case]]
+id = "tax-slabs-new-2024-04-01-after"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "slab income 1000000, slab tax 50000.00, special-rate tax 0, total income 1000000, rebate 0, surcharge 0, cess 2000.0000, tax with 52000, without 52000, extra 0"
+[case.input]
+fy = 2024
+regime = "new"
+other_income = "1000000"
+[case.expect]
+extra = "0"
+tax_with = "52000"
+tax_without = "52000"
+total_income = "1000000"
+rebate = "0"
+surcharge = "0"
+
+[[case]]
+id = "tax-slabs-new-2024-04-01-before"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "slab income 1000000, slab tax 60000.00, special-rate tax 0, total income 1000000, rebate 0, surcharge 0, cess 2400.0000, tax with 62400, without 62400, extra 0"
+[case.input]
+fy = 2023
+regime = "new"
+other_income = "1000000"
+[case.expect]
+extra = "0"
+tax_with = "62400"
+tax_without = "62400"
+total_income = "1000000"
+rebate = "0"
+surcharge = "0"
+
+[[case]]
+id = "tax-slabs-new-2025-04-01-after"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "slab income 1000000, slab tax 40000.00, special-rate tax 0, total income 1000000, rebate 40000.00, surcharge 0, cess 0.0000, tax with 0, without 0, extra 0"
+[case.input]
+fy = 2025
+regime = "new"
+other_income = "1000000"
+[case.expect]
+extra = "0"
+tax_with = "0"
+tax_without = "0"
+total_income = "1000000"
+rebate = "40000.00"
+surcharge = "0"
+
+[[case]]
+id = "tax-slabs-new-2025-04-01-before"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "slab income 1000000, slab tax 50000.00, special-rate tax 0, total income 1000000, rebate 0, surcharge 0, cess 2000.0000, tax with 52000, without 52000, extra 0"
+[case.input]
+fy = 2024
+regime = "new"
+other_income = "1000000"
+[case.expect]
+extra = "0"
+tax_with = "52000"
+tax_without = "52000"
+total_income = "1000000"
+rebate = "0"
+surcharge = "0"
+
+[[case]]
+id = "tax-slabs-old-2011-04-01-after"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "slab income 900000, slab tax 122000.00, special-rate tax 0, total income 900000, rebate 0, surcharge 0, cess 3660.0000, tax with 125660, without 125660, extra 0"
+[case.input]
+fy = 2011
+regime = "old"
+other_income = "900000"
+[case.expect]
+extra = "0"
+tax_with = "125660"
+tax_without = "125660"
+total_income = "900000"
+rebate = "0"
+surcharge = "0"
+
+[[case]]
+id = "tax-slabs-old-2011-04-01-before"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "slab income 900000, slab tax 124000.00, special-rate tax 0, total income 900000, rebate 0, surcharge 0, cess 3720.0000, tax with 127720, without 127720, extra 0"
+[case.input]
+fy = 2010
+regime = "old"
+other_income = "900000"
+[case.expect]
+extra = "0"
+tax_with = "127720"
+tax_without = "127720"
+total_income = "900000"
+rebate = "0"
+surcharge = "0"
+
+[[case]]
+id = "tax-slabs-old-2012-04-01-after"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "slab income 900000, slab tax 110000.00, special-rate tax 0, total income 900000, rebate 0, surcharge 0, cess 3300.0000, tax with 113300, without 113300, extra 0"
+[case.input]
+fy = 2012
+regime = "old"
+other_income = "900000"
+[case.expect]
+extra = "0"
+tax_with = "113300"
+tax_without = "113300"
+total_income = "900000"
+rebate = "0"
+surcharge = "0"
+
+[[case]]
+id = "tax-slabs-old-2012-04-01-before"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "slab income 900000, slab tax 122000.00, special-rate tax 0, total income 900000, rebate 0, surcharge 0, cess 3660.0000, tax with 125660, without 125660, extra 0"
+[case.input]
+fy = 2011
+regime = "old"
+other_income = "900000"
+[case.expect]
+extra = "0"
+tax_with = "125660"
+tax_without = "125660"
+total_income = "900000"
+rebate = "0"
+surcharge = "0"
+
+[[case]]
+id = "tax-slabs-old-2014-04-01-after"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "slab income 900000, slab tax 105000.00, special-rate tax 0, total income 900000, rebate 0, surcharge 0, cess 3150.0000, tax with 108150, without 108150, extra 0"
+[case.input]
+fy = 2014
+regime = "old"
+other_income = "900000"
+[case.expect]
+extra = "0"
+tax_with = "108150"
+tax_without = "108150"
+total_income = "900000"
+rebate = "0"
+surcharge = "0"
+
+[[case]]
+id = "tax-slabs-old-2014-04-01-before"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "slab income 900000, slab tax 110000.00, special-rate tax 0, total income 900000, rebate 0, surcharge 0, cess 3300.0000, tax with 113300, without 113300, extra 0"
+[case.input]
+fy = 2013
+regime = "old"
+other_income = "900000"
+[case.expect]
+extra = "0"
+tax_with = "113300"
+tax_without = "113300"
+total_income = "900000"
+rebate = "0"
+surcharge = "0"
+
+[[case]]
+id = "tax-slabs-old-2017-04-01-after"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "slab income 900000, slab tax 92500.00, special-rate tax 0, total income 900000, rebate 0, surcharge 0, cess 2775.0000, tax with 95280, without 95280, extra 0"
+[case.input]
+fy = 2017
+regime = "old"
+other_income = "900000"
+[case.expect]
+extra = "0"
+tax_with = "95280"
+tax_without = "95280"
+total_income = "900000"
+rebate = "0"
+surcharge = "0"
+
+[[case]]
+id = "tax-slabs-old-2017-04-01-before"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "slab income 900000, slab tax 105000.00, special-rate tax 0, total income 900000, rebate 0, surcharge 0, cess 3150.0000, tax with 108150, without 108150, extra 0"
+[case.input]
+fy = 2016
+regime = "old"
+other_income = "900000"
+[case.expect]
+extra = "0"
+tax_with = "108150"
+tax_without = "108150"
+total_income = "900000"
+rebate = "0"
+surcharge = "0"
+
+[[case]]
+id = "tax-surcharge-new-2022-04-01-after"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "gold: long-term 112 gain 181785.7142857142857142857143; slab income 30000000, slab tax 8737500.00, special-rate tax 36357.14285714285714285714286, total income 30181785.71428571428571428571, rebate 0, surcharge 2189828.571428571428571428571, cess 438547.4285714285714285714284, tax with 11402230, without 11358750, extra 43480"
+[case.input]
+fy = 2022
+regime = "new"
+other_income = "30000000"
+[[case.input.events]]
+label = "gold"
+sale_date = 2022-12-01
+acq_date = 2018-06-01
+asset_class = "etf_gold"
+proceeds = "300000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "43480"
+tax_with = "11402230"
+tax_without = "11358750"
+
+[[case]]
+id = "tax-surcharge-new-2022-04-01-before"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "gold: long-term 112 gain 183455.8823529411764705882353; slab income 30000000, slab tax 8737500.00, special-rate tax 36691.17647058823529411764706, total income 30183455.88235294117647058824, rebate 0, surcharge 2193547.794117647058823529412, cess 438709.5588235294117647058824, tax with 11406450, without 11358750, extra 47700"
+[case.input]
+fy = 2021
+regime = "new"
+other_income = "30000000"
+[[case.input.events]]
+label = "gold"
+sale_date = 2021-12-01
+acq_date = 2017-06-01
+asset_class = "etf_gold"
+proceeds = "300000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "47700"
+tax_with = "11406450"
+tax_without = "11358750"
+
+[[case]]
+id = "tax-surcharge-new-2023-04-01-after"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "slab income 60000000, slab tax 17700000.00, special-rate tax 0, total income 60000000, rebate 0, surcharge 4425000.0000, cess 885000.000000, tax with 23010000, without 23010000, extra 0"
+[case.input]
+fy = 2023
+regime = "new"
+other_income = "60000000"
+[case.expect]
+extra = "0"
+tax_with = "23010000"
+tax_without = "23010000"
+total_income = "60000000"
+rebate = "0"
+surcharge = "4425000.0000"
+
+[[case]]
+id = "tax-surcharge-new-2023-04-01-before"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "slab income 60000000, slab tax 17737500.00, special-rate tax 0, total income 60000000, rebate 0, surcharge 6562875.0000, cess 972015.000000, tax with 25272390, without 25272390, extra 0"
+[case.input]
+fy = 2022
+regime = "new"
+other_income = "60000000"
+[case.expect]
+extra = "0"
+tax_with = "25272390"
+tax_without = "25272390"
+total_income = "60000000"
+rebate = "0"
+surcharge = "6562875.0000"
+
+[[case]]
+id = "tax-surcharge-old-2013-04-01-after"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "slab income 12000000, slab tax 3430000.00, special-rate tax 0, total income 12000000, rebate 0, surcharge 343000.0000, cess 113190.000000, tax with 3886190, without 3886190, extra 0"
+[case.input]
+fy = 2013
+regime = "old"
+other_income = "12000000"
+[case.expect]
+extra = "0"
+tax_with = "3886190"
+tax_without = "3886190"
+total_income = "12000000"
+rebate = "0"
+surcharge = "343000.0000"
+
+[[case]]
+id = "tax-surcharge-old-2013-04-01-before"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "slab income 12000000, slab tax 3430000.00, special-rate tax 0, total income 12000000, rebate 0, surcharge 0, cess 102900.0000, tax with 3532900, without 3532900, extra 0"
+[case.input]
+fy = 2012
+regime = "old"
+other_income = "12000000"
+[case.expect]
+extra = "0"
+tax_with = "3532900"
+tax_without = "3532900"
+total_income = "12000000"
+rebate = "0"
+surcharge = "0"
+
+[[case]]
+id = "tax-surcharge-old-2015-04-01-after"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "slab income 12000000, slab tax 3425000.00, special-rate tax 0, total income 12000000, rebate 0, surcharge 411000.0000, cess 115080.000000, tax with 3951080, without 3951080, extra 0"
+[case.input]
+fy = 2015
+regime = "old"
+other_income = "12000000"
+[case.expect]
+extra = "0"
+tax_with = "3951080"
+tax_without = "3951080"
+total_income = "12000000"
+rebate = "0"
+surcharge = "411000.0000"
+
+[[case]]
+id = "tax-surcharge-old-2015-04-01-before"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "slab income 12000000, slab tax 3425000.00, special-rate tax 0, total income 12000000, rebate 0, surcharge 342500.0000, cess 113025.000000, tax with 3880530, without 3880530, extra 0"
+[case.input]
+fy = 2014
+regime = "old"
+other_income = "12000000"
+[case.expect]
+extra = "0"
+tax_with = "3880530"
+tax_without = "3880530"
+total_income = "12000000"
+rebate = "0"
+surcharge = "342500.0000"
+
+[[case]]
+id = "tax-surcharge-old-2016-04-01-after"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "slab income 12000000, slab tax 3425000.00, special-rate tax 0, total income 12000000, rebate 0, surcharge 513750.0000, cess 118162.500000, tax with 4056910, without 4056910, extra 0"
+[case.input]
+fy = 2016
+regime = "old"
+other_income = "12000000"
+[case.expect]
+extra = "0"
+tax_with = "4056910"
+tax_without = "4056910"
+total_income = "12000000"
+rebate = "0"
+surcharge = "513750.0000"
+
+[[case]]
+id = "tax-surcharge-old-2016-04-01-before"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "slab income 12000000, slab tax 3425000.00, special-rate tax 0, total income 12000000, rebate 0, surcharge 411000.0000, cess 115080.000000, tax with 3951080, without 3951080, extra 0"
+[case.input]
+fy = 2015
+regime = "old"
+other_income = "12000000"
+[case.expect]
+extra = "0"
+tax_with = "3951080"
+tax_without = "3951080"
+total_income = "12000000"
+rebate = "0"
+surcharge = "411000.0000"
+
+[[case]]
+id = "tax-surcharge-old-2017-04-01-after"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "slab income 6000000, slab tax 1612500.00, special-rate tax 0, total income 6000000, rebate 0, surcharge 161250.0000, cess 53212.500000, tax with 1826960, without 1826960, extra 0"
+[case.input]
+fy = 2017
+regime = "old"
+other_income = "6000000"
+[case.expect]
+extra = "0"
+tax_with = "1826960"
+tax_without = "1826960"
+total_income = "6000000"
+rebate = "0"
+surcharge = "161250.0000"
+
+[[case]]
+id = "tax-surcharge-old-2017-04-01-before"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "slab income 6000000, slab tax 1625000.00, special-rate tax 0, total income 6000000, rebate 0, surcharge 0, cess 48750.0000, tax with 1673750, without 1673750, extra 0"
+[case.input]
+fy = 2016
+regime = "old"
+other_income = "6000000"
+[case.expect]
+extra = "0"
+tax_with = "1673750"
+tax_without = "1673750"
+total_income = "6000000"
+rebate = "0"
+surcharge = "0"
+
+[[case]]
+id = "tax-surcharge-old-2019-04-01-after"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "slab income 30000000, slab tax 8812500.00, special-rate tax 0, total income 30000000, rebate 0, surcharge 2203125.0000, cess 440625.000000, tax with 11456250, without 11456250, extra 0"
+[case.input]
+fy = 2019
+regime = "old"
+other_income = "30000000"
+[case.expect]
+extra = "0"
+tax_with = "11456250"
+tax_without = "11456250"
+total_income = "30000000"
+rebate = "0"
+surcharge = "2203125.0000"
+
+[[case]]
+id = "tax-surcharge-old-2019-04-01-before"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "slab income 30000000, slab tax 8812500.00, special-rate tax 0, total income 30000000, rebate 0, surcharge 1321875.0000, cess 405375.000000, tax with 10539750, without 10539750, extra 0"
+[case.input]
+fy = 2018
+regime = "old"
+other_income = "30000000"
+[case.expect]
+extra = "0"
+tax_with = "10539750"
+tax_without = "10539750"
+total_income = "30000000"
+rebate = "0"
+surcharge = "1321875.0000"
+
+[[case]]
+id = "tax-surcharge-old-2022-04-01-after"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "gold: long-term 112 gain 181785.7142857142857142857143; slab income 30000000, slab tax 8812500.00, special-rate tax 36357.14285714285714285714286, total income 30181785.71428571428571428571, rebate 0, surcharge 2208578.571428571428571428571, cess 442297.4285714285714285714284, tax with 11499730, without 11456250, extra 43480"
+[case.input]
+fy = 2022
+regime = "old"
+other_income = "30000000"
+[[case.input.events]]
+label = "gold"
+sale_date = 2022-12-01
+acq_date = 2018-06-01
+asset_class = "etf_gold"
+proceeds = "300000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "43480"
+tax_with = "11499730"
+tax_without = "11456250"
+
+[[case]]
+id = "tax-surcharge-old-2022-04-01-before"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "gold: long-term 112 gain 183455.8823529411764705882353; slab income 30000000, slab tax 8812500.00, special-rate tax 36691.17647058823529411764706, total income 30183455.88235294117647058824, rebate 0, surcharge 2212297.794117647058823529412, cess 442459.5588235294117647058824, tax with 11503950, without 11456250, extra 47700"
+[case.input]
+fy = 2021
+regime = "old"
+other_income = "30000000"
+[[case.input.events]]
+label = "gold"
+sale_date = 2021-12-01
+acq_date = 2017-06-01
+asset_class = "etf_gold"
+proceeds = "300000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "47700"
+tax_with = "11503950"
+tax_without = "11456250"
