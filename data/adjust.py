@@ -1,7 +1,10 @@
 """Splits: found from the price gaps, confirmed against a second source (the fund's NAV), listed with the evidence in data/corporate_actions.csv,
 and applied only here. The published prices are never touched: `adjust` adds adj_* columns (prices before a split's ex-date divided by its factor,
 quantities multiplied by it, a factor of 1 leaves the published text as it is).
-Run:  python -m data.adjust     (writes data/processed/etf_daily_adjusted.csv; stops when a big gap has no listed action, or an action has no gap)
+Fund NAVs get the same treatment for unit changes (a liquid fund's NAV went x100 when its face value changed; gold ETFs split 1 to 100):
+data/nav_units.csv lists each with its evidence, `adjust_nav` puts every earlier NAV on the new scale.
+Run:  python -m data.adjust     (writes data/processed/etf_daily_adjusted.csv and amfi_nav_adjusted.csv; stops when a big gap has no listed
+                                 action, or a listed action has no gap)
 """
 from __future__ import annotations
 
@@ -87,6 +90,70 @@ def unconfirmed(rows: list[dict], actions: list[dict]) -> list[dict]:
             or abs(seen[(a["symbol"], a["ex_date"].isoformat())] / a["factor"] - 1) > SAME]
 
 
+def load_nav_units(path: Path = ROOT / "nav_units.csv") -> list[dict]:
+    """Unit changes of fund NAVs: `factor` = NAV after / NAV before the change (100 when the face value fell 100 times, 0.01 for a 1 to 100 split)."""
+    out, seen = [], set()
+    with path.open(newline="") as f:
+        for r in csv.DictReader(f):
+            tag = f"{r['code']} {r['date']}"
+            factor = Decimal(r["factor"])
+            if factor <= 0:
+                raise ValueError(f"{tag}: the factor must be above zero")
+            if not r["evidence"].strip():
+                raise ValueError(f"{tag}: no evidence given")
+            if (r["code"], r["date"]) in seen:
+                raise ValueError(f"{tag}: listed twice")
+            seen.add((r["code"], r["date"]))
+            out.append({"code": r["code"], "date": date.fromisoformat(r["date"]), "factor": factor, "evidence": r["evidence"]})
+    return sorted(out, key=lambda u: (u["code"], u["date"]))
+
+
+def adjust_nav(rows: list[dict], units: list[dict]) -> list[dict]:
+    out = []
+    for r in rows:
+        day = date.fromisoformat(r["date"])
+        factor = Decimal(1)
+        for u in units:
+            if u["code"] == r["code"] and u["date"] > day:
+                factor *= u["factor"]
+        out.append(r | {"adj_factor": _plain(factor), "adj_nav": r["nav"] if factor == 1 else _plain(Decimal(r["nav"]) * factor)})
+    return out
+
+
+def nav_candidates(rows: list[dict]) -> list[dict]:
+    """Days a scheme's NAV moved outside the band from its previous listed day. ratio = previous NAV / NAV."""
+    shaped = [{"symbol": r["code"], "series": "NAV", "date": r["date"], "close": r["nav"]} for r in rows]
+    return [{"code": c["symbol"]} | {k: v for k, v in c.items() if k != "symbol"} for c in candidates(shaped)]
+
+
+def nav_unexplained(rows: list[dict], units: list[dict]) -> list[dict]:
+    listed = {(u["code"], u["date"].isoformat()) for u in units}
+    return [c for c in nav_candidates(rows) if (c["code"], c["date"]) not in listed]
+
+
+def nav_unconfirmed(rows: list[dict], units: list[dict]) -> list[dict]:
+    """Listed unit changes whose day shows no jump in the NAV, or a jump of a different size than the factor."""
+    seen = {(c["code"], c["date"]): c["ratio"] for c in nav_candidates(rows)}
+    return [u for u in units if (u["code"], u["date"].isoformat()) not in seen
+            or abs(seen[(u["code"], u["date"].isoformat())] * u["factor"] - 1) > SAME]
+
+
+def build_nav(root: Path = ROOT) -> int:
+    with (root / "processed" / "amfi_nav_daily.csv").open(newline="") as f:
+        rd = csv.DictReader(f)
+        fields, rows = list(rd.fieldnames), list(rd)
+    units = load_nav_units(root / "nav_units.csv")
+    bad = [f"{c['code']} {c['date']} (NAV {c['prev_close']} to {c['close']}, ratio {c['ratio']:.4f}) has no listed unit change" for c in nav_unexplained(rows, units)]
+    bad += [f"{u['code']} {u['date']} (factor {u['factor']}) shows no matching jump in the NAV" for u in nav_unconfirmed(rows, units)]
+    if bad:
+        raise ValueError("; ".join(bad))
+    with (root / "processed" / "amfi_nav_adjusted.csv").open("w", newline="") as f:
+        w = csv.DictWriter(f, fields + ["adj_factor", "adj_nav"], lineterminator=chr(10))
+        w.writeheader()
+        w.writerows(adjust_nav(rows, units))
+    return len(rows)
+
+
 def build(root: Path = ROOT) -> int:
     with (root / "processed" / "nse_etf_daily.csv").open(newline="") as f:
         rd = csv.DictReader(f)
@@ -104,4 +171,4 @@ def build(root: Path = ROOT) -> int:
 
 
 if __name__ == "__main__":
-    print(f"{build()} rows")
+    print(f"{build()} ETF rows, {build_nav()} NAV rows")

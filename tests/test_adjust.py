@@ -131,3 +131,63 @@ def test_the_date_the_nav_series_switches_scale_is_optional_and_read_when_given(
     p.write_text("symbol,ex_date,kind,factor,nav_ex_date,evidence\nNIFTYBEES,2019-12-19,split,10,2019-12-23,\"x\"\nGOLDBEES,2019-12-19,split,100,,\"y\"\n", newline="")
     gold, nifty = adj.load_actions(p)
     assert (gold["symbol"], gold["nav_ex_date"]) == ("GOLDBEES", None) and nifty["nav_ex_date"] == date(2019, 12, 23)
+
+
+def nav(d, code, value):
+    return {"date": d, "code": code, "nav": value}
+
+
+LIQ = [{"code": "100851", "date": date(2012, 8, 5), "factor": Decimal(100), "evidence": "27.0094 to 2702.2706 (ratio 100.05)"}]
+
+
+def test_a_nav_unit_change_puts_every_earlier_nav_on_the_new_scale():
+    rows = [nav("2012-08-02", "100851", "26.9900"), nav("2012-08-03", "100851", "27.0094"), nav("2012-08-05", "100851", "2702.2706"), nav("2012-08-06", "100851", "2703.1000"),
+            nav("2012-08-03", "999", "5")]
+    out = adj.adjust_nav(rows, LIQ)
+    assert [(r["date"], r["code"], r["adj_nav"], r["adj_factor"]) for r in out] == [
+        ("2012-08-02", "100851", "2699", "100"), ("2012-08-03", "100851", "2700.94", "100"), ("2012-08-05", "100851", "2702.2706", "1"),
+        ("2012-08-06", "100851", "2703.1000", "1"), ("2012-08-03", "999", "5", "1")]
+    assert out[0]["nav"] == "26.9900"                                                      # the published text is untouched
+
+
+def test_a_split_of_a_fund_is_a_factor_below_one_and_two_changes_multiply():
+    units = LIQ + [{"code": "100851", "date": date(2015, 1, 1), "factor": Decimal("0.01"), "evidence": "x"}]
+    rows = [nav("2012-01-02", "100851", "26"), nav("2014-01-02", "100851", "3000")]
+    assert [r["adj_factor"] for r in adj.adjust_nav(rows, units)] == ["1", "0.01"]       # 100 x 0.01 before 2012-08-05 is 1; 0.01 between the two dates
+    assert [r["adj_nav"] for r in adj.adjust_nav(rows, units)] == ["26", "30"]
+
+
+def test_nav_units_are_read_with_their_evidence_and_bad_ones_are_refused(tmp_path):
+    p = tmp_path / "u.csv"
+    p.write_text("code,date,factor,evidence\n100851,2012-08-05,100,\"27.0094 to 2702.2706\"\n", newline="")
+    assert adj.load_nav_units(p) == [{"code": "100851", "date": date(2012, 8, 5), "factor": Decimal(100), "evidence": "27.0094 to 2702.2706"}]
+    for bad, why in [("100851,2012-08-05,0,x", "factor"), ("100851,2012-08-05,100,", "evidence"), ("100851,2012-08-05,100,x\n100851,2012-08-05,2,y", "twice")]:
+        p.write_text("code,date,factor,evidence\n" + bad + "\n", newline="")
+        with pytest.raises(ValueError, match=why):
+            adj.load_nav_units(p)
+
+
+def test_nav_jumps_outside_the_band_need_a_listed_change_and_a_listed_change_needs_its_jump():
+    rows = [nav("2012-08-03", "100851", "27.0094"), nav("2012-08-05", "100851", "2702.2706"), nav("2012-08-06", "100851", "2703.1"),
+            nav("2013-01-18", "777", "23.3975"), nav("2013-01-20", "777", "2340.82")]
+    assert [(c["code"], c["date"]) for c in adj.nav_unexplained(rows, LIQ)] == [("777", "2013-01-20")]
+    assert adj.nav_unconfirmed(rows, LIQ) == []
+    flat = [nav("2012-08-03", "100851", "27.0094"), nav("2012-08-05", "100851", "27.02")]
+    assert [a["code"] for a in adj.nav_unconfirmed(flat, LIQ)] == ["100851"]
+    wrong = [{"code": "100851", "date": date(2012, 8, 5), "factor": Decimal(10), "evidence": "typo"}]
+    assert [a["factor"] for a in adj.nav_unconfirmed(rows[:3], wrong)] == [Decimal(10)]
+
+
+def test_build_nav_writes_the_adjusted_file_from_the_published_one_and_refuses_an_unexplained_jump(tmp_path):
+    (tmp_path / "processed").mkdir()
+    with (tmp_path / "processed" / "amfi_nav_daily.csv").open("w", newline="") as f:
+        w = csv.writer(f, lineterminator=chr(10))
+        w.writerow(["date", "code", "nav"])
+        w.writerows([["2012-08-03", "100851", "27.0094"], ["2012-08-05", "100851", "2702.2706"]])
+    (tmp_path / "nav_units.csv").write_text("code,date,factor,evidence\n100851,2012-08-05,100,\"27.0094 to 2702.2706\"\n", newline="")
+    assert adj.build_nav(tmp_path) == 2
+    rows = list(csv.DictReader((tmp_path / "processed" / "amfi_nav_adjusted.csv").open(newline="")))
+    assert [(r["adj_nav"], r["adj_factor"]) for r in rows] == [("2700.94", "100"), ("2702.2706", "1")]
+    (tmp_path / "nav_units.csv").write_text("code,date,factor,evidence\n", newline="")
+    with pytest.raises(ValueError, match="100851 2012-08-05"):
+        adj.build_nav(tmp_path)
