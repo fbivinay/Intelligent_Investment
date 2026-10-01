@@ -1,0 +1,17 @@
+{
+ "files": {
+  "run.json": "e1f6868aae4d02f80d9c32cce8bf771bbe41f99e0fd4552e1d6f32861090e454",
+  "weights_gru-L126-c20.npy": "5bd3ddd8e91b8a88550e9477244c97695acec3e4b44970f4576c31a59bc217a7",
+  "weights_gru-L126-c5.npy": "02eec5e21d82b3bcf2e2cb63edffcaedfca86abeb9a045848207d1d06c93dde5",
+  "weights_gru-L63-c20.npy": "7223aa13b07d81e3fac4e8b48760fd68db88ff89f9e0d2d14b7e985f8db6ad4f",
+  "weights_gru-L63-c5.npy": "295e6fe82b28b65c4a92fbce67e81674e7f84b170b9056f975ecc36717fbb753",
+  "weights_mlp-L126-c20.npy": "c92aa7c2481fb14ae8850b280c1ccadc3ecfbd003ee56cb2b8f9313ccac618fc",
+  "weights_mlp-L126-c5.npy": "05e7caffddbe1f81ccd4a36a36f766bf8b9cffbeb8aa036b5426b7eab69fbd2b",
+  "weights_mlp-L63-c20.npy": "d33c5ce49a60cb637243ef5514fac697fcca8002f2fd592cf66bc8db0624da84",
+  "weights_mlp-L63-c5.npy": "9eebd37a9d7f6194be29092a90cd44d3cc4d62d17d1ca27d87a1318c87522d9a",
+  "weights_tcn-L126-c20.npy": "0e0f08be774beab711e47666105b0367a3aa0e947ba5893eab299f30ecb98b68",
+  "weights_tcn-L126-c5.npy": "b2255cc7d74562bfa884a3876fff4c5501cb52861d17797a097cf76306747828",
+  "weights_tcn-L63-c20.npy": "98620951d7f3d33cd027fb57d9a2252d6f167740dad2b1a35a550df6fab25a55",
+  "weights_tcn-L63-c5.npy": "460e7e2debb88da67b8405c437ed11e9d2ed2c06f192dff9d9940478e89d499e"
+ }
+}

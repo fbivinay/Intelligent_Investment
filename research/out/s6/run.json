@@ -1,0 +1,104 @@
+{
+ "configs": {
+  "gru-L126-c20": {
+   "arch": "gru",
+   "cost": 0.002,
+   "equal_weight_days_after_first_cut": 994,
+   "name": "gru-L126-c20",
+   "seconds": 14.5,
+   "seq_len": 126
+  },
+  "gru-L126-c5": {
+   "arch": "gru",
+   "cost": 0.0005,
+   "equal_weight_days_after_first_cut": 500,
+   "name": "gru-L126-c5",
+   "seconds": 16.2,
+   "seq_len": 126
+  },
+  "gru-L63-c20": {
+   "arch": "gru",
+   "cost": 0.002,
+   "equal_weight_days_after_first_cut": 994,
+   "name": "gru-L63-c20",
+   "seconds": 8.9,
+   "seq_len": 63
+  },
+  "gru-L63-c5": {
+   "arch": "gru",
+   "cost": 0.0005,
+   "equal_weight_days_after_first_cut": 500,
+   "name": "gru-L63-c5",
+   "seconds": 16.7,
+   "seq_len": 63
+  },
+  "mlp-L126-c20": {
+   "arch": "mlp",
+   "cost": 0.002,
+   "equal_weight_days_after_first_cut": 997,
+   "name": "mlp-L126-c20",
+   "seconds": 8.6,
+   "seq_len": 126
+  },
+  "mlp-L126-c5": {
+   "arch": "mlp",
+   "cost": 0.0005,
+   "equal_weight_days_after_first_cut": 997,
+   "name": "mlp-L126-c5",
+   "seconds": 8.9,
+   "seq_len": 126
+  },
+  "mlp-L63-c20": {
+   "arch": "mlp",
+   "cost": 0.002,
+   "equal_weight_days_after_first_cut": 997,
+   "name": "mlp-L63-c20",
+   "seconds": 8.5,
+   "seq_len": 63
+  },
+  "mlp-L63-c5": {
+   "arch": "mlp",
+   "cost": 0.0005,
+   "equal_weight_days_after_first_cut": 749,
+   "name": "mlp-L63-c5",
+   "seconds": 8.7,
+   "seq_len": 63
+  },
+  "tcn-L126-c20": {
+   "arch": "tcn",
+   "cost": 0.002,
+   "equal_weight_days_after_first_cut": 1120,
+   "name": "tcn-L126-c20",
+   "seconds": 21.8,
+   "seq_len": 126
+  },
+  "tcn-L126-c5": {
+   "arch": "tcn",
+   "cost": 0.0005,
+   "equal_weight_days_after_first_cut": 748,
+   "name": "tcn-L126-c5",
+   "seconds": 22.5,
+   "seq_len": 126
+  },
+  "tcn-L63-c20": {
+   "arch": "tcn",
+   "cost": 0.002,
+   "equal_weight_days_after_first_cut": 748,
+   "name": "tcn-L63-c20",
+   "seconds": 13.5,
+   "seq_len": 63
+  },
+  "tcn-L63-c5": {
+   "arch": "tcn",
+   "cost": 0.0005,
+   "equal_weight_days_after_first_cut": 500,
+   "name": "tcn-L63-c5",
+   "seconds": 17.4,
+   "seq_len": 63
+  }
+ },
+ "cuda": "Tesla T4",
+ "cuts": 11,
+ "device": "cuda",
+ "torch": "2.10.0+cu128"
+}
