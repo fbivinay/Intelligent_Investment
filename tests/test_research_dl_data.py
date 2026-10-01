@@ -90,3 +90,23 @@ def test_the_label_of_day_t_is_the_return_from_the_fill_price_of_t_plus_1_to_tha
 def test_features_and_labels_pass_the_causality_harness_in_the_sense_the_row_of_a_day_never_depends_on_later_days():
     p = panel(n=500, seed=4)
     causal.assert_causal(lambda q: D.feature_matrix(F.build(q))[0], p, n_cuts=5, seed=1)
+
+
+def test_the_normaliser_statistics_are_the_sample_mean_and_deviation_over_the_rows_from_the_first_valid_day():
+    X = np.array([[1.0], [2.0], [3.0], [4.0], [50.0]])
+    mu, sd = D.fit_norm(X, 0, 4)
+    assert mu[0] == pytest.approx(2.5) and sd[0] == pytest.approx(np.std([1, 2, 3, 4], ddof=1))
+    mu2, _ = D.fit_norm(X, 1, 4)
+    assert mu2[0] == pytest.approx(3.0)                                                         # the start row is honoured
+    p = panel()
+    Xp, names = D.feature_matrix(F.build(p))
+    t0 = D.first_valid(Xp, names)
+    j = names.index("ret1:NIFTYBEES")
+    assert D.fit_norm(Xp, t0, 500)[0][j] == pytest.approx(np.nanmean(Xp[t0:500, j]))
+
+
+def test_a_sequence_may_start_on_the_very_first_row_but_not_before():
+    Z = np.arange(20, dtype=float).reshape(10, 2)
+    assert np.array_equal(D.sequences(Z, np.array([3]), 4)[0], Z[0:4])
+    with pytest.raises(ValueError, match="start"):
+        D.sequences(Z, np.array([2]), 4)

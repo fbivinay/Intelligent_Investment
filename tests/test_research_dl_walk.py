@@ -46,7 +46,7 @@ def test_a_window_too_short_for_the_validation_set_also_leaves_the_prior():
 def test_the_weights_of_every_day_are_unchanged_when_the_data_after_it_is_cut_away():
     p = panel()
     full = walk(p)
-    for n in (560, 620):
+    for n in (430, 560, 620):
         part = walk(causal.truncate(p, n))
         assert part.shape == (n, 5)
         assert np.allclose(part, full[:n], atol=1e-6, equal_nan=True)
@@ -64,3 +64,36 @@ def test_the_label_timing_matches_the_simulator_the_weights_of_day_t_earn_the_re
     p = panel(n=50)
     R = D.labels(p.vwap, p.cash)
     assert np.allclose(R[7, :4], p.vwap[9] / p.vwap[8] - 1)
+
+
+def test_the_number_of_days_to_learn_from_is_compared_exactly_with_the_minimum():
+    p = panel()
+    days = 420 - 2 - (252 + CFG.seq_len - 1)                                                  # days t whose label is known before the first cut, from the first usable day
+    enough = walk(p, cuts=[420], min_samples=days)
+    short = walk(p, cuts=[420], min_samples=days + 1)
+    assert np.allclose(short[420:], 0.2) and not np.allclose(enough[420:], 0.2)
+
+
+def test_the_seeds_are_averaged_so_two_seeds_give_the_mean_of_their_separate_weights():
+    p = panel()
+    a, b, both = walk(p, seeds=(0,)), walk(p, seeds=(1,)), walk(p, seeds=(0, 1))
+    assert not np.allclose(a[420:], b[420:]) and np.allclose(both[420:], (a[420:] + b[420:]) / 2, atol=1e-6)
+
+
+def test_each_seed_is_fitted_once_with_validation_and_then_refitted_on_every_known_day_for_the_epochs_validation_chose(monkeypatch):
+    from research.dl import models as M
+    calls = []
+
+    def fake_fit(cfg, Xtr, Rtr, seed, device="cpu", Xval=None, Rval=None, epochs=None):
+        model = M.make_model(cfg.arch, Xtr.shape[2], cfg.seq_len, cfg.hidden)
+        if Xval is not None:
+            calls.append(("val", seed, len(Xtr), len(Xval)))
+            return model, 7, {}
+        calls.append(("full", seed, len(Xtr), epochs))
+        return model, epochs, {}
+    monkeypatch.setattr(T, "fit", fake_fit)
+    p = panel()
+    walk(p, cuts=[420])
+    # first usable day 252 + 5 - 1 = 256; labels are known up to day 417 (cut 420, horizon 2, then one more); validation is the last 60 of them (358..417); training stops 2 + 5 days
+    # before it, on day 350
+    assert calls == [("val", 0, 95, 60), ("full", 0, 162, 7), ("val", 1, 95, 60), ("full", 1, 162, 7)]                    # 256..350 is 95 days, 256..417 is 162

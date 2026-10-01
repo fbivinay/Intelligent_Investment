@@ -14,6 +14,7 @@ from research.dl import data as D, train as T
 def walk_weights(feats: dict, vwap: np.ndarray, cash: np.ndarray, cuts: list[int], cfg: T.Config, seeds=(0, 1, 2), device: str = "cpu", val_days: int = 126,
                  min_samples: int = 300, progress=None) -> np.ndarray:
     """T x 5 weights (four ETFs and cash), NaN before the first cut. Day t's weights use only the data up to day t and a model trained on data before its cut."""
+    cuts = [c for c in cuts if c < len(cash)]                                      # a cut after the last day has nothing to predict
     X, names = D.feature_matrix(feats)
     t0 = D.first_valid(X, names)
     first = t0 + cfg.seq_len - 1
