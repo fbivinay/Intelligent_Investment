@@ -24,10 +24,11 @@ class Run:
     drawdown: np.ndarray          # T, before tax, from the high-water mark
     tax_by_fy: dict               # tax of each completed financial year, paid the day after it ends
     pending_tax: float
+    eligible_from: str | None = None
 
 
-def run_of_result(id_: str, family: str, cap: float, r) -> Run:
-    return Run(id_, family, cap, r.equity, r.drawdown, dict(r.tax_by_fy), r.pending_tax)
+def run_of_result(id_: str, family: str, cap: float, r, eligible_from: str | None = None) -> Run:
+    return Run(id_, family, cap, r.equity, r.drawdown, dict(r.tax_by_fy), r.pending_tax, eligible_from)
 
 
 def cut_days(dates: np.ndarray, first: str = "2013-04-01") -> list[int]:
@@ -86,7 +87,8 @@ def pick(runs: list[Run], stats: Stats, dates: np.ndarray, c: int, cap: float, s
     ok = np.isfinite(stats.growth[s0]) and stats.maxdd[s0] <= cap
     log = dict(cut=str(dates[c]), eligible=0, s0=runs[s0].id, s0_growth=float(stats.growth[s0]), s0_maxdd=float(stats.maxdd[s0]), s0_eligible=bool(ok), best="",
                best_growth=float("nan"), best_maxdd=float("nan"), diff=float("nan"), se=float("nan"), margin=margin)
-    eligible = np.flatnonzero(np.isfinite(stats.growth) & (stats.maxdd <= cap))
+    in_time = np.array([r.eligible_from is None or dates[c] >= np.datetime64(r.eligible_from) for r in runs])
+    eligible = np.flatnonzero(np.isfinite(stats.growth) & (stats.maxdd <= cap) & in_time)
     log["eligible"] = int(len(eligible))
     if not len(eligible):
         return s0, {**log, "decision": "S0", "reason": "no strategy is eligible: every one has had a drawdown above the cap"}
@@ -137,7 +139,7 @@ def candidates(panel: P.Panel, rules, trials: list, cap: float, progress=None):
     chosen = [t for t in trials if t.cap in (None, cap)]
     runs = []
     for k, t in enumerate(chosen):
-        runs.append(run_of_result(t.id, t.family, cap, sim.simulate(panel, t.fn(panel), rules, sim.SimConfig(cap=cap, band=t.band))))
+        runs.append(run_of_result(t.id, t.family, cap, sim.simulate(panel, t.fn(panel), rules, sim.SimConfig(cap=cap, band=t.band)), t.eligible_from))
         if progress:
             progress(k + 1, len(chosen))
     return runs, lambda i: chosen[i].fn(panel)

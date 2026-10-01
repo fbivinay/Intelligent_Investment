@@ -402,3 +402,26 @@ def test_the_references_start_fresh_on_the_same_day_with_the_same_capital():
     window = pn_from(p, sel.first_cut)
     hold = sim.simulate(window, st.s1_static([1, 0, 0, 0, 0], "never")(window), RULES, sim.SimConfig(governor=False, capital=1_000_000.0))
     assert np.array_equal(refs["Nifty BeES"].equity, hold.equity)                                    # bought on the first day, held, no governor
+
+
+# ---- a candidate that may be picked only from a given date --------------------------------------------------------------------------------------------------
+
+def test_a_run_is_not_eligible_before_its_eligible_from_date_and_is_from_that_cut_on():
+    dates, c, base = field()
+    rng = np.random.default_rng(4)
+    late = path_run("late", base + 0.0004 + rng.normal(0, 0.0003, len(base)))
+    runs = [path_run("s0", base, family="S0"), S.Run(late.id, late.family, late.cap, late.equity, late.drawdown, {}, 0.0, eligible_from="2013-04-02")]
+    i, log = decide(runs, dates, c)
+    assert runs[i].id == "s0" and log["eligible"] == 1 and log["best"] == "s0"
+    on_time = [runs[0], S.Run(late.id, late.family, late.cap, late.equity, late.drawdown, {}, 0.0, eligible_from="2013-04-01")]
+    i, log = decide(on_time, dates, c)
+    assert on_time[i].id == "late" and log["eligible"] == 2
+
+
+def test_candidates_carry_a_trials_eligible_from_date_into_its_run():
+    from dataclasses import replace
+    p = small_world()
+    trials = [t for t in st.trials(s1_steps=2) if t.family == "S0" or (t.family == "S4" and t.params["lookback"] == 20 and t.band == 0.05 and t.params["target"] == 0.12)]
+    trials = [replace(t, eligible_from="2016-04-01") if t.family == "S4" else t for t in trials]
+    runs, _ = S.candidates(p, RULES, trials, cap=0.2)
+    assert [r.eligible_from for r in runs] == [None, "2016-04-01"]

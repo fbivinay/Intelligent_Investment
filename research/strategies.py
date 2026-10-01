@@ -161,6 +161,7 @@ class Trial:
     fn: Callable
     band: float = 0.01                 # the simulator's no-trade band for this trial, as a share of wealth
     cap: float | None = None           # S0 only: the risk level it belongs to
+    eligible_from: str | None = None   # a selector may pick it only at cuts on or after this date (a model needs a record of its own first)
 
 
 def _fmt(v) -> str:

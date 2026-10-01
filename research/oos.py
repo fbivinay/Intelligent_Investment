@@ -15,14 +15,14 @@ import numpy as np
 import pandas as pd
 
 from engine.rules import Rules
-from research import baseline as B, diagnostics as D, panel as P, selector as S, sim, strategies as st
+from research import baseline as B, diagnostics as D, panel as P, s6 as S6, selector as S, sim, strategies as st
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = Path(__file__).resolve().parent / "out"
 VARIANTS = ("spec", "deflated")
 DESIGNS = ("ensembles", "all trials")
 NAMES = {"S0": "S0 plain holding (Nifty ETF and cash)", "E1": "E1 equal weight, four ETFs and cash", "E2": "E2 trend filters (mean of 6)", "E3": "E3 momentum rotation (mean of 18)",
-         "E4": "E4 volatility targeting (mean of 10)", "E5": "E5 drawdown-aware exposure (mean of 6)"}
+         "E4": "E4 volatility targeting (mean of 10)", "E5": "E5 drawdown-aware exposure (mean of 6)", "S6": "S6 deep model (mean of 12 configurations, 3 seeds each)"}
 
 
 def margin_for(variant: str, n_eff: float) -> float:
@@ -128,7 +128,7 @@ def report(levels: list[dict]) -> str:
 def main(out: Path = OUT, s1_steps: int = 10) -> list[dict]:
     rules = Rules.load(ROOT / "rules")
     panel = P.load_panel(end=P.DESIGN_END)
-    trials, ensembles = st.trials(s1_steps), st.ensembles()
+    trials, ensembles = st.trials(s1_steps) + S6.trials(), st.ensembles() + [S6.ensemble()]
     out.mkdir(parents=True, exist_ok=True)
     levels = []
     for risk, cap in B.RISKS.items():

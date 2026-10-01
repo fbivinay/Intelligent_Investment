@@ -132,6 +132,8 @@ def test_main_loads_the_panel_up_to_the_design_end_and_writes_the_ledger_and_the
     chosen = some_trials()
     monkeypatch.setattr(P, "load_panel", fake_load)
     monkeypatch.setattr(st, "trials", lambda s1_steps=10: chosen)
+    from research import s6
+    monkeypatch.setattr(s6, "trials", lambda: [])
     df = B.main(out=tmp_path)
     assert seen["kwargs"].get("end", P.DESIGN_END) == P.DESIGN_END
     assert (tmp_path / "trials.csv").exists() and (tmp_path / "baseline.md").exists()

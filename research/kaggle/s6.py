@@ -8,6 +8,7 @@ waits, pulls the weights and verifies every file against the hashes the kernel w
 from __future__ import annotations
 
 import json
+import shutil
 from pathlib import Path
 
 import numpy as np
@@ -22,6 +23,12 @@ DL = Path(__file__).resolve().parents[1] / "dl"
 CODE = ("data", "models", "train", "walk", "configs")
 
 
+def record_inputs(snap: Path, out: Path) -> None:
+    """Keep, next to the weights, the manifest of the dataset the kernel read and the dates the weights belong to."""
+    shutil.copyfile(Path(snap) / "manifest.json", Path(out) / "input_manifest.json")
+    shutil.copyfile(Path(snap) / "d_dates.npy", Path(out) / "dates.npy")
+
+
 def main() -> dict:
     panel = P.load_panel(end=P.DESIGN_END)
     cfgs = C.committed()
@@ -34,6 +41,7 @@ def main() -> dict:
     run.upload_dataset(build.SNAP, OWNER, DATASET, "India algo panel (design period)", "panel, features, cuts and the code of the deep model")
     run.run_kernel(build.ROOT / "artifacts" / "kaggle" / "s6_kernel", OWNER, KERNEL, "India algo S6", Path(kernel_s6.__file__), [f"{OWNER}/{DATASET}"],
                    [f"weights_{c['name']}.npy" for c in cfgs] + ["run.json"], OUT)
+    record_inputs(build.SNAP, OUT)
     return json.loads((OUT / "run.json").read_text(encoding="utf-8"))
 
 

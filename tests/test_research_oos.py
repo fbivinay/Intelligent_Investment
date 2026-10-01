@@ -7,7 +7,7 @@ import pandas as pd
 import pytest
 
 from engine.rules import Rules
-from research import baseline as B, oos, panel as P, selector as S, strategies as st
+from research import baseline as B, oos, panel as P, s6 as S6, selector as S, strategies as st
 from research.panel import ASSETS, Panel
 
 RULES = Rules.load(Path(__file__).resolve().parents[1] / "rules")
@@ -126,6 +126,8 @@ def test_main_writes_a_selection_log_per_design_level_and_variant_and_the_table_
     monkeypatch.setattr(P, "load_panel", lambda *a, **k: p)
     monkeypatch.setattr(st, "trials", lambda s1_steps=10: chosen)
     monkeypatch.setattr(st, "ensembles", lambda: ens)
+    monkeypatch.setattr(S6, "trials", lambda: [])
+    monkeypatch.setattr(S6, "ensemble", lambda: deep_like())
     a, b = tmp_path / "a", tmp_path / "b"
     oos.main(out=a)
     oos.main(out=b)
@@ -135,3 +137,21 @@ def test_main_writes_a_selection_log_per_design_level_and_variant_and_the_table_
         assert hashlib.sha256((a / n).read_bytes()).hexdigest() == hashlib.sha256((b / n).read_bytes()).hexdigest()
     log = pd.read_csv(a / "selection_Balanced_ensembles_spec.csv")
     assert list(log.columns) == S.LOG_COLUMNS and len(log) == 2
+
+
+def deep_like():
+    """A stand-in for the deep model on the synthetic panel: the S6 family, a three-year record before it may be picked."""
+    from dataclasses import replace
+    return replace(st.ensembles()[3], id="S6|stand-in|band=0.05", family="S6", eligible_from="2016-04-01")
+
+
+def test_the_deep_model_is_a_candidate_with_its_own_row_and_is_not_picked_before_it_may_be():
+    p = world(n=1700)
+    out = oos.run_level(p, RULES, few_trials(), st.ensembles() + [deep_like()], "Aggressive", 0.3)
+    assert list(out["alone"]) == ["S0", "E1", "E2", "E3", "E4", "E5", "S6"] and out["designs"]["ensembles"]["n_trials"] == 7
+    for v in out["designs"]["ensembles"]["variants"].values():
+        log = v["log"]
+        early = log[log.cut < "2016-04-01"]
+        assert len(early) == 3 and (early.picked != "S6|stand-in|band=0.05").all()
+    text = oos.report([out])
+    assert "S6 deep model (mean of 12 configurations, 3 seeds each) (alone)" in text

@@ -1,0 +1,53 @@
+{
+ "files": {
+  "c_configs.json": "ff4c606ca68c2926e2ac11d5e93274b28e16635b26d66ff1cde4da273752919f",
+  "c_dl_configs.py": "8d3b18a3390cd585ec9f11a0fd8666ac465f7d5df543023f3d393152386fe206",
+  "c_dl_data.py": "63809c464780752b3bc9e723722d586059a8dc05e0edf970ef841a0dc9f77d3f",
+  "c_dl_models.py": "79d26c63ba13242318dafe5474beb7d8fda1ff174ed740f2f89a728cd9cf34a8",
+  "c_dl_train.py": "aba50c129e26c32d8e989ce3126881f1b3a4796547f33a2b74e2d162d6f3c285",
+  "c_dl_walk.py": "2df4dbd4f7f0c8b86b1161f9932887f77d4a569f80192f51b352bb6c7e83cf12",
+  "c_snapshot.py": "d03d8072371a8d3190023ad3dbf757b4e91f5bb88fe3c8f6557d07054f5d1602",
+  "d_cash.npy": "f2b32f40b44ad230f7a125bc73f4e51528a8a2b3d9b110de0515b17db41a157b",
+  "d_close.npy": "9a399fa4df15f5f04fbd96650baf2addf7fa9ba2a8f7538441f8eddb9bb150ac",
+  "d_cuts.npy": "0a8c7b05bf5f2001cbd78d8f7bf0a5d493cb6e30ea51b9e551ef099950174c27",
+  "d_dates.npy": "35bb0e0c50d2adc267353124a561766e9e04cb238515dffdf64f29779b67d6a1",
+  "d_f_cash_yield63.npy": "ffbef56d52f3c1e81a217181ced7712b01a1b512efb03f45fbd2d50611f6c319",
+  "d_f_dd252.npy": "1ecc7bea900173c1aa69e522852a528db2a9364d00e088537c670712ef889e65",
+  "d_f_dist200.npy": "e4190853cf9bd371618f2f6d1e87d3bda50685ffaf9919c343196c22f8eb9dc6",
+  "d_f_dist50.npy": "3382f5bf59b8c01a6810d403e9913fd46c9fffb22cd3ee0b1e9b2f76b874dfed",
+  "d_f_gold_vs_equity63.npy": "32d3b8e24fc79c4c7ceffb8274cd3494a21dbfb59af5d9c62fe1047612e2394c",
+  "d_f_pb_pct.npy": "ee6b282aeb1d43bd97e35769ebca7bc156fb16c96c837170eea263f3bb6f4183",
+  "d_f_pe_pct.npy": "30e71427d30535422ad575e48d3a9e554c32d816e1c6923815047b579be6c95e",
+  "d_f_ret1.npy": "8e52ec0554867b3d7dadf921292f34901eaf4b201a3c7210acb3b3549ba35e61",
+  "d_f_ret21.npy": "3d75357b5d6afe9bce6f9a066eac1c11d3b079a62ba37f0a02162e271d2e7752",
+  "d_f_ret252.npy": "deb10e94a9123e7cd6ab1cb179989e91df1c15745ebed8830a280bdef73eb891",
+  "d_f_ret5.npy": "94015c040efffdad0575b9f7e32df9b1826410dfe6ff0b86307214a14ea9abdb",
+  "d_f_ret63.npy": "01648924699b91240099c7948b65e7091c0ce240fa1f66b8b6891d9ffb6ebc9e",
+  "d_f_vix.npy": "70a9ca3bb01289fe8ccfc39751fbc70b51e8266b05754a0f9cbc7c044bfbf49b",
+  "d_f_vixchg5.npy": "5da508efdac4a648780b60334fdb93d56ce11cd1c3b0c359e90364425f555fd3",
+  "d_f_vol21.npy": "c6fd916df44e833a02031639e301663c9441b0e59b7d54a4a2d09085dffc8c5a",
+  "d_f_vol63.npy": "a595f0fa5c5d31b07eb6583248e395179d472b1002ee8b6d1d564d7775de90c9",
+  "d_f_vspike.npy": "3d43102231af7c5a17e48aa9fd4519616f59a6644f0193556a16bb9202dfead8",
+  "d_high.npy": "2482be1d24c320dd38f650b0b98bc7508b91b1c27b4922839eb71143d47e24ef",
+  "d_low.npy": "bb0f80d65c4dfb360f3387687d188120889a3fbb4f544dcf7b11f27982a119de",
+  "d_nifty.npy": "e055d0047455ca6255448844bac38f2a542c4fca999bb0c8c32c2ccb39831d5d",
+  "d_open.npy": "acb358aee5cf86f870afcb7391c67397a7aee527756ab4ca8498af5aa64d5802",
+  "d_pb.npy": "6548c56dd5981a2536939d362d6cbc8e42f86ad756f32e55df8684e28b34f2f2",
+  "d_pe.npy": "3ec0b93d284c6dea8377e86ee9566e5f2bb6dd3b5dfe1ceadb7e00efcd571e69",
+  "d_value.npy": "1896401cde893a296a75a4f698e359cf7cbca9ca4308ac95fc26cd8726e69179",
+  "d_vix.npy": "70a9ca3bb01289fe8ccfc39751fbc70b51e8266b05754a0f9cbc7c044bfbf49b",
+  "d_vwap.npy": "99ed07f0bfbc28bb80b4bf1467f7addb4691a429b97191b2b96b0e647e354560"
+ },
+ "meta": {
+  "assets": [
+   "NIFTYBEES",
+   "JUNIORBEES",
+   "BANKBEES",
+   "GOLDBEES"
+  ],
+  "days": 3351,
+  "design_end": "2023-09-30",
+  "first_day": "2010-04-01",
+  "last_day": "2023-09-29"
+ }
+}
