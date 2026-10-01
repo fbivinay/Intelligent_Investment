@@ -1,0 +1,15 @@
+{
+ "execution": {
+  "harvest": true
+ },
+ "files": {
+  "Aggressive.csv": "855327029c6fc372005d29f5f05b6e30a591ba9ded72a4675139b192dd768a9a",
+  "Balanced.csv": "b2facea5996c1f304ed5cc7ae59bac89a724d16bd7b5ae5c0fe116fdd5e0538f",
+  "Conservative.csv": "9750ff0db2120dfdbd3de1c01c8ee4aecc078fdd35e7725bdf1a7752641ccded"
+ },
+ "source": {
+  "signal_Aggressive.csv": "05037df38e7fa718aa34347ccfd4d5d08147267ce0f88a895c2320fbf332d9b9",
+  "signal_Balanced.csv": "6458caa88edb0fb3299335681ccf3aaf0ff4f32c6004ab008d7486db2f8af70d",
+  "signal_Conservative.csv": "cf082fb9991cf52cce3fa481389f7a11f7bd964f06d08f8f6d539f3d788c2529"
+ }
+}
