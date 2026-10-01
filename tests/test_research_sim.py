@@ -423,3 +423,15 @@ def test_the_tax_paid_out_of_the_account_is_not_a_drawdown_and_does_not_trip_the
     assert r.equity[paid] < r.equity[paid - 1] - 30_000                     # the account is poorer by the tax ...
     assert r.drawdown.max() < 0.005                                         # ... but a payment out of the account is not a market loss: only the sale's charges show
     assert r.multiplier.min() == 1.0
+
+
+def test_selling_the_whole_fund_position_after_pieces_were_sold_across_lots_does_not_trip_on_float_dust():
+    import dataclasses
+    days = weekdays(date(2016, 6, 1), 12)
+    p = flat_panel(days, price=100.0)
+    p = dataclasses.replace(p, cash=p.cash * 1e-3)                          # a very low unit value: about a billion units, where rounding is 1e-7 of a unit
+    w = W(days, [[0.6, 0, 0, 0, 0.4], [0.3, 0, 0, 0, 0.7], [0.75, 0, 0, 0, 0.25], [1, 0, 0, 0, 0]])
+    r = sim.simulate(p, w, RULES, sim.SimConfig(**CFG))
+    marks = np.column_stack([p.close, p.cash])
+    assert r.units[-1, 4] == 0 and r.units[-1, 0] > 0
+    assert np.allclose(r.equity, (r.units * marks).sum(axis=1) + r.cash, rtol=0, atol=1e-6)

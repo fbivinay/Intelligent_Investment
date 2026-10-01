@@ -94,7 +94,7 @@ def _slip(a, value, adv, half, impact, maxs, use):
 
 
 @njit(cache=True)
-def _sell(i, u, t, px, adv, reg, cvals, cded, sizes, cls, half, impact, maxs, use_slip, units, cash, lot_units, lot_cost, lot_day, head,
+def _sell(i, u, t, px, adv, reg, cvals, cded, sizes, cls, half, impact, maxs, use_slip, units, cash, lot_units, lot_cost, lot_day, head, tail,
           sl_asset, sl_acq, sl_sale, sl_units, sl_cost, sl_proc, sl_scost, sl_n, acc):
     s = _slip(i, u * px[t, i], adv[t, i], half, impact, maxs, use_slip)
     price = px[t, i] * (1.0 - s)
@@ -107,7 +107,7 @@ def _sell(i, u, t, px, adv, reg, cvals, cded, sizes, cls, half, impact, maxs, us
     acc[2] += u * px[t, i] * s
     acc[3] += 1.0
     remaining = u
-    while remaining > 1e-9:
+    while remaining > 1e-9 and head[i] < tail[i]:                           # the lots can fall short of `units` by float dust, never run past them
         k = head[i]
         lu = lot_units[i, k]
         take = min(remaining, lu)
@@ -127,6 +127,8 @@ def _sell(i, u, t, px, adv, reg, cvals, cded, sizes, cls, half, impact, maxs, us
         if lot_units[i, k] <= 1e-9:
             head[i] += 1
     units[i] -= u
+    if head[i] >= tail[i]:
+        units[i] = 0.0                                                      # no lots left: whatever is left in `units` is rounding dust
 
 
 @njit(cache=True)
@@ -163,7 +165,7 @@ def _run(t0, t1, px, close, adv, reg, fixed, target, cvals, cded, sizes, cls, wh
                     u = units[i] if sell_all else min(sv / px[t, i], units[i])
                 if u <= 0.0:
                     continue
-                _sell(i, u, t, px, adv, reg, cvals, cded, sizes, cls, half, impact, maxs, use_slip, units, cash, lot_units, lot_cost, lot_day, head,
+                _sell(i, u, t, px, adv, reg, cvals, cded, sizes, cls, half, impact, maxs, use_slip, units, cash, lot_units, lot_cost, lot_day, head, tail,
                       sl_asset, sl_acq, sl_sale, sl_units, sl_cost, sl_proc, sl_scost, sl_n, acc)
             # an overdraft (tax, fees) is covered by selling: the fund first, then the ETFs in turn
             if cash[0] < 0.0:
@@ -177,7 +179,7 @@ def _run(t0, t1, px, close, adv, reg, fixed, target, cvals, cded, sizes, cls, wh
                     else:
                         u = min(need / px[t, i], units[i])
                     if u > 0.0:
-                        _sell(i, u, t, px, adv, reg, cvals, cded, sizes, cls, half, impact, maxs, use_slip, units, cash, lot_units, lot_cost, lot_day, head,
+                        _sell(i, u, t, px, adv, reg, cvals, cded, sizes, cls, half, impact, maxs, use_slip, units, cash, lot_units, lot_cost, lot_day, head, tail,
                               sl_asset, sl_acq, sl_sale, sl_units, sl_cost, sl_proc, sl_scost, sl_n, acc)
             for i in range(N):
                 cur = units[i] * px[t, i]
