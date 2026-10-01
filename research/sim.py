@@ -5,12 +5,17 @@ by the engine's own rules (research/costs.py). Lots are FIFO. The day loop is nu
 exact engine (`engine.tax.investment_tax`, 2 to 10 ms) and the tax is paid out of the portfolio on the first trading day of the next year, so the tax feeds back into what the
 strategy can hold. The year in progress at the end is reported as pending tax, and what selling everything at the last close would add as the liquidation tax.
 A governor cuts risky weights as the account's drawdown nears its cap (spec section 4).
+
+W1, tax-aware execution (off unless asked for): `hold_days` holds back a sale for as long as the lot it would sell first is still short-term but turns long-term within
+that many days, unless the strategy exits the asset or the governor is cutting risk; `harvest` sells, on a fixed day near the end of each financial year, the long-term
+equity lots whose gain fits in what is left of the year's exemption, and buys the units back the next day, so the gain is taxed at zero and the cost basis steps up.
 """
 from __future__ import annotations
 
 import math
+from bisect import bisect_left
 from dataclasses import dataclass, field
-from datetime import date
+from datetime import date, timedelta
 from decimal import Decimal
 
 import numpy as np
@@ -18,7 +23,7 @@ import pandas as pd
 from numba import njit
 
 from engine.rules import Rules
-from engine.tax import CGEvent, Carry, TaxProfile, fy_end, fy_of, investment_tax
+from engine.tax import CGEvent, Carry, TaxProfile, add_months, fy_end, fy_of, investment_tax
 from engine.trace import const
 from research import costs as C
 from research.panel import ASSETS, Panel
@@ -45,6 +50,11 @@ class SimConfig:
     tax: bool = True
     profile: TaxProfile = field(default_factory=lambda: TaxProfile("new", Decimal(1200000)))
     adv_days: int = 20
+    hold_days: int = 0                     # W1: hold back a sale while the first lot turns long-term within this many days (0: off)
+    harvest: bool = False                  # W1: realise long-term equity gains up to the yearly exemption and buy back the next day
+    harvest_offset: int = 5                # the harvest is on the 5th-to-last trading day of the financial year
+    harvest_share: float = 0.95            # aim at this share of the exemption left: the estimate uses the previous close
+    harvest_min: float = 1_000.0           # no harvest for a smaller gain: the round trip would cost more than it saves
 
 
 @dataclass
@@ -94,7 +104,7 @@ def _slip(a, value, adv, half, impact, maxs, use):
 
 
 @njit(cache=True)
-def _sell(i, u, t, px, adv, reg, cvals, cded, sizes, cls, half, impact, maxs, use_slip, units, cash, lot_units, lot_cost, lot_day, head, tail,
+def _sell(i, u, t, px, adv, reg, cvals, cded, sizes, cls, half, impact, maxs, use_slip, units, cash, lot_units, lot_cost, lot_day, head, tail, lt_turn, fmv, gf_idx, ltcg,
           sl_asset, sl_acq, sl_sale, sl_units, sl_cost, sl_proc, sl_scost, sl_n, acc):
     s = _slip(i, u * px[t, i], adv[t, i], half, impact, maxs, use_slip)
     price = px[t, i] * (1.0 - s)
@@ -112,6 +122,12 @@ def _sell(i, u, t, px, adv, reg, cvals, cded, sizes, cls, half, impact, maxs, us
         lu = lot_units[i, k]
         take = min(remaining, lu)
         cost_part = lot_cost[i, k] * take / lu
+        if cls[i] == 0 and lt_turn[lot_day[i, k], i] <= t:                  # a long-term equity gain: it uses up the year's exemption
+            pp = proceeds * take / u
+            c_eff = cost_part
+            if lot_day[i, k] <= gf_idx and fmv[i] > 0.0:
+                c_eff = max(cost_part, min(fmv[i] * take, pp))
+            ltcg[0] += pp - ded * take / u - c_eff
         n = sl_n[0]
         sl_asset[n] = i
         sl_acq[n] = lot_day[i, k]
@@ -132,11 +148,31 @@ def _sell(i, u, t, px, adv, reg, cvals, cded, sizes, cls, half, impact, maxs, us
 
 
 @njit(cache=True)
+def _add_lot(i, u, value, s, t, px, reg, cvals, cded, sizes, cls, units, cash, lot_units, lot_cost, lot_day, tail, acc):
+    ch = _charge(cvals, sizes, reg[t], cls[i], 0, value)
+    ded = _charge(cded, sizes, reg[t], cls[i], 0, value)
+    cash[0] -= value + ch
+    k = tail[i]
+    lot_units[i, k] = u
+    lot_cost[i, k] = value + ded
+    lot_day[i, k] = t
+    tail[i] = k + 1
+    units[i] += u
+    acc[0] += value
+    acc[1] += ch
+    acc[2] += u * px[t, i] * s
+    acc[3] += 1.0
+
+
+@njit(cache=True)
 def _run(t0, t1, px, close, adv, reg, fixed, target, cvals, cded, sizes, cls, whole, half, impact, maxs, use_slip, band, min_trade, cap, use_gov, gstart, gend, ghold,
-         units, cash, lot_units, lot_cost, lot_day, head, tail, pend_w, pend_valid, gov, tax_due,
+         hold_days, dayn, lt_turn, harvest, exempt, hshare, hmin, fmv, gf_idx,
+         units, cash, lot_units, lot_cost, lot_day, head, tail, pend_w, pend_valid, gov, tax_due, rebuy, ltcg,
          equity, dd, mult, traded, chg, slipc, taxpaid, nord, units_out, cash_out,
          sl_asset, sl_acq, sl_sale, sl_units, sl_cost, sl_proc, sl_scost, sl_n):
     acc = np.zeros(4)
+    ltcg[0] = 0.0                                                            # each call is one financial year
+    T = dayn.shape[0]
     for t in range(t0, t1):
         acc[:] = 0.0
         cash[0] -= fixed[t]
@@ -146,6 +182,17 @@ def _run(t0, t1, px, close, adv, reg, fixed, target, cvals, cded, sizes, cls, wh
                 taxpaid[t] = tax_due[0]
                 gov[5] += tax_due[0]
                 tax_due[0] = 0.0
+            for i in range(N):
+                if rebuy[i] > 0.0:
+                    if pend_w[i] > 0.0:
+                        s = _slip(i, rebuy[i] * px[t, i], adv[t, i], half, impact, maxs, use_slip)
+                        price = px[t, i] * (1.0 + s)
+                        u = rebuy[i]
+                        while u > 0.0 and u * price + _charge(cvals, sizes, reg[t], cls[i], 0, u * price) > cash[0]:
+                            u -= 1.0
+                        if u > 0.0:
+                            _add_lot(i, u, u * price, s, t, px, reg, cvals, cded, sizes, cls, units, cash, lot_units, lot_cost, lot_day, tail, acc)
+                    rebuy[i] = 0.0
             total = cash[0]
             for i in range(N):
                 total += units[i] * px[t, i]
@@ -157,6 +204,10 @@ def _run(t0, t1, px, close, adv, reg, fixed, target, cvals, cded, sizes, cls, wh
                 sell_all = pend_w[i] <= 0.0 and units[i] > 0.0
                 if not (gap < -thr or sell_all):
                     continue
+                if hold_days > 0 and i < 4 and not sell_all and t > 0 and mult[t - 1] >= 1.0 and head[i] < tail[i]:
+                    lt = lt_turn[lot_day[i, head[i]], i]
+                    if lt > t and lt < T and dayn[lt] - dayn[t] <= hold_days:
+                        continue                                             # the first lot turns long-term soon: wait for it
                 sv = cur if sell_all else min(-gap, cur)
                 if whole[i] == 1:
                     est = px[t, i] * (1.0 - _slip(i, sv, adv[t, i], half, impact, maxs, use_slip))
@@ -165,7 +216,7 @@ def _run(t0, t1, px, close, adv, reg, fixed, target, cvals, cded, sizes, cls, wh
                     u = units[i] if sell_all else min(sv / px[t, i], units[i])
                 if u <= 0.0:
                     continue
-                _sell(i, u, t, px, adv, reg, cvals, cded, sizes, cls, half, impact, maxs, use_slip, units, cash, lot_units, lot_cost, lot_day, head, tail,
+                _sell(i, u, t, px, adv, reg, cvals, cded, sizes, cls, half, impact, maxs, use_slip, units, cash, lot_units, lot_cost, lot_day, head, tail, lt_turn, fmv, gf_idx, ltcg,
                       sl_asset, sl_acq, sl_sale, sl_units, sl_cost, sl_proc, sl_scost, sl_n, acc)
             # an overdraft (tax, fees) is covered by selling: the fund first, then the ETFs in turn
             if cash[0] < 0.0:
@@ -179,8 +230,8 @@ def _run(t0, t1, px, close, adv, reg, fixed, target, cvals, cded, sizes, cls, wh
                     else:
                         u = min(need / px[t, i], units[i])
                     if u > 0.0:
-                        _sell(i, u, t, px, adv, reg, cvals, cded, sizes, cls, half, impact, maxs, use_slip, units, cash, lot_units, lot_cost, lot_day, head, tail,
-                              sl_asset, sl_acq, sl_sale, sl_units, sl_cost, sl_proc, sl_scost, sl_n, acc)
+                        _sell(i, u, t, px, adv, reg, cvals, cded, sizes, cls, half, impact, maxs, use_slip, units, cash, lot_units, lot_cost, lot_day, head, tail, lt_turn, fmv, gf_idx,
+                              ltcg, sl_asset, sl_acq, sl_sale, sl_units, sl_cost, sl_proc, sl_scost, sl_n, acc)
             for i in range(N):
                 cur = units[i] * px[t, i]
                 gap = pend_w[i] * total - cur
@@ -207,19 +258,42 @@ def _run(t0, t1, px, close, adv, reg, fixed, target, cvals, cded, sizes, cls, wh
                     if value <= 0.0:
                         continue
                     u = value / px[t, i]
-                ch = _charge(cvals, sizes, reg[t], cls[i], 0, value)
-                ded = _charge(cded, sizes, reg[t], cls[i], 0, value)
-                cash[0] -= value + ch
-                k = tail[i]
-                lot_units[i, k] = u
-                lot_cost[i, k] = value + ded
-                lot_day[i, k] = t
-                tail[i] = k + 1
-                units[i] += u
-                acc[0] += value
-                acc[1] += ch
-                acc[2] += u * px[t, i] * s
-                acc[3] += 1.0
+                _add_lot(i, u, value, s, t, px, reg, cvals, cded, sizes, cls, units, cash, lot_units, lot_cost, lot_day, tail, acc)
+            # W1 harvest: the long-term equity lots at the head of each queue whose gain (at yesterday's close) fits in what is left of the exemption
+            if harvest[t] == 1 and exempt[t] > 0.0 and t > 0:
+                for i in range(3):
+                    goal = hshare * (exempt[t] - ltcg[0])
+                    if goal < hmin:
+                        break
+                    p_est = close[t - 1, i]
+                    g_sum = 0.0
+                    u_sum = 0.0
+                    k = head[i]
+                    while k < tail[i]:
+                        lu = lot_units[i, k]
+                        if lu > 1e-9:
+                            if lt_turn[lot_day[i, k], i] > t:
+                                break                                        # first in, first out: a short-term lot ends the harvest
+                            cpu = lot_cost[i, k] / lu
+                            if lot_day[i, k] <= gf_idx and fmv[i] > 0.0:
+                                cpu = max(cpu, min(fmv[i], p_est))
+                            g = p_est - cpu
+                            if g_sum + g * lu <= goal:
+                                g_sum += g * lu
+                                u_sum += lu
+                            else:
+                                if g > 0.0:
+                                    extra = math.floor((goal - g_sum) / g)
+                                    if extra > 0.0:
+                                        u_sum += extra
+                                        g_sum += extra * g
+                                break
+                        k += 1
+                    if u_sum > 0.0 and g_sum > 0.0:
+                        u_sum = min(u_sum, units[i])
+                        _sell(i, u_sum, t, px, adv, reg, cvals, cded, sizes, cls, half, impact, maxs, use_slip, units, cash, lot_units, lot_cost, lot_day, head, tail,
+                              lt_turn, fmv, gf_idx, ltcg, sl_asset, sl_acq, sl_sale, sl_units, sl_cost, sl_proc, sl_scost, sl_n, acc)
+                        rebuy[i] += u_sum
         traded[t] = acc[0]
         chg[t] = acc[1]
         slipc[t] = acc[2]
@@ -270,6 +344,66 @@ def _run(t0, t1, px, close, adv, reg, fixed, target, cvals, cded, sizes, cls, wh
 
 
 _TABLE_CACHE: dict = {}
+_LT_CACHE: dict = {}
+
+
+def _segments(rules: Rules, table: str, key: str, value: str) -> list:
+    rows = [r for r in rules.tables[table].all_rows() if dict(r.key).get(key) == value]
+    return sorted(rows, key=lambda r: r.valid_from)
+
+
+def lt_turn_days(rules: Rules, days: list[date], asset_class: str) -> np.ndarray:
+    """For each acquisition day index a, the first day index t at which a sale of that lot is long-term by the engine's rules (bucket by the acquisition date,
+    holding period by the sale date); len(days) + 1 when that is not within the days."""
+    T = len(days)
+    out = np.full(T, T + 1, dtype=np.int64)
+    buckets = _segments(rules, "tax.buckets", "asset_class", asset_class)
+    terms = {}
+    for a, acq in enumerate(days):
+        b = next(r for r in buckets if r.covers(acq)).data["bucket"]
+        if b not in terms:
+            terms[b] = [(r.valid_from, r.valid_to, None if r.data.get("always_short", False) else int(r.data["lt_months"]))
+                        for r in _segments(rules, "tax.capital_gains", "bucket", b)]
+        for start, end, months in terms[b]:
+            if months is None:
+                continue
+            lo = max(add_months(acq, months) + timedelta(days=1), start)
+            if end is not None and lo > end:
+                continue
+            t = bisect_left(days, lo)
+            if t < T and (end is None or days[t] <= end):
+                out[a] = t
+                break
+    return out
+
+
+def _lt_table(rules: Rules, days: list[date]) -> np.ndarray:
+    key = (id(rules), days[0], days[-1], len(days))
+    if key not in _LT_CACHE:
+        _LT_CACHE[key] = (rules, np.ascontiguousarray(np.column_stack([lt_turn_days(rules, days, c) for c in ASSET_CLASS])))
+    return _LT_CACHE[key][1]
+
+
+def harvest_days(days: list[date], offset: int = 5) -> np.ndarray:
+    """True on the offset-th to last trading day of every financial year whose last trading day is in the days."""
+    fy = np.array([fy_of(d) for d in days])
+    out = np.zeros(len(days), dtype=bool)
+    ends = [t for t in range(len(days) - 1) if fy[t + 1] != fy[t]]
+    if days[-1] == fy_end(fy[-1]):
+        ends.append(len(days) - 1)
+    for e in ends:
+        if e - offset + 1 >= 0 and fy[e - offset + 1] == fy[e]:
+            out[e - offset + 1] = True
+    return out
+
+
+def _exemptions(rules: Rules, days: list[date]) -> np.ndarray:
+    """The yearly exemption of long-term equity gains in force on each day (0 when there is none, as before FY 2018-19 when they were exempt in full)."""
+    by_fy = {}
+    for fy in sorted({fy_of(d) for d in days}):
+        ok = rules.has_fy("tax.lt_exemption", fy, group="equity_112a")
+        by_fy[fy] = float(rules.at_fy("tax.lt_exemption", fy, group="equity_112a").value) if ok else 0.0
+    return np.array([by_fy[fy_of(d)] for d in days])
 
 
 def _cost_table(rules: Rules):
@@ -319,11 +453,18 @@ def simulate(panel: Panel, weights: np.ndarray, rules: Rules, cfg: SimConfig = S
     from bisect import bisect_right
     reg = np.array([max(0, bisect_right(starts, d) - 1) for d in days], dtype=np.int64)
     fixed = C.fixed_costs(rules, days) if cfg.tax or True else np.zeros(T)
-    hi = {}
+    hi, gf_idx = {}, -1
     for d_i, d in enumerate(days):
         if d <= GRANDFATHER:
             hi = {a: float(panel.high[d_i, a]) for a in range(4)}
+            gf_idx = d_i
     fmv_unit = hi if hi and days[0] <= GRANDFATHER else None
+    w1 = cfg.hold_days > 0 or cfg.harvest
+    dayn = np.array([d.toordinal() for d in days], dtype=np.int64)
+    lt_turn = _lt_table(rules, days) if w1 else np.zeros((T, N), dtype=np.int64)
+    harvest = (harvest_days(days, cfg.harvest_offset) if cfg.harvest else np.zeros(T, dtype=bool)).astype(np.int8)
+    exempt = _exemptions(rules, days) if cfg.harvest else np.zeros(T)
+    fmv = np.array([fmv_unit[a] for a in range(4)] + [0.0]) if fmv_unit else np.zeros(N)
 
     L = T + 10
     units = np.zeros(N)
@@ -334,6 +475,7 @@ def simulate(panel: Panel, weights: np.ndarray, rules: Rules, cfg: SimConfig = S
     pend_w, pend_valid = np.zeros(N), np.zeros(1, dtype=np.int64)
     gov = np.array([cfg.capital, 1.0, 0.0, 0.0, 0.0, 0.0])        # high-water mark, multiplier, cut flag, low since the cut, its day, tax paid so far
     tax_due = np.zeros(1)
+    rebuy, ltcg = np.zeros(N), np.zeros(1)
     equity, dd, mult = np.zeros(T), np.zeros(T), np.ones(T)
     traded, chg, slipc, taxpaid, nord = np.zeros(T), np.zeros(T), np.zeros(T), np.zeros(T), np.zeros(T)
     units_out, cash_out = np.zeros((T, N)), np.zeros(T)
@@ -353,7 +495,8 @@ def simulate(panel: Panel, weights: np.ndarray, rules: Rules, cfg: SimConfig = S
         sl_n[0] = 0
         _run(t0, t1, px, close, adv, reg, fixed, weights, cvals, cded, sizes, CLS, WHOLE, HALF, C.IMPACT, C.MAX_SLIPPAGE, 1 if cfg.slippage else 0, cfg.band, cfg.min_trade,
              cfg.cap, 1 if cfg.governor else 0, cfg.gov_start, cfg.gov_end, cfg.gov_hold_days,
-             units, cash, lot_units, lot_cost, lot_day, head, tail, pend_w, pend_valid, gov, tax_due,
+             cfg.hold_days, dayn, lt_turn, harvest, exempt, cfg.harvest_share, cfg.harvest_min, fmv, gf_idx if fmv_unit else -1,
+             units, cash, lot_units, lot_cost, lot_day, head, tail, pend_w, pend_valid, gov, tax_due, rebuy, ltcg,
              equity, dd, mult, traded, chg, slipc, taxpaid, nord, units_out, cash_out,
              sl["asset"], sl["acq"], sl["sale"], sl["units"], sl["cost"], sl["proc"], sl["scost"], sl_n)
         n = int(sl_n[0])
