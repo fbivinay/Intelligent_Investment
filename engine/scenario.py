@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import date
-from decimal import Decimal
+from decimal import ROUND_FLOOR, Decimal
 
 from engine.charges import Order, account_opening_fee, amc_fee, dp_charge, order_charges
 from engine.lots import Inventory
@@ -31,7 +31,7 @@ class Bar:
 class Result:
     net: Node                    # what you end up with: the root of the whole trace
     waterfall: dict[str, Node]
-    units: int
+    units: Decimal                # whole units for an ETF, to the fund's unit step for a fund
     bought_on: date
     ended_on: date
     sold: bool
@@ -39,24 +39,28 @@ class Result:
 
 def buy_and_hold(rules: Rules, *, instrument: str, instrument_class: str, bars: list[Bar],
                  dividends: dict[date, Decimal], amount: Decimal, start: date, end: date,
-                 profile: TaxProfile, sell_at_end: bool = True) -> Result:
+                 profile: TaxProfile, sell_at_end: bool = True, unit_step: Decimal = Decimal(1), demat: bool = True) -> Result:
+    """`unit_step`: the smallest unit you can buy (1 for an ETF on the exchange, 0.001 for a fund's units). `demat`: units held in a demat account (an ETF) pay the
+    account's opening fee, its yearly fee and the depository charge on a sale; fund units bought from the fund house (demat=False) pay none of them."""
     if amount <= 0:
         raise ValueError("amount must be positive")
+    if unit_step <= 0:
+        raise ValueError("unit_step must be positive")
     buy = next((b for b in bars if b.on >= start), None)
     last = [b for b in bars if b.on <= end]
     if buy is None or not last or last[-1].on <= buy.on:
         raise ValueError(f"no usable price history between {start} and {end}")
     sell = last[-1]
 
-    units = int(amount // buy.close)
-    while units > 0:
-        bc = order_charges(rules, Order(buy.on, instrument_class, "buy", Decimal(units), buy.close))
+    q = (amount / buy.close / unit_step).to_integral_value(rounding=ROUND_FLOOR) * unit_step
+    while q > 0:
+        bc = order_charges(rules, Order(buy.on, instrument_class, "buy", q, buy.close))
         if bc.turnover.value + bc.total.value <= amount:
             break
-        units -= 1
-    if units == 0:
+        q -= unit_step
+    if q <= 0:
         raise ValueError(f"{amount} is too small to buy one unit at {buy.close} after charges")
-    q = Decimal(units)
+    units = q
 
     initial = const("Money invested", amount)
     cost = add("Cost of acquisition (price + buy charges you may deduct)", bc.turnover, bc.deductible)
@@ -69,14 +73,17 @@ def buy_and_hold(rules: Rules, *, instrument: str, instrument_class: str, bars: 
                 mul(f"Dividend paid on {ex}", const("Units held", q), const("Dividend per unit", per_unit)))
     div_fy = {fy: add(f"Dividends received in {fy_label(fy)}", *ns) for fy, ns in div_by_fy.items()}
 
-    opened = buy.on  # ponytail: the account is opened for this purchase; a user with an older account pays no opening fee
-    opening = account_opening_fee(rules, opened)
-    amc = [amc_fee(rules, min(fy_end(fy), sell.on), opened) for fy in range(fy_of(buy.on), fy_of(sell.on) + 1)]
+    if demat:
+        opened = buy.on  # ponytail: the account is opened for this purchase; a user with an older account pays no opening fee
+        opening = account_opening_fee(rules, opened)
+        amc = [amc_fee(rules, min(fy_end(fy), sell.on), opened) for fy in range(fy_of(buy.on), fy_of(sell.on) + 1)]
+    else:
+        opening, amc = const("Account opening fee (none: fund units, no demat account)", 0), []
 
     sale_value = mul("Value of units at the end", const("Units held", q), const("Closing price on the last day", sell.close))
     if sell_at_end:
         sc = order_charges(rules, Order(sell.on, instrument_class, "sell", q, sell.close))
-        dp = dp_charge(rules, sell.on)  # one sale of one ISIN on one day: one charge event under either DP basis
+        dp = dp_charge(rules, sell.on) if demat else const("Depository charge (none: fund units, no demat account)", 0)  # one sale of one ISIN on one day: one event
         inv = Inventory()
         inv.buy(instrument, buy.on, q, cost)
         piece = inv.sell(instrument, q)[0]
