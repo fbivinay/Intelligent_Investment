@@ -1,0 +1,38 @@
+{
+ "Aggressive": {
+  "all trials": {
+   "deflated_margin": 3.5190807509142905,
+   "n_eff": 488.8055028780061,
+   "n_trials": 2077
+  },
+  "ensembles": {
+   "deflated_margin": 1.3081840272672591,
+   "n_eff": 2.3529567401476434,
+   "n_trials": 7
+  }
+ },
+ "Balanced": {
+  "all trials": {
+   "deflated_margin": 3.5387992015274374,
+   "n_eff": 524.0305029511362,
+   "n_trials": 2077
+  },
+  "ensembles": {
+   "deflated_margin": 1.3318807035211888,
+   "n_eff": 2.4277213568794593,
+   "n_trials": 7
+  }
+ },
+ "Conservative": {
+  "all trials": {
+   "deflated_margin": 3.587274028330756,
+   "n_eff": 622.8261813236453,
+   "n_trials": 2077
+  },
+  "ensembles": {
+   "deflated_margin": 1.385157380978541,
+   "n_eff": 2.609948488778537,
+   "n_trials": 7
+  }
+ }
+}
