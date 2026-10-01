@@ -8,6 +8,7 @@ accident.
 from __future__ import annotations
 
 import csv
+import dataclasses
 from dataclasses import dataclass
 from datetime import date, timedelta
 from pathlib import Path
@@ -37,6 +38,11 @@ class Panel:
     pe: np.ndarray               # T, Nifty 50 P/E (NaN before 2012-07)
     pb: np.ndarray               # T, Nifty 50 P/B
     special_days: tuple[str, ...] = ()   # weekend sessions only some ETFs traded (gold ETFs on Akshaya Tritiya and Dhanteras): not in the table
+
+
+def from_day(p: Panel, i0: int) -> Panel:
+    """The panel from day i0 on, every array still aligned: a fresh account can start there."""
+    return Panel(**{f.name: (getattr(p, f.name)[i0:] if isinstance(getattr(p, f.name), np.ndarray) else getattr(p, f.name)) for f in dataclasses.fields(p)})
 
 
 def _rows(path: Path):
