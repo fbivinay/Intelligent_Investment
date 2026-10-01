@@ -17,6 +17,7 @@ from research.kaggle.snapshot import sha256
 from research.strategies import Trial
 
 OUT = Path(__file__).resolve().parent / "out" / "s6"
+OUT_FROZEN = Path(__file__).resolve().parent / "out" / "s6_frozen"
 RECORD_YEARS = 3
 NEVER = "9999-12-31"
 BAND = 0.05
@@ -74,3 +75,21 @@ def ensemble(out=OUT) -> Trial:
     """The mean of every committed configuration's weights: the deep model as one candidate with nothing left to choose."""
     weights, dates = load(out)
     return _trial(f"mean of {len(weights)} configurations", np.mean(list(weights.values()), axis=0), dates, {"configs": len(weights), "seeds": len(C.SEEDS)})
+
+
+def ensemble_combined(design=OUT, frozen=OUT_FROZEN) -> Trial:
+    """The deep model through the frozen years: the design run's weights for every design day (the record is never rewritten) and the frozen run's for the days after,
+    from models retrained each April on the data before it."""
+    dw, ddates = load(design)
+    fw, fdates = load(frozen)
+    n = len(ddates)
+    if len(fdates) < n or not np.array_equal(fdates[:n], ddates):
+        raise ValueError("the frozen run's calendar does not extend the design run's")
+    combined = {}
+    for name, w in fw.items():
+        if not np.isfinite(w[n:]).all():
+            raise ValueError(f"weights are missing on new days in the frozen run of {name}")
+        c = w.copy()
+        c[:n] = dw[name]
+        combined[name] = c
+    return _trial(f"mean of {len(combined)} configurations", np.mean(list(combined.values()), axis=0), fdates, {"configs": len(combined), "seeds": len(C.SEEDS)})

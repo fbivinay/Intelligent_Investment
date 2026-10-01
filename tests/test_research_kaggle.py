@@ -316,3 +316,22 @@ def test_the_driver_keeps_the_input_manifest_and_the_dates_next_to_the_weights(t
     D6.record_inputs(tmp_path / "snap", out)
     assert (out / "input_manifest.json").read_bytes() == (tmp_path / "snap" / "manifest.json").read_bytes()
     assert SN.sha256(out / "dates.npy") == json.loads((out / "input_manifest.json").read_text())["files"]["d_dates.npy"]
+
+
+def test_the_frozen_run_trains_at_the_last_design_cut_and_every_april_after_it():
+    from research.kaggle import s6 as D6
+    dates = np.arange(np.datetime64("2010-04-01"), np.datetime64("2026-09-30"), dtype="datetime64[D]")
+    dates = dates[np.is_busday(dates)]
+    cuts = D6.frozen_cuts(dates)
+    assert [str(dates[c]) for c in cuts] == ["2023-04-03", "2024-04-01", "2025-04-01", "2026-04-01"]
+
+
+def test_the_frozen_driver_refuses_to_run_without_the_freeze_tag(monkeypatch):
+    from research import frozen
+    from research.kaggle import s6 as D6
+    loaded = []
+    monkeypatch.setattr(frozen, "code_state", lambda *a, **k: (_ for _ in ()).throw(RuntimeError("no tag frozen-design-v1")))
+    monkeypatch.setattr(D6.P, "load_panel", lambda *a, **k: loaded.append(1))
+    with pytest.raises(RuntimeError, match="tag"):
+        D6.main_frozen()
+    assert loaded == []

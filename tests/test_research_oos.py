@@ -22,8 +22,8 @@ def weekdays(start, n):
     return out
 
 
-def world(n=1150, seed=11):
-    days = weekdays(date(2010, 4, 1), n)
+def world(n=1150, seed=11, start=date(2010, 4, 1)):
+    days = weekdays(start, n)
     rng = np.random.default_rng(seed)
     close = 100 * np.exp(np.cumsum(rng.normal(0.0004, 0.01, (n, 4)), axis=0))
     nan = np.full(n, np.nan)
@@ -63,7 +63,7 @@ def test_a_level_run_gives_every_figure_the_report_needs_for_both_designs():
             assert list(v["log"].columns) == S.LOG_COLUMNS and len(v["log"]) == 2 and v["row"]["start"] == "2013-04-01"
             assert set(("cagr", "cagr_liquidated", "max_dd", "sharpe", "turnover", "tax")) <= set(v["row"]) and len(v["edge"]) == 2 and 0.0 <= v["dsr"]["dsr"] <= 1.0
             assert "sel" not in v and "acct" not in v and "runs" not in d                    # the heavy objects are not kept
-    assert list(out["alone"]) == ["S0", "E1", "E2", "E3", "E4", "E5"] and list(out["refs"]) == ["Nifty BeES", "Gold BeES", "Liquid fund"]
+    assert list(out["alone"]) == ["S0", "E1", "E2", "E3", "E4", "E5"] and list(out["refs"]) == ["Nifty BeES", "Junior BeES", "Bank BeES", "Gold BeES", "Liquid fund"]
     assert all(r["start"] == "2013-04-01" for r in out["alone"].values()) and out["refs"]["Nifty BeES"]["start"] == "2013-04-01"
 
 
@@ -132,7 +132,13 @@ def test_main_writes_a_selection_log_per_design_level_and_variant_and_the_table_
     oos.main(out=a)
     oos.main(out=b)
     names = sorted(x.name for x in a.iterdir())
-    assert names == sorted(["oos.md"] + [f"selection_{r}_{d}_{v}.csv" for r in ("Conservative", "Balanced", "Aggressive") for d in ("ensembles", "all-trials") for v in ("spec", "deflated")])
+    assert names == sorted(["oos.md", "oos_margins.json"] + [f"selection_{r}_{d}_{v}.csv" for r in ("Conservative", "Balanced", "Aggressive") for d in ("ensembles", "all-trials")
+                                                                for v in ("spec", "deflated")])
+    import json
+    m = json.loads((a / "oos_margins.json").read_text())
+    assert set(m) == {"Conservative", "Balanced", "Aggressive"} and m["Balanced"]["ensembles"]["n_trials"] == 7
+    assert m["Balanced"]["ensembles"]["deflated_margin"] == pytest.approx(oos.margin_for("deflated", m["Balanced"]["ensembles"]["n_eff"]))
+    assert "harvest = True" in (a / "oos.md").read_text(encoding="utf-8")
     for n in names:
         assert hashlib.sha256((a / n).read_bytes()).hexdigest() == hashlib.sha256((b / n).read_bytes()).hexdigest()
     log = pd.read_csv(a / "selection_Balanced_ensembles_spec.csv")
@@ -155,3 +161,18 @@ def test_the_deep_model_is_a_candidate_with_its_own_row_and_is_not_picked_before
         assert len(early) == 3 and (early.picked != "S6|stand-in|band=0.05").all()
     text = oos.report([out])
     assert "S6 deep model (mean of 12 configurations, 3 seeds each) (alone)" in text
+
+
+def test_the_execution_settings_reach_every_strategy_account_and_s0_but_not_the_reference_holdings():
+    from research import sim
+    p = world(n=1900, start=date(2016, 4, 1))                                                 # harvests need the yearly exemption, from FY 2018-19
+    out = oos.run_level(p, RULES, few_trials(), st.ensembles(), "Balanced", 0.2, sim_kw={"harvest": True})
+    c0 = S.cut_days(p.dates)[0]
+    window = P.from_day(p, c0)
+    e1 = st.ensembles()[0]
+    fixed = B.fixed_total(window, RULES)
+    on = B.measure(window, sim.simulate(window, e1.fn(p)[c0:], RULES, sim.SimConfig(cap=0.2, band=e1.band, harvest=True)), fixed, 1_000_000.0)
+    off = B.measure(window, sim.simulate(window, e1.fn(p)[c0:], RULES, sim.SimConfig(cap=0.2, band=e1.band)), fixed, 1_000_000.0)
+    assert on["final"] != off["final"] and out["alone"]["E1"]["final"] == pytest.approx(on["final"])
+    hold = sim.simulate(window, st.s1_static([1, 0, 0, 0, 0], "never")(window), RULES, sim.SimConfig(governor=False))
+    assert out["refs"]["Nifty BeES"]["final"] == pytest.approx(B.measure(window, hold, fixed, 1_000_000.0)["final"]) and out["execution"] == {"harvest": True}
