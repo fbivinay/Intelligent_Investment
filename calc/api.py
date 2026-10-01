@@ -180,6 +180,19 @@ def calculate(params: dict) -> dict:
             "results": results, "messages": messages, "traces": traces.trees, "series": series, "projections": projections, "csv": csv, "check": check, "notes": NOTES}
 
 
+def preview(params: dict) -> dict:
+    """The Fyers preview of one fill day of the model's account (the first day with orders if no date is given), and the days that have orders."""
+    from calc import fyers as F
+    try:
+        p = _parse({**params, "compare": []})
+        run = PR.run(p["level"], p["amount"], p["start"], p["end"], p["profile"], p["slippage"])
+        days = F.order_days(run)
+        on = date.fromisoformat(str(params.get("date", days[0] if days else run.dates[1])))
+        return {"order_days": days, "preview": F.preview(run, on)}
+    except (ValueError, KeyError) as e:
+        return {"error": str(e).strip("'\"")}
+
+
 if __name__ == "__main__":
     import sys
     print(json.dumps(calculate(json.loads(sys.argv[1]) if len(sys.argv) > 1 else {"amount": 1000000, "start": "2016-04-01", "end": "2026-09-30"}))[:2000])

@@ -52,6 +52,7 @@ class ProductRun:
     equity: list[float]         # the fast simulator's daily marks at the close (after tax paid), for the chart
     pretax: list[float]         # the same marks with the tax paid added back: the returns a projection resamples
     drawdown: list[float]
+    units: np.ndarray           # T x 5 units held after each day's fills (the fast simulator's), for the Fyers preview
     sim_final: float
     gap: float                  # exact books (still holding) less the fast simulator's, the yearly fee of the year in progress allowed for
     growth_sold: float
@@ -89,6 +90,6 @@ def run(level: str, amount: Decimal, start: date, end: date, profile: TaxProfile
     years = (days[-1] - days[0]).days / 365.25
     grow = lambda v: (float(v) / float(amount)) ** (1 / years) - 1 if v > 0 else -1.0
     return ProductRun(level, booked, [d.isoformat() for d in days], w, sig_strategy[s0:s0 + len(days)], [float(x) for x in r.equity],
-                      [float(x) for x in r.equity + np.cumsum(r.tax_paid)], [float(x) for x in r.drawdown],
+                      [float(x) for x in r.equity + np.cumsum(r.tax_paid)], [float(x) for x in r.drawdown], r.units,
                       float(r.equity[-1] - r.pending_tax), float(booked.held.value) - (float(r.equity[-1] - r.pending_tax) - last_fee),
                       grow(booked.sold.value), grow(booked.held.value), float(r.drawdown.max()))
