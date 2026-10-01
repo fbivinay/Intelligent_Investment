@@ -124,3 +124,29 @@ def test_amount_too_small_or_period_empty_is_an_error(rules):
 def test_a_zero_or_negative_amount_is_refused(rules, amount):
     with pytest.raises(ValueError, match="positive"):
         run(rules, amount)
+
+
+def test_fund_units_are_bought_to_the_unit_step_so_almost_all_the_money_is_invested(rules):
+    r = buy_and_hold(rules, instrument="FUND", instrument_class="mf_equity", bars=bars(), dividends={}, amount=Dc("100050"), start=date(2015, 4, 1),
+                     end=date(2019, 6, 3), profile=TaxProfile("old", Dc(0)), unit_step=Dc("0.001"), demat=False)
+    assert r.units == r.units.quantize(Dc("0.001")) and r.units > 1000 and r.units % 1 != 0
+    assert_balanced(r.net)
+    whole = buy_and_hold(rules, instrument="FUND", instrument_class="mf_equity", bars=bars(), dividends={}, amount=Dc("100050"), start=date(2015, 4, 1),
+                         end=date(2019, 6, 3), profile=TaxProfile("old", Dc(0)), demat=False)
+    assert whole.units == 1000 and r.units > whole.units
+
+
+def test_without_demat_there_is_no_opening_fee_no_yearly_fee_and_no_depository_charge(rules):
+    kw = dict(instrument="FUND", instrument_class="mf_equity", bars=bars(), dividends={}, amount=Dc("100000"), start=date(2015, 4, 1), end=date(2019, 6, 3),
+              profile=TaxProfile("old", Dc(0)))
+    demat, direct = buy_and_hold(rules, **kw), buy_and_hold(rules, **kw, demat=False)
+    assert demat.waterfall["account_opening"].value > 0 and demat.waterfall["amc"].value > 0
+    assert direct.waterfall["account_opening"].value == 0 and direct.waterfall["amc"].value == 0
+    assert direct.waterfall["sale_charges"].value < demat.waterfall["sale_charges"].value                 # no depository charge on the sale
+    assert_balanced(direct.net)
+
+
+def test_a_unit_step_that_is_not_positive_is_refused(rules):
+    with pytest.raises(ValueError, match="step"):
+        buy_and_hold(rules, instrument="FUND", instrument_class="mf_equity", bars=bars(), dividends={}, amount=Dc("100000"), start=date(2015, 4, 1),
+                     end=date(2019, 6, 3), profile=TaxProfile("old", Dc(0)), unit_step=Dc(0))
