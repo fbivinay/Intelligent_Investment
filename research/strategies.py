@@ -188,3 +188,16 @@ def trials(s1_steps: int = 10) -> list[Trial]:
     for (start, end), band in product(product((0.05, 0.10, 0.15), (0.25, 0.35)), (0.01, 0.05)):
         add("S5", s5_marketdd, {"start": start, "end": end}, band)
     return out
+
+
+def ensembles() -> list[Trial]:
+    """One candidate per family with no parameter left to choose. E1: the equal-weight mix of the four ETFs and cash, rebalanced yearly (the 1/N portfolio, the average of the
+    symmetric S1 grid). E2 to E5: the average of the weights of every committed parameter set of S2 to S5 (those with the 5% simulator band where a family has both bands)."""
+    every = trials()
+    out = [Trial("E1|equal-weight,rebalance=year|band=0.01", "E1", {"weights": [0.2] * 5, "rebalance": "year"}, s1_static([0.2] * 5, "year"))]
+    for k, src in enumerate(("S2", "S3", "S4", "S5"), start=2):
+        band = 0.01 if src == "S3" else 0.05
+        members = [t.fn for t in every if t.family == src and t.band == band]
+        out.append(Trial(f"E{k}|mean of {len(members)} {src}|band={band:g}", f"E{k}", {"of": src, "members": len(members)},
+                         lambda p, members=members: np.mean([m(p) for m in members], axis=0), band))
+    return out
