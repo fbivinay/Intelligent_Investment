@@ -1,0 +1,67 @@
+[{"stream_name":"stdout","time":14.393349857,"data":"06:08:15 gru-L63-c5 cut 1/4\n"}
+,{"stream_name":"stdout","time":14.915244141,"data":"06:08:16 gru-L63-c5 cut 2/4\n"}
+,{"stream_name":"stdout","time":17.240340669,"data":"06:08:18 gru-L63-c5 cut 3/4\n"}
+,{"stream_name":"stdout","time":19.895712074,"data":"06:08:21 gru-L63-c5 cut 4/4\n"}
+,{"stream_name":"stdout","time":19.89689093,"data":"06:08:21 gru-L63-c5 done in 13.8 s\n"}
+,{"stream_name":"stdout","time":21.975024939,"data":"06:08:23 gru-L63-c20 cut 1/4\n"}
+,{"stream_name":"stdout","time":22.514064989,"data":"06:08:23 gru-L63-c20 cut 2/4\n"}
+,{"stream_name":"stdout","time":25.018904555,"data":"06:08:26 gru-L63-c20 cut 3/4\n"}
+,{"stream_name":"stdout","time":27.81820397,"data":"06:08:28 gru-L63-c20 cut 4/4\n"}
+,{"stream_name":"stdout","time":27.820273912,"data":"06:08:28 gru-L63-c20 done in 7.9 s\n"}
+,{"stream_name":"stdout","time":31.268271573,"data":"06:08:32 gru-L126-c5 cut 1/4\n"}
+,{"stream_name":"stdout","time":32.242366391,"data":"06:08:33 gru-L126-c5 cut 2/4\n"}
+,{"stream_name":"stdout","time":35.447812898,"data":"06:08:36 gru-L126-c5 cut 3/4\n"}
+,{"stream_name":"stdout","time":40.56690571,"data":"06:08:41 gru-L126-c5 cut 4/4\n"}
+,{"stream_name":"stdout","time":40.567851977,"data":"06:08:41 gru-L126-c5 done in 12.7 s\n"}
+,{"stream_name":"stdout","time":43.515290377,"data":"06:08:44 gru-L126-c20 cut 1/4\n"}
+,{"stream_name":"stdout","time":44.492630772,"data":"06:08:45 gru-L126-c20 cut 2/4\n"}
+,{"stream_name":"stdout","time":47.764579206,"data":"06:08:48 gru-L126-c20 cut 3/4\n"}
+,{"stream_name":"stdout","time":53.089525113,"data":"06:08:54 gru-L126-c20 cut 4/4\n"}
+,{"stream_name":"stdout","time":53.089806691,"data":"06:08:54 gru-L126-c20 done in 12.5 s\n"}
+,{"stream_name":"stdout","time":55.701502794,"data":"06:08:56 tcn-L63-c5 cut 1/4\n"}
+,{"stream_name":"stdout","time":58.313197108,"data":"06:08:59 tcn-L63-c5 cut 2/4\n"}
+,{"stream_name":"stdout","time":65.416305716,"data":"06:09:06 tcn-L63-c5 cut 3/4\n"}
+,{"stream_name":"stdout","time":69.367017651,"data":"06:09:10 tcn-L63-c5 cut 4/4\n"}
+,{"stream_name":"stdout","time":69.368128763,"data":"06:09:10 tcn-L63-c5 done in 16.3 s\n"}
+,{"stream_name":"stdout","time":71.411726359,"data":"06:09:12 tcn-L63-c20 cut 1/4\n"}
+,{"stream_name":"stdout","time":73.95719346,"data":"06:09:15 tcn-L63-c20 cut 2/4\n"}
+,{"stream_name":"stdout","time":77.488758385,"data":"06:09:18 tcn-L63-c20 cut 3/4\n"}
+,{"stream_name":"stdout","time":81.632546838,"data":"06:09:22 tcn-L63-c20 cut 4/4\n"}
+,{"stream_name":"stdout","time":81.633617262,"data":"06:09:22 tcn-L63-c20 done in 12.3 s\n"}
+,{"stream_name":"stdout","time":84.910153627,"data":"06:09:26 tcn-L126-c5 cut 1/4\n"}
+,{"stream_name":"stdout","time":90.173893403,"data":"06:09:31 tcn-L126-c5 cut 2/4\n"}
+,{"stream_name":"stdout","time":99.026945385,"data":"06:09:40 tcn-L126-c5 cut 3/4\n"}
+,{"stream_name":"stdout","time":107.041311702,"data":"06:09:48 tcn-L126-c5 cut 4/4\n"}
+,{"stream_name":"stdout","time":107.042329948,"data":"06:09:48 tcn-L126-c5 done in 25.4 s\n"}
+,{"stream_name":"stdout","time":108.664521891,"data":"06:09:49 tcn-L126-c20 cut 1/4\n"}
+,{"stream_name":"stdout","time":110.879832534,"data":"06:09:52 tcn-L126-c20 cut 2/4\n"}
+,{"stream_name":"stdout","time":114.956770079,"data":"06:09:56 tcn-L126-c20 cut 3/4\n"}
+,{"stream_name":"stdout","time":122.313378254,"data":"06:10:03 tcn-L126-c20 cut 4/4\n"}
+,{"stream_name":"stdout","time":122.314564806,"data":"06:10:03 tcn-L126-c20 done in 15.3 s\n"}
+,{"stream_name":"stdout","time":123.082787161,"data":"06:10:04 mlp-L63-c5 cut 1/4\n"}
+,{"stream_name":"stdout","time":123.699383688,"data":"06:10:04 mlp-L63-c5 cut 2/4\n"}
+,{"stream_name":"stdout","time":124.840641459,"data":"06:10:05 mlp-L63-c5 cut 3/4\n"}
+,{"stream_name":"stdout","time":125.733574048,"data":"06:10:06 mlp-L63-c5 cut 4/4\n"}
+,{"stream_name":"stdout","time":125.73459819,"data":"06:10:06 mlp-L63-c5 done in 3.4 s\n"}
+,{"stream_name":"stdout","time":126.451563062,"data":"06:10:07 mlp-L63-c20 cut 1/4\n"}
+,{"stream_name":"stdout","time":126.832461726,"data":"06:10:07 mlp-L63-c20 cut 2/4\n"}
+,{"stream_name":"stdout","time":127.871528256,"data":"06:10:09 mlp-L63-c20 cut 3/4\n"}
+,{"stream_name":"stdout","time":128.717119735,"data":"06:10:09 mlp-L63-c20 cut 4/4\n"}
+,{"stream_name":"stdout","time":128.718212726,"data":"06:10:09 mlp-L63-c20 done in 3.0 s\n"}
+,{"stream_name":"stdout","time":129.51211632,"data":"06:10:10 mlp-L126-c5 cut 1/4\n"}
+,{"stream_name":"stdout","time":130.115496251,"data":"06:10:11 mlp-L126-c5 cut 2/4\n"}
+,{"stream_name":"stdout","time":131.309671182,"data":"06:10:12 mlp-L126-c5 cut 3/4\n"}
+,{"stream_name":"stdout","time":132.916604282,"data":"06:10:14 mlp-L126-c5 cut 4/4\n"}
+,{"stream_name":"stdout","time":132.917764028,"data":"06:10:14 mlp-L126-c5 done in 4.2 s\n"}
+,{"stream_name":"stdout","time":133.514065396,"data":"06:10:14 mlp-L126-c20 cut 1/4\n"}
+,{"stream_name":"stdout","time":134.098753903,"data":"06:10:15 mlp-L126-c20 cut 2/4\n"}
+,{"stream_name":"stdout","time":134.819277365,"data":"06:10:15 mlp-L126-c20 cut 3/4\n"}
+,{"stream_name":"stdout","time":136.140782779,"data":"06:10:17 mlp-L126-c20 cut 4/4\n"}
+,{"stream_name":"stdout","time":136.141749643,"data":"06:10:17 mlp-L126-c20 done in 3.2 s\n"}
+,{"stream_name":"stderr","time":140.208143008,"data":"/usr/local/lib/python3.12/dist-packages/mistune.py:435: SyntaxWarning: invalid escape sequence '\\|'\n"}
+,{"stream_name":"stderr","time":140.208173099,"data":"  cells[i][c] = re.sub('\\\\\\\\\\|', '|', cell)\n"}
+,{"stream_name":"stderr","time":140.442065662,"data":"/usr/local/lib/python3.12/dist-packages/nbconvert/filters/filter_links.py:36: SyntaxWarning: invalid escape sequence '\\_'\n"}
+,{"stream_name":"stderr","time":140.442091129,"data":"  text = re.sub(r'_', '\\_', text) # Escape underscores in display text\n"}
+,{"stream_name":"stderr","time":141.066989531,"data":"[NbConvertApp] Converting notebook __script__.ipynb to html\n"}
+,{"stream_name":"stderr","time":142.294386377,"data":"[NbConvertApp] Writing 294376 bytes to __results__.html\n"}
+]
