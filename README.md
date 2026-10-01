@@ -1,102 +1,68 @@
-# DeepTrend
+# Intelligent Investment (India)
 
-A deep-learning model that decides, every US trading day, how much of your money
-to hold in a US spot Bitcoin ETF (IBIT), a gold ETF (GLD) and T-bills. It is built for an
-Indian resident investing under the Liberalised Remittance Scheme, and measured in
-**rupees, after every Indian tax**, against what an Indian would otherwise buy.
+> If I invested ₹X on date Y, what would I have after every real cost and tax, compared with the main alternatives, and what range could happen if I invest today?
 
-**Site:** https://btc-paper-trader-fbivinays-projects.vercel.app
+A research system for a resident Indian investor: ETFs and funds on NSE, every transaction charged and taxed by the rules of its own date (Fyers fee schedule,
+STT, exchange, SEBI, stamp duty, GST, DP charges, capital gains by holding period, exemptions, grandfathering, slabs, surcharge, cess, rebate), every number traced to
+its rule and source. Fyers is the design target only: no account, no keys, no orders are ever sent.
 
-## The result that matters to an Indian investor
+**Not investment advice.** Past results and estimates, never guarantees.
 
-₹1,00,000 put in on 11 Jan 2024 (IBIT's launch), worth this much in hand at the end of
-Sep 2026, after tax at the 30% slab. The rupee's fall (₹83 to ₹96 a dollar) is taxed as a
-gain, so it is counted too.
+## Status
 
-| Option | In hand | Per year | Worst fall |
-|---|---|---|---|
-| Gold ETF in India (GOLDBEES) | ₹2,17,872 | +33.2% | −23% |
-| Bitcoin ETF held (IBIT via LRS) | ₹1,86,483 | +25.8% | −40% |
-| Bitcoin on an Indian exchange | ₹1,86,585 | +25.9% | −43% |
-| **DeepTrend model** | **₹1,65,801** | **+20.5%** | **−16%** |
-| Bank FD (SBI, 1 year) | ₹1,12,990 | +4.6% | 0% |
-| Nifty 50 ETF (NIFTYBEES) | ₹1,10,575 | +3.8% | −15% |
-
-The model roughly quadruples Nifty and FD returns, and takes less than half the falls of
-holding Bitcoin. The site lets you pick your own slab; lower slabs raise the model most,
-because its gains are short-term.
-
-## The deep learning model
-
-A **Deep Momentum Network** (Lim, Zohren & Roberts, University of Oxford, 2019).
-
-- **Why this model:** our first model, an LSTM, guessed Bitcoin's 4-hour direction right
-  44.3% of the time (37.6% by chance) and still lost money: a 0.04% edge against 0.25% fees.
-  So this network is not trained to guess. Its loss is minus the Sharpe ratio of the
-  positions it takes, so it learns directly to earn more per unit of risk.
-- **Why pooled:** Bitcoin has too little history for a neural network. The network learns
-  from 18 markets at once (95,615 market-days since 2000: stocks, bonds, gold, silver, oil,
-  Nifty, crypto), on scale-free features, then applies what it learned to Bitcoin and gold.
-- **How it works:**
-  1. Input: 63 trading days × 8 features (volatility-scaled returns over 1/21/63/126/252
-     days, three MACD trend signals).
-  2. A Transformer encoder (1 layer, 2 heads, causal mask) outputs a position from 0 to 1.
-  3. The output is calibrated: each value is ranked against the network's own outputs over
-     the previous 3 years.
-  4. The live model averages this with the share of 8 classic trend votes. It then shrinks
-     the position in wild markets, gives what's left to gold, and keeps the rest in T-bills.
-- **How it was chosen:** 40 variants were trained on a Kaggle GPU: 5 architectures (LSTM,
-  GRU, TCN, Transformer, MLP), each pooled or fine-tuned, raw or calibrated, alone or with
-  the votes. Every one was retrained each January on data before that year, chosen on
-  2019–2023 only, then tested on IBIT's real prices from 2024.
-
-| Model | 2019–23 per year / worst fall | Real ETF 2024+ per year / worst fall |
+| # | Part | State |
 |---|---|---|
-| **Transformer, calibrated + 8 votes (live)** | +26.6% / −28% | +18.1% / −16% |
-| 8 trend votes alone | +33.1% / −34% | +25.9% / −15% |
-| Transformer, calibrated, alone | +22.9% / −21% | +10.3% / −16% |
-| Buy & hold | +56.5% / −76% | +19.9% / −44% |
+| 1 | Rules and costs engine (`engine/`, `rules/`) | done: dated TOML rule tables from 2010, exact Decimal maths, a trace for every number |
+| 2 | Data layer (`data/`) | done: NSE archive and website history, AMFI NAVs, 2010-04-01 to 2026-09-30, gaps documented in `data/gaps.md` |
+| 3 | Strategy engine (`research/`) | done: design frozen under tag `frozen-design-v1`, the frozen test run once |
+| 4-6 | Calculator, comparison and projection, web app, Fyers demo | in progress |
 
-Honest note: on real prices the simple trend votes alone earned more. The hybrid keeps the
-network in charge of half the decision and stays level with the rules on the years used to
-choose.
+## Results
 
-## How it runs (free, no database)
+The product is a walk-forward selector per risk level (maximum drawdown 10%, 20%, 30%): every April it looks only at the past and keeps same-risk plain holding
+(Nifty ETF plus a liquid fund) unless a candidate beats it by more than selection noise. Candidates: equal weight of four ETFs (Nifty, Next 50, Bank, Gold) and a
+liquid fund; means of trend, momentum, volatility-targeting and drawdown-aware variants; and a deep-learning position model trained on a Kaggle T4 GPU.
+
+**Frozen test**, the three years nothing was designed on (2023-10-03 to 2026-09-30, ₹10 lakh, after all charges and tax, everything sold at the end, per year):
+
+| Risk level | Product | Same-risk plain holding | Nifty BeES held | Liquid fund held |
+|---|---|---|---|---|
+| Conservative (10%) | 4.0% (it was plain holding) | 4.0% | 4.3% | 4.0% |
+| Balanced (20%) | 6.8%, worst fall 13.1% | 3.9% | 4.3% | 4.0% |
+| Aggressive (30%) | 10.9%, worst fall 13.2% | 3.7% | 4.3% | 4.0% |
+
+- The winner in both the design years and the frozen years is the simple equal-weight mix, not the deep model: the deep model earned less than its own equal-weight
+  starting point in both periods.
+- Three years are one market path (gold rose about 31% a year after tax): weak evidence either way.
+- The research tax profile (new regime, other income ₹12 lakh) sits on the ₹12 lakh rebate threshold from FY 2025-26, where slab-taxed gains cost about 43%; the
+  liquid-fund figures are as low as they get for this profile. See `research/out/frozen/notes_after_the_run.md`.
+
+Reports: `research/out/frozen/report.md` (frozen test), `research/out/oos.md` (design period, out of sample for the selection), `research/out/baseline.md` (every trial,
+in-sample), pre-registration `docs/superpowers/specs/2026-10-01-frozen-test-preregistration.md`, every decision in `docs/superpowers/ledgers/`.
+
+## Run it
+
+```bash
+python -m pip install -r requirements-research.txt      # Python 3.13
+python -m pytest                                        # about 1,440 tests
+python -m research.baseline                             # every trial over the design period -> research/out/trials.csv, baseline.md
+python -m research.oos                                  # walk-forward selector, design period -> research/out/oos.md
+python -m research.kaggle.s6                            # deep model on a Kaggle GPU (needs the kaggle CLI logged in)
+python -m research.frozen                               # the frozen test: refuses to run unless the code equals tag frozen-design-v1
+```
+
+## Layout
 
 ```
-GitHub Actions, Mon-Fri
-  22:30 UTC decide  -> real prices (Yahoo) -> checks -> Transformer + votes -> decision
-                    -> append to web/data/decisions.csv, rebuild web/data/site.json
-                    -> commit -> Vercel rebuilds the site
-  14:45 UTC execute -> broker orders, only if keys exist and SEND_ORDERS=on
+rules/      dated rule tables (tax, charges, Fyers fees), every row with its source, date checked and confidence
+engine/     money, traces, charges, tax, FIFO lots, a traced buy-and-hold
+data/       downloaders, builders and checks; data/processed/ is committed, raw downloads are not
+research/   panel, causal features, fast simulator (numba), strategies, selector, diagnostics, deep model (research/dl), Kaggle pipeline (research/kaggle)
+docs/       design specs, plans, ledgers, verification notes
+tests/      unit, golden, causality and reproducibility tests
 ```
 
-- **Tamper-evident record:** `web/data/decisions.csv` is append-only, and git timestamps
-  every row, so the live record cannot be edited after the fact without it showing.
-- **Phone alerts (ntfy.sh):** sent when the split should change, so the model can be
-  followed by hand in any broker app.
-- **Safety rules in code:** buys come from cash only (no leverage), it never sells more than
-  it holds, orders are capped, and duplicate orders are impossible. Stale or absurd data
-  stops the run.
-- **Yearly retraining:** each January the job trains that year's Transformer and commits
-  its weights to `models/`.
+## The earlier project
 
-## Repository
-
-| Path | What |
-|---|---|
-| `ml/etf_dl.py` | the Deep Momentum Network: features, Transformer, training, calibration |
-| `ml/dmn_kaggle.py` | the GPU run that compared all 40 variants |
-| `ml/dl_results.csv`, `ml/dmn_walkforward.csv` | its results and walk-forward outputs |
-| `ml/etf_model.py` | the live model: network + votes, volatility sizing, gold fill |
-| `ml/etf_tax_sim.py` | Indian tax simulator: FIFO lots, 24-month rule, loss set-off |
-| `ml/india_compare.py` | FD, Nifty, Indian gold, Indian Bitcoin, in rupees after tax |
-| `ml/etf_daily.py` | the daily decide / execute job |
-| `ml/broker.py` | Alpaca client and the cash-only rebalance |
-| `ml/etf_research.py` | rule-based strategies compared the same way |
-| `web/` | the Next.js site; `web/data/` is written by the daily job |
-
-Every module has an assert-based self-check; CI runs them on every push.
-
-Paper trading on real prices. Not investment advice. Confirm tax treatment with a
-Chartered Accountant.
+`ml/`, `models/`, `web/` and `.github/workflows/etf-daily.yml` belong to the superseded US-ETF and Bitcoin project (DeepTrend); its README is in
+`docs/old-project/DeepTrend-README.md`. Its daily job runs only in its own repository (`btc-paper-trader`).

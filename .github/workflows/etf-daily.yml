@@ -30,6 +30,8 @@ permissions:
 
 jobs:
   run:
+    # The old US-ETF daily job runs only in its own repository (btc-paper-trader); copies of this file elsewhere skip it.
+    if: github.repository == 'fbivinay/btc-paper-trader'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:

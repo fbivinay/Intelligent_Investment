@@ -1,0 +1,10 @@
+# The India system (engine/, data/, research/, tests/), as run on Python 3.13
+numpy>=2.4
+pandas>=2.3
+numba>=0.66
+scipy>=1.17
+pytest>=8.3
+# the deep model (research/dl) and its tests; CPU is enough locally, the GPU runs are on Kaggle
+torch>=2.12
+# optional: the Kaggle pipeline (research/kaggle) uses the kaggle command line, logged in on this machine
+# kaggle>=2.2
