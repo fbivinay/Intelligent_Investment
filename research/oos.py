@@ -8,6 +8,7 @@ by luck. The diagnostics (probability of backtest overfitting, deflated Sharpe r
 """
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
@@ -20,6 +21,7 @@ from research import baseline as B, diagnostics as D, panel as P, s6 as S6, sele
 ROOT = Path(__file__).resolve().parents[1]
 OUT = Path(__file__).resolve().parent / "out"
 VARIANTS = ("spec", "deflated")
+EXECUTION = {"harvest": True}           # W1 as shipped: harvest long-term equity gains up to the yearly exemption, no hold rule (see the plan 3B ledger)
 DESIGNS = ("ensembles", "all trials")
 NAMES = {"S0": "S0 plain holding (Nifty ETF and cash)", "E1": "E1 equal weight, four ETFs and cash", "E2": "E2 trend filters (mean of 6)", "E3": "E3 momentum rotation (mean of 18)",
          "E4": "E4 volatility targeting (mean of 10)", "E5": "E5 drawdown-aware exposure (mean of 6)", "S6": "S6 deep model (mean of 12 configurations, 3 seeds each)"}
@@ -38,9 +40,9 @@ def excess(equity: np.ndarray, cash: np.ndarray) -> np.ndarray:
     return equity[1:] / equity[:-1] - cash[1:] / cash[:-1]
 
 
-def _design(panel: P.Panel, rules: Rules, trials: list, cap: float, capital: float, progress=None) -> dict:
+def _design(panel: P.Panel, rules: Rules, trials: list, cap: float, capital: float, progress=None, sim_kw: dict | None = None) -> dict:
     """Run the candidates, then the diagnostics on their excess returns and the stitched account of each margin."""
-    runs, weights_of = S.candidates(panel, rules, trials, cap, progress)
+    runs, weights_of = S.candidates(panel, rules, trials, cap, progress, sim_kw)
     paths = np.vstack([excess(r.equity, panel.cash) for r in runs]).T
     sharpes = paths.mean(axis=0) / paths.std(axis=0, ddof=1)
     n_eff, var_sr = D.effective_trials(paths), float(np.var(sharpes, ddof=1)) if len(runs) > 1 else 0.0
@@ -55,22 +57,24 @@ def _design(panel: P.Panel, rules: Rules, trials: list, cap: float, capital: flo
     return out
 
 
-def run_level(panel: P.Panel, rules: Rules, trials: list, ensembles: list, risk: str, cap: float, capital: float = 1_000_000.0, progress=None) -> dict:
+def run_level(panel: P.Panel, rules: Rules, trials: list, ensembles: list, risk: str, cap: float, capital: float = 1_000_000.0, progress=None,
+              sim_kw: dict | None = None) -> dict:
     s0 = [t for t in trials if t.family == "S0"]
-    designs = {"ensembles": _design(panel, rules, s0 + ensembles, cap, capital), "all trials": _design(panel, rules, trials, cap, capital, progress)}
+    designs = {"ensembles": _design(panel, rules, s0 + ensembles, cap, capital, sim_kw=sim_kw), "all trials": _design(panel, rules, trials, cap, capital, progress, sim_kw)}
     first = designs["ensembles"]["variants"]["spec"]["sel"].first_cut
     window = P.from_day(panel, first)
     fixed = B.fixed_total(window, rules)
-    refs = S.references(panel, designs["ensembles"]["variants"]["spec"]["sel"], [t for t in s0 if t.cap == cap][0].fn(panel), rules, cap, capital)
+    refs = S.references(panel, designs["ensembles"]["variants"]["spec"]["sel"], [t for t in s0 if t.cap == cap][0].fn(panel), rules, cap, capital, sim_kw)
     srs = []
     for d in designs.values():
         for v in d["variants"].values():
-            v["acct"] = S.stitched_account(panel, v["sel"], rules, cap, capital)
+            v["acct"] = S.stitched_account(panel, v["sel"], rules, cap, capital, sim_kw)
             srs.append(D.sharpe(excess(v["acct"].equity, window.cash)))
     alone = {}
     for t in s0 + ensembles:
         if t.cap in (None, cap):
-            alone[t.family] = B.measure(window, sim.simulate(window, t.fn(panel)[first:], rules, sim.SimConfig(cap=cap, band=t.band, capital=capital)), fixed, capital)
+            r = sim.simulate(window, t.fn(panel)[first:], rules, sim.SimConfig(cap=cap, band=t.band, capital=capital, **(sim_kw or {})))
+            alone[t.family] = B.measure(window, r, fixed, capital)
     seed = int(window.dates[0].astype("datetime64[D]").astype(int))
     for d in designs.values():
         for v in d["variants"].values():
@@ -82,7 +86,8 @@ def run_level(panel: P.Panel, rules: Rules, trials: list, ensembles: list, risk:
         d.pop("runs"), d.pop("weights_of")
         for v in d["variants"].values():
             v.pop("sel"), v.pop("acct")
-    return dict(risk=risk, cap=cap, designs=designs, alone=alone, refs={k: B.measure(window, r, fixed, capital) for k, r in refs.items() if k != "S0"}, n_variants=len(srs))
+    return dict(risk=risk, cap=cap, designs=designs, alone=alone, refs={k: B.measure(window, r, fixed, capital) for k, r in refs.items() if k != "S0"}, n_variants=len(srs),
+                execution=dict(sim_kw or {}))
 
 
 def _line(label: str, r: dict) -> str:
@@ -100,7 +105,9 @@ def report(levels: list[dict]) -> str:
            "Every account has the drawdown governor on at the risk level's cap (the reference investments, held without one, are the exception) and pays charges, slippage and tax "
            "by each transaction's own date. All start the same day with the same money. The selection is out of sample; the design (candidate lists, margins, caps) was fixed with "
            "the design period in view. Design 2 (plain holding plus one ensemble per family) was chosen after design 1's result was seen, so its numbers here are in-sample for that "
-           "choice: only the last three years, untouched until the freeze, can confirm it.", ""]
+           "choice: only the last three years, untouched until the freeze, can confirm it.", "",
+           "Execution: " + (", ".join(f"{k} = {v}" for k, v in levels[0].get("execution", {}).items()) or "plain") + " for every strategy account and S0 (W1: long-term equity "
+           "gains realised each March up to the yearly exemption and bought back the next day); the reference investments are held plainly.", ""]
     for lv in levels:
         first = lv["alone"]["S0"]
         out += [f"## {lv['risk']}: drawdown cap {lv['cap'] * 100:.0f}%", "",
@@ -132,12 +139,16 @@ def main(out: Path = OUT, s1_steps: int = 10) -> list[dict]:
     out.mkdir(parents=True, exist_ok=True)
     levels = []
     for risk, cap in B.RISKS.items():
-        lv = run_level(panel, rules, trials, ensembles, risk, cap, progress=lambda n, total, risk=risk: print(f"\r{risk} {n}/{total}", end="", file=sys.stderr) if n % 200 == 0 or n == total else None)
+        lv = run_level(panel, rules, trials, ensembles, risk, cap, progress=lambda n, total, risk=risk: print(f"\r{risk} {n}/{total}", end="", file=sys.stderr) if n % 200 == 0 or n == total else None,
+                       sim_kw=EXECUTION)
         for design, d in lv["designs"].items():
             for v, x in d["variants"].items():
                 x["log"].to_csv(out / f"selection_{risk}_{design.replace(' ', '-')}_{v}.csv", index=False, float_format="%.10g", lineterminator="\n")
         levels.append(lv)
     (out / "oos.md").write_text(report(levels), encoding="utf-8")
+    margins = {lv["risk"]: {d: {"n_trials": x["n_trials"], "n_eff": x["n_eff"], "deflated_margin": x["variants"]["deflated"]["margin"]} for d, x in lv["designs"].items()}
+               for lv in levels}
+    (out / "oos_margins.json").write_bytes((json.dumps(margins, indent=1, sort_keys=True) + "\n").encode("utf-8"))
     print(file=sys.stderr)
     return levels
 

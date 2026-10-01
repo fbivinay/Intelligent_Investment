@@ -395,7 +395,7 @@ def test_the_references_start_fresh_on_the_same_day_with_the_same_capital():
     runs, weights_of = S.candidates(p, RULES, trials, cap=0.2)
     sel = S.walk_forward(runs, weights_of, p.dates, cap=0.2, margin=1e9, capital=1_000_000.0)
     refs = S.references(p, sel, weights_of(0), RULES, cap=0.2, capital=1_000_000.0)
-    assert list(refs) == ["S0", "Nifty BeES", "Gold BeES", "Liquid fund"]
+    assert list(refs) == ["S0", "Nifty BeES", "Junior BeES", "Bank BeES", "Gold BeES", "Liquid fund"]
     for r in refs.values():
         assert r.dates[0] == p.dates[sel.first_cut] and r.equity[0] == pytest.approx(1_000_000.0, rel=2e-3)
     assert np.array_equal(refs["S0"].equity, S.stitched_account(p, sel, RULES, cap=0.2, capital=1_000_000.0).equity)
@@ -425,3 +425,22 @@ def test_candidates_carry_a_trials_eligible_from_date_into_its_run():
     trials = [replace(t, eligible_from="2016-04-01") if t.family == "S4" else t for t in trials]
     runs, _ = S.candidates(p, RULES, trials, cap=0.2)
     assert [r.eligible_from for r in runs] == [None, "2016-04-01"]
+
+
+def test_the_execution_settings_reach_the_candidates_the_stitched_account_and_s0_but_not_the_reference_holdings():
+    p = small_world(n=1300)
+    trials = [t for t in st.trials(s1_steps=2) if t.family == "S0"]
+    runs, weights_of = S.candidates(p, RULES, trials, cap=0.3, sim_kw={"harvest": True})
+    direct = sim.simulate(p, weights_of(0), RULES, sim.SimConfig(cap=0.3, harvest=True))
+    assert np.array_equal(runs[0].equity, direct.equity)
+    sel = S.walk_forward(runs, weights_of, p.dates, cap=0.3, margin=1e9, capital=1_000_000.0)
+    acct = S.stitched_account(p, sel, RULES, cap=0.3, sim_kw={"harvest": True})
+    assert np.array_equal(acct.equity, sim.simulate(pn_from(p, sel.first_cut), weights_of(0)[sel.first_cut:], RULES, sim.SimConfig(cap=0.3, harvest=True)).equity)
+    later = S.cut_days(p.dates)[1]
+    acct2 = S.stitched_account(p, sel, RULES, cap=0.3, sim_kw={"harvest": True}, start=later)
+    assert acct2.dates[0] == p.dates[later]
+    refs = S.references(p, sel, weights_of(0), RULES, cap=0.3, sim_kw={"harvest": True}, start=later)
+    assert np.array_equal(refs["S0"].equity, acct2.equity) and refs["Nifty BeES"].dates[0] == p.dates[later]
+    window = pn_from(p, later)
+    plain = sim.simulate(window, st.s1_static([1, 0, 0, 0, 0], "never")(window), RULES, sim.SimConfig(governor=False))
+    assert np.array_equal(refs["Nifty BeES"].equity, plain.equity)

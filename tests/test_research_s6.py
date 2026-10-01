@@ -112,3 +112,52 @@ def test_weights_missing_after_the_first_model_day_are_refused(tmp_path):
     (out / "outputs.json").write_text(json.dumps({"files": files}))
     with pytest.raises(ValueError, match="missing"):
         S6.trials(out)[0].fn(panel_on(dates))
+
+
+def frozen_dir(tmp_path, design_dates, extra=300, seed=5, first_new=None):
+    """A frozen-run folder: dates extend the design dates, weights NaN before the frozen run's first cut."""
+    out = tmp_path / "s6_frozen"
+    out.mkdir(parents=True)
+    dates = weekdays(len(design_dates) + extra)
+    assert np.array_equal(dates[:len(design_dates)], design_dates)
+    np.save(out / "dates.npy", dates.astype("int64"))
+    (out / "input_manifest.json").write_text(json.dumps({"files": {"d_dates.npy": sha256(out / "dates.npy")}}))
+    rng = np.random.default_rng(seed)
+    start = len(design_dates) - 100 if first_new is None else first_new
+    files = {}
+    for c in CONFIGS:
+        w = rng.dirichlet(np.ones(5), len(dates)).astype("float32")
+        w[:start] = np.nan
+        np.save(out / f"weights_{c['name']}.npy", w)
+        files[f"weights_{c['name']}.npy"] = sha256(out / f"weights_{c['name']}.npy")
+    (out / "outputs.json").write_text(json.dumps({"files": files}))
+    return out, dates
+
+
+def test_the_combined_model_keeps_the_design_weights_and_takes_only_the_new_days_from_the_frozen_run(tmp_path):
+    design, ddates, i0 = out_dir(tmp_path)
+    frozen, fdates = frozen_dir(tmp_path, ddates)
+    t = S6.ensemble_combined(design, frozen)
+    w = t.fn(panel_on(fdates))
+    dw, _ = S6.load(design)
+    fw, _ = S6.load(frozen)
+    d_mean, f_mean = np.mean(list(dw.values()), axis=0), np.mean(list(fw.values()), axis=0)
+    n = len(ddates)
+    assert w.shape == (len(fdates), 5) and np.allclose(w[:i0], 0.2)
+    assert np.allclose(w[i0:n], d_mean[i0:n] / d_mean[i0:n].sum(axis=1, keepdims=True))                # the record is not rewritten
+    assert np.allclose(w[n:], f_mean[n:] / f_mean[n:].sum(axis=1, keepdims=True)) and t.eligible_from == "2016-04-01" and t.family == "S6"
+
+
+def test_the_frozen_run_must_cover_every_new_day_and_extend_the_same_calendar(tmp_path):
+    design, ddates, i0 = out_dir(tmp_path)
+    late, _ = frozen_dir(tmp_path / "late", ddates, first_new=len(ddates) + 5)                    # the frozen run starts after the design run ends: a gap
+    with pytest.raises(ValueError, match="missing"):
+        S6.ensemble_combined(design, late)
+    other = tmp_path / "other"
+    other.mkdir()
+    out2, d2, _ = out_dir(other, n=1900)
+    shifted = d2 + 1
+    np.save(out2 / "dates.npy", shifted.astype("int64"))
+    (out2 / "input_manifest.json").write_text(json.dumps({"files": {"d_dates.npy": sha256(out2 / "dates.npy")}}))
+    with pytest.raises(ValueError, match="calendar"):
+        S6.ensemble_combined(design, out2)

@@ -76,6 +76,7 @@ class Result:
     liquidation_charges: float
     liquidation_equity: float     # what remains after pending tax, liquidation tax and its charges
     orders: int
+    order_log: np.ndarray = None  # orders x 6: day index, asset, side (0 buy, 1 sell), units, fill price after slippage, charges taken (ETF sales include the depository charge)
 
 
 @njit(cache=True)
@@ -104,13 +105,27 @@ def _slip(a, value, adv, half, impact, maxs, use):
 
 
 @njit(cache=True)
+def _log(olog, ol_n, t, i, side, u, price, ch):
+    """One row of the order log: day, asset, side (0 buy, 1 sell), units, fill price after slippage, the charges the simulator took."""
+    n = ol_n[0]
+    olog[n, 0] = t
+    olog[n, 1] = i
+    olog[n, 2] = side
+    olog[n, 3] = u
+    olog[n, 4] = price
+    olog[n, 5] = ch
+    ol_n[0] = n + 1
+
+
+@njit(cache=True)
 def _sell(i, u, t, px, adv, reg, cvals, cded, sizes, cls, half, impact, maxs, use_slip, units, cash, lot_units, lot_cost, lot_day, head, tail, lt_turn, fmv, gf_idx, ltcg,
-          sl_asset, sl_acq, sl_sale, sl_units, sl_cost, sl_proc, sl_scost, sl_n, acc):
+          sl_asset, sl_acq, sl_sale, sl_units, sl_cost, sl_proc, sl_scost, sl_n, acc, olog, ol_n):
     s = _slip(i, u * px[t, i], adv[t, i], half, impact, maxs, use_slip)
     price = px[t, i] * (1.0 - s)
     proceeds = u * price
     ch = _charge(cvals, sizes, reg[t], cls[i], 1, proceeds)
     ded = _charge(cded, sizes, reg[t], cls[i], 1, proceeds)
+    _log(olog, ol_n, t, i, 1, u, price, ch)
     cash[0] += proceeds - ch
     acc[0] += proceeds
     acc[1] += ch
@@ -148,9 +163,10 @@ def _sell(i, u, t, px, adv, reg, cvals, cded, sizes, cls, half, impact, maxs, us
 
 
 @njit(cache=True)
-def _add_lot(i, u, value, s, t, px, reg, cvals, cded, sizes, cls, units, cash, lot_units, lot_cost, lot_day, tail, acc):
+def _add_lot(i, u, value, s, t, px, reg, cvals, cded, sizes, cls, units, cash, lot_units, lot_cost, lot_day, tail, acc, olog, ol_n):
     ch = _charge(cvals, sizes, reg[t], cls[i], 0, value)
     ded = _charge(cded, sizes, reg[t], cls[i], 0, value)
+    _log(olog, ol_n, t, i, 0, u, value / u, ch)
     cash[0] -= value + ch
     k = tail[i]
     lot_units[i, k] = u
@@ -169,7 +185,7 @@ def _run(t0, t1, px, close, adv, reg, fixed, target, cvals, cded, sizes, cls, wh
          hold_days, dayn, lt_turn, harvest, exempt, hshare, hmin, fmv, gf_idx,
          units, cash, lot_units, lot_cost, lot_day, head, tail, pend_w, pend_valid, gov, tax_due, rebuy, ltcg,
          equity, dd, mult, traded, chg, slipc, taxpaid, nord, units_out, cash_out,
-         sl_asset, sl_acq, sl_sale, sl_units, sl_cost, sl_proc, sl_scost, sl_n):
+         sl_asset, sl_acq, sl_sale, sl_units, sl_cost, sl_proc, sl_scost, sl_n, olog, ol_n):
     acc = np.zeros(4)
     ltcg[0] = 0.0                                                            # each call is one financial year
     T = dayn.shape[0]
@@ -191,7 +207,7 @@ def _run(t0, t1, px, close, adv, reg, fixed, target, cvals, cded, sizes, cls, wh
                         while u > 0.0 and u * price + _charge(cvals, sizes, reg[t], cls[i], 0, u * price) > cash[0]:
                             u -= 1.0
                         if u > 0.0:
-                            _add_lot(i, u, u * price, s, t, px, reg, cvals, cded, sizes, cls, units, cash, lot_units, lot_cost, lot_day, tail, acc)
+                            _add_lot(i, u, u * price, s, t, px, reg, cvals, cded, sizes, cls, units, cash, lot_units, lot_cost, lot_day, tail, acc, olog, ol_n)
                     rebuy[i] = 0.0
             total = cash[0]
             for i in range(N):
@@ -217,7 +233,7 @@ def _run(t0, t1, px, close, adv, reg, fixed, target, cvals, cded, sizes, cls, wh
                 if u <= 0.0:
                     continue
                 _sell(i, u, t, px, adv, reg, cvals, cded, sizes, cls, half, impact, maxs, use_slip, units, cash, lot_units, lot_cost, lot_day, head, tail, lt_turn, fmv, gf_idx, ltcg,
-                      sl_asset, sl_acq, sl_sale, sl_units, sl_cost, sl_proc, sl_scost, sl_n, acc)
+                      sl_asset, sl_acq, sl_sale, sl_units, sl_cost, sl_proc, sl_scost, sl_n, acc, olog, ol_n)
             # an overdraft (tax, fees) is covered by selling: the fund first, then the ETFs in turn
             if cash[0] < 0.0:
                 for k in range(N):
@@ -231,7 +247,7 @@ def _run(t0, t1, px, close, adv, reg, fixed, target, cvals, cded, sizes, cls, wh
                         u = min(need / px[t, i], units[i])
                     if u > 0.0:
                         _sell(i, u, t, px, adv, reg, cvals, cded, sizes, cls, half, impact, maxs, use_slip, units, cash, lot_units, lot_cost, lot_day, head, tail, lt_turn, fmv, gf_idx,
-                              ltcg, sl_asset, sl_acq, sl_sale, sl_units, sl_cost, sl_proc, sl_scost, sl_n, acc)
+                              ltcg, sl_asset, sl_acq, sl_sale, sl_units, sl_cost, sl_proc, sl_scost, sl_n, acc, olog, ol_n)
             for i in range(N):
                 cur = units[i] * px[t, i]
                 gap = pend_w[i] * total - cur
@@ -258,7 +274,7 @@ def _run(t0, t1, px, close, adv, reg, fixed, target, cvals, cded, sizes, cls, wh
                     if value <= 0.0:
                         continue
                     u = value / px[t, i]
-                _add_lot(i, u, value, s, t, px, reg, cvals, cded, sizes, cls, units, cash, lot_units, lot_cost, lot_day, tail, acc)
+                _add_lot(i, u, value, s, t, px, reg, cvals, cded, sizes, cls, units, cash, lot_units, lot_cost, lot_day, tail, acc, olog, ol_n)
             # W1 harvest: the long-term equity lots at the head of each queue whose gain (at yesterday's close) fits in what is left of the exemption
             if harvest[t] == 1 and exempt[t] > 0.0 and t > 0:
                 for i in range(3):
@@ -292,7 +308,7 @@ def _run(t0, t1, px, close, adv, reg, fixed, target, cvals, cded, sizes, cls, wh
                     if u_sum > 0.0 and g_sum > 0.0:
                         u_sum = min(u_sum, units[i])
                         _sell(i, u_sum, t, px, adv, reg, cvals, cded, sizes, cls, half, impact, maxs, use_slip, units, cash, lot_units, lot_cost, lot_day, head, tail,
-                              lt_turn, fmv, gf_idx, ltcg, sl_asset, sl_acq, sl_sale, sl_units, sl_cost, sl_proc, sl_scost, sl_n, acc)
+                              lt_turn, fmv, gf_idx, ltcg, sl_asset, sl_acq, sl_sale, sl_units, sl_cost, sl_proc, sl_scost, sl_n, acc, olog, ol_n)
                         rebuy[i] += u_sum
         traded[t] = acc[0]
         chg[t] = acc[1]
@@ -476,6 +492,7 @@ def simulate(panel: Panel, weights: np.ndarray, rules: Rules, cfg: SimConfig = S
     gov = np.array([cfg.capital, 1.0, 0.0, 0.0, 0.0, 0.0])        # high-water mark, multiplier, cut flag, low since the cut, its day, tax paid so far
     tax_due = np.zeros(1)
     rebuy, ltcg = np.zeros(N), np.zeros(1)
+    olog, ol_n = np.zeros((5 * N * T + 16, 6)), np.zeros(1, dtype=np.int64)
     equity, dd, mult = np.zeros(T), np.zeros(T), np.ones(T)
     traded, chg, slipc, taxpaid, nord = np.zeros(T), np.zeros(T), np.zeros(T), np.zeros(T), np.zeros(T)
     units_out, cash_out = np.zeros((T, N)), np.zeros(T)
@@ -498,7 +515,7 @@ def simulate(panel: Panel, weights: np.ndarray, rules: Rules, cfg: SimConfig = S
              cfg.hold_days, dayn, lt_turn, harvest, exempt, cfg.harvest_share, cfg.harvest_min, fmv, gf_idx if fmv_unit else -1,
              units, cash, lot_units, lot_cost, lot_day, head, tail, pend_w, pend_valid, gov, tax_due, rebuy, ltcg,
              equity, dd, mult, traded, chg, slipc, taxpaid, nord, units_out, cash_out,
-             sl["asset"], sl["acq"], sl["sale"], sl["units"], sl["cost"], sl["proc"], sl["scost"], sl_n)
+             sl["asset"], sl["acq"], sl["sale"], sl["units"], sl["cost"], sl["proc"], sl["scost"], sl_n, olog, ol_n)
         n = int(sl_n[0])
         part = {k: v[:n] for k, v in sl.items()}
         events = _events(rules, part, days, fmv_unit) if cfg.tax else []
@@ -539,4 +556,4 @@ def simulate(panel: Panel, weights: np.ndarray, rules: Rules, cfg: SimConfig = S
         liq_tax = 0.0
     return Result(dates=panel.dates, equity=equity, drawdown=dd, multiplier=mult, units=units_out, cash=cash_out, traded=traded, charges=chg, slippage=slipc, tax_paid=taxpaid,
                   tax_by_fy=tax_by_fy, carry=carry, pending_tax=pending, liquidation_tax=liq_tax, liquidation_charges=liq_charges,
-                  liquidation_equity=float(equity[-1]) - pending - liq_tax - liq_charges, orders=int(nord.sum()))
+                  liquidation_equity=float(equity[-1]) - pending - liq_tax - liq_charges, orders=int(nord.sum()), order_log=olog[:int(ol_n[0])].copy())

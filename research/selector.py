@@ -104,7 +104,7 @@ def pick(runs: list[Run], stats: Stats, dates: np.ndarray, c: int, cap: float, s
 
 
 LOG_COLUMNS = ["cut", "eligible", "s0", "s0_growth", "s0_maxdd", "s0_eligible", "best", "best_growth", "best_maxdd", "diff", "se", "margin", "decision", "reason", "picked", "family"]
-REFERENCES = ("Nifty BeES", "Gold BeES", "Liquid fund")
+REFERENCES = ("Nifty BeES", "Junior BeES", "Bank BeES", "Gold BeES", "Liquid fund")
 
 
 @dataclass(frozen=True)
@@ -134,29 +134,34 @@ def walk_forward(runs: list[Run], weights_of, dates: np.ndarray, cap: float, mar
     return Selection(pd.DataFrame(rows, columns=LOG_COLUMNS), holder, weights, cuts[0] if cuts else None)
 
 
-def candidates(panel: P.Panel, rules, trials: list, cap: float, progress=None):
-    """The full run of every trial that applies at this cap (S0 only its own), and a function that rebuilds the weights of run i."""
+def candidates(panel: P.Panel, rules, trials: list, cap: float, progress=None, sim_kw: dict | None = None):
+    """The full run of every trial that applies at this cap (S0 only its own), and a function that rebuilds the weights of run i. `sim_kw`: execution settings (W1)."""
     chosen = [t for t in trials if t.cap in (None, cap)]
     runs = []
     for k, t in enumerate(chosen):
-        runs.append(run_of_result(t.id, t.family, cap, sim.simulate(panel, t.fn(panel), rules, sim.SimConfig(cap=cap, band=t.band)), t.eligible_from))
+        r = sim.simulate(panel, t.fn(panel), rules, sim.SimConfig(cap=cap, band=t.band, **(sim_kw or {})))
+        runs.append(run_of_result(t.id, t.family, cap, r, t.eligible_from))
         if progress:
             progress(k + 1, len(chosen))
     return runs, lambda i: chosen[i].fn(panel)
 
 
-def stitched_account(panel: P.Panel, sel: Selection, rules, cap: float, capital: float = 1_000_000.0) -> sim.Result:
-    """The stitched weights as ONE fresh account from the first cut, governor on."""
+def stitched_account(panel: P.Panel, sel: Selection, rules, cap: float, capital: float = 1_000_000.0, sim_kw: dict | None = None, start: int | None = None) -> sim.Result:
+    """The stitched weights as ONE fresh account from the first cut (or from day `start`), governor on."""
     if sel.first_cut is None:
         raise ValueError("there was no cut, so nothing was stitched")
-    return sim.simulate(P.from_day(panel, sel.first_cut), sel.weights[sel.first_cut:], rules, sim.SimConfig(cap=cap, capital=capital))
+    i0 = sel.first_cut if start is None else start
+    return sim.simulate(P.from_day(panel, i0), sel.weights[i0:], rules, sim.SimConfig(cap=cap, capital=capital, **(sim_kw or {})))
 
 
-def references(panel: P.Panel, sel: Selection, s0_weights: np.ndarray, rules, cap: float, capital: float = 1_000_000.0) -> dict[str, sim.Result]:
-    """Accounts started fresh on the first cut with the same capital: S0 (its weights from the full history, governor on) and buy and hold of the reference investments."""
-    window = P.from_day(panel, sel.first_cut)
+def references(panel: P.Panel, sel: Selection, s0_weights: np.ndarray, rules, cap: float, capital: float = 1_000_000.0, sim_kw: dict | None = None,
+               start: int | None = None) -> dict[str, sim.Result]:
+    """Accounts started fresh on the first cut (or on day `start`) with the same capital: S0 (its weights from the full history, governor on, the same execution as the
+    strategies) and plain buy and hold of the reference investments."""
+    i0 = sel.first_cut if start is None else start
+    window = P.from_day(panel, i0)
     from research import strategies as st
-    out = {"S0": sim.simulate(window, s0_weights[sel.first_cut:], rules, sim.SimConfig(cap=cap, capital=capital))}
+    out = {"S0": sim.simulate(window, s0_weights[i0:], rules, sim.SimConfig(cap=cap, capital=capital, **(sim_kw or {})))}
     for name in REFERENCES:
         out[name] = sim.simulate(window, st.s1_static(baseline.REFERENCE[name], "never")(window), rules, sim.SimConfig(governor=False, capital=capital))
     return out
