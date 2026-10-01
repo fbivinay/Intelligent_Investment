@@ -164,3 +164,13 @@ def test_a_vwap_above_the_days_high_is_refused_too(tmp_path):
     write(root / "processed" / "etf_daily_adjusted.csv", ETF_COLS, [[r[c] for c in ETF_COLS] for r in rows])
     with pytest.raises(ValueError, match="VWAP"):
         pn.load_panel(root, end="2030-01-01")
+
+
+def test_from_day_starts_the_panel_on_that_day_with_every_array_still_aligned(tmp_path):
+    root, ds = make_root(tmp_path)
+    p = pn.load_panel(root, end="2030-01-01")
+    q = pn.from_day(p, 2)
+    assert len(q.dates) == len(p.dates) - 2 and q.dates[0] == p.dates[2] and q.dates[-1] == p.dates[-1]
+    for name in ("open", "high", "low", "close", "value", "vwap", "cash", "nifty", "vix", "pe", "pb"):
+        assert np.array_equal(getattr(q, name), getattr(p, name)[2:], equal_nan=True), name
+    assert q.assets == p.assets and q.special_days == p.special_days
