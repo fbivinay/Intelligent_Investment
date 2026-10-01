@@ -16,7 +16,7 @@ profile (sub-project 4 and 5). The question it answers: *does anything beat plai
 | Topic | Rule |
 |---|---|
 | Decision time | After the close of day t. The strategy sees data up to and including t only. |
-| Fill | At the open of the next trading day t+1 (funds: the NAV of t+1), with slippage. Profit and loss of the holding is open(t+1) to open(t+2). |
+| Fill | At the volume-weighted average price of the next trading day t+1 (funds: the NAV of t+1), with slippage. Profit and loss of the holding is VWAP(t+1) to VWAP(t+2), marked at the close. Amended 2026-10-01: the exchange files' opening prints are unreliable for these ETFs (185 to 240 days each with a large gap or an open outside the day's range), the day's value divided by its quantity is not. |
 | Instruments | NIFTYBEES, JUNIORBEES, BANKBEES, GOLDBEES (ETFs); a liquid fund as the cash leg (Nippon India Liquid, regular plan to 2012-12, direct from 2013-01, spliced on daily returns; LIQUIDBEES cannot be used, its price is flat); NIFTY and BANKNIFTY index futures (Aggressive only, leverage up to 1.5x). The Midcap 100 index has no instrument in the data: a feature only. |
 | Tax classes | `etf_equity`, `etf_gold`, `mf_debt` (cash leg), futures as business income: the engine's own classes and rules by date. |
 | Research capital | Rs 10 lakh (slippage and lot rounding bite at this size; the site scales later). |
@@ -36,12 +36,12 @@ lot sizes.
 
 | # | Family | Parameters tried |
 |---|---|---|
-| S0 | **Same-risk plain holding** (the default and the benchmark): Nifty ETF plus the cash leg, equity share the largest whose training-window drawdown is within the cap; it has the governor too, so every comparison is like for like | one per risk level |
-| S1 | Static mixes of the four ETFs and cash, rebalanced yearly or never | weights on a 10% grid |
-| S2 | Trend filter per asset: hold it while above its moving average, else cash | average length 50, 100, 200; equal or inverse-volatility weights |
-| S3 | Momentum rotation: hold the top k assets by past return | lookback 3, 6, 12 months; k 1 to 3; monthly or quarterly |
-| S4 | Volatility targeting of the equity sleeve | target 6 to 18%; lookback 20, 60 days |
-| S5 | Drawdown-aware exposure (scale down as the account nears its own high-water drawdown) | start and end points |
+| S0 | **Same-risk plain holding** (the default and the benchmark): Nifty ETF plus the cash leg, equity share the largest (steps of 5%) whose drawdown over all the history so far stayed within the cap, so the share can only fall; cash until a year of history exists; it has the governor too, so every comparison is like for like | one per risk level |
+| S1 | Static mixes of the four ETFs and cash, rebalanced on the first trading day of each financial year or never (the weights drift with prices in between and nothing is traded) | weights on a 10% grid: 1,001 mixes x 2 |
+| S2 | Trend filter per asset: hold it while strictly above its moving average, else its slot stays in cash | average length 50, 100, 200; equal or inverse-volatility (63 days) weights; simulator no-trade band 1% or 5% |
+| S3 | Momentum rotation: on the first trading day of the month or quarter hold the top k assets by past return, skipping any whose return is not above zero (slot stays in cash); weights drift in between | lookback 63, 126, 252 days; k 1 to 3; monthly or quarterly |
+| S4 | Volatility targeting of the Nifty ETF (no leverage, rest in cash) | target 6, 9, 12, 15, 18%; lookback 20, 60 days; band 1% or 5% |
+| S5 | Drawdown-aware exposure: the Nifty ETF's share falls in a straight line from 1 to 0 as the ETF falls from `start` to `end` below its highest close of the last 252 days (the account's own drawdown is the governor's job, below) | start 5, 10, 15%; end 25, 35% |
 | S6 | **Deep learning position model** (Deep Momentum Network): LSTM, GRU, TCN, small Transformer, MLP; output = long-only weights over the assets and cash (Aggressive: signed futures weight); loss = negative Sharpe with a turnover penalty; retrained each April on an expanding window; 3 seeds averaged | architecture, sequence length, penalty, 3 seeds |
 | S7 | Futures overlay (Aggressive only): hedge when trend is down, lever up to 1.5x when trend is up and volatility is low | thresholds |
 | W1 | Tax-aware execution (wraps any of the above): do not sell a lot within 30 days of turning long term unless the signal is strongly against it; each financial year realise gains up to the exemption and buy back | on or off, 30 or 60 days |
@@ -54,7 +54,8 @@ interest change. Each is computed only from data up to t; a test proves it (sect
 
 The reference account's drawdown from its high-water mark scales the risky share: full exposure while the drawdown is under half the cap, falling in a
 straight line to zero at 90% of the cap, back to full exposure only after a new high-water mark or 60 trading days without a new low. The governor is part
-of each strategy in the simulation, so selection sees its cost (sells, tax, missed recovery), not a free insurance.
+of each strategy in the simulation, so selection sees its cost (sells, tax, missed recovery), not a free insurance. The drawdown is measured before tax, as the
+cap is: the account's value plus the tax paid out of it so far (amended 2026-10-01: the first simulator counted a yearly tax payment as a loss).
 
 ## 5. Walk-forward selector
 
@@ -102,7 +103,7 @@ exact. Kaggle quotas and session limits apply (a T4 session is limited to a few 
 
 1. **Research panel and features**: one aligned daily table with the cash leg and every feature. Done when a causality test passes for every feature and the
    splice and split days are continuous.
-2. **Fast simulator** (float, vectorised): next-open fills, costs, slippage, lot rounding, FIFO tax with the engine's rates by date, governor. Done when it
+2. **Fast simulator** (float, numba): next-day VWAP fills, costs, slippage, lot rounding, FIFO tax with the engine's rates by date, governor. Done when it
    agrees with the exact `engine/` replay within a stated tolerance on hand-worked and recorded scenarios.
 3. **Strategies S0 to S5, W1** with the causality harness. Done when every one passes it and a CPU baseline run gives a first table: each strategy's after-tax
    result and drawdown for each risk level over the design period.
@@ -115,7 +116,7 @@ Each step is a plan task with tests first; the first visible result is the basel
 
 ## 9. Choices made for you (say which to change)
 
-1. Fills at the next open, daily decisions, weights depend on the date only.
+1. Fills at the next day's VWAP (amended from "next open", see section 2), daily decisions, weights depend on the date only.
 2. Universe: the four ETFs, a liquid fund as cash, futures only for Aggressive.
 3. Research capital Rs 10 lakh; research tax profile: new regime, other income Rs 12 lakh.
 4. Same-risk plain holding is the default for each level (not 100% Nifty for everyone).
