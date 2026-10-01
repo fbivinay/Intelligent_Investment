@@ -1,6 +1,13 @@
 {
+  "framework": "nextjs",
   "functions": {
-    "api/calc.py": { "maxDuration": 60, "memory": 1769, "includeFiles": "api/_lib/**" },
-    "api/preview.py": { "maxDuration": 60, "memory": 1769, "includeFiles": "api/_lib/**" }
+    "api/calc.py": {
+      "maxDuration": 60,
+      "includeFiles": "api/_lib/**"
+    },
+    "api/preview.py": {
+      "maxDuration": 60,
+      "includeFiles": "api/_lib/**"
+    }
   }
 }
