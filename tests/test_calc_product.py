@@ -60,3 +60,8 @@ def test_the_same_inputs_give_the_same_books():
     a = PR.run("Conservative", Decimal(300000), date(2019, 1, 1), date(2021, 1, 1), PROFILE)
     b = PR.run("Conservative", Decimal(300000), date(2019, 1, 1), date(2021, 1, 1), PROFILE)
     assert a.booked.sold.value == b.booked.sold.value and a.booked.trades == b.booked.trades
+
+
+def test_the_pretax_marks_add_back_every_rupee_of_tax_paid(balanced):
+    r = balanced
+    assert r.pretax[-1] >= r.equity[-1] and r.pretax[0] == r.equity[0] and len(r.pretax) == len(r.equity)

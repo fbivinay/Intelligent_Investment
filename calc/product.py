@@ -50,6 +50,7 @@ class ProductRun:
     weights: np.ndarray         # the artifact's weights it followed
     strategy: list[str]         # the strategy the product held each day
     equity: list[float]         # the fast simulator's daily marks at the close (after tax paid), for the chart
+    pretax: list[float]         # the same marks with the tax paid added back: the returns a projection resamples
     drawdown: list[float]
     sim_final: float
     gap: float                  # exact books (still holding) less the fast simulator's, the yearly fee of the year in progress allowed for
@@ -87,6 +88,7 @@ def run(level: str, amount: Decimal, start: date, end: date, profile: TaxProfile
     last_fee = float(amc_fee(rl, days[-1], days[0]).value)                     # the books charge the year in progress; the simulator does not
     years = (days[-1] - days[0]).days / 365.25
     grow = lambda v: (float(v) / float(amount)) ** (1 / years) - 1 if v > 0 else -1.0
-    return ProductRun(level, booked, [d.isoformat() for d in days], w, sig_strategy[s0:s0 + len(days)], [float(x) for x in r.equity], [float(x) for x in r.drawdown],
+    return ProductRun(level, booked, [d.isoformat() for d in days], w, sig_strategy[s0:s0 + len(days)], [float(x) for x in r.equity],
+                      [float(x) for x in r.equity + np.cumsum(r.tax_paid)], [float(x) for x in r.drawdown],
                       float(r.equity[-1] - r.pending_tax), float(booked.held.value) - (float(r.equity[-1] - r.pending_tax) - last_fee),
                       grow(booked.sold.value), grow(booked.held.value), float(r.drawdown.max()))
