@@ -288,3 +288,10 @@ def test_a_trial_exactly_at_the_cap_is_within_it_and_one_a_hair_above_is_not():
 def test_the_report_leaves_out_a_risk_level_that_was_not_run_and_the_reference_section_when_there_is_none():
     text = B.report(pd.DataFrame([ledger_row(id="S0|cap=0.2", family="S0")], columns=B.COLUMNS))
     assert "## Balanced" in text and "## Conservative" not in text and "## Aggressive" not in text and "Other investments" not in text
+
+
+def test_the_fixed_fees_of_a_panel_are_those_of_its_days_and_a_longer_panel_pays_more():
+    p = small_panel(n=900)
+    days = [pd.Timestamp(d).date() for d in p.dates]
+    assert B.fixed_total(p, RULES) == pytest.approx(C.fixed_costs(RULES, days).sum()) and B.fixed_total(p, RULES) > 0
+    assert B.fixed_total(small_panel(n=300), RULES) < B.fixed_total(p, RULES)
