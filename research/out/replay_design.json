@@ -1,0 +1,26 @@
+{
+ "E1 Aggressive": {
+  "exact_charges": 3725.4799999999996,
+  "max_order_gap": 0.9513692345398397,
+  "orders": 107,
+  "sim_charges": 3741.474576063247,
+  "total_gap": 15.994576063247223,
+  "wealth_gap_share": 5.269044562969335e-06
+ },
+ "E4 Aggressive": {
+  "exact_charges": 10999.589999999998,
+  "max_order_gap": 0.9989862746559055,
+  "orders": 302,
+  "sim_charges": 11011.678859090056,
+  "total_gap": 12.088859090057667,
+  "wealth_gap_share": 4.364388015567414e-06
+ },
+ "S0 Balanced": {
+  "exact_charges": 5143.3,
+  "max_order_gap": 7.507454437487837,
+  "orders": 204,
+  "sim_charges": 5151.346163214973,
+  "total_gap": 8.046163214972694,
+  "wealth_gap_share": 3.423498003518078e-06
+ }
+}
