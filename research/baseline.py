@@ -21,7 +21,7 @@ ROOT = Path(__file__).resolve().parents[1]
 OUT = Path(__file__).resolve().parent / "out"
 FIRST_PICK = np.datetime64("2013-04-01")           # the walk-forward selector's first pick; the figures "from 2013" start here
 RISKS = dict(zip(("Conservative", "Balanced", "Aggressive"), st.RISK_CAPS))
-FAMILIES = ("S0", "S1", "S2", "S3", "S4", "S5")
+FAMILIES = ("S0", "S1", "S2", "S3", "S4", "S5", "S6")
 REFERENCE = {"Nifty BeES": [1, 0, 0, 0, 0], "Junior BeES": [0, 1, 0, 0, 0], "Bank BeES": [0, 0, 1, 0, 0], "Gold BeES": [0, 0, 0, 1, 0], "Liquid fund": [0, 0, 0, 0, 1]}
 COLUMNS = ["id", "family", "params", "risk", "cap", "band", "start", "end", "years", "orders", "final", "cagr", "cagr_liquidated", "max_dd", "cagr_2013", "max_dd_2013",
            "sharpe", "turnover", "charges", "slippage", "tax", "liquidation_tax"]
@@ -136,7 +136,8 @@ def report(df: pd.DataFrame) -> str:
 def main(out: Path = OUT, s1_steps: int = 10) -> pd.DataFrame:
     rules = Rules.load(ROOT / "rules")
     panel = P.load_panel(end=P.DESIGN_END)
-    df = ledger(panel, rules, st.trials(s1_steps), progress=lambda n, total: print(f"\r{n}/{total}", end="", file=sys.stderr) if n % 100 == 0 or n == total else None)
+    from research import s6
+    df = ledger(panel, rules, st.trials(s1_steps) + s6.trials(), progress=lambda n, total: print(f"\r{n}/{total}", end="", file=sys.stderr) if n % 100 == 0 or n == total else None)
     out.mkdir(parents=True, exist_ok=True)
     write_ledger(df, out / "trials.csv")
     (out / "baseline.md").write_text(report(df), encoding="utf-8")

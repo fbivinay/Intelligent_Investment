@@ -295,3 +295,24 @@ def test_the_committed_configuration_list_is_twelve_unique_trials_of_three_archi
     assert len(cfgs) == 12 and len({c["name"] for c in cfgs}) == 12
     assert {c["arch"] for c in cfgs} == {"gru", "tcn", "mlp"} and {c["seq_len"] for c in cfgs} == {63, 126} and {c["cost"] for c in cfgs} == {0.0005, 0.002}
     assert cfgs[0] == {"name": "gru-L63-c5", "arch": "gru", "seq_len": 63, "cost": 0.0005} and C.SEEDS == (0, 1, 2)
+
+
+def test_the_s6_kernel_records_the_hash_of_the_manifest_it_read(tmp_path, monkeypatch):
+    from research.dl import configs as C
+    from research.kaggle import kernel_s6 as K6
+    monkeypatch.setattr(C, "MIN_SAMPLES", 100)
+    monkeypatch.setattr(C, "VAL_DAYS", 60)
+    monkeypatch.setattr(C, "SEEDS", (0,))
+    p, snap = s6_snapshot(tmp_path, [{"name": "mlp-L5-c5", "arch": "mlp", "seq_len": 5, "cost": 0.0005}])
+    run = K6.main(snap, tmp_path / "out", device="cpu")
+    assert run["input_manifest"] == SN.sha256(snap / "manifest.json")
+
+
+def test_the_driver_keeps_the_input_manifest_and_the_dates_next_to_the_weights(tmp_path):
+    from research.kaggle import build as BU, s6 as D6
+    BU.build_snapshot(tiny_panel(), tmp_path / "snap", design_end="2030-01-01")
+    out = tmp_path / "out"
+    out.mkdir()
+    D6.record_inputs(tmp_path / "snap", out)
+    assert (out / "input_manifest.json").read_bytes() == (tmp_path / "snap" / "manifest.json").read_bytes()
+    assert SN.sha256(out / "dates.npy") == json.loads((out / "input_manifest.json").read_text())["files"]["d_dates.npy"]

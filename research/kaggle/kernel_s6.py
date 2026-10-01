@@ -44,7 +44,8 @@ def main(src, out, device="cuda", only=None):
     feats = {n[len("d_f_"):-len(".npy")]: np.load(src / n) for n in listed if n.startswith("d_f_")}
     vwap, cash, cuts = load("vwap"), load("cash"), [int(c) for c in load("cuts")]
     configs = json.loads((src / "c_configs.json").read_text(encoding="utf-8"))
-    run = {"device": device, "torch": torch.__version__, "cuda": str(torch.cuda.get_device_name(0)) if device == "cuda" else "cpu", "cuts": len(cuts), "configs": {}}
+    run = {"device": device, "torch": torch.__version__, "cuda": str(torch.cuda.get_device_name(0)) if device == "cuda" else "cpu", "cuts": len(cuts), "configs": {},
+           "input_manifest": sha256(src / "manifest.json")}
     files = {}
     for cfg in configs:
         if only and cfg["name"] not in only:
