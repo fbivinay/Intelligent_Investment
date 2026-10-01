@@ -25,3 +25,11 @@ web/next-env.d.ts
 
 # A running download holds this while it lists days
 /data/*.lock
+
+# The calculator function bundle, made by tools/bundle_site.py before a deploy
+/site/api/_lib/
+/site/.next/
+/site/node_modules/
+/site/.vercel/
+/site/test-results/
+/site/playwright-report/
