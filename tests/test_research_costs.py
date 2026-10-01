@@ -114,3 +114,21 @@ def test_regimes_follow_every_charge_table_not_only_the_first():
     reg, _ = costs.regimes(RULES, [date(2016, 1, 4)])
     for d in (date(2013, 6, 1), date(2018, 3, 4), date(2020, 7, 1), date(2024, 10, 1)):                 # an STT, a clearing, a stamp duty and a brokerage change
         assert d in reg
+
+
+def engine_deductible(cls, side, on, value):
+    price = Decimal(100)
+    ch = order_charges(RULES, Order(on, cls, side, Decimal(str(value)) / price, price))
+    return float(ch.deductible.value), float(ch.total.value)
+
+
+@pytest.mark.parametrize("cls,side,on,value", [("etf_equity", "sell", date(2022, 8, 1), 250_000), ("etf_equity", "buy", date(2022, 8, 1), 250_000),
+                                               ("etf_gold", "sell", date(2016, 6, 1), 500_000), ("mf_debt", "buy", date(2021, 6, 1), 1_000_000)])
+def test_the_deductible_part_is_what_the_engine_calls_deductible_plus_the_depository_charge_on_etf_sales_and_leaves_out_stt(cls, side, on, value):
+    t = costs.charge_table(RULES, [on])
+    ded, total = engine_deductible(cls, side, on, value)
+    dp = float(dp_charge(RULES, on).value) if (side == "sell" and cls != "mf_debt") else 0.0
+    assert costs.deductible(t, 0, cls, side, value) == pytest.approx(ded + dp, abs=0.011)
+    assert costs.charge(t, 0, cls, side, value) - costs.deductible(t, 0, cls, side, value) == pytest.approx(total - ded, abs=0.011)     # what is left is STT
+    if cls == "etf_equity" and side == "sell":
+        assert total - ded > 0
