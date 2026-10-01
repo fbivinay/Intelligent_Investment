@@ -1,0 +1,151 @@
+[{"stream_name":"stdout","time":14.555122874,"data":"04:14:23 gru-L63-c5 cut 1/11\n"}
+,{"stream_name":"stdout","time":15.296275843,"data":"04:14:23 gru-L63-c5 cut 2/11\n"}
+,{"stream_name":"stdout","time":16.285937755,"data":"04:14:24 gru-L63-c5 cut 3/11\n"}
+,{"stream_name":"stdout","time":17.258514473,"data":"04:14:25 gru-L63-c5 cut 4/11\n"}
+,{"stream_name":"stdout","time":17.65674075,"data":"04:14:26 gru-L63-c5 cut 5/11\n"}
+,{"stream_name":"stdout","time":18.613087718,"data":"04:14:27 gru-L63-c5 cut 6/11\n"}
+,{"stream_name":"stdout","time":19.922063837,"data":"04:14:28 gru-L63-c5 cut 7/11\n"}
+,{"stream_name":"stdout","time":21.030625333,"data":"04:14:29 gru-L63-c5 cut 8/11\n"}
+,{"stream_name":"stdout","time":21.622113578,"data":"04:14:30 gru-L63-c5 cut 9/11\n"}
+,{"stream_name":"stdout","time":22.041120643,"data":"04:14:30 gru-L63-c5 cut 10/11\n"}
+,{"stream_name":"stdout","time":24.318265015,"data":"04:14:32 gru-L63-c5 cut 11/11\n"}
+,{"stream_name":"stdout","time":24.319557905,"data":"04:14:32 gru-L63-c5 done in 16.7 s\n"}
+,{"stream_name":"stdout","time":24.506601467,"data":"04:14:33 gru-L63-c20 cut 1/11\n"}
+,{"stream_name":"stdout","time":25.145980978,"data":"04:14:33 gru-L63-c20 cut 2/11\n"}
+,{"stream_name":"stdout","time":26.131791554,"data":"04:14:34 gru-L63-c20 cut 3/11\n"}
+,{"stream_name":"stdout","time":27.088901238,"data":"04:14:35 gru-L63-c20 cut 4/11\n"}
+,{"stream_name":"stdout","time":27.342443541,"data":"04:14:35 gru-L63-c20 cut 5/11\n"}
+,{"stream_name":"stdout","time":27.628288351,"data":"04:14:36 gru-L63-c20 cut 6/11\n"}
+,{"stream_name":"stdout","time":28.887033521,"data":"04:14:37 gru-L63-c20 cut 7/11\n"}
+,{"stream_name":"stdout","time":30.207671333,"data":"04:14:38 gru-L63-c20 cut 8/11\n"}
+,{"stream_name":"stdout","time":30.739223646,"data":"04:14:39 gru-L63-c20 cut 9/11\n"}
+,{"stream_name":"stdout","time":31.166975297,"data":"04:14:39 gru-L63-c20 cut 10/11\n"}
+,{"stream_name":"stdout","time":33.215439146,"data":"04:14:41 gru-L63-c20 cut 11/11\n"}
+,{"stream_name":"stdout","time":33.216506948,"data":"04:14:41 gru-L63-c20 done in 8.9 s\n"}
+,{"stream_name":"stdout","time":33.417518189,"data":"04:14:41 gru-L126-c5 cut 1/11\n"}
+,{"stream_name":"stdout","time":34.406541369,"data":"04:14:42 gru-L126-c5 cut 2/11\n"}
+,{"stream_name":"stdout","time":36.513796341,"data":"04:14:45 gru-L126-c5 cut 3/11\n"}
+,{"stream_name":"stdout","time":36.957151543,"data":"04:14:45 gru-L126-c5 cut 4/11\n"}
+,{"stream_name":"stdout","time":37.654333217,"data":"04:14:46 gru-L126-c5 cut 5/11\n"}
+,{"stream_name":"stdout","time":39.531120427,"data":"04:14:48 gru-L126-c5 cut 6/11\n"}
+,{"stream_name":"stdout","time":41.897689023,"data":"04:14:50 gru-L126-c5 cut 7/11\n"}
+,{"stream_name":"stdout","time":43.777054761,"data":"04:14:52 gru-L126-c5 cut 8/11\n"}
+,{"stream_name":"stdout","time":45.088394928,"data":"04:14:53 gru-L126-c5 cut 9/11\n"}
+,{"stream_name":"stdout","time":45.918404887,"data":"04:14:54 gru-L126-c5 cut 10/11\n"}
+,{"stream_name":"stdout","time":49.429107834,"data":"04:14:57 gru-L126-c5 cut 11/11\n"}
+,{"stream_name":"stdout","time":49.430404936,"data":"04:14:57 gru-L126-c5 done in 16.2 s\n"}
+,{"stream_name":"stdout","time":49.622237834,"data":"04:14:58 gru-L126-c20 cut 1/11\n"}
+,{"stream_name":"stdout","time":50.549311948,"data":"04:14:59 gru-L126-c20 cut 2/11\n"}
+,{"stream_name":"stdout","time":52.847384057,"data":"04:15:01 gru-L126-c20 cut 3/11\n"}
+,{"stream_name":"stdout","time":53.267113872,"data":"04:15:01 gru-L126-c20 cut 4/11\n"}
+,{"stream_name":"stdout","time":53.680679061,"data":"04:15:02 gru-L126-c20 cut 5/11\n"}
+,{"stream_name":"stdout","time":54.205854192,"data":"04:15:02 gru-L126-c20 cut 6/11\n"}
+,{"stream_name":"stdout","time":56.426361193,"data":"04:15:04 gru-L126-c20 cut 7/11\n"}
+,{"stream_name":"stdout","time":58.915962753,"data":"04:15:07 gru-L126-c20 cut 8/11\n"}
+,{"stream_name":"stdout","time":60.129630329,"data":"04:15:08 gru-L126-c20 cut 9/11\n"}
+,{"stream_name":"stdout","time":60.969283048,"data":"04:15:09 gru-L126-c20 cut 10/11\n"}
+,{"stream_name":"stdout","time":63.970061642,"data":"04:15:12 gru-L126-c20 cut 11/11\n"}
+,{"stream_name":"stdout","time":63.971201338,"data":"04:15:12 gru-L126-c20 done in 14.5 s\n"}
+,{"stream_name":"stdout","time":64.885546148,"data":"04:15:13 tcn-L63-c5 cut 1/11\n"}
+,{"stream_name":"stdout","time":65.716233835,"data":"04:15:14 tcn-L63-c5 cut 2/11\n"}
+,{"stream_name":"stdout","time":67.506460208,"data":"04:15:16 tcn-L63-c5 cut 3/11\n"}
+,{"stream_name":"stdout","time":68.944362985,"data":"04:15:17 tcn-L63-c5 cut 4/11\n"}
+,{"stream_name":"stdout","time":70.00528268,"data":"04:15:18 tcn-L63-c5 cut 5/11\n"}
+,{"stream_name":"stdout","time":70.778140774,"data":"04:15:19 tcn-L63-c5 cut 6/11\n"}
+,{"stream_name":"stdout","time":73.178046103,"data":"04:15:21 tcn-L63-c5 cut 7/11\n"}
+,{"stream_name":"stdout","time":76.343212326,"data":"04:15:24 tcn-L63-c5 cut 8/11\n"}
+,{"stream_name":"stdout","time":78.314858357,"data":"04:15:26 tcn-L63-c5 cut 9/11\n"}
+,{"stream_name":"stdout","time":79.287750289,"data":"04:15:27 tcn-L63-c5 cut 10/11\n"}
+,{"stream_name":"stdout","time":81.392458759,"data":"04:15:29 tcn-L63-c5 cut 11/11\n"}
+,{"stream_name":"stdout","time":81.393587943,"data":"04:15:29 tcn-L63-c5 done in 17.4 s\n"}
+,{"stream_name":"stdout","time":81.677211065,"data":"04:15:30 tcn-L63-c20 cut 1/11\n"}
+,{"stream_name":"stdout","time":82.167776878,"data":"04:15:30 tcn-L63-c20 cut 2/11\n"}
+,{"stream_name":"stdout","time":83.802203012,"data":"04:15:32 tcn-L63-c20 cut 3/11\n"}
+,{"stream_name":"stdout","time":85.313297036,"data":"04:15:33 tcn-L63-c20 cut 4/11\n"}
+,{"stream_name":"stdout","time":86.36961971,"data":"04:15:34 tcn-L63-c20 cut 5/11\n"}
+,{"stream_name":"stdout","time":86.994097475,"data":"04:15:35 tcn-L63-c20 cut 6/11\n"}
+,{"stream_name":"stdout","time":88.823294974,"data":"04:15:37 tcn-L63-c20 cut 7/11\n"}
+,{"stream_name":"stdout","time":90.619027983,"data":"04:15:39 tcn-L63-c20 cut 8/11\n"}
+,{"stream_name":"stdout","time":91.822215023,"data":"04:15:40 tcn-L63-c20 cut 9/11\n"}
+,{"stream_name":"stdout","time":92.809075851,"data":"04:15:41 tcn-L63-c20 cut 10/11\n"}
+,{"stream_name":"stdout","time":94.870151055,"data":"04:15:43 tcn-L63-c20 cut 11/11\n"}
+,{"stream_name":"stdout","time":94.871386822,"data":"04:15:43 tcn-L63-c20 done in 13.5 s\n"}
+,{"stream_name":"stdout","time":95.184945098,"data":"04:15:43 tcn-L126-c5 cut 1/11\n"}
+,{"stream_name":"stdout","time":96.682575336,"data":"04:15:45 tcn-L126-c5 cut 2/11\n"}
+,{"stream_name":"stdout","time":99.488992945,"data":"04:15:48 tcn-L126-c5 cut 3/11\n"}
+,{"stream_name":"stdout","time":101.250399287,"data":"04:15:49 tcn-L126-c5 cut 4/11\n"}
+,{"stream_name":"stdout","time":103.027123096,"data":"04:15:51 tcn-L126-c5 cut 5/11\n"}
+,{"stream_name":"stdout","time":104.142302942,"data":"04:15:52 tcn-L126-c5 cut 6/11\n"}
+,{"stream_name":"stdout","time":107.978523208,"data":"04:15:56 tcn-L126-c5 cut 7/11\n"}
+,{"stream_name":"stdout","time":109.389352803,"data":"04:15:57 tcn-L126-c5 cut 8/11\n"}
+,{"stream_name":"stdout","time":112.526980384,"data":"04:16:01 tcn-L126-c5 cut 9/11\n"}
+,{"stream_name":"stdout","time":113.992001656,"data":"04:16:02 tcn-L126-c5 cut 10/11\n"}
+,{"stream_name":"stdout","time":117.328730028,"data":"04:16:05 tcn-L126-c5 cut 11/11\n"}
+,{"stream_name":"stdout","time":117.329830081,"data":"04:16:05 tcn-L126-c5 done in 22.5 s\n"}
+,{"stream_name":"stdout","time":117.635493256,"data":"04:16:06 tcn-L126-c20 cut 1/11\n"}
+,{"stream_name":"stdout","time":119.096554225,"data":"04:16:07 tcn-L126-c20 cut 2/11\n"}
+,{"stream_name":"stdout","time":121.731638494,"data":"04:16:10 tcn-L126-c20 cut 3/11\n"}
+,{"stream_name":"stdout","time":123.014440252,"data":"04:16:11 tcn-L126-c20 cut 4/11\n"}
+,{"stream_name":"stdout","time":124.765661615,"data":"04:16:13 tcn-L126-c20 cut 5/11\n"}
+,{"stream_name":"stdout","time":125.857518434,"data":"04:16:14 tcn-L126-c20 cut 6/11\n"}
+,{"stream_name":"stdout","time":131.959921601,"data":"04:16:20 tcn-L126-c20 cut 7/11\n"}
+,{"stream_name":"stdout","time":133.135567336,"data":"04:16:21 tcn-L126-c20 cut 8/11\n"}
+,{"stream_name":"stdout","time":136.07529076,"data":"04:16:24 tcn-L126-c20 cut 9/11\n"}
+,{"stream_name":"stdout","time":137.533133842,"data":"04:16:26 tcn-L126-c20 cut 10/11\n"}
+,{"stream_name":"stdout","time":139.124691119,"data":"04:16:27 tcn-L126-c20 cut 11/11\n"}
+,{"stream_name":"stdout","time":139.125784085,"data":"04:16:27 tcn-L126-c20 done in 21.8 s\n"}
+,{"stream_name":"stdout","time":139.324576443,"data":"04:16:27 mlp-L63-c5 cut 1/11\n"}
+,{"stream_name":"stdout","time":140.375403394,"data":"04:16:28 mlp-L63-c5 cut 2/11\n"}
+,{"stream_name":"stdout","time":141.988052187,"data":"04:16:30 mlp-L63-c5 cut 3/11\n"}
+,{"stream_name":"stdout","time":143.985707203,"data":"04:16:32 mlp-L63-c5 cut 4/11\n"}
+,{"stream_name":"stdout","time":144.23765315,"data":"04:16:32 mlp-L63-c5 cut 5/11\n"}
+,{"stream_name":"stdout","time":145.109911338,"data":"04:16:33 mlp-L63-c5 cut 6/11\n"}
+,{"stream_name":"stdout","time":146.18631134,"data":"04:16:34 mlp-L63-c5 cut 7/11\n"}
+,{"stream_name":"stdout","time":146.425255731,"data":"04:16:34 mlp-L63-c5 cut 8/11\n"}
+,{"stream_name":"stdout","time":146.913715509,"data":"04:16:35 mlp-L63-c5 cut 9/11\n"}
+,{"stream_name":"stdout","time":147.170611941,"data":"04:16:35 mlp-L63-c5 cut 10/11\n"}
+,{"stream_name":"stdout","time":147.848170256,"data":"04:16:36 mlp-L63-c5 cut 11/11\n"}
+,{"stream_name":"stdout","time":147.849199111,"data":"04:16:36 mlp-L63-c5 done in 8.7 s\n"}
+,{"stream_name":"stdout","time":148.01758711,"data":"04:16:36 mlp-L63-c20 cut 1/11\n"}
+,{"stream_name":"stdout","time":149.379520232,"data":"04:16:37 mlp-L63-c20 cut 2/11\n"}
+,{"stream_name":"stdout","time":151.432312115,"data":"04:16:39 mlp-L63-c20 cut 3/11\n"}
+,{"stream_name":"stdout","time":153.326813902,"data":"04:16:41 mlp-L63-c20 cut 4/11\n"}
+,{"stream_name":"stdout","time":153.559565124,"data":"04:16:42 mlp-L63-c20 cut 5/11\n"}
+,{"stream_name":"stdout","time":153.764947853,"data":"04:16:42 mlp-L63-c20 cut 6/11\n"}
+,{"stream_name":"stdout","time":154.778182677,"data":"04:16:43 mlp-L63-c20 cut 7/11\n"}
+,{"stream_name":"stdout","time":155.017530458,"data":"04:16:43 mlp-L63-c20 cut 8/11\n"}
+,{"stream_name":"stdout","time":155.424017805,"data":"04:16:43 mlp-L63-c20 cut 9/11\n"}
+,{"stream_name":"stdout","time":155.684835943,"data":"04:16:44 mlp-L63-c20 cut 10/11\n"}
+,{"stream_name":"stdout","time":156.36387608,"data":"04:16:44 mlp-L63-c20 cut 11/11\n"}
+,{"stream_name":"stdout","time":156.364993745,"data":"04:16:44 mlp-L63-c20 done in 8.5 s\n"}
+,{"stream_name":"stdout","time":156.538569739,"data":"04:16:45 mlp-L126-c5 cut 1/11\n"}
+,{"stream_name":"stdout","time":157.726923621,"data":"04:16:46 mlp-L126-c5 cut 2/11\n"}
+,{"stream_name":"stdout","time":159.245099392,"data":"04:16:47 mlp-L126-c5 cut 3/11\n"}
+,{"stream_name":"stdout","time":160.701023477,"data":"04:16:49 mlp-L126-c5 cut 4/11\n"}
+,{"stream_name":"stdout","time":161.136621304,"data":"04:16:49 mlp-L126-c5 cut 5/11\n"}
+,{"stream_name":"stdout","time":161.436500906,"data":"04:16:49 mlp-L126-c5 cut 6/11\n"}
+,{"stream_name":"stdout","time":162.788197095,"data":"04:16:51 mlp-L126-c5 cut 7/11\n"}
+,{"stream_name":"stdout","time":163.155082234,"data":"04:16:51 mlp-L126-c5 cut 8/11\n"}
+,{"stream_name":"stdout","time":164.039043593,"data":"04:16:52 mlp-L126-c5 cut 9/11\n"}
+,{"stream_name":"stdout","time":164.452840304,"data":"04:16:53 mlp-L126-c5 cut 10/11\n"}
+,{"stream_name":"stdout","time":165.280882914,"data":"04:16:53 mlp-L126-c5 cut 11/11\n"}
+,{"stream_name":"stdout","time":165.281996953,"data":"04:16:53 mlp-L126-c5 done in 8.9 s\n"}
+,{"stream_name":"stdout","time":165.455696355,"data":"04:16:54 mlp-L126-c20 cut 1/11\n"}
+,{"stream_name":"stdout","time":166.678675369,"data":"04:16:55 mlp-L126-c20 cut 2/11\n"}
+,{"stream_name":"stdout","time":168.08659367,"data":"04:16:56 mlp-L126-c20 cut 3/11\n"}
+,{"stream_name":"stdout","time":169.689432216,"data":"04:16:58 mlp-L126-c20 cut 4/11\n"}
+,{"stream_name":"stdout","time":170.071470458,"data":"04:16:58 mlp-L126-c20 cut 5/11\n"}
+,{"stream_name":"stdout","time":170.390383351,"data":"04:16:58 mlp-L126-c20 cut 6/11\n"}
+,{"stream_name":"stdout","time":171.628180653,"data":"04:17:00 mlp-L126-c20 cut 7/11\n"}
+,{"stream_name":"stdout","time":171.996532292,"data":"04:17:00 mlp-L126-c20 cut 8/11\n"}
+,{"stream_name":"stdout","time":172.856658969,"data":"04:17:01 mlp-L126-c20 cut 9/11\n"}
+,{"stream_name":"stdout","time":173.274217204,"data":"04:17:01 mlp-L126-c20 cut 10/11\n"}
+,{"stream_name":"stdout","time":173.903068202,"data":"04:17:02 mlp-L126-c20 cut 11/11\n"}
+,{"stream_name":"stdout","time":173.904204141,"data":"04:17:02 mlp-L126-c20 done in 8.6 s\n"}
+,{"stream_name":"stderr","time":178.702812916,"data":"/usr/local/lib/python3.12/dist-packages/mistune.py:435: SyntaxWarning: invalid escape sequence '\\|'\n"}
+,{"stream_name":"stderr","time":178.70286671,"data":"  cells[i][c] = re.sub('\\\\\\\\\\|', '|', cell)\n"}
+,{"stream_name":"stderr","time":178.991485972,"data":"/usr/local/lib/python3.12/dist-packages/nbconvert/filters/filter_links.py:36: SyntaxWarning: invalid escape sequence '\\_'\n"}
+,{"stream_name":"stderr","time":178.991516688,"data":"  text = re.sub(r'_', '\\_', text) # Escape underscores in display text\n"}
+,{"stream_name":"stderr","time":179.65947332,"data":"[NbConvertApp] Converting notebook __script__.ipynb to html\n"}
+,{"stream_name":"stderr","time":181.010722782,"data":"[NbConvertApp] Writing 294110 bytes to __results__.html\n"}
+]
