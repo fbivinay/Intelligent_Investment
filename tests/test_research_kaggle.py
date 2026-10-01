@@ -248,3 +248,50 @@ def test_the_smoke_check_demands_intact_data_a_gpu_and_agreement():
     for change, match in (({"manifest_ok": False, "bad_files": ["d_close.npy"]}, "changed"), ({"cuda": False}, "no GPU"), ({"max_abs_diff": 0.5}, "disagree")):
         with pytest.raises(RuntimeError, match=match):
             SM.check({**good, **change})
+
+
+# ---- the S6 kernel --------------------------------------------------------------------------------------------------------------------------------------------
+
+def s6_snapshot(tmp_path, configs):
+    import json as _json
+    from research.dl import configs as C  # noqa: F401
+    from research.kaggle import build as BU
+    root = Path(__file__).resolve().parents[1] / "research" / "dl"
+    cfg_file = tmp_path / "configs.json"
+    cfg_file.write_text(_json.dumps(configs))
+    code = {f"dl_{n}.py": root / f"{n}.py" for n in ("data", "models", "train", "walk", "configs")}
+    code["configs.json"] = cfg_file
+    p = tiny_panel(n=700, start="2011-01-03")
+    BU.build_snapshot(p, tmp_path / "snap", code=code, design_end="2030-01-01", extra_arrays={"cuts": np.array([420, 520])})
+    return p, tmp_path / "snap"
+
+
+def test_the_s6_kernel_trains_each_configuration_and_writes_weights_with_hashes_that_verify(tmp_path, monkeypatch):
+    from research.dl import configs as C
+    from research.kaggle import kernel_s6 as K6
+    monkeypatch.setattr(C, "MIN_SAMPLES", 100)
+    monkeypatch.setattr(C, "VAL_DAYS", 60)
+    monkeypatch.setattr(C, "SEEDS", (0,))
+    p, snap = s6_snapshot(tmp_path, [{"name": "mlp-L5-c5", "arch": "mlp", "seq_len": 5, "cost": 0.0005}, {"name": "mlp-L9-c20", "arch": "mlp", "seq_len": 9, "cost": 0.002}])
+    run = K6.main(snap, tmp_path / "out", device="cpu")
+    assert sorted(run["configs"]) == ["mlp-L5-c5", "mlp-L9-c20"] and run["device"] == "cpu" and run["cuts"] == 2
+    K.verify_output(tmp_path / "out", ["weights_mlp-L5-c5.npy", "weights_mlp-L9-c20.npy", "run.json"])
+    w = np.load(tmp_path / "out" / "weights_mlp-L5-c5.npy")
+    assert w.shape == (700, 5) and w.dtype == np.float32 and np.isnan(w[:420]).all() and np.allclose(w[420:].sum(axis=1), 1.0, atol=1e-5)
+
+
+def test_the_s6_kernel_refuses_a_dataset_that_does_not_match_its_manifest(tmp_path):
+    from research.kaggle import kernel_s6 as K6
+    p, snap = s6_snapshot(tmp_path, [{"name": "mlp-L5-c5", "arch": "mlp", "seq_len": 5, "cost": 0.0005}])
+    (snap / "d_vwap.npy").write_bytes(b"tampered")
+    with pytest.raises(RuntimeError, match="manifest"):
+        K6.main(snap, tmp_path / "out", device="cpu")
+    assert not (tmp_path / "out" / "outputs.json").exists()
+
+
+def test_the_committed_configuration_list_is_twelve_unique_trials_of_three_architectures_two_windows_and_two_costs():
+    from research.dl import configs as C
+    cfgs = C.committed()
+    assert len(cfgs) == 12 and len({c["name"] for c in cfgs}) == 12
+    assert {c["arch"] for c in cfgs} == {"gru", "tcn", "mlp"} and {c["seq_len"] for c in cfgs} == {63, 126} and {c["cost"] for c in cfgs} == {0.0005, 0.002}
+    assert cfgs[0] == {"name": "gru-L63-c5", "arch": "gru", "seq_len": 63, "cost": 0.0005} and C.SEEDS == (0, 1, 2)

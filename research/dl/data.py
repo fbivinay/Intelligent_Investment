@@ -3,6 +3,8 @@ return each day's weights go on to earn (the simulator's timing: filled at the V
 """
 from __future__ import annotations
 
+import warnings
+
 import numpy as np
 
 PER_ASSET = ("ret1", "ret5", "ret21", "ret63", "ret252", "vol21", "vol63", "dd252", "dist50", "dist200", "vspike")
@@ -35,7 +37,8 @@ def first_valid(X: np.ndarray, names: list[str]) -> int:
 
 def fit_norm(X: np.ndarray, start: int, upto: int) -> tuple[np.ndarray, np.ndarray]:
     """Mean and deviation of each column over rows start..upto-1, ignoring missing values; a column with none or no spread gets mean 0 or deviation 1."""
-    with np.errstate(all="ignore"):
+    with warnings.catch_warnings(), np.errstate(all="ignore"):
+        warnings.simplefilter("ignore", RuntimeWarning)                           # a column with no value yet has no mean
         mu, sd = np.nanmean(X[start:upto], axis=0), np.nanstd(X[start:upto], axis=0, ddof=1)
     return np.where(np.isfinite(mu), mu, 0.0), np.where(np.isfinite(sd) & (sd > 0), sd, 1.0)
 
