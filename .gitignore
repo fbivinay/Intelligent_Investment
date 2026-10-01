@@ -33,3 +33,5 @@ web/next-env.d.ts
 /site/.vercel/
 /site/test-results/
 /site/playwright-report/
+/site/tsconfig.tsbuildinfo
+/site/next-env.d.ts

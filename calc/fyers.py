@@ -49,8 +49,9 @@ def preview(run: ProductRun, on: date) -> dict:
         how = "Fyers API v3 place order (after-market, for the next session)" if p else "Not an exchange order: buy or redeem directly with the fund house"
         orders.append({"trade": t, "payload": p, "how": how, "fees": t["charges"], "depository": t["dp"]})
     before = run.units[i - 1]
+    value = before * run.prices[i - 1]
     return {"label": LABEL, "decided_on": run.dates[i - 1], "fill_day": day, "targets": {a: float(w) for a, w in zip(ASSETS, target)},
-            "holdings_before": {a: float(u) for a, u in zip(ASSETS, before)}, "orders": orders,
+            "holdings_before": {a: float(u) for a, u in zip(ASSETS, before)}, "values_before": {a: float(v) for a, v in zip(ASSETS, value)}, "orders": orders,
             "total_fees": float(sum(float(o["fees"]) for o in orders)), "total_depository": float(sum(float(o["depository"]) for o in orders)),
             "timeline": [f"After the close of {run.dates[i - 1]}: the day's prices are in; the weights for the next session are worked out",
                          "The same evening: the ETF orders are placed as after-market orders; the fund leg goes to the fund house",
