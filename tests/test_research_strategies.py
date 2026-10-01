@@ -329,3 +329,36 @@ def test_each_trial_runs_the_strategy_its_parameters_describe():
     for n, t in enumerate(st.trials(s1_steps=4)):
         if t.family != "S1" or n % 9 == 0:
             assert np.array_equal(t.fn(p), factory[t.family](**t.params)(p)), t.id
+
+
+# ---- ensembles: one candidate per family, no parameter left to choose -----------------------------------------------------------------------------------------
+
+def test_there_is_one_ensemble_per_family_with_the_member_counts_of_the_committed_grids():
+    ens = st.ensembles()
+    assert [e.family for e in ens] == ["E1", "E2", "E3", "E4", "E5"] and len({e.id for e in ens}) == 5 and all(e.cap is None for e in ens)
+    assert [e.params.get("members") for e in ens[1:]] == [6, 18, 10, 6] and [e.params.get("of") for e in ens[1:]] == ["S2", "S3", "S4", "S5"]
+    assert [e.band for e in ens] == [0.01, 0.05, 0.01, 0.05, 0.05]                       # the wide band for the families that trade on a daily signal; S3 and E1 hold between rebalance days
+
+
+def test_an_ensemble_is_the_mean_of_the_weights_of_every_committed_parameter_set_of_its_family():
+    p = panel_from(walk(T=400, seed=12))
+    members = {"E2": ("S2", 0.05), "E3": ("S3", 0.01), "E4": ("S4", 0.05), "E5": ("S5", 0.05)}
+    for e in st.ensembles()[1:]:
+        src, band = members[e.family]
+        ms = [t for t in st.trials() if t.family == src and t.band == band]
+        assert len(ms) == e.params["members"]
+        w = e.fn(p)
+        check_valid(w, 400)
+        assert np.allclose(w, np.mean([t.fn(p) for t in ms], axis=0)), e.id
+
+
+def test_e1_is_the_equal_weight_mix_of_the_four_etfs_and_cash_rebalanced_yearly():
+    p = panel_from(walk(T=700, seed=13))
+    e1 = st.ensembles()[0]
+    assert np.array_equal(e1.fn(p), st.s1_static([0.2] * 5, "year")(p)) and e1.params == {"weights": [0.2] * 5, "rebalance": "year"}
+
+
+def test_every_ensemble_passes_the_causality_harness():
+    p = panel_from(walk(T=450, seed=14))
+    for e in st.ensembles():
+        causal.assert_causal(e.fn, p, n_cuts=4, seed=3)
