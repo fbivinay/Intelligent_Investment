@@ -15,7 +15,9 @@ its rule and source. Fyers is the design target only: no account, no keys, no or
 | 1 | Rules and costs engine (`engine/`, `rules/`) | done: dated TOML rule tables from 2010, exact Decimal maths, a trace for every number |
 | 2 | Data layer (`data/`) | done: NSE archive and website history, AMFI NAVs, 2010-04-01 to 2026-09-30, gaps documented in `data/gaps.md` |
 | 3 | Strategy engine (`research/`) | done: design frozen under tag `frozen-design-v1`, the frozen test run once |
-| 4-6 | Calculator, comparison and projection, web app, Fyers demo | in progress |
+| 4 | Calculator, comparison and projection (`calc/`) | done: the model's signal replayed for any amount, dates and tax profile with exact traced books; eight alternatives through the same engine; projections labelled ESTIMATE |
+| 5 | Web app (`site/`) | done locally: every number has an ⓘ that opens its trace; deploy on Vercel waits for a yes |
+| 6 | Fyers demo (`site/app/fyers`, `calc/fyers.py`) | done: a past day's orders as Fyers API v3 payloads with fee estimates, preview only |
 
 ## Results
 
@@ -51,6 +53,19 @@ python -m research.kaggle.s6                            # deep model on a Kaggle
 python -m research.frozen                               # the frozen test: refuses to run unless the code equals tag frozen-design-v1
 ```
 
+## The calculator and the site
+
+```bash
+python -m calc.server 8765                 # the calculator API: POST /api/calc, /api/preview
+cd site && npm install && LOCAL_API=1 npx next build && LOCAL_API=1 npx next start -p 3100     # the site, forwarding /api to it
+npx playwright test                        # browser checks: every number has an ⓘ that opens, inputs recalculate
+python -m tools.bundle_site                # before a Vercel deploy: copies code, rules, data and the signal into site/api/_lib
+```
+
+The model's signal (`research/out/signal/`) is the frozen design's weights after its reference account's drawdown guard; a user's account follows them, its
+orders decided by the fast simulator and booked again exactly by the engine (`calc/replay.py`). Alternatives: Nifty BeES, Junior BeES, Bank BeES, Gold BeES,
+HDFC Nifty 50 index fund, ICICI Nifty Next 50 index fund, SBI Arbitrage fund, Nippon India Liquid fund.
+
 ## Layout
 
 ```
@@ -58,6 +73,9 @@ rules/      dated rule tables (tax, charges, Fyers fees), every row with its sou
 engine/     money, traces, charges, tax, FIFO lots, a traced buy-and-hold
 data/       downloaders, builders and checks; data/processed/ is committed, raw downloads are not
 research/   panel, causal features, fast simulator (numba), strategies, selector, diagnostics, deep model (research/dl), Kaggle pipeline (research/kaggle)
+calc/       the calculator: options, product replay, exact books, alternatives, projections, API, Fyers preview, local server
+site/       Next.js web app and its Vercel Python functions
+tools/      the deploy bundler
 docs/       design specs, plans, ledgers, verification notes
 tests/      unit, golden, causality and reproducibility tests
 ```
