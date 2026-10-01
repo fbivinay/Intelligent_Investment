@@ -53,12 +53,16 @@ def measure(panel: P.Panel, r: sim.Result, fixed_total: float, capital: float) -
         tax=float(sum(r.tax_by_fy.values()) + r.pending_tax), liquidation_tax=float(r.liquidation_tax))
 
 
+def fixed_total(panel: P.Panel, rules: Rules) -> float:
+    """The fixed fees (account opening, yearly demat fee) a run over the panel's days pays."""
+    return float(C.fixed_costs(rules, [pd.Timestamp(x).date() for x in panel.dates]).sum())
+
+
 def ledger(panel: P.Panel, rules: Rules, trials: list, progress=None) -> pd.DataFrame:
     """Run every trial at every risk level (S0 only at its own) and the reference holdings, and return one row per run."""
     if panel.dates[-1] > np.datetime64(P.DESIGN_END):
         raise ValueError(f"the panel ends {panel.dates[-1]}, after the design end {P.DESIGN_END}: the frozen test years are never loaded by the baseline")
-    days = [pd.Timestamp(x).date() for x in panel.dates]
-    fixed = float(C.fixed_costs(rules, days).sum())
+    fixed = fixed_total(panel, rules)
     rows, total = [], sum(len([c for c in RISKS.values() if t.cap in (None, c)]) for t in trials) + len(REFERENCE)
 
     def run(cfg, w, **row):
