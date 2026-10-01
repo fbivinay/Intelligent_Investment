@@ -131,3 +131,44 @@ def test_a_label_that_peeks_one_day_ahead_is_what_the_validation_gap_exists_to_c
     assert all(t + 2 < val[0] for t in train)
     train_bad = [t for t in range(0, val[0] + 3) if t + 2 >= val[0]]
     assert train_bad and all(t not in set(train) for t in train_bad)
+
+
+@pytest.mark.parametrize("arch", M.ARCHS)
+def test_the_output_depends_on_the_most_recent_day_and_on_earlier_days_too(arch):
+    torch.manual_seed(1)
+    model = M.make_model(arch, F, L, hidden=8)
+    for p in model.head.parameters():
+        torch.nn.init.normal_(p, std=1.0)                                                      # a head that is not zero, so the inputs show
+    x = torch.randn(4, L, F)
+    base = model(x).detach()
+    last, first = x.clone(), x.clone()
+    last[:, -1] += 1.0
+    first[:, 0] += 1.0
+    assert not torch.allclose(model(last).detach(), base, atol=1e-6) and not torch.allclose(model(first).detach(), base, atol=1e-6)
+
+
+def test_the_mlp_reads_todays_row_for_its_first_group_of_inputs():
+    torch.manual_seed(2)
+    model = M.make_model("mlp", F, L, hidden=8)
+    with torch.no_grad():
+        model.net[0].weight[:, F:] = 0.0                                                         # only today's features reach the hidden layer
+        for p in model.head.parameters():
+            torch.nn.init.normal_(p, std=1.0)
+    x = torch.randn(4, L, F)
+    base = model(x)
+    mid, last = x.clone(), x.clone()
+    mid[:, 5] += 1.0
+    last[:, -1] += 1.0
+    assert torch.allclose(model(mid), base) and not torch.allclose(model(last), base, atol=1e-6)
+
+
+def test_the_transformer_reads_the_last_token_of_the_window():
+    torch.manual_seed(3)
+    model = M.make_model("transformer", F, L, hidden=8)
+    with torch.no_grad():
+        for p in model.head.parameters():
+            torch.nn.init.normal_(p, std=1.0)
+        model.pos.normal_(std=1.0)
+    x = torch.randn(4, L, F)
+    want = model.head(model.enc(model.inp(x) + model.pos)[:, -1])
+    assert torch.allclose(model(x), want, atol=1e-6)
