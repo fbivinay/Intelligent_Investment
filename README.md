@@ -16,7 +16,7 @@ its rule and source. Fyers is the design target only: no account, no keys, no or
 | 2 | Data layer (`data/`) | done: NSE archive and website history, AMFI NAVs, 2010-04-01 to 2026-09-30, gaps documented in `data/gaps.md` |
 | 3 | Strategy engine (`research/`) | done: design frozen under tag `frozen-design-v1`, the frozen test run once |
 | 4 | Calculator, comparison and projection (`calc/`) | done: the model's signal replayed for any amount, dates and tax profile with exact traced books; eight alternatives through the same engine; projections labelled ESTIMATE |
-| 5 | Web app (`site/`) | done locally: every number has an ⓘ that opens its trace; deploy on Vercel waits for a yes |
+| 5 | Web app (`site/`) | done and live at https://intelligent-investment.vercel.app: every number has an ⓘ that opens its trace |
 | 6 | Fyers demo (`site/app/fyers`, `calc/fyers.py`) | done: a past day's orders as Fyers API v3 payloads with fee estimates, preview only |
 
 ## Results
