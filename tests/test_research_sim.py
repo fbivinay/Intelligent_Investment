@@ -410,3 +410,16 @@ def test_the_wealth_lost_to_slippage_is_what_is_reported_on_buys_and_sells_toget
     assert slipped.slippage[1] > 0 and slipped.slippage[3] > 0
     lost = free.equity[5] - slipped.equity[5]
     assert lost == pytest.approx(slipped.slippage[1] + slipped.slippage[3], rel=0.06)        # what the two fills cost, as reported (charges differ by a few rupees)
+
+
+def test_the_tax_paid_out_of_the_account_is_not_a_drawdown_and_does_not_trip_the_governor():
+    days = weekdays(date(2016, 6, 1), 230)                                  # runs past the start of the next financial year, when the tax is paid
+    close = np.concatenate([np.linspace(100, 150, 100), np.full(130, 150.0)])
+    p = flat_panel(days, close=close)
+    w = W(days, [[1, 0, 0, 0, 0]] * 100 + [[0, 0, 0, 0, 1]])                # hold the rising ETF, then sell it all: a short-term gain, taxed when the year ends
+    r = sim.simulate(p, w, RULES, sim.SimConfig(capital=1_000_000.0, cap=0.04, governor=True, slippage=False))
+    assert r.tax_paid.sum() > 30_000                                        # about 15% of a 50% gain on Rs 10 lakh
+    paid = int(np.flatnonzero(r.tax_paid)[0])
+    assert r.equity[paid] < r.equity[paid - 1] - 30_000                     # the account is poorer by the tax ...
+    assert r.drawdown.max() < 0.005                                         # ... but a payment out of the account is not a market loss: only the sale's charges show
+    assert r.multiplier.min() == 1.0

@@ -51,7 +51,7 @@ class SimConfig:
 class Result:
     dates: np.ndarray
     equity: np.ndarray            # T, marked at the close, after tax paid
-    drawdown: np.ndarray          # T, from the high-water mark
+    drawdown: np.ndarray          # T, before tax (equity plus the tax paid so far) from its high-water mark: what the cap and the governor measure
     multiplier: np.ndarray        # T, the governor's scaling of risky weights decided at this close
     units: np.ndarray             # T x 5, held after the day's fills
     cash: np.ndarray              # T, uninvested rupees
@@ -142,6 +142,7 @@ def _run(t0, t1, px, close, adv, reg, fixed, target, cvals, cded, sizes, cls, wh
             if tax_due[0] > 0.0:
                 cash[0] -= tax_due[0]
                 taxpaid[t] = tax_due[0]
+                gov[5] += tax_due[0]
                 tax_due[0] = 0.0
             total = cash[0]
             for i in range(N):
@@ -227,27 +228,28 @@ def _run(t0, t1, px, close, adv, reg, fixed, target, cvals, cded, sizes, cls, wh
             units_out[t, i] = units[i]
         cash_out[t] = cash[0]
         equity[t] = eq
-        if eq >= gov[0]:
-            gov[0] = eq
+        eqp = eq + gov[5]                      # before tax: what has been paid out of the account is not a market loss (spec section 2)
+        if eqp >= gov[0]:
+            gov[0] = eqp
             if gov[2] == 1.0:
                 gov[2] = 0.0
             gov[1] = 1.0
-        ddv = 1.0 - eq / gov[0]
+        ddv = 1.0 - eqp / gov[0]
         dd[t] = ddv
         m = 1.0
         if use_gov == 1:
             raw = (gend * cap - ddv) / ((gend - gstart) * cap)
             raw = min(1.0, max(0.0, raw))
             if gov[2] == 1.0:
-                if eq < gov[3]:
-                    gov[3] = eq
+                if eqp < gov[3]:
+                    gov[3] = eqp
                     gov[4] = t
                 if t - gov[4] >= ghold:
                     gov[2] = 0.0
             if gov[2] == 0.0:
                 if raw < 1.0:
                     gov[2] = 1.0
-                    gov[3] = eq
+                    gov[3] = eqp
                     gov[4] = t
                     gov[1] = raw
                     m = raw
@@ -328,7 +330,7 @@ def simulate(panel: Panel, weights: np.ndarray, rules: Rules, cfg: SimConfig = S
     lot_day = np.zeros((N, L), dtype=np.int64)
     head, tail = np.zeros(N, dtype=np.int64), np.zeros(N, dtype=np.int64)
     pend_w, pend_valid = np.zeros(N), np.zeros(1, dtype=np.int64)
-    gov = np.array([cfg.capital, 1.0, 0.0, 0.0, 0.0])
+    gov = np.array([cfg.capital, 1.0, 0.0, 0.0, 0.0, 0.0])        # high-water mark, multiplier, cut flag, low since the cut, its day, tax paid so far
     tax_due = np.zeros(1)
     equity, dd, mult = np.zeros(T), np.zeros(T), np.ones(T)
     traded, chg, slipc, taxpaid, nord = np.zeros(T), np.zeros(T), np.zeros(T), np.zeros(T), np.zeros(T)
