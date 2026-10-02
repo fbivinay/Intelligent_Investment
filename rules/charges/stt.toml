@@ -218,3 +218,46 @@ source = "S23 Sale of a futures in securities has been revised to 0.05% (upto Ma
 verified_on = 2026-09-30
 confidence = "primary"
 note = "Finance Act 2026."
+
+[[row]]
+instrument_class = "eq_share"
+side = "buy"
+from = 2010-04-01
+to = 2012-06-30
+value = "0.00125"
+round_step = "1"
+source = "S18 delivery based purchase of an equity share: existing rate 0.125%, reduced to 0.1% from 1st July 2012"
+verified_on = 2026-10-02
+confidence = "primary"
+note = "Listed equity shares bought for delivery: STT on both sides, unlike ETF units."
+
+[[row]]
+instrument_class = "eq_share"
+side = "buy"
+from = 2012-07-01
+value = "0.001"
+round_step = "1"
+source = "S18 0.1% from 1st July 2012; S23 delivery based purchase of an equity share: 0.1% (No Change)"
+verified_on = 2026-10-02
+confidence = "primary"
+
+[[row]]
+instrument_class = "eq_share"
+side = "sell"
+from = 2010-04-01
+to = 2012-06-30
+value = "0.00125"
+round_step = "1"
+source = "S18 delivery based sale of an equity share: existing rate 0.125%, reduced to 0.1% from 1st July 2012"
+verified_on = 2026-10-02
+confidence = "primary"
+
+[[row]]
+instrument_class = "eq_share"
+side = "sell"
+from = 2012-07-01
+value = "0.001"
+round_step = "1"
+source = "S18 0.1% from 1st July 2012; S23 delivery based sale of an equity share: 0.1% (No Change)"
+verified_on = 2026-10-02
+confidence = "primary"

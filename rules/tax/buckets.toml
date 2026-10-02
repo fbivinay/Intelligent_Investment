@@ -60,3 +60,12 @@ source = "S46 clause 21: unit of a Specified Mutual Fund acquired on or after 20
 verified_on = 2026-09-30
 confidence = "primary"
 note = "Gains are deemed short-term whatever the holding period."
+
+[[row]]
+asset_class = "eq_share"
+bucket = "equity"
+from = 2010-04-01
+source = "S43 section 112A and S46 section 111A apply to STT-paid listed equity shares, whatever the date of purchase"
+verified_on = 2026-10-02
+confidence = "primary"
+note = "Listed equity shares bought and sold on a recognised exchange with STT paid: the same treatment as equity oriented ETF units."

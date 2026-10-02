@@ -19,13 +19,14 @@ from engine.rules import Rules
 from engine.tax import fy_end, fy_of
 
 SIZES = np.array([1e3, 1e4, 5e4, 1e5, 2.5e5, 5e5, 1e6, 2.5e6, 5e6, 1e7, 5e7, 1e8])
-CLASSES = ("etf_equity", "etf_gold", "mf_debt")
+CLASSES = ("etf_equity", "etf_gold", "mf_debt", "eq_share")
 SIDES = ("buy", "sell")
 CHARGE_RULES = ("fyers.brokerage", "charges.stt", "charges.exchange_txn", "charges.sebi", "charges.ipft", "charges.clearing", "charges.stamp", "charges.gst",
                 "fyers.dp", "charges.dp_depository")
 
 # Slippage (assumed, labelled): a half-spread per instrument plus an impact that grows with the square root of the order's share of a normal day's traded value.
 HALF_SPREAD = {"NIFTYBEES": 0.0003, "JUNIORBEES": 0.0008, "BANKBEES": 0.0006, "GOLDBEES": 0.0006, "MOM100": 0.0015, "MON100": 0.0015, "CASH": 0.0}   # the two thinner ETFs: wider, assumed
+STOCK_HALF_SPREAD = 0.001     # a listed share in the 500 most traded: assumed
 IMPACT = 0.005
 MAX_SLIPPAGE = 0.03
 
