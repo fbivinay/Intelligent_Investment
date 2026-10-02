@@ -76,3 +76,13 @@ def test_the_six_etf_growth_level_holds_the_six_etfs_in_equal_parts_with_no_cash
     assert g.names[-1] == "LIQUID_FUND" and len(g.names) == 7 and abs(g.weights[0][:6] - 1 / 6).max() < 0.05 and g.weights[:, 6].max() < 1e-9
     f = PR.run("Balanced", Decimal(1000000), date(2014, 4, 1), date(2015, 4, 1), TaxProfile("new", Decimal(1500000)), model="four")
     assert len(f.names) == 5
+
+
+def test_the_max_level_starts_in_april_2017_holds_stocks_and_its_books_match_the_fast_simulator():
+    with pytest.raises(ValueError, match="2017-04-03"):
+        PR.run("Max", Decimal(1000000), date(2016, 4, 1), date(2020, 3, 31), PROFILE)
+    run = PR.run("Max", Decimal(1000000), date(2017, 4, 3), date(2019, 3, 29), PROFILE)
+    assert "GOLDBEES" in run.names and "MON100" in run.names and len(run.names) > 100
+    assert abs(run.weights.sum(axis=1) - 1).max() < 1e-6
+    assert abs(run.gap) < 1000
+    assert any(t["side"] == "sell" for t in run.booked.trades)

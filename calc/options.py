@@ -31,11 +31,14 @@ class Option:
 
 
 PRODUCT_START = date(2013, 4, 1)
+MAX_START = date(2017, 4, 3)       # the Max level holds stocks: the stock data starts 2016-01, its first pick needs a year of it
 OPTIONS = [
     Option("PRODUCT_Conservative", "Model: Conservative (10% cap)", "product", ""),
     Option("PRODUCT_Balanced", "Model: Balanced (20% cap)", "product", ""),
     Option("PRODUCT_Aggressive", "Model: Aggressive (30% cap)", "product", ""),
     Option("PRODUCT_Growth", "Model: Growth (six ETFs in equal parts, no fall guard)", "product", ""),
+    Option("PRODUCT_Max", "Model: Max (stock momentum half with a market switch, gold ETF and Nasdaq 100 ETF a quarter each)", "product", "",
+           note="from 2017-04-03; the gold and Nasdaq ETFs and the mix were chosen after seeing 2017-2026"),
     Option("NIFTYBEES", "Nifty 50 ETF (Nifty BeES)", "etf", "etf_equity", symbol="NIFTYBEES"),
     Option("JUNIORBEES", "Nifty Next 50 ETF (Junior BeES)", "etf", "etf_equity", symbol="JUNIORBEES"),
     Option("BANKBEES", "Nifty Bank ETF (Bank BeES)", "etf", "etf_equity", symbol="BANKBEES"),
@@ -85,7 +88,7 @@ def _nav(code: str) -> tuple[Bar, ...]:
 def first_day(o: Option, on: date | None = None) -> date:
     """The first day the option can be bought (for a fund, of the plan a start on `on` would use)."""
     if o.kind == "product":
-        return PRODUCT_START
+        return MAX_START if o.id == "PRODUCT_Max" else PRODUCT_START
     if o.kind == "etf":
         return _etf(o.symbol)[0].on
     return _nav(_plan(o, on or date.min)[0])[0].on

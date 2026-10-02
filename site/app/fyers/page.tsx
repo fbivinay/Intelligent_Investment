@@ -43,7 +43,7 @@ export default function Fyers() {
         <label>End<input type="date" max="2026-09-30" value={form.end} onChange={(e) => set({ end: e.target.value, date: "" })} /></label>
         <label>Risk level
           <select value={form.level} onChange={(e) => set({ level: e.target.value, date: "" })}>
-            <option>Conservative</option><option>Balanced</option><option>Aggressive</option><option>Growth</option>
+            <option>Conservative</option><option>Balanced</option><option>Aggressive</option><option>Growth</option><option>Max</option>
           </select>
         </label>
         <label>Day with orders

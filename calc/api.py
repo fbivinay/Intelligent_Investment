@@ -160,7 +160,7 @@ def calculate(params: dict) -> dict:
         series[pid] = _thin(run.dates, run.equity)
         csv = {"trades": R.csv_text(b.trades), "tax_lines": R.csv_text(b.tax_lines)}
         check["product_books_less_fast_simulator_rupees"] = round(run.gap, 2)
-        hist = PR.run(p["level"], RESEARCH_AMOUNT, O.PRODUCT_START, p["end"], p["profile"], p["slippage"], p["model"])
+        hist = PR.run(p["level"], RESEARCH_AMOUNT, PR.start_of(p["level"]), p["end"], p["profile"], p["slippage"], p["model"])
         split = {}
         for c, x in zip(classes(run.names[:-1]), run.weights[-1]):
             split[c] = split.get(c, 0.0) + float(x)
@@ -185,7 +185,7 @@ def calculate(params: dict) -> dict:
                                       p["horizon"], p["profile"], _seed(oid, p["horizon"]))
     return {"inputs": {**{k: v for k, v in params.items()}, "start": p["start"].isoformat(), "end": p["end"].isoformat(), "level": p["level"], "model": p["model"]},
             "stamps": {"data_as_of": DATA_END.isoformat(), "rules_verified_on": max(r.ref.verified_on for r in PR.rules().all_rows()).isoformat(),
-                       "signal": SIGNALS[p["model"]]},
+                       "signal": SIGNALS[p["model"]] + ("; Max level: research/out/signal_max (stock momentum, gold and Nasdaq ETFs)" if p["level"] == "Max" else "")},
             "results": results, "messages": messages, "traces": traces.trees, "series": series, "projections": projections, "csv": csv, "check": check, "notes": NOTES}
 
 

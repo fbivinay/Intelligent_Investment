@@ -13,9 +13,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 LIB = ROOT / "site" / "api" / "_lib"
 CODE = ["calc", "engine", "research/__init__.py", "research/artifact.py", "research/baseline.py", "research/causal.py", "research/costs.py", "research/panel.py",
-        "research/sim.py", "research/strategies.py", "research/kaggle/__init__.py", "research/kaggle/snapshot.py"]
+        "research/sim.py", "research/strategies.py", "research/maxmodel.py", "research/stockmom.py", "research/kaggle/__init__.py", "research/kaggle/snapshot.py"]
 DATA = ["rules", "data/processed/etf_daily_adjusted.csv", "data/processed/amfi_nav_adjusted.csv", "data/processed/nse_index_daily.csv",
-        "data/processed/NIFTYBEES_dividends.csv", "research/out/signal", "research/out/signal_growth"]
+        "data/processed/NIFTYBEES_dividends.csv", "research/out/signal", "research/out/signal_growth", "research/out/signal_max"]
 NUMBA = '''"""Stand-in for numba in the serverless bundle: njit returns the function unchanged (plain Python, same results, no compiler)."""
 STAND_IN = True
 

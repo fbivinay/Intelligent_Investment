@@ -6,10 +6,10 @@ import pytest
 from calc import options as O
 
 
-def test_there_are_at_least_eight_alternatives_with_unique_ids_and_the_four_product_levels():
+def test_there_are_at_least_eight_alternatives_with_unique_ids_and_the_five_product_levels():
     alts = [o for o in O.OPTIONS if o.kind != "product"]
     assert len(alts) >= 8 and len({o.id for o in O.OPTIONS}) == len(O.OPTIONS)
-    assert [o.id for o in O.OPTIONS if o.kind == "product"] == ["PRODUCT_Conservative", "PRODUCT_Balanced", "PRODUCT_Aggressive", "PRODUCT_Growth"]
+    assert [o.id for o in O.OPTIONS if o.kind == "product"] == ["PRODUCT_Conservative", "PRODUCT_Balanced", "PRODUCT_Aggressive", "PRODUCT_Growth", "PRODUCT_Max"]
     classes = {o.id: o.instrument_class for o in alts}
     assert classes["NIFTYBEES"] == "etf_equity" and classes["GOLDBEES"] == "etf_gold" and classes["LIQUID_FUND"] == "mf_debt" and classes["ARBITRAGE_FUND"] == "mf_equity"
     assert O.get("NIFTY50_INDEX_FUND").kind == "fund" and O.get("BANKBEES").kind == "etf"

@@ -8,7 +8,10 @@ const LEVELS: { id: Inputs["level"]; cap: string }[] = [
   { id: "Balanced", cap: "about 20%" },
   { id: "Aggressive", cap: "about 30%" },
   { id: "Growth", cap: "no fall guard: fell up to about 30%" },
+  { id: "Max", cap: "stock momentum, gold and Nasdaq: fell up to about 18% (from April 2017)" },
 ];
+
+const MAX_START = "2017-04-03"; // the Max level holds stocks; its data starts later
 
 export function Controls({ v, set }: { v: Inputs; set: (p: Partial<Inputs>) => void }) {
   return (
@@ -25,7 +28,7 @@ export function Controls({ v, set }: { v: Inputs; set: (p: Partial<Inputs>) => v
       <fieldset className="levels">
         <legend>Model risk level</legend>
         {LEVELS.map((l) => (
-          <button key={l.id} className={v.level === l.id ? "on" : ""} onClick={() => set({ level: l.id })} aria-pressed={v.level === l.id} title={l.cap}>
+          <button key={l.id} className={v.level === l.id ? "on" : ""} onClick={() => set({ level: l.id, ...(l.id === "Max" && v.start < MAX_START ? { start: MAX_START } : {}) })} aria-pressed={v.level === l.id} title={l.cap}>
             {l.id}
           </button>
         ))}

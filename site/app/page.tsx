@@ -42,7 +42,7 @@ export default function Calculator() {
       <section className="intro">
         <h1>If you had invested on a date, what would you have now, after every charge and tax?</h1>
         <p>The model picks once a year, from past data only, between plain holding at your risk level and simple mixes of Indian ETFs and a liquid fund; it is
-          compared with buying and holding each alternative. Every rupee is charged and taxed by the rules of its own date.</p>
+          compared with buying and holding each alternative. The Max level (from April 2017) holds the 30 strongest of the 500 most traded stocks each quarter (in the liquid fund while the Nifty is below its 200-day average) for half the money, and the gold and Nasdaq 100 ETFs for a quarter each; those two and the mix were chosen after seeing 2017-2026. Every rupee is charged and taxed by the rules of its own date.</p>
       </section>
       <Controls v={v} set={set} />
       <div className={busy ? "status busy" : "status"} aria-live="polite">{busy ? "Working it out…" : error ? "" : answer ? "Up to date" : ""}</div>
