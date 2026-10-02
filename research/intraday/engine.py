@@ -244,27 +244,34 @@ def arrays(d: Data, tr: pd.DataFrame) -> np.ndarray:
 
 
 def account_multi(ds: list, books: list, scales, capital: float, lo: int = 0, hi: int | None = None, count: bool = False, tax: bool = True,
-                  charges: bool = True):
+                  charges: bool = True, tax_fn=None):
     """Several strategies in one account with whole lots: strategy k trades floor(equity x scale_k / (margin a lot)) lots, and the day's margins together
     never pass the equity (the later strategies are cut first). `ds[k]` is strategy k's index data (all on the same days), `books[k]` its arrays()."""
     d0 = ds[0]
     days = d0.T["days"]
     hi = len(days) if hi is None else hi
     stt, exch = _stt(days), _exch(days)
-    eq, carry, year_pnl = capital, 0.0, 0.0
+    eq, carry, year_pnl, year_int = capital, 0.0, 0.0, 0.0
+    state = None                                   # tax_fn's own carry (business losses) between years
     out = np.zeros(hi - lo)
     active = 0
     for i in range(lo, hi):
         traded = False
         if i > lo and d0.fy[i] != d0.fy[i - 1]:
-            taxable = year_pnl + carry
-            if taxable > 0:
-                eq -= TAX * taxable if tax else 0.0
-                carry = 0.0
+            if tax_fn is not None:
+                t, state = tax_fn(int(d0.fy[i - 1]), year_pnl, year_int, state)
+                eq -= t
             else:
-                carry = taxable
-            year_pnl = 0.0
-        eq *= 1 + d0.cash[i] * ((1 - TAX) if tax else 1.0)
+                taxable = year_pnl + carry
+                if taxable > 0:
+                    eq -= TAX * taxable if tax else 0.0
+                    carry = 0.0
+                else:
+                    carry = taxable
+            year_pnl, year_int = 0.0, 0.0
+        gain = eq * d0.cash[i]
+        year_int += gain
+        eq += gain if (tax_fn is not None or not tax) else gain * (1 - TAX)
         room = eq
         for d, a, sc in zip(ds, books, scales):
             pts, mu, sold, bought, orders, fut = a[i]
@@ -287,6 +294,9 @@ def account_multi(ds: list, books: list, scales, capital: float, lo: int = 0, hi
             traded = True
         active += traded
         out[i - lo] = eq
+    if tax_fn is not None:                         # the year in progress at the end: its tax as if it ended there
+        t, _ = tax_fn(int(d0.fy[hi - 1]), year_pnl, year_int, state)
+        out[-1] -= t
     return (out, active) if count else out
 
 
