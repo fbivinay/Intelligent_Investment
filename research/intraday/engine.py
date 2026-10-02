@@ -243,35 +243,51 @@ def arrays(d: Data, tr: pd.DataFrame) -> np.ndarray:
     return a
 
 
+def _flat_tax(fy, pnl, interest, carry):
+    """The research default: 31.2% of the year's trading profit and liquid fund gain, a trading loss carried forward."""
+    carry = carry or 0.0
+    taxable = pnl + carry
+    return TAX * (max(taxable, 0.0) + max(interest, 0.0)), min(taxable, 0.0)
+
+
+def installments(days: np.ndarray) -> np.ndarray:
+    """Share of the year's tax due by each day as advance tax (section 211: 15% by 15 June, 45% by 15 September, 75% by 15 December, 100% by 15 March),
+    on the first trading day on or after each date; 0 on other days."""
+    out = np.zeros(len(days))
+    d = pd.DatetimeIndex(days.astype("datetime64[ns]"))
+    for month, share in ((6, 0.15), (9, 0.45), (12, 0.75), (3, 1.0)):
+        due = (d.month == month) & (d.day >= 15)
+        first = due & ~np.r_[False, due[:-1]]
+        out[first] = share
+    return out
+
+
 def account_multi(ds: list, books: list, scales, capital: float, lo: int = 0, hi: int | None = None, count: bool = False, tax: bool = True,
-                  charges: bool = True, tax_fn=None):
+                  charges: bool = True, tax_fn=None, advance: bool = True):
     """Several strategies in one account with whole lots: strategy k trades floor(equity x scale_k / (margin a lot)) lots, and the day's margins together
-    never pass the equity (the later strategies are cut first). `ds[k]` is strategy k's index data (all on the same days), `books[k]` its arrays()."""
+    never pass the equity (the later strategies are cut first). `ds[k]` is strategy k's index data (all on the same days), `books[k]` its arrays().
+    Tax: `tax_fn(fy, trading profit, liquid fund gain, state) -> (tax, state)`, the flat 31.2% by default, none with tax=False. With `advance`, the tax is
+    paid in the legal advance-tax installments on the year-to-date figures, and settled after the year ends (a refund if overpaid); else all after the year."""
     d0 = ds[0]
     days = d0.T["days"]
     hi = len(days) if hi is None else hi
     stt, exch = _stt(days), _exch(days)
-    eq, carry, year_pnl, year_int = capital, 0.0, 0.0, 0.0
-    state = None                                   # tax_fn's own carry (business losses) between years
+    fn = (tax_fn or _flat_tax) if tax else None
+    inst = installments(days) if advance else np.zeros(len(days))
+    eq, year_pnl, year_int, paid = capital, 0.0, 0.0, 0.0
+    state = None                                   # the tax function's carry (losses) between years
     out = np.zeros(hi - lo)
     active = 0
     for i in range(lo, hi):
         traded = False
         if i > lo and d0.fy[i] != d0.fy[i - 1]:
-            if tax_fn is not None:
-                t, state = tax_fn(int(d0.fy[i - 1]), year_pnl, year_int, state)
-                eq -= t
-            else:
-                taxable = year_pnl + carry
-                if taxable > 0:
-                    eq -= TAX * taxable if tax else 0.0
-                    carry = 0.0
-                else:
-                    carry = taxable
-            year_pnl, year_int = 0.0, 0.0
+            if fn is not None:
+                t, state = fn(int(d0.fy[i - 1]), year_pnl, year_int, state)
+                eq -= t - paid
+            year_pnl, year_int, paid = 0.0, 0.0, 0.0
         gain = eq * d0.cash[i]
         year_int += gain
-        eq += gain if (tax_fn is not None or not tax) else gain * (1 - TAX)
+        eq += gain
         room = eq
         for d, a, sc in zip(ds, books, scales):
             pts, mu, sold, bought, orders, fut = a[i]
@@ -292,11 +308,16 @@ def account_multi(ds: list, books: list, scales, capital: float, lo: int = 0, hi
             eq += pnl
             year_pnl += pnl
             traded = True
+        if fn is not None and inst[i] > 0:
+            due = inst[i] * fn(int(d0.fy[i]), year_pnl, year_int, state)[0] - paid
+            if due > 0:
+                eq -= due
+                paid += due
         active += traded
         out[i - lo] = eq
-    if tax_fn is not None:                         # the year in progress at the end: its tax as if it ended there
-        t, _ = tax_fn(int(d0.fy[hi - 1]), year_pnl, year_int, state)
-        out[-1] -= t
+    if fn is not None:                             # the year in progress at the end: its tax as if it ended there
+        t, _ = fn(int(d0.fy[hi - 1]), year_pnl, year_int, state)
+        out[-1] -= t - paid
     return (out, active) if count else out
 
 
