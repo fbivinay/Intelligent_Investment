@@ -39,3 +39,7 @@ data/processed/stocks_eq.parquet
 data/processed/nifty_options.parquet
 research/out/eq_*.pkl
 research/out/fut_nifty.pkl
+data/processed/intraday_days.npz
+data/processed/intraday_paths.npy
+research/out/intraday/out/
+research/out/intraday/*.log

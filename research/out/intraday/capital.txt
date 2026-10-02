@@ -1,0 +1,10 @@
+Rs 10 lakh training: 7.8% a year, worst fall 0.8%
+Rs 10 lakh test: 10.7% a year, worst fall 3.0%
+Rs 25 lakh training: 14.6% a year, worst fall 4.4%
+Rs 25 lakh test: 13.8% a year, worst fall 4.4%
+Rs 50 lakh training: 16.7% a year, worst fall 5.0%
+Rs 50 lakh test: 15.3% a year, worst fall 5.0%
+Rs 100 lakh training: 17.5% a year, worst fall 5.3%
+Rs 100 lakh test: 16.4% a year, worst fall 5.5%
+Rs 250 lakh training: 17.9% a year, worst fall 5.4%
+Rs 250 lakh test: 16.9% a year, worst fall 5.7%
