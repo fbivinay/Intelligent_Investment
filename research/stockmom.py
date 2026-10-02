@@ -33,22 +33,36 @@ def wide():
     return f, idx, traded
 
 
-def picks(idx, value, traded, n=30, top=500, start=START):
-    """{decision day: chosen symbols}, decided after that day's close with data up to it."""
+def picks(idx, value, traded, n=30, top=500, start=START, trend=0, safe=()):
+    """{decision day: chosen symbols}, decided after that day's close with data up to it. With `trend` (days), the market switch is checked on the first
+    trading day of each month: while the Nifty ETF closes below its `trend`-day average the money goes to `safe` (empty: the liquid fund); back above it, the
+    stocks are ranked afresh. Without it, only the quarters' first days count."""
     dates = idx.index
     days = pd.Series(dates, index=dates)
-    first = days[days >= start].groupby(days[days >= start].dt.to_period("Q")).first().values
+    d0 = days[days >= start]
+    quarter = set(d0.groupby(d0.dt.to_period("Q")).first().values)
+    first = d0.groupby(d0.dt.to_period("M" if trend else "Q")).first().values
     medval = value.fillna(0).rolling(126, min_periods=100).median()
     age = traded.cumsum()
-    out = {}
+    market = idx["NIFTYBEES"]
+    up = market > market.rolling(trend or 1).mean() if trend else pd.Series(True, index=dates)
+    out, invested = {}, False
     for d in first:
         p = dates.get_loc(d)
+        if not up.iloc[p]:
+            if invested or not out:
+                out[d] = list(safe)
+            invested = False
+            continue
+        if invested and d not in quarter:
+            continue
         live = (age.iloc[p] >= 252) & traded.iloc[p - 5:p + 1].any()
         uni = medval.iloc[p][live].nlargest(top).index
         i = idx[uni]
         vol = np.log(i.iloc[p - 252:p + 1]).diff().std() * np.sqrt(252)
         s = ((i.iloc[p] / i.iloc[p - 126] - 1) + (i.iloc[p] / i.iloc[p - 252] - 1)) / 2 / vol
         out[d] = list(s.dropna().nlargest(n).index)
+        invested = True
     return out
 
 
@@ -82,14 +96,17 @@ def weights(panel, chosen: dict) -> np.ndarray:
     for d, syms in chosen.items():
         t = dates.get_loc(d)
         target[t:] = 0.0
-        target[t:, [col[s] for s in syms]] = 1.0 / len(syms)
+        if syms:
+            target[t:, [col[s] for s in syms]] = 1.0 / len(syms)
+        else:
+            target[t:, n] = 1.0                                            # the market switch is off: the liquid fund
         reset[t] = True
     return st._drifting(panel, target, reset)
 
 
-def run(n=30, top=500, capital=1e6, harvest=True):
+def run(n=30, top=500, capital=1e6, harvest=True, trend=0, safe=()):
     f, idx, traded = wide()
-    chosen = picks(idx, f["value"], traded, n, top)
+    chosen = picks(idx, f["value"], traded, n, top, trend=trend, safe=safe)
     syms = sorted({s for v in chosen.values() for s in v})
     panel = stock_panel(f, idx, syms)
     w = weights(panel, chosen)
