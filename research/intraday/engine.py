@@ -243,7 +243,8 @@ def arrays(d: Data, tr: pd.DataFrame) -> np.ndarray:
     return a
 
 
-def account_multi(ds: list, books: list, scales, capital: float, lo: int = 0, hi: int | None = None, count: bool = False):
+def account_multi(ds: list, books: list, scales, capital: float, lo: int = 0, hi: int | None = None, count: bool = False, tax: bool = True,
+                  charges: bool = True):
     """Several strategies in one account with whole lots: strategy k trades floor(equity x scale_k / (margin a lot)) lots, and the day's margins together
     never pass the equity (the later strategies are cut first). `ds[k]` is strategy k's index data (all on the same days), `books[k]` its arrays()."""
     d0 = ds[0]
@@ -258,12 +259,12 @@ def account_multi(ds: list, books: list, scales, capital: float, lo: int = 0, hi
         if i > lo and d0.fy[i] != d0.fy[i - 1]:
             taxable = year_pnl + carry
             if taxable > 0:
-                eq -= TAX * taxable
+                eq -= TAX * taxable if tax else 0.0
                 carry = 0.0
             else:
                 carry = taxable
             year_pnl = 0.0
-        eq *= 1 + d0.cash[i] * (1 - TAX)
+        eq *= 1 + d0.cash[i] * ((1 - TAX) if tax else 1.0)
         room = eq
         for d, a, sc in zip(ds, books, scales):
             pts, mu, sold, bought, orders, fut = a[i]
@@ -280,7 +281,7 @@ def account_multi(ds: list, books: list, scales, capital: float, lo: int = 0, hi
                 prem = (sold + bought) * lot * n
                 brokerage = 20 * orders * max(1.0, np.ceil(n / 24))
                 cost = brokerage + stt[i] * sold * lot * n + exch[i] * prem + 1e-6 * prem + 0.00003 * bought * lot * n + 0.18 * (brokerage + exch[i] * prem)
-            pnl = pts * lot * n - cost
+            pnl = pts * lot * n - (cost if charges else 0.0)
             eq += pnl
             year_pnl += pnl
             traded = True
