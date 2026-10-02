@@ -27,12 +27,23 @@ MAX_ROWS = 1_000_000
 
 
 def _xlsx(path: Path, sheets: dict[str, pd.DataFrame]) -> None:
+    """Row by row, so the low-memory mode keeps every cell (it drops a row once the next one starts; pandas' own writer goes column by column)."""
+    import xlsxwriter
     path.parent.mkdir(parents=True, exist_ok=True)
-    with pd.ExcelWriter(path, engine="xlsxwriter", engine_kwargs={"options": {"constant_memory": True}}) as w:
-        for name, df in sheets.items():
-            if len(df) > MAX_ROWS:
-                raise ValueError(f"{path.name}/{name}: {len(df)} rows is more than a sheet holds")
-            df.to_excel(w, sheet_name=name[:31], index=False)
+    wb = xlsxwriter.Workbook(str(path), {"constant_memory": True, "strings_to_numbers": False, "nan_inf_to_errors": True})
+    for name, df in sheets.items():
+        if len(df) > MAX_ROWS:
+            raise ValueError(f"{path.name}/{name}: {len(df)} rows is more than a sheet holds")
+        ws = wb.add_worksheet(name[:31])
+        ws.write_row(0, 0, [str(c) for c in df.columns])
+        df = df.copy()
+        for c in df.columns:
+            if pd.api.types.is_datetime64_any_dtype(df[c]):
+                df[c] = df[c].dt.strftime("%Y-%m-%d %H:%M").str.replace(" 00:00", "", regex=False)
+        df = df.astype(object).where(df.notna(), None)
+        for r, row in enumerate(df.itertuples(index=False, name=None), start=1):
+            ws.write_row(r, 0, row)
+    wb.close()
     print(path.relative_to(ROOT), flush=True)
 
 
@@ -105,7 +116,7 @@ def _rows(table: dict) -> pd.DataFrame:
     for r in table.get("row", []):
         flat = {}
         for k, v in r.items():
-            flat[k] = json.dumps(v) if isinstance(v, (list, dict)) else v
+            flat[k] = json.dumps(v, default=str) if isinstance(v, (list, dict)) else v.isoformat() if hasattr(v, "isoformat") else v
         out.append(flat)
     return pd.DataFrame(out)
 
