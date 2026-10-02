@@ -49,7 +49,7 @@ def test_long_lists_in_a_trace_are_cut_with_a_line_saying_how_many_more(answer):
 
 
 def test_the_stamps_the_csv_the_series_and_the_projections_are_there(answer):
-    assert answer["stamps"]["data_as_of"] == "2026-09-30" and answer["stamps"]["rules_verified_on"] == "2026-09-30" and "six-ETF" in answer["stamps"]["signal"]
+    assert answer["stamps"]["data_as_of"] == "2026-09-30" and answer["stamps"]["rules_verified_on"] == "2026-10-02" and "six-ETF" in answer["stamps"]["signal"]
     assert answer["csv"]["trades"].startswith("date,asset,class,side") and answer["csv"]["tax_lines"].startswith("financial_year,")
     s = answer["series"]["PRODUCT_Balanced"]
     assert s["dates"][0] == "2016-04-01" and len(s["dates"]) == len(s["values"]) and len(s["dates"]) < 600              # thinned for the chart

@@ -35,3 +35,4 @@ web/next-env.d.ts
 /site/playwright-report/
 /site/tsconfig.tsbuildinfo
 /site/next-env.d.ts
+data/processed/stocks_eq.parquet

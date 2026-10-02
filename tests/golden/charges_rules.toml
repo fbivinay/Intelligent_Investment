@@ -1007,3 +1007,51 @@ key = {  }
 boundary = ["charges.dp_depository[]@2024-10-01:after"]
 [case.expect]
 value = "3.5"
+
+[[case]]
+id = "charges.stt-eq_share-buy-2012-06-30"
+kind = "rule_value"
+source = "S18 delivery-based equity shares: existing 0.125%"
+table = "charges.stt"
+on = 2012-06-30
+key = { instrument_class = "eq_share", side = "buy" }
+boundary = ["charges.stt[instrument_class=eq_share,side=buy]@2012-07-01:before"]
+[case.expect]
+value = "0.00125"
+round_step = "1"
+
+[[case]]
+id = "charges.stt-eq_share-buy-2012-07-01"
+kind = "rule_value"
+source = "S18 reduced to 0.1% w.e.f. 1st July 2012"
+table = "charges.stt"
+on = 2012-07-01
+key = { instrument_class = "eq_share", side = "buy" }
+boundary = ["charges.stt[instrument_class=eq_share,side=buy]@2012-07-01:after"]
+[case.expect]
+value = "0.001"
+round_step = "1"
+
+[[case]]
+id = "charges.stt-eq_share-sell-2012-06-30"
+kind = "rule_value"
+source = "S18 delivery-based equity shares: existing 0.125%"
+table = "charges.stt"
+on = 2012-06-30
+key = { instrument_class = "eq_share", side = "sell" }
+boundary = ["charges.stt[instrument_class=eq_share,side=sell]@2012-07-01:before"]
+[case.expect]
+value = "0.00125"
+round_step = "1"
+
+[[case]]
+id = "charges.stt-eq_share-sell-2012-07-01"
+kind = "rule_value"
+source = "S18 reduced to 0.1% w.e.f. 1st July 2012"
+table = "charges.stt"
+on = 2012-07-01
+key = { instrument_class = "eq_share", side = "sell" }
+boundary = ["charges.stt[instrument_class=eq_share,side=sell]@2012-07-01:after"]
+[case.expect]
+value = "0.001"
+round_step = "1"

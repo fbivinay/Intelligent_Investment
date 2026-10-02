@@ -34,7 +34,7 @@ GRANDFATHER = date(2018, 1, 31)
 
 def classes(assets) -> tuple[str, ...]:
     """The engine's class of each asset of a panel, the cash leg (a liquid fund) last."""
-    return tuple(CLASS_OF[a] for a in assets) + ("mf_debt",)
+    return tuple(CLASS_OF.get(a, "eq_share") for a in assets) + ("mf_debt",)       # a symbol not listed is a listed share
 
 
 ASSET_CLASS = classes(ASSETS)
@@ -59,6 +59,7 @@ class SimConfig:
     harvest_offset: int = 5                # the harvest is on the 5th-to-last trading day of the financial year
     harvest_share: float = 0.95            # aim at this share of the exemption left: the estimate uses the previous close
     harvest_min: float = 1_000.0           # no harvest for a smaller gain: the round trip would cost more than it saves
+    max_orders: int = 0                    # rows kept for the order log (0: 5 per asset and day, enough for any run; set it for a panel of hundreds of shares)
 
 
 @dataclass
@@ -445,7 +446,7 @@ def _events(rules: Rules, sl, days, fmv_unit, names: list[str], cls: tuple[str, 
         acq, sale = days[int(sl["acq"][k])], days[int(sl["sale"][k])]
         units = float(sl["units"][k])
         fmv = None
-        if cls[a] == "etf_equity" and acq <= GRANDFATHER and fmv_unit is not None:
+        if cls[a] in ("etf_equity", "eq_share") and acq <= GRANDFATHER and fmv_unit is not None:
             fmv = const("Value on 31 Jan 2018", Decimal(repr(round(fmv_unit[a] * units, 2))))
         out.append(CGEvent(f"{names[a] if a < len(names) else 'liquid fund'} sold {sale}", sale, cls[a], acq,
                            const("Sale proceeds", Decimal(repr(round(max(float(sl["proc"][k]), 0.0), 2)))),
@@ -471,7 +472,7 @@ def simulate(panel: Panel, weights: np.ndarray, rules: Rules, cfg: SimConfig = S
     cls_names = classes(panel.assets)
     CLS = np.array([C.CLASSES.index(c) for c in cls_names], dtype=np.int64)       # index into costs.CLASSES
     WHOLE = np.array([1] * n + [0], dtype=np.int64)                              # whole units for the ETFs, fractions for the fund
-    HALF = np.array([C.HALF_SPREAD[a] for a in panel.assets] + [0.0])
+    HALF = np.array([C.HALF_SPREAD.get(a, C.STOCK_HALF_SPREAD) for a in panel.assets] + [0.0])
     weights = np.asarray(weights, dtype=float)
     _check_weights(weights, T, N)
     px = np.ascontiguousarray(np.column_stack([panel.vwap, panel.cash]))
@@ -505,7 +506,7 @@ def simulate(panel: Panel, weights: np.ndarray, rules: Rules, cfg: SimConfig = S
     gov = np.array([cfg.capital, 1.0, 0.0, 0.0, 0.0, 0.0])        # high-water mark, multiplier, cut flag, low since the cut, its day, tax paid so far
     tax_due = np.zeros(1)
     rebuy, ltcg = np.zeros(N), np.zeros(1)
-    olog, ol_n = np.zeros((5 * N * T + 16, 6)), np.zeros(1, dtype=np.int64)
+    olog, ol_n = np.zeros((cfg.max_orders or 5 * N * T + 16, 6)), np.zeros(1, dtype=np.int64)
     equity, dd, mult = np.zeros(T), np.zeros(T), np.ones(T)
     traded, chg, slipc, taxpaid, nord = np.zeros(T), np.zeros(T), np.zeros(T), np.zeros(T), np.zeros(T)
     units_out, cash_out = np.zeros((T, N)), np.zeros(T)

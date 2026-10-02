@@ -3424,3 +3424,23 @@ extra = "2152800"
 tax_with = "11659050"
 surcharge = "2098125.0000"
 total_income = "31000000"
+
+[[case]]
+id = "tax-cg-eq_share-2024-07-23-after"
+kind = "tax_fy"
+source = "rates from the sources via tests/golden/tax_gains_rules.toml and tax_slab_rules.toml (S40 to S70); arithmetic worked independently, see work"
+work = "equity: long-term 112A gain 200000; slab income 1000000, slab tax 112500.00, special-rate tax 9375.000, total income 1200000, rebate 0, surcharge 0, cess 4875.00000, tax with 126750, without 117000, extra 9750"
+[case.input]
+fy = 2024
+regime = "old"
+other_income = "1000000"
+[[case.input.events]]
+label = "equity"
+sale_date = 2024-07-23
+acq_date = 2020-01-15
+asset_class = "eq_share"
+proceeds = "300000"
+sale_costs = "0"
+cost = "100000"
+[case.expect]
+extra = "9750"

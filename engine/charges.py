@@ -8,7 +8,7 @@ from decimal import Decimal
 from engine.rules import Rules
 from engine.trace import Node, add, cite, const, from_row, from_rule, minn, mul, rnd
 
-SEGMENT = {"etf_equity": "delivery", "etf_gold": "delivery", "fut_index": "futures",
+SEGMENT = {"etf_equity": "delivery", "eq_share": "delivery", "etf_gold": "delivery", "fut_index": "futures",
            "mf_equity": "mf", "mf_debt": "mf"}
 EXCHANGE = "NSE"
 DEDUCTIBLE = "cg_deductible"  # tag: may be deducted from a capital gain (STT may not)
