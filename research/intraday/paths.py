@@ -32,7 +32,7 @@ def vols(T: dict, i: int, slot: int) -> np.ndarray:
 
 def option_paths(T: dict, i: int, slot: int = 0):
     """(strikes, call path BARS x K, put path BARS x K)."""
-    strikes = T["atm"][i] + T["offs"] * STEP
+    strikes = T["atm"][i] + T["offs"] * int(T.get("step", STEP))
     s = T["spot"][i][:, None]
     t = _t_left(T["days"][i], T["expiry"][i, slot])[:, None]
     v = vols(T, i, slot)
