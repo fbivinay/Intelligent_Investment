@@ -9,5 +9,8 @@
       "maxDuration": 180,
       "includeFiles": "api/_lib/**"
     }
+  },
+  "git": {
+    "deploymentEnabled": false
   }
 }
