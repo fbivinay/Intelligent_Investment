@@ -46,3 +46,5 @@ research/out/intraday/*.log
 data/processed/intraday_days_*.npz
 data/processed/intraday_paths_*.npy
 data/processed/banknifty_options.parquet
+dataset/1_raw_data
+dataset/2_cleaned_data/
