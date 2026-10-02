@@ -28,13 +28,14 @@ def days(start, n):
     return out
 
 
-def make_root(tmp_path, n=6, start=date(2012, 12, 26), skip=None, etf_price=lambda sym, i: 100 + i):
-    """A tiny data folder: the four ETFs on n trading days, a regular and a direct liquid fund, Nifty 50 and India VIX."""
+def make_root(tmp_path, n=6, start=date(2012, 12, 26), skip=None, etf_price=lambda sym, i: 100 + i, assets=None, late=None):
+    """A tiny data folder: the four ETFs (or `assets`) on n trading days, a regular and a direct liquid fund, Nifty 50 and India VIX. `late`: {symbol: the index of
+    its first day}."""
     ds = days(start, n)
     etf = []
-    for sym in pn.ASSETS:
+    for sym in assets or pn.ASSETS:
         for i, d in enumerate(ds):
-            if skip == (sym, d):
+            if skip == (sym, d) or i < (late or {}).get(sym, 0):
                 continue
             p = etf_price(sym, i)
             etf.append([d.isoformat(), sym, "EQ", p, p + 1, p - 1, p + 0.5, 1_000_000 + i, round((1_000_000 + i) / (p + 0.25))])
@@ -174,3 +175,20 @@ def test_from_day_starts_the_panel_on_that_day_with_every_array_still_aligned(tm
     for name in ("open", "high", "low", "close", "value", "vwap", "cash", "nifty", "vix", "pe", "pb"):
         assert np.array_equal(getattr(q, name), getattr(p, name)[2:], equal_nan=True), name
     assert q.assets == p.assets and q.special_days == p.special_days
+
+
+def test_a_wider_universe_starts_on_the_first_day_every_one_of_its_etfs_has_a_row(tmp_path):
+    root, ds = make_root(tmp_path, assets=pn.GROWTH, late={"MON100": 2})
+    p = pn.load_panel(root, end="2030-01-01", assets=pn.GROWTH)
+    assert p.assets == pn.GROWTH and p.close.shape == (4, 6) and str(p.dates[0]) == ds[2].isoformat()
+    assert p.cash[0] == 1.0 and [pn.CLASS_OF[a] for a in p.assets] == ["etf_equity", "etf_equity", "etf_equity", "etf_gold", "etf_equity", "etf_gold"]
+    assert pn.load_panel(root, end="2030-01-01").close.shape == (6, 4)                              # the four ETFs alone still start on the first day
+
+
+def test_a_listed_day_an_etf_did_not_trade_is_left_out_and_recorded(tmp_path, monkeypatch):
+    ds = days(date(2012, 12, 26), 6)
+    root, _ = make_root(tmp_path, assets=pn.GROWTH, skip=("MON100", ds[3]))
+    monkeypatch.setitem(pn.NOT_TRADED, ("MON100", ds[3].isoformat()), "no row in that day's cash file")
+    p = pn.load_panel(root, end="2030-01-01", assets=pn.GROWTH)
+    assert len(p.dates) == 5 and ds[3].isoformat() in p.special_days
+    assert pn.load_panel(root, end="2030-01-01").close.shape == (6, 4)                              # it does not touch a panel without that ETF

@@ -1,4 +1,4 @@
-"""The fast simulator: one account, four ETFs and a liquid fund as cash, daily decisions.
+"""The fast simulator: one account, the panel's ETFs and a liquid fund as cash (the last asset), daily decisions.
 
 A strategy decides target weights after the close of day t. The fill is on day t+1 at that day's VWAP (the fund: its NAV), with slippage, in whole units for the ETFs, charged
 by the engine's own rules (research/costs.py). Lots are FIFO. The day loop is numba; it runs one financial year at a time, and at each year end the year's sales go to the
@@ -26,14 +26,18 @@ from engine.rules import Rules
 from engine.tax import CGEvent, Carry, TaxProfile, add_months, fy_end, fy_of, investment_tax
 from engine.trace import const
 from research import costs as C
-from research.panel import ASSETS, Panel
+from research.panel import ASSETS, CLASS_OF, Panel
 
-N = 5                                              # the four ETFs and the cash leg (asset 4)
-ASSET_CLASS = ("etf_equity", "etf_equity", "etf_equity", "etf_gold", "mf_debt")
-CLS = np.array([0, 0, 0, 1, 2], dtype=np.int64)    # index into costs.CLASSES
-WHOLE = np.array([1, 1, 1, 1, 0], dtype=np.int64)  # whole units for the ETFs, fractions for the fund
-HALF = np.array([C.HALF_SPREAD[a] for a in ASSETS] + [0.0])
+N = 5                                              # the four ETFs and the cash leg (asset 4) of the first universe
 GRANDFATHER = date(2018, 1, 31)
+
+
+def classes(assets) -> tuple[str, ...]:
+    """The engine's class of each asset of a panel, the cash leg (a liquid fund) last."""
+    return tuple(CLASS_OF[a] for a in assets) + ("mf_debt",)
+
+
+ASSET_CLASS = classes(ASSETS)
 
 
 @dataclass(frozen=True)
@@ -63,7 +67,7 @@ class Result:
     equity: np.ndarray            # T, marked at the close, after tax paid
     drawdown: np.ndarray          # T, before tax (equity plus the tax paid so far) from its high-water mark: what the cap and the governor measure
     multiplier: np.ndarray        # T, the governor's scaling of risky weights decided at this close
-    units: np.ndarray             # T x 5, held after the day's fills
+    units: np.ndarray             # T x (n + 1), held after the day's fills
     cash: np.ndarray              # T, uninvested rupees
     traded: np.ndarray            # T, rupees bought plus sold
     charges: np.ndarray           # T
@@ -96,7 +100,7 @@ def _charge(vals, sizes, reg, c, s, value):
 
 @njit(cache=True)
 def _slip(a, value, adv, half, impact, maxs, use):
-    if use == 0 or value <= 0.0 or a == 4:
+    if use == 0 or value <= 0.0 or a == half.shape[0] - 1:                 # the cash leg is last: a fund unit has no spread
         return 0.0
     part = 1.0
     if adv == adv and adv > 0.0:
@@ -189,6 +193,7 @@ def _run(t0, t1, px, close, adv, reg, fixed, target, cvals, cded, sizes, cls, wh
     acc = np.zeros(4)
     ltcg[0] = 0.0                                                            # each call is one financial year
     T = dayn.shape[0]
+    N = units.shape[0]                                                       # the ETFs and the cash leg, last
     for t in range(t0, t1):
         acc[:] = 0.0
         cash[0] -= fixed[t]
@@ -220,7 +225,7 @@ def _run(t0, t1, px, close, adv, reg, fixed, target, cvals, cded, sizes, cls, wh
                 sell_all = pend_w[i] <= 0.0 and units[i] > 0.0
                 if not (gap < -thr or sell_all):
                     continue
-                if hold_days > 0 and i < 4 and not sell_all and t > 0 and mult[t - 1] >= 1.0 and head[i] < tail[i]:
+                if hold_days > 0 and i < N - 1 and not sell_all and t > 0 and mult[t - 1] >= 1.0 and head[i] < tail[i]:
                     lt = lt_turn[lot_day[i, head[i]], i]
                     if lt > t and lt < T and dayn[lt] - dayn[t] <= hold_days:
                         continue                                             # the first lot turns long-term soon: wait for it
@@ -237,7 +242,7 @@ def _run(t0, t1, px, close, adv, reg, fixed, target, cvals, cded, sizes, cls, wh
             # an overdraft (tax, fees) is covered by selling: the fund first, then the ETFs in turn
             if cash[0] < 0.0:
                 for k in range(N):
-                    i = 4 if k == 0 else k - 1
+                    i = N - 1 if k == 0 else k - 1
                     if cash[0] >= 0.0 or units[i] <= 0.0:
                         continue
                     need = -cash[0] * 1.002 + 1.0
@@ -277,7 +282,9 @@ def _run(t0, t1, px, close, adv, reg, fixed, target, cvals, cded, sizes, cls, wh
                 _add_lot(i, u, value, s, t, px, reg, cvals, cded, sizes, cls, units, cash, lot_units, lot_cost, lot_day, tail, acc, olog, ol_n)
             # W1 harvest: the long-term equity lots at the head of each queue whose gain (at yesterday's close) fits in what is left of the exemption
             if harvest[t] == 1 and exempt[t] > 0.0 and t > 0:
-                for i in range(3):
+                for i in range(N - 1):
+                    if cls[i] != 0:
+                        continue                                             # only equity gains have the exemption
                     goal = hshare * (exempt[t] - ltcg[0])
                     if goal < hmin:
                         break
@@ -352,10 +359,10 @@ def _run(t0, t1, px, close, adv, reg, fixed, target, cvals, cded, sizes, cls, wh
                 gov[1] = m
         mult[t] = m
         risky = 0.0
-        for i in range(4):
+        for i in range(N - 1):
             pend_w[i] = target[t, i] * m
             risky += pend_w[i]
-        pend_w[4] = 1.0 - risky
+        pend_w[N - 1] = 1.0 - risky
         pend_valid[0] = 1
 
 
@@ -393,10 +400,10 @@ def lt_turn_days(rules: Rules, days: list[date], asset_class: str) -> np.ndarray
     return out
 
 
-def _lt_table(rules: Rules, days: list[date]) -> np.ndarray:
-    key = (id(rules), days[0], days[-1], len(days))
+def _lt_table(rules: Rules, days: list[date], cls: tuple[str, ...]) -> np.ndarray:
+    key = (id(rules), days[0], days[-1], len(days), cls)
     if key not in _LT_CACHE:
-        _LT_CACHE[key] = (rules, np.ascontiguousarray(np.column_stack([lt_turn_days(rules, days, c) for c in ASSET_CLASS])))
+        _LT_CACHE[key] = (rules, np.ascontiguousarray(np.column_stack([lt_turn_days(rules, days, c) for c in cls])))
     return _LT_CACHE[key][1]
 
 
@@ -431,25 +438,25 @@ def _cost_table(rules: Rules):
     return _TABLE_CACHE[key][1:]
 
 
-def _events(rules: Rules, sl, days, fmv_unit) -> list[CGEvent]:
+def _events(rules: Rules, sl, days, fmv_unit, names: list[str], cls: tuple[str, ...]) -> list[CGEvent]:
     out = []
     for k in range(len(sl["asset"])):
         a = int(sl["asset"][k])
         acq, sale = days[int(sl["acq"][k])], days[int(sl["sale"][k])]
         units = float(sl["units"][k])
         fmv = None
-        if ASSET_CLASS[a] == "etf_equity" and acq <= GRANDFATHER and fmv_unit is not None:
+        if cls[a] == "etf_equity" and acq <= GRANDFATHER and fmv_unit is not None:
             fmv = const("Value on 31 Jan 2018", Decimal(repr(round(fmv_unit[a] * units, 2))))
-        out.append(CGEvent(f"{ASSETS[a] if a < 4 else 'liquid fund'} sold {sale}", sale, ASSET_CLASS[a], acq,
+        out.append(CGEvent(f"{names[a] if a < len(names) else 'liquid fund'} sold {sale}", sale, cls[a], acq,
                            const("Sale proceeds", Decimal(repr(round(max(float(sl["proc"][k]), 0.0), 2)))),
                            const("Sale charges deductible", Decimal(repr(round(max(float(sl["scost"][k]), 0.0), 2)))),
                            const("Cost of acquisition", Decimal(repr(round(max(float(sl["cost"][k]), 0.0), 2)))), fmv_2018=fmv))
     return out
 
 
-def _check_weights(w: np.ndarray, T: int) -> None:
-    if w.shape != (T, N):
-        raise ValueError(f"weights must be {T} x {N}, not {w.shape}")
+def _check_weights(w: np.ndarray, T: int, n: int) -> None:
+    if w.shape != (T, n):
+        raise ValueError(f"weights must be {T} x {n}, not {w.shape}")
     if (w < -1e-12).any():
         raise ValueError("weights cannot be negative (no shorting in this simulator)")
     if not np.allclose(w.sum(axis=1), 1.0, atol=1e-6):
@@ -459,8 +466,14 @@ def _check_weights(w: np.ndarray, T: int) -> None:
 def simulate(panel: Panel, weights: np.ndarray, rules: Rules, cfg: SimConfig = SimConfig()) -> Result:
     days = [date.fromisoformat(str(d)) for d in panel.dates]
     T = len(days)
+    n = len(panel.assets)
+    N = n + 1
+    cls_names = classes(panel.assets)
+    CLS = np.array([C.CLASSES.index(c) for c in cls_names], dtype=np.int64)       # index into costs.CLASSES
+    WHOLE = np.array([1] * n + [0], dtype=np.int64)                              # whole units for the ETFs, fractions for the fund
+    HALF = np.array([C.HALF_SPREAD[a] for a in panel.assets] + [0.0])
     weights = np.asarray(weights, dtype=float)
-    _check_weights(weights, T)
+    _check_weights(weights, T, N)
     px = np.ascontiguousarray(np.column_stack([panel.vwap, panel.cash]))
     close = np.ascontiguousarray(np.column_stack([panel.close, panel.cash]))
     adv = pd.DataFrame(panel.value).rolling(cfg.adv_days, min_periods=1).mean().shift(1).to_numpy()
@@ -472,15 +485,15 @@ def simulate(panel: Panel, weights: np.ndarray, rules: Rules, cfg: SimConfig = S
     hi, gf_idx = {}, -1
     for d_i, d in enumerate(days):
         if d <= GRANDFATHER:
-            hi = {a: float(panel.high[d_i, a]) for a in range(4)}
+            hi = {a: float(panel.high[d_i, a]) for a in range(n)}
             gf_idx = d_i
     fmv_unit = hi if hi and days[0] <= GRANDFATHER else None
     w1 = cfg.hold_days > 0 or cfg.harvest
     dayn = np.array([d.toordinal() for d in days], dtype=np.int64)
-    lt_turn = _lt_table(rules, days) if w1 else np.zeros((T, N), dtype=np.int64)
+    lt_turn = _lt_table(rules, days, cls_names) if w1 else np.zeros((T, N), dtype=np.int64)
     harvest = (harvest_days(days, cfg.harvest_offset) if cfg.harvest else np.zeros(T, dtype=bool)).astype(np.int8)
     exempt = _exemptions(rules, days) if cfg.harvest else np.zeros(T)
-    fmv = np.array([fmv_unit[a] for a in range(4)] + [0.0]) if fmv_unit else np.zeros(N)
+    fmv = np.array([fmv_unit[a] for a in range(n)] + [0.0]) if fmv_unit else np.zeros(N)
 
     L = T + 10
     units = np.zeros(N)
@@ -496,7 +509,7 @@ def simulate(panel: Panel, weights: np.ndarray, rules: Rules, cfg: SimConfig = S
     equity, dd, mult = np.zeros(T), np.zeros(T), np.ones(T)
     traded, chg, slipc, taxpaid, nord = np.zeros(T), np.zeros(T), np.zeros(T), np.zeros(T), np.zeros(T)
     units_out, cash_out = np.zeros((T, N)), np.zeros(T)
-    cap_sl = 4 * L
+    cap_sl = max(4, n) * L
     sl = dict(asset=np.zeros(cap_sl, dtype=np.int64), acq=np.zeros(cap_sl, dtype=np.int64), sale=np.zeros(cap_sl, dtype=np.int64), units=np.zeros(cap_sl),
               cost=np.zeros(cap_sl), proc=np.zeros(cap_sl), scost=np.zeros(cap_sl))
     sl_n = np.zeros(1, dtype=np.int64)
@@ -518,7 +531,7 @@ def simulate(panel: Panel, weights: np.ndarray, rules: Rules, cfg: SimConfig = S
              sl["asset"], sl["acq"], sl["sale"], sl["units"], sl["cost"], sl["proc"], sl["scost"], sl_n, olog, ol_n)
         n = int(sl_n[0])
         part = {k: v[:n] for k, v in sl.items()}
-        events = _events(rules, part, days, fmv_unit) if cfg.tax else []
+        events = _events(rules, part, days, fmv_unit, panel.assets, cls_names) if cfg.tax else []
         if c < len(bounds) - 2:
             if cfg.tax:
                 it = investment_tax(rules, int(fy[t0]), cfg.profile, events, carry)
@@ -550,7 +563,7 @@ def simulate(panel: Panel, weights: np.ndarray, rules: Rules, cfg: SimConfig = S
             lq["cost"].append(float(lot_cost[i, k])); lq["proc"].append(value * lu / u_tot); lq["scost"].append(ded * lu / u_tot)
     lq = {k: np.array(v) for k, v in lq.items()}
     if cfg.tax and len(lq["asset"]):
-        total = float(investment_tax(rules, int(fy[-1]), cfg.profile, last_events + _events(rules, lq, days, fmv_unit), carry).extra.value)
+        total = float(investment_tax(rules, int(fy[-1]), cfg.profile, last_events + _events(rules, lq, days, fmv_unit, panel.assets, cls_names), carry).extra.value)
         liq_tax = max(total - pending, 0.0)
     else:
         liq_tax = 0.0
