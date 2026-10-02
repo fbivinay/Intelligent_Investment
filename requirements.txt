@@ -1,4 +1,2 @@
 pandas>=2.2
 numpy>=2.0
-# research only (ml/etf_research.py's machine-learning candidate):
-# scikit-learn>=1.5
