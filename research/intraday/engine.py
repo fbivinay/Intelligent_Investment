@@ -18,20 +18,24 @@ import pandas as pd
 from research.intraday import paths as PA, prep
 
 ROOT = Path(__file__).resolve().parents[2]
-PATHS = ROOT / "data" / "processed" / "intraday_paths.npy"
+def paths_file(symbol: str = "NIFTY") -> Path:
+    return ROOT / "data" / "processed" / ("intraday_paths.npy" if symbol == "NIFTY" else f"intraday_paths_{symbol}.npy")
 EXIT = 365                    # 15:20
 TAX = 0.312
 CE, PE = 0, 1
 
 
-def build_paths(T: dict) -> np.ndarray:
+def build_paths(T: dict, symbol: str = "NIFTY") -> np.ndarray:
     """D x BARS x 2 (CE, PE) x K float32 prices on the nearest expiry, NaN where a strike has no volatility."""
     D, K = len(T["days"]), len(T["offs"])
     out = np.full((D, prep.BARS, 2, K), np.nan, dtype=np.float32)
     for i in range(D):
         _, ce, pe = PA.option_paths(T, i, 0)
         out[i, :, 0], out[i, :, 1] = ce, pe
-    np.save(PATHS, out)
+    try:
+        np.save(paths_file(symbol), out)
+    except OSError:
+        pass
     return out
 
 
@@ -46,12 +50,12 @@ class Data:
     spot5: np.ndarray = field(default=None)   # D x 75, 5-minute closes
 
 
-def load() -> Data:
-    T = prep.load()
-    P = np.load(PATHS) if PATHS.exists() else build_paths(T)
+def load(symbol: str = "NIFTY") -> Data:
+    T = prep.load(symbol)
+    P = np.load(paths_file(symbol)) if paths_file(symbol).exists() else build_paths(T, symbol)
     days = pd.DatetimeIndex(T["days"].astype("datetime64[ns]"))
     lots = pd.read_csv(ROOT / "data" / "lot_sizes.csv", parse_dates=["expiry"])
-    lots = lots[lots.symbol == "NIFTY"].sort_values("expiry")
+    lots = lots[lots.symbol == symbol].sort_values("expiry")
     lot = lots.set_index("expiry").lot.reindex(days, method="bfill").fillna(lots.lot.iloc[-1]).to_numpy()
     nav = pd.read_csv(ROOT / "data" / "processed" / "amfi_nav_adjusted.csv", dtype={"code": str}, parse_dates=["date"])
     nav = nav[nav.code == "118701"].set_index("date").adj_nav.sort_index()
@@ -127,7 +131,8 @@ def trades(d: Data, s: Spec, signals: dict | None = None) -> pd.DataFrame:
             slip = 2 * 0.5
             rows.append((i, pnl - slip, ref, 0.12 * spot[e], 4 * 20 + 0.0002 * spot[e] * (1 + 0.18), 2))
             continue
-        shift = int(round((spot[e] - T["atm"][i]) / prep.STEP))
+        step = int(T["step"]) if "step" in T else prep.STEP
+        shift = int(round((spot[e] - T["atm"][i]) / step))
         legs = [(t if direction[i] > 0 else 1 - t, (off if direction[i] > 0 else -off), side) for t, off, side in s.legs]
         cols = [mid + shift + off for _, off, _ in legs]
         if min(cols) < 0 or max(cols) >= len(T["offs"]):
@@ -157,7 +162,7 @@ def trades(d: Data, s: Spec, signals: dict | None = None) -> pd.DataFrame:
         if credit > 0 and (sides > 0).any():               # covered: the widest gap between a sold and a bought strike of one type, less the credit
             width = 0.0
             for t in (CE, PE):
-                ks = [off * prep.STEP for (tt, off, _), side in zip(legs, sides) if tt == t]
+                ks = [off * step for (tt, off, _), side in zip(legs, sides) if tt == t]
                 sd = [side for (tt, _, _), side in zip(legs, sides) if tt == t]
                 if -1 in sd and 1 in sd:
                     width = max(width, max(ks) - min(ks))
@@ -226,4 +231,64 @@ def account(d: Data, tr: pd.DataFrame, capital: float = 1_000_000.0, scale: floa
 def stats(eq: pd.Series) -> dict:
     yrs = (eq.index[-1] - eq.index[0]).days / 365.25
     v = eq.to_numpy()
+    return dict(cagr=(v[-1] / v[0]) ** (1 / yrs) - 1 if v[-1] > 0 else -1.0, worst_fall=float((1 - v / np.maximum.accumulate(v)).max()))
+
+
+def arrays(d: Data, tr: pd.DataFrame) -> np.ndarray:
+    """One strategy's trades as a D x 6 array (points, margin a unit, sold, bought, orders, futures cost; NaN points on days it does not trade)."""
+    a = np.full((len(d.lot), 6), np.nan)
+    if len(tr):
+        i = tr.i.to_numpy(dtype=int)
+        a[i] = tr[["points", "margin_unit", "sold", "bought", "orders", "fut_cost"]].to_numpy(dtype=float)
+    return a
+
+
+def account_multi(ds: list, books: list, scales, capital: float, lo: int = 0, hi: int | None = None, count: bool = False):
+    """Several strategies in one account with whole lots: strategy k trades floor(equity x scale_k / (margin a lot)) lots, and the day's margins together
+    never pass the equity (the later strategies are cut first). `ds[k]` is strategy k's index data (all on the same days), `books[k]` its arrays()."""
+    d0 = ds[0]
+    days = d0.T["days"]
+    hi = len(days) if hi is None else hi
+    stt, exch = _stt(days), _exch(days)
+    eq, carry, year_pnl = capital, 0.0, 0.0
+    out = np.zeros(hi - lo)
+    active = 0
+    for i in range(lo, hi):
+        traded = False
+        if i > lo and d0.fy[i] != d0.fy[i - 1]:
+            taxable = year_pnl + carry
+            if taxable > 0:
+                eq -= TAX * taxable
+                carry = 0.0
+            else:
+                carry = taxable
+            year_pnl = 0.0
+        eq *= 1 + d0.cash[i] * (1 - TAX)
+        room = eq
+        for d, a, sc in zip(ds, books, scales):
+            pts, mu, sold, bought, orders, fut = a[i]
+            if pts != pts or eq <= 0:
+                continue
+            lot = d.lot[i]
+            n = np.floor(min(eq * sc, room) / (mu * lot))
+            if n < 1:
+                continue
+            room -= n * mu * lot
+            if fut == fut:
+                cost = fut * n
+            else:
+                prem = (sold + bought) * lot * n
+                brokerage = 20 * orders * max(1.0, np.ceil(n / 24))
+                cost = brokerage + stt[i] * sold * lot * n + exch[i] * prem + 1e-6 * prem + 0.00003 * bought * lot * n + 0.18 * (brokerage + exch[i] * prem)
+            pnl = pts * lot * n - cost
+            eq += pnl
+            year_pnl += pnl
+            traded = True
+        active += traded
+        out[i - lo] = eq
+    return (out, active) if count else out
+
+
+def stats_arr(v: np.ndarray, days: np.ndarray) -> dict:
+    yrs = (days[-1] - days[0]).astype(int) / 365.25
     return dict(cagr=(v[-1] / v[0]) ** (1 / yrs) - 1 if v[-1] > 0 else -1.0, worst_fall=float((1 - v / np.maximum.accumulate(v)).max()))

@@ -1,6 +1,6 @@
 """Every Fyers-style intraday strategy as a grid of settings, judged out of sample at a 5% worst fall.
 
-    python -m research.intraday.grid [workers]      # writes research/out/intraday/grid.csv (also what the Kaggle kernel runs)
+    python -m research.intraday.grid [workers]      # writes research/out/intraday/grid[_SYMBOL].csv (also what the Kaggle kernel runs); INTRADAY_SYMBOL=BANKNIFTY for the Bank Nifty
 
 Each setting trades the whole period once. Its size is fitted on the training years (2016-01 to 2021-12) so that their worst fall is 5%; that size then runs on
 the test years (2022-01 to 2026-05), which played no part in any choice. Both windows start fresh with Rs 10 lakh in the liquid fund. Families (the Fyers
@@ -61,11 +61,12 @@ def specs() -> list[E.Spec]:
 
 
 _D = _SIG = None
+SYMBOL = os.environ.get("INTRADAY_SYMBOL", "NIFTY")
 
 
 def _init():
     global _D, _SIG
-    _D = E.load()
+    _D = E.load(SYMBOL)
     _SIG = S.build(_D.T)
 
 
@@ -106,7 +107,7 @@ def main(workers: int | None = None, out: Path = OUT) -> pd.DataFrame:
             if k % 50 == 0:
                 print(f"{k}/{len(sp)}", file=sys.stderr, flush=True)
     df = pd.DataFrame(rows).sort_values("train_cagr", ascending=False)
-    df.to_csv(out / "grid.csv", index=False)
+    df.to_csv(out / ("grid.csv" if SYMBOL == "NIFTY" else f"grid_{SYMBOL}.csv"), index=False)
     return df
 
 

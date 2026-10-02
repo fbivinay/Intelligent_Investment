@@ -1,7 +1,7 @@
 """One table of trading days for the intraday option work: the Nifty and India VIX minute paths (09:15 to 15:29, 375 bars) and, for the nearest and next
 NIFTY option expiries, each strike's implied volatility at the open and at the close, backed out of the exchange's own open and close prices.
 
-    python -m research.intraday.prep      # writes data/processed/intraday_days.npz
+    python -m research.intraday.prep [SYMBOL]      # writes data/processed/intraday_days[_SYMBOL].npz
 
 Sources: data/raw/minute/*.csv (Kaggle dataset debashis74017/nifty-50-minute-data, 2015-01 to 2026-05) and data/processed/nifty_options.parquet (the F&O
 bhavcopies). Each strike's volatility comes from its out-of-the-money option (the liquid side) and prices both the call and the put. The option open is paired
@@ -19,9 +19,13 @@ from research.intraday import pricing as BS
 
 ROOT = Path(__file__).resolve().parents[2]
 RAW = ROOT / "data" / "raw" / "minute"
-OUT = ROOT / "data" / "processed" / "intraday_days.npz"
+SYMBOLS = {"NIFTY": ("nifty50_minute.csv", 50), "BANKNIFTY": ("banknifty_minute.csv", 100)}      # minute file, strike step
+
+
+def out_path(symbol: str = "NIFTY") -> Path:
+    return ROOT / "data" / "processed" / ("intraday_days.npz" if symbol == "NIFTY" else f"intraday_days_{symbol}.npz")
 BARS = 375                      # 09:15 to 15:29
-STEP = 50
+STEP = 50                       # the Nifty's; a table carries its own as T["step"]
 OFFS = np.arange(-20, 21)       # strikes around the 09:15 at-the-money strike, in steps of 50
 R = 0.065                       # assumed rupee rate for pricing (labelled)
 
@@ -40,10 +44,12 @@ def years_left(day: pd.Timestamp, expiry: pd.Timestamp, bar: int) -> float:
     return max((expiry + pd.Timedelta(hours=15, minutes=30) - now).total_seconds(), 60.0) / (365.25 * 86400)
 
 
-def build(out: Path = OUT) -> None:
-    spot = minutes("nifty50_minute.csv")
+def build(symbol: str = "NIFTY") -> None:
+    out = out_path(symbol)
+    fname, step = SYMBOLS[symbol]
+    spot = minutes(fname)
     vix = minutes("vix_minute.csv").reindex(spot.index).ffill()
-    o = pd.read_parquet(ROOT / "data" / "processed" / "nifty_options.parquet")
+    o = pd.read_parquet(ROOT / "data" / "processed" / f"{symbol.lower()}_options.parquet")
     o = o[o.date.isin(spot.index)]
     days = sorted(set(spot.index) & set(o.date))
     D, K = len(days), len(OFFS)
@@ -55,13 +61,13 @@ def build(out: Path = OUT) -> None:
     by_day = dict(tuple(o.groupby("date")))
     for i, d in enumerate(days):
         s0, s1 = spot.at[d, 0], spot.at[d, BARS - 1]
-        atm[i] = round(s0 / STEP) * STEP
+        atm[i] = round(s0 / step) * step
         g = by_day[d]
         expiries = sorted(e for e in g.expiry.unique() if e >= d)[:2]
         for slot, e in enumerate(expiries):
             exp[i, slot] = np.datetime64(e.date())
             c = g[(g.expiry == e) & (g.contracts > 0)].set_index(["type", "strike"])
-            strikes = atm[i] + OFFS * STEP
+            strikes = atm[i] + OFFS * step
             for t, side in enumerate(("CE", "PE")):
                 for j, k in enumerate(strikes):
                     if (side, k) in c.index:
@@ -77,14 +83,14 @@ def build(out: Path = OUT) -> None:
         if i % 250 == 0:
             print(f"\r{i}/{D}", end="", file=sys.stderr)
     np.savez_compressed(out, days=np.array(days, dtype="datetime64[D]"), spot=spot.loc[days].to_numpy(), vix=vix.loc[days].to_numpy(), expiry=exp, atm=atm,
-                        offs=OFFS, iv=iv, px=px, hl=hl)
+                        offs=OFFS, iv=iv, px=px, hl=hl, step=step, symbol=symbol)
     print(f"\n{D} days, {days[0].date()} to {days[-1].date()}", file=sys.stderr)
 
 
-def load(path: Path = OUT) -> dict:
-    z = np.load(path)
+def load(symbol: str = "NIFTY") -> dict:
+    z = np.load(out_path(symbol))
     return {k: z[k] for k in z.files}
 
 
 if __name__ == "__main__":
-    build()
+    build(sys.argv[1] if len(sys.argv) > 1 else "NIFTY")
