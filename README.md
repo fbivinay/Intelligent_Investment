@@ -1,86 +1,73 @@
 # Intelligent Investment (India)
 
-> If I invested ₹X on date Y, what would I have after every real cost and tax, compared with the main alternatives, and what range could happen if I invest today?
+An algorithmic investing system for an Indian investor. It answers one question honestly: **what would my money have become, after every real charge
+and every tax, compared with the normal ways to invest, and how bad could the falls get?**
 
-A research system for a resident Indian investor: ETFs and funds on NSE, every transaction charged and taxed by the rules of its own date (Fyers fee schedule,
-STT, exchange, SEBI, stamp duty, GST, DP charges, capital gains by holding period, exemptions, grandfathering, slabs, surcharge, cess, rebate), every number traced to
-its rule and source. Fyers is the design target only: no account, no keys, no orders are ever sent.
+Execution is designed for the Fyers broker (its fee schedule is in the maths), but no account is used and no order is ever sent. Not investment advice:
+everything here is past results and estimates, never a promise.
 
-**Not investment advice.** Past results and estimates, never guarantees.
+## What we did, step by step
 
-## Status
+1. **Rules of charges and tax** (`rules/`, `engine/`). Every Fyers fee, exchange and government charge (STT, stamp duty, GST, SEBI, DP) and every income-tax
+   rule (slabs, old and new regime, surcharge, cess, 87A rebate, capital gains, holding periods, exemptions, grandfathering, business income) from 2010 to
+   2026, each row dated and linked to its source. The engine charges and taxes every transaction by the rules of its own date. Checked against hand
+   calculations and the Fyers brokerage calculator.
+2. **Data** (`data/`, readable copy in `dataset/`). Every NSE daily file 2016-2026 (all shares, all futures and options, index closes), NSE website history
+   2010-2016, mutual fund and ETF NAVs from AMFI, and minute-by-minute Nifty, Bank Nifty and India VIX (2015-2026, Kaggle). Gaps and checks in
+   `data/gaps.md`.
+3. **Testing strategies without cheating** (`research/`). Every strategy is judged on years it never saw: chosen on the early years, then run unchanged on
+   the later ones. Trades fill at the next day's prices with slippage. Nothing uses future data (tested). Heavy runs went to Kaggle (GPU for the deep
+   model, CPU for the option grids).
+4. **Calculator and website** (`calc/`, `site/`). Enter an amount, dates and your tax profile; it replays the model with exact charges and tax, and compares
+   it with ETFs and funds. Every number has an ⓘ showing its calculation. Live: https://intelligent-investment.vercel.app
 
-| # | Part | State |
-|---|---|---|
-| 1 | Rules and costs engine (`engine/`, `rules/`) | done: dated TOML rule tables from 2010, exact Decimal maths, a trace for every number |
-| 2 | Data layer (`data/`) | done: NSE archive and website history, AMFI NAVs, 2010-04-01 to 2026-09-30, gaps documented in `data/gaps.md` |
-| 3 | Strategy engine (`research/`) | done: design frozen under tag `frozen-design-v1`, the frozen test run once |
-| 4 | Calculator, comparison and projection (`calc/`) | done: the model's signal replayed for any amount, dates and tax profile with exact traced books; eight alternatives through the same engine; projections labelled ESTIMATE |
-| 5 | Web app (`site/`) | done and live at https://intelligent-investment.vercel.app: every number has an ⓘ that opens its trace |
-| 6 | Fyers demo (`site/app/fyers`, `calc/fyers.py`) | done: a past day's orders as Fyers API v3 payloads with fee estimates, preview only |
+## What we found
 
-## Results
+| Tried | Result (after tax, years not used to choose it) |
+|---|---|
+| Deep learning (5 network types, Kaggle GPU) | lost to a simple equal mix of ETFs: rejected |
+| Trend, momentum and volatility rules on 4 ETFs | about 7-11% a year; a fall guard cut both risk and return |
+| Six ETFs in equal parts (adds Midcap 100 and Nasdaq 100) | about 15% a year, worst fall 28% (2013-2026) |
+| Stock momentum (30 strongest of the 500 most traded shares) | about 23% a year, worst fall 48% (2017-2026) |
+| **Max**: momentum half (with a market switch) + gold ETF + Nasdaq 100 ETF | **21.4% a year, worst fall 18%** (2017-2026); on the website |
+| Nifty futures for leverage; covered calls; insurance puts | added nothing after cost and tax: rejected |
+| **About 100 Fyers automations** (1,905 settings of intraday Nifty and Bank Nifty option, futures and signal strategies) | option selling with a stop on every leg wins; buying options on chart signals does not |
 
-The product is a walk-forward selector per risk level (maximum drawdown 10%, 20%, 30%): every April it looks only at the past and keeps same-risk plain holding
-(Nifty ETF plus a liquid fund) unless a candidate beats it by more than selection noise. Candidates: equal weight of four ETFs (Nifty, Next 50, Bank, Gold) and a
-liquid fund; means of trend, momentum, volatility-targeting and drawdown-aware variants; and a deep-learning position model trained on a Kaggle T4 GPU.
+The risk levels built from the intraday option book (test years 2022-01 to 2026-05, whole lots, one account, new tax regime with Rs 12 lakh other income;
+full tables by regime and income in `research/out/intraday/levels_tax.md`):
 
-**Frozen test**, the three years nothing was designed on (2023-10-03 to 2026-09-30, ₹10 lakh, after all charges and tax, everything sold at the end, per year):
+| Level | Minimum money | Asked | Got after tax | Worst fall | Before tax |
+|---|---|---|---|---|---|
+| Low | Rs 50 lakh | 15%, fall up to 5% | 12.3% (16.4% with no other income) | 2.5% | 17.5% |
+| Medium | Rs 25 lakh | 20%, fall up to 10% | 26.2% | 4.7% | 38.3% |
+| High | Rs 10 lakh | 25%, fall up to 15% | 48.3% | 7.9% | 72.3% |
 
-| Risk level | Product | Same-risk plain holding | Nifty BeES held | Liquid fund held |
-|---|---|---|---|---|
-| Conservative (10%) | 4.0% (it was plain holding) | 4.0% | 4.3% | 4.0% |
-| Balanced (20%) | 6.8%, worst fall 13.1% | 3.9% | 4.3% | 4.0% |
-| Aggressive (30%) | 10.9%, worst fall 13.2% | 3.7% | 4.3% | 4.0% |
+Same years for comparison: Nifty 50 ETF 6.9% (fall 15.7%), Gold ETF 26.3% (24.4%), Nasdaq 100 ETF 23.1% (27.9%), Midcap 100 ETF 15.4% (20.9%), liquid
+fund 5.5%, Max 22.1% (15.7%).
 
-- The winner in both the design years and the frozen years is the simple equal-weight mix, not the deep model: the deep model earned less than its own equal-weight
-  starting point in both periods.
-- Three years are one market path (gold rose about 31% a year after tax): weak evidence either way.
-- The research tax profile (new regime, other income ₹12 lakh) sits on the ₹12 lakh rebate threshold from FY 2025-26, where slab-taxed gains cost about 43%; the
-  liquid-fund figures are as low as they get for this profile. See `research/out/frozen/notes_after_the_run.md`.
+Limits, said plainly: option prices inside the day are modelled between the exchange's real open and close prices (no free minute option data exists);
+the option levels need daily automated trading and the minimum money above (smaller accounts cannot hold the lots); 4.4 test years are one market path.
 
-Reports: `research/out/frozen/report.md` (frozen test), `research/out/oos.md` (design period, out of sample for the selection), `research/out/baseline.md` (every trial,
-in-sample), pre-registration `docs/superpowers/specs/2026-10-01-frozen-test-preregistration.md`, every decision in `docs/superpowers/ledgers/`.
+## Folders
+
+```
+dataset/    the data for reading: 1_raw_data (as downloaded), 2_cleaned_data (Excel), 3_tax_and_charges_rules (structured Excel, unstructured notes)
+rules/      the dated tax and charge tables the engine reads
+engine/     exact charges, tax, FIFO lots, a trace for every number
+data/       downloaders and cleaners; data/raw (downloads), data/processed (cleaned, what the code reads)
+research/   simulators, strategies, walk-forward selection, deep model, stock momentum, intraday options (research/intraday), reports in research/out
+calc/       the calculator behind the website
+site/       the website (Next.js, Vercel)
+tests/      about 1,500 tests
+docs/       designs, plans and the record of every decision
+```
 
 ## Run it
 
 ```bash
-python -m pip install -r requirements-research.txt      # Python 3.13
-python -m pytest                                        # about 1,440 tests
-python -m research.baseline                             # every trial over the design period -> research/out/trials.csv, baseline.md
-python -m research.oos                                  # walk-forward selector, design period -> research/out/oos.md
-python -m research.kaggle.s6                            # deep model on a Kaggle GPU (needs the kaggle CLI logged in)
-python -m research.frozen                               # the frozen test: refuses to run unless the code equals tag frozen-design-v1
+python -m pip install -r requirements-research.txt     # Python 3.13
+python -m pytest                                       # the tests
+python -m research.intraday.levels_tax                 # the risk levels by tax profile
+python -m tools.export_dataset                         # rebuild dataset/ from data/ and rules/
+python -m tools.bundle_site                            # then: cd site && npx vercel deploy --prod --yes
 ```
-
-## The calculator and the site
-
-```bash
-python -m calc.server 8765                 # the calculator API: POST /api/calc, /api/preview
-cd site && npm install && LOCAL_API=1 npx next build && LOCAL_API=1 npx next start -p 3100     # the site, forwarding /api to it
-npx playwright test                        # browser checks: every number has an ⓘ that opens, inputs recalculate
-python -m tools.bundle_site                # before a Vercel deploy: copies code, rules, data and the signal into site/api/_lib
-```
-
-The model's signal (`research/out/signal/`) is the frozen design's weights after its reference account's drawdown guard; a user's account follows them, its
-orders decided by the fast simulator and booked again exactly by the engine (`calc/replay.py`). Alternatives: Nifty BeES, Junior BeES, Bank BeES, Gold BeES,
-HDFC Nifty 50 index fund, ICICI Nifty Next 50 index fund, SBI Arbitrage fund, Nippon India Liquid fund.
-
-## Layout
-
-```
-rules/      dated rule tables (tax, charges, Fyers fees), every row with its source, date checked and confidence
-engine/     money, traces, charges, tax, FIFO lots, a traced buy-and-hold
-data/       downloaders, builders and checks; data/processed/ is committed, raw downloads are not
-research/   panel, causal features, fast simulator (numba), strategies, selector, diagnostics, deep model (research/dl), Kaggle pipeline (research/kaggle)
-calc/       the calculator: options, product replay, exact books, alternatives, projections, API, Fyers preview, local server
-site/       Next.js web app and its Vercel Python functions
-tools/      the deploy bundler
-docs/       design specs, plans, ledgers, verification notes
-tests/      unit, golden, causality and reproducibility tests
-```
-
-## The earlier project
-
-`ml/`, `models/`, `web/` and `.github/workflows/etf-daily.yml` belong to the superseded US-ETF and Bitcoin project (DeepTrend); its README is in
-`docs/old-project/DeepTrend-README.md`. Its daily job runs only in its own repository (`btc-paper-trader`).
