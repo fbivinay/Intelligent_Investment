@@ -46,7 +46,7 @@ export type Inputs = {
   amount: number;
   start: string;
   end: string;
-  level: "Conservative" | "Balanced" | "Aggressive";
+  level: "Conservative" | "Balanced" | "Aggressive" | "Growth";
   compare: string[];
   regime: "new" | "old";
   other_income: number;

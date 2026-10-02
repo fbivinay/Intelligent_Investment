@@ -5,7 +5,7 @@ import { preview } from "@/lib/api";
 import type { Preview } from "@/lib/types";
 import { pct, rupees, rupeesExact } from "@/lib/format";
 
-const NAMES: Record<string, string> = { NIFTYBEES: "Nifty BeES", JUNIORBEES: "Junior BeES", BANKBEES: "Bank BeES", GOLDBEES: "Gold BeES", LIQUID_FUND: "Liquid fund" };
+const NAMES: Record<string, string> = { NIFTYBEES: "Nifty BeES", JUNIORBEES: "Junior BeES", BANKBEES: "Bank BeES", GOLDBEES: "Gold BeES", MOM100: "Midcap 100 ETF", MON100: "Nasdaq 100 ETF", LIQUID_FUND: "Liquid fund" };
 
 export default function Fyers() {
   const [form, setForm] = useState({ amount: 1000000, start: "2019-04-01", end: "2021-04-01", level: "Balanced", date: "" });
@@ -43,7 +43,7 @@ export default function Fyers() {
         <label>End<input type="date" max="2026-09-30" value={form.end} onChange={(e) => set({ end: e.target.value, date: "" })} /></label>
         <label>Risk level
           <select value={form.level} onChange={(e) => set({ level: e.target.value, date: "" })}>
-            <option>Conservative</option><option>Balanced</option><option>Aggressive</option>
+            <option>Conservative</option><option>Balanced</option><option>Aggressive</option><option>Growth</option>
           </select>
         </label>
         <label>Day with orders

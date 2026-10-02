@@ -1,0 +1,21 @@
+{
+ "assets": [
+  "NIFTYBEES",
+  "JUNIORBEES",
+  "BANKBEES",
+  "GOLDBEES",
+  "MOM100",
+  "MON100",
+  "cash"
+ ],
+ "execution": {
+  "harvest": true
+ },
+ "files": {
+  "Aggressive.csv": "f9ef696983a86379d7ff887d6e98995d79dc336ea4618dd18ee46b7c520f9a9e",
+  "Balanced.csv": "f8df37120fdc0dcb7b5d44f38e899ab91cc771e6e97f151682895681382929e7",
+  "Conservative.csv": "69ff2bc6a033f5011b7c4079d69a72aced9707198f189d781225990dd14214f9",
+  "Growth.csv": "5ac476cd250c444e24d45e77ac40f343c89a23bd22b5184219a31b13b598cb44"
+ },
+ "rule": "Conservative, Balanced, Aggressive: ensembles design, deflated margin, governor; Growth: equal six ETFs, yearly, no governor"
+}

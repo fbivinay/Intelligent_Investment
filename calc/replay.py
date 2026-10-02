@@ -18,9 +18,9 @@ from engine.rules import Rules
 from engine.tax import CGEvent, Carry, TaxProfile, classify, fy_end, fy_label, fy_of, investment_tax
 from engine.trace import Node, add, const, div, mul, sub
 from research.panel import Panel
-from research.sim import ASSET_CLASS
+from research.sim import classes
 
-NAMES = ("NIFTYBEES", "JUNIORBEES", "BANKBEES", "GOLDBEES", "LIQUID_FUND")
+NAMES = ("NIFTYBEES", "JUNIORBEES", "BANKBEES", "GOLDBEES", "LIQUID_FUND")      # the four-ETF panel's; a panel's own are names_of(panel)
 GRANDFATHER = date(2018, 1, 31)
 KIND_LABELS = {"brokerage": "Brokerage", "stt": "STT", "exchange_txn": "Exchange transaction charges", "sebi": "SEBI turnover fee", "ipft": "IPF charge",
                "clearing": "Clearing charges", "stamp": "Stamp duty", "gst": "GST", "dp": "Depository charges", "fees": "Account opening and yearly demat fees"}
@@ -44,8 +44,9 @@ def _dec(x) -> Decimal:
     return Decimal(repr(float(x)))
 
 
-def _qty(a: int, u: float) -> Decimal:
-    return Decimal(int(round(u))) if a < 4 else _dec(u)
+def names_of(panel: Panel) -> tuple[str, ...]:
+    """The panel's ETFs and the liquid fund (the cash leg, last)."""
+    return tuple(panel.assets) + ("LIQUID_FUND",)
 
 
 def csv_text(rows: list[dict]) -> str:
@@ -60,15 +61,16 @@ def csv_text(rows: list[dict]) -> str:
 
 def book(rules: Rules, panel: Panel, log, amount: Decimal, profile: TaxProfile) -> Booked:
     days = [date.fromisoformat(str(d)) for d in panel.dates]
+    NAMES, CLS, cash = names_of(panel), classes(panel.assets), len(panel.assets)
     gf = [i for i, d in enumerate(days) if d <= GRANDFATHER]
-    fmv_unit = {a: _dec(panel.high[gf[-1], a]) for a in range(3)} if gf else {}
+    fmv_unit = {a: _dec(panel.high[gf[-1], a]) for a in range(cash) if CLS[a] == "etf_equity"} if gf else {}
     inv, kinds, buys, sells = Inventory(), {}, [], []
     events: dict[int, list[CGEvent]] = {}
     trades, lines, dp_seen = [], [], set()
 
     def sale(on: date, a: int, qty: Decimal, price: Decimal, tag: str):
         """Book a sale: its charges, the depository charge, and one capital gains event per lot it takes."""
-        cls, name = ASSET_CLASS[a], NAMES[a]
+        cls, name = CLS[a], NAMES[a]
         o = order_charges(rules, Order(on, cls, "sell", qty, price))
         dp = None
         if cls != "mf_debt":
@@ -94,9 +96,9 @@ def book(rules: Rules, panel: Panel, log, amount: Decimal, profile: TaxProfile) 
 
     for t, a, side, u, price, _taken in log:
         t, a = int(t), int(a)
-        on, name, cls = days[t], NAMES[a], ASSET_CLASS[a]
-        qty, px = _qty(a, u), _dec(price)
-        if side and a == 4:
+        on, name, cls = days[t], NAMES[a], CLS[a]
+        qty, px = (Decimal(int(round(u))) if a < cash else _dec(u)), _dec(price)
+        if side and a == cash:
             qty = min(qty, inv.units(name))                                       # the simulator's fund units carry float dust
         if qty <= 0:
             continue
@@ -112,15 +114,16 @@ def book(rules: Rules, panel: Panel, log, amount: Decimal, profile: TaxProfile) 
             kinds.setdefault(k, []).append(n)
         if dp is not None:
             kinds.setdefault("dp", []).append(dp)
-        vwap = float(panel.vwap[t, a]) if a < 4 else float(panel.cash[t])
+        vwap = float(panel.vwap[t, a]) if a < cash else float(panel.cash[t])
         trades.append({"date": on.isoformat(), "asset": name, "class": cls, "side": "sell" if side else "buy", "units": str(qty), "price": str(px), "vwap": repr(vwap),
                        "slippage": repr(float(px) / vwap - 1.0) if vwap else "0", "turnover": str(o.turnover.value), "charges": str(o.total.value),
                        "dp": str(dp.value) if dp is not None else "0"})
 
     last, end = len(days) - 1, days[-1]
     holdings = {n: inv.units(n) for n in NAMES}
-    close = {a: (_dec(panel.close[last, a]) if a < 4 else _dec(panel.cash[last])) for a in range(5)}
-    valued = [mul(f"{NAMES[a]} held at the end", const("Units held", holdings[NAMES[a]]), const(f"Price on {end}", close[a])) for a in range(5) if holdings[NAMES[a]] > 0]
+    close = {a: (_dec(panel.close[last, a]) if a < cash else _dec(panel.cash[last])) for a in range(cash + 1)}
+    valued = [mul(f"{NAMES[a]} held at the end", const("Units held", holdings[NAMES[a]]), const(f"Price on {end}", close[a])) for a in range(cash + 1)
+              if holdings[NAMES[a]] > 0]
     fees = [account_opening_fee(rules, days[0])] + [amc_fee(rules, min(fy_end(fy), end), days[0]) for fy in range(fy_of(days[0]), fy_of(end) + 1)]
 
     def taxes(extra: list[CGEvent]) -> dict:
@@ -141,7 +144,7 @@ def book(rules: Rules, panel: Panel, log, amount: Decimal, profile: TaxProfile) 
     held_w["net"] = sub("Final amount if still holding, after all charges and tax", sub("Gross end value less all charges", held_w["gross_end"], held_w["charges"]), held_w["tax"])
 
     liq_turnover, liq_kinds, liq_events = [], {}, []
-    for a in range(5):
+    for a in range(cash + 1):
         q = holdings[NAMES[a]]
         if q > 0:
             o, dp, evs = sale(end, a, q, close[a], "end")
