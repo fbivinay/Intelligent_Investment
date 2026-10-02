@@ -36,3 +36,6 @@ web/next-env.d.ts
 /site/tsconfig.tsbuildinfo
 /site/next-env.d.ts
 data/processed/stocks_eq.parquet
+data/processed/nifty_options.parquet
+research/out/eq_*.pkl
+research/out/fut_nifty.pkl
