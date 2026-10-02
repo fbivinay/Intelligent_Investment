@@ -22,6 +22,9 @@ ROOT = Path(__file__).resolve().parents[1]
 FROZEN = Path(__file__).resolve().parent / "out" / "frozen"
 SIGNAL = Path(__file__).resolve().parent / "out" / "signal"
 LEVELS = B.RISKS
+SIGNAL_SIX = Path(__file__).resolve().parent / "out" / "signal_growth"     # the six-ETF model's signal (research/growth.py signal)
+LEVELS_SIX = (*B.RISKS, "Growth")                    # the first three: the selector with the drawdown governor; Growth: GROWTH_MIX, no governor
+GROWTH_MIX = [1 / 6] * 6 + [0.0]                     # the six ETFs in equal parts, no cash, back to equal each April
 COLUMNS = ["NIFTYBEES", "JUNIORBEES", "BANKBEES", "GOLDBEES", "cash"]
 EXECUTION = {"harvest": True}
 
@@ -30,7 +33,7 @@ def effective(target: np.ndarray, mult: np.ndarray) -> np.ndarray:
     """Risky weights times the governor's multiplier; what they give up goes to the fund."""
     if (mult < 0).any() or (mult > 1).any():
         raise ValueError("a governor multiplier is between 0 and 1")
-    risky = target[:, :4] * mult[:, None]
+    risky = target[:, :-1] * mult[:, None]
     return np.column_stack([risky, 1.0 - risky.sum(axis=1)])
 
 
@@ -65,10 +68,11 @@ def build(panel: P.Panel, rules: Rules, frozen: Path = FROZEN, out: Path = SIGNA
 
 
 def load(level: str, out: Path = SIGNAL) -> tuple[np.ndarray, np.ndarray, list[str]]:
-    """Dates, T x 5 weights and the strategy held, of one level's artifact, after checking its hash."""
+    """Dates, T x (n + 1) weights (the ETFs, then cash) and the strategy held, of one level's artifact, after checking its hash."""
     files = json.loads((Path(out) / "manifest.json").read_text(encoding="utf-8"))["files"]
     df = _read_verified(Path(out) / f"{level}.csv", files)
-    return df.date.to_numpy(dtype="datetime64[D]"), df[COLUMNS].to_numpy(dtype=float), df.strategy.tolist()
+    cols = [c for c in df.columns if c not in ("date", "multiplier", "strategy")]
+    return df.date.to_numpy(dtype="datetime64[D]"), df[cols].to_numpy(dtype=float), df.strategy.tolist()
 
 
 if __name__ == "__main__":

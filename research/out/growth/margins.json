@@ -1,0 +1,62 @@
+{
+ "Aggressive": {
+  "all trials": {
+   "deflated_margin": 3.406608634474804,
+   "n_eff": 331.1234260496991,
+   "n_trials": 987
+  },
+  "ensembles": {
+   "deflated_margin": 1.2801041804020206,
+   "n_eff": 2.268986727622382,
+   "n_trials": 6
+  }
+ },
+ "Balanced": {
+  "all trials": {
+   "deflated_margin": 3.4246176866732405,
+   "n_eff": 352.13095932274445,
+   "n_trials": 987
+  },
+  "ensembles": {
+   "deflated_margin": 1.3028569414412234,
+   "n_eff": 2.3366495916598304,
+   "n_trials": 6
+  }
+ },
+ "Capped 40%": {
+  "all trials": {
+   "deflated_margin": 3.399132784761105,
+   "n_eff": 322.8061035029978,
+   "n_trials": 987
+  },
+  "ensembles": {
+   "deflated_margin": 1.274883087299921,
+   "n_eff": 2.253903142120458,
+   "n_trials": 6
+  }
+ },
+ "Conservative": {
+  "all trials": {
+   "deflated_margin": 3.4646830060964464,
+   "n_eff": 404.2421850779705,
+   "n_trials": 987
+  },
+  "ensembles": {
+   "deflated_margin": 1.3291804919332793,
+   "n_eff": 2.4190148973124908,
+   "n_trials": 6
+  }
+ },
+ "No guard": {
+  "all trials": {
+   "deflated_margin": 3.394226654080989,
+   "n_eff": 317.47125844006047,
+   "n_trials": 987
+  },
+  "ensembles": {
+   "deflated_margin": 1.2900529371256142,
+   "n_eff": 2.298181803962797,
+   "n_trials": 6
+  }
+ }
+}

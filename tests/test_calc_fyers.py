@@ -29,7 +29,7 @@ def test_a_day_preview_lists_the_targets_the_holdings_before_the_orders_with_pay
     day = run.booked.trades[0]["date"]
     pv = F.preview(run, date.fromisoformat(day))
     assert pv["fill_day"] == day and pv["decided_on"] == run.dates[run.dates.index(day) - 1]
-    assert abs(sum(pv["targets"].values()) - 1) < 1e-9 and set(pv["holdings_before"]) == set(F.ASSETS)
+    assert abs(sum(pv["targets"].values()) - 1) < 1e-9 and set(pv["holdings_before"]) == set(run.names)
     i = run.dates.index(day)
     assert pv["values_before"]["NIFTYBEES"] == pytest.approx(run.units[i - 1, 0] * run.prices[i - 1, 0])
     orders = pv["orders"]

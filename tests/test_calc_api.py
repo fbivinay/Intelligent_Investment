@@ -49,7 +49,7 @@ def test_long_lists_in_a_trace_are_cut_with_a_line_saying_how_many_more(answer):
 
 
 def test_the_stamps_the_csv_the_series_and_the_projections_are_there(answer):
-    assert answer["stamps"]["data_as_of"] == "2026-09-30" and answer["stamps"]["rules_verified_on"] == "2026-09-30" and "frozen-design-v1" in answer["stamps"]["signal"]
+    assert answer["stamps"]["data_as_of"] == "2026-09-30" and answer["stamps"]["rules_verified_on"] == "2026-09-30" and "six-ETF" in answer["stamps"]["signal"]
     assert answer["csv"]["trades"].startswith("date,asset,class,side") and answer["csv"]["tax_lines"].startswith("financial_year,")
     s = answer["series"]["PRODUCT_Balanced"]
     assert s["dates"][0] == "2016-04-01" and len(s["dates"]) == len(s["values"]) and len(s["dates"]) < 600              # thinned for the chart
@@ -85,3 +85,10 @@ def test_a_product_start_before_2013_04_and_a_fund_that_did_not_exist_yet_are_me
     ids = {m["id"]: m["text"] for m in a["messages"]}
     assert "2013-04-01" in ids["PRODUCT_Aggressive"] and "2010-06-29" in ids["NEXT50_INDEX_FUND"]
     assert [r["id"] for r in a["results"]] == ["NIFTYBEES"]
+
+
+def test_the_four_etf_frozen_model_can_still_be_asked_for_and_an_unknown_model_is_refused():
+    a = api.calculate({"amount": 200000, "start": "2018-06-01", "end": "2019-06-03", "model": "four", "level": "Conservative", "compare": [], "horizon": 1})
+    assert "frozen-design-v1" in a["stamps"]["signal"] and a["results"][0]["id"] == "PRODUCT_Conservative"
+    assert "model" in api.calculate({"amount": 200000, "start": "2018-06-01", "end": "2019-06-03", "model": "eight"})["error"]
+    assert "level" in api.calculate({"amount": 200000, "start": "2018-06-01", "end": "2019-06-03", "model": "four", "level": "Growth"})["error"]

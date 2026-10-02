@@ -1,5 +1,6 @@
 """The product for a user: an account that follows the signal artifact of one risk level from the start day to the end day, its orders decided by the fast
-simulator and booked exactly by calc.replay.
+simulator and booked exactly by calc.replay. Two models: "six" (six ETFs: the four plus the Midcap 100 and Nasdaq 100 ETFs, four levels) and "four" (the
+four-ETF model of the frozen test, three levels).
 
 The account has no drawdown governor of its own: it follows the reference account's governed weights (sub-project 3 spec), so its own drawdown can exceed the cap.
 The smallest order is Rs 5,000 or 0.5% of the amount, whichever is smaller, so small accounts still follow the weights.
@@ -24,7 +25,8 @@ from research import artifact as A, causal, panel as P, sim
 ROOT = Path(__file__).resolve().parents[1]
 DATA_END = date(2026, 9, 30)
 MIN_AMOUNT = Decimal(10000)
-LEVELS = tuple(A.LEVELS)
+MODELS = {"six": (P.GROWTH, A.SIGNAL_SIX, tuple(A.LEVELS_SIX)), "four": (P.ASSETS, A.SIGNAL, tuple(A.LEVELS))}     # assets, signal folder, levels
+LEVELS = MODELS["six"][2]
 
 
 @lru_cache(maxsize=1)
@@ -32,28 +34,29 @@ def rules() -> Rules:
     return Rules.load(ROOT / "rules")
 
 
-@lru_cache(maxsize=1)
-def full_panel() -> P.Panel:
-    return P.load_panel(end=DATA_END.isoformat())
+@lru_cache(maxsize=None)
+def full_panel(model: str = "six") -> P.Panel:
+    return P.load_panel(end=DATA_END.isoformat(), assets=MODELS[model][0])
 
 
 @lru_cache(maxsize=None)
-def _signal(level: str):
-    return A.load(level)
+def _signal(level: str, model: str = "six"):
+    return A.load(level, MODELS[model][1])
 
 
 @dataclass
 class ProductRun:
     level: str
     booked: R.Booked
+    names: tuple                # the ETFs and the liquid fund, in the order of the weights
     dates: list[str]            # the trading days of the account
     weights: np.ndarray         # the artifact's weights it followed
     strategy: list[str]         # the strategy the product held each day
     equity: list[float]         # the fast simulator's daily marks at the close (after tax paid), for the chart
     pretax: list[float]         # the same marks with the tax paid added back: the returns a projection resamples
     drawdown: list[float]
-    units: np.ndarray           # T x 5 units held after each day's fills (the fast simulator's), for the Fyers preview
-    prices: np.ndarray          # T x 5 closing prices (the fund: its total-return index), to value those units
+    units: np.ndarray           # T x (n + 1) units held after each day's fills (the fast simulator's), for the Fyers preview
+    prices: np.ndarray          # T x (n + 1) closing prices (the fund: its total-return index), to value those units
     sim_final: float
     gap: float                  # exact books (still holding) less the fast simulator's, the yearly fee of the year in progress allowed for
     growth_sold: float
@@ -61,9 +64,11 @@ class ProductRun:
     worst_fall: float
 
 
-def run(level: str, amount: Decimal, start: date, end: date, profile: TaxProfile, slippage: bool = True) -> ProductRun:
-    if level not in LEVELS:
-        raise KeyError(f"unknown risk level {level!r}; the levels are {LEVELS}")
+def run(level: str, amount: Decimal, start: date, end: date, profile: TaxProfile, slippage: bool = True, model: str = "six") -> ProductRun:
+    if model not in MODELS:
+        raise KeyError(f"unknown model {model!r}; the models are {tuple(MODELS)}")
+    if level not in MODELS[model][2]:
+        raise KeyError(f"unknown risk level {level!r}; the levels are {MODELS[model][2]}")
     if start < PRODUCT_START:
         raise ValueError(f"the model's history starts {PRODUCT_START.isoformat()} (its first yearly pick); choose a start on or after it")
     if end <= start:
@@ -72,8 +77,8 @@ def run(level: str, amount: Decimal, start: date, end: date, profile: TaxProfile
         raise ValueError(f"the data ends {DATA_END.isoformat()}")
     if amount < MIN_AMOUNT:
         raise ValueError(f"the model needs at least Rs {MIN_AMOUNT:,} to hold its mix of ETFs")
-    panel, rl = full_panel(), rules()
-    sig_dates, sig_w, sig_strategy = _signal(level)
+    panel, rl = full_panel(model), rules()
+    sig_dates, sig_w, sig_strategy = _signal(level, model)
     i0 = int(np.searchsorted(panel.dates, np.datetime64(start)))
     i1 = int(np.searchsorted(panel.dates, np.datetime64(end), side="right")) - 1
     if i1 - i0 < 2:
@@ -90,7 +95,7 @@ def run(level: str, amount: Decimal, start: date, end: date, profile: TaxProfile
     last_fee = float(amc_fee(rl, days[-1], days[0]).value)                     # the books charge the year in progress; the simulator does not
     years = (days[-1] - days[0]).days / 365.25
     grow = lambda v: (float(v) / float(amount)) ** (1 / years) - 1 if v > 0 else -1.0
-    return ProductRun(level, booked, [d.isoformat() for d in days], w, sig_strategy[s0:s0 + len(days)], [float(x) for x in r.equity],
+    return ProductRun(level, booked, R.names_of(window), [d.isoformat() for d in days], w, sig_strategy[s0:s0 + len(days)], [float(x) for x in r.equity],
                       [float(x) for x in r.equity + np.cumsum(r.tax_paid)], [float(x) for x in r.drawdown], r.units, np.column_stack([window.close, window.cash]),
                       float(r.equity[-1] - r.pending_tax), float(booked.held.value) - (float(r.equity[-1] - r.pending_tax) - last_fee),
                       grow(booked.sold.value), grow(booked.held.value), float(r.drawdown.max()))

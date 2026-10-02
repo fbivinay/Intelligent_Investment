@@ -1,6 +1,6 @@
 """One call for the web app: `calculate(params) -> dict`, plain JSON.
 
-Inputs: amount, start, end, level (risk level of the model), compare (alternatives to show), regime, other_income, slippage, end_convention (sell or hold), horizon
+Inputs: amount, start, end, model ("six" ETFs, the default, or "four", the frozen-test model), level (its risk level), compare (alternatives to show), regime, other_income, slippage, end_convention (sell or hold), horizon
 (projection years). Output: the model and each alternative with net, gross end value, charges, tax and "if still holding", each figure with the id of its trace;
 charges by kind and tax by financial year; daily values for the chart; projections; the model's trades and tax lines as CSV; stamps and notes. A bad input
 returns {"error": ...} only; an option that cannot run on these dates (the model before its first pick, a fund that did not exist yet) is a message beside the rest.
@@ -17,12 +17,17 @@ import numpy as np
 from calc import compare as CP, options as O, product as PR, project as PJ, replay as R
 from engine.tax import TaxProfile, fy_label
 from engine.trace import Node, flags
+from research.sim import classes
 
 DATA_START, DATA_END = date(2010, 4, 1), PR.DATA_END
 MAX_CHILDREN = 12
 MAX_DEPTH = 5
 SERIES_POINTS = 500
 RESEARCH_AMOUNT = Decimal(1000000)
+MODEL_NAMES = {"six": ", six ETFs", "four": ", four ETFs (frozen test)"}
+PLANS = {"six": "replay of the six-ETF model's signal", "four": "replay of the frozen model's signal"}
+SIGNALS = {"six": "six-ETF model (research/out/signal_growth): yearly picks out of sample, the Midcap 100 and Nasdaq 100 ETFs added with hindsight",
+           "four": "frozen design frozen-design-v1 (research/out/signal)"}
 NOTES = [
     "Past results, not a promise; not investment advice.",
     "The model follows the weights of one reference account that has the drawdown guard; your own fall can exceed the cap if you start on another day.",
@@ -93,9 +98,12 @@ def _parse(params: dict) -> dict:
         raise ValueError(f"the data ends {DATA_END.isoformat()}")
     if end <= start:
         raise ValueError("the end date must be after the start date")
+    model = params.get("model", "six")
+    if model not in PR.MODELS:
+        raise ValueError(f"the model must be one of {', '.join(PR.MODELS)}")
     level = params.get("level", "Balanced")
-    if level not in PR.LEVELS:
-        raise ValueError(f"the risk level must be one of {', '.join(PR.LEVELS)}")
+    if level not in PR.MODELS[model][2]:
+        raise ValueError(f"the risk level must be one of {', '.join(PR.MODELS[model][2])}")
     regime = params.get("regime", "new")
     if regime not in ("new", "old"):
         raise ValueError("the tax regime must be new or old")
@@ -114,7 +122,7 @@ def _parse(params: dict) -> dict:
     end_conv = params.get("end_convention", "sell")
     if end_conv not in ("sell", "hold"):
         raise ValueError("the end convention must be sell or hold")
-    return dict(amount=amount, start=start, end=end, level=level, profile=TaxProfile(regime, income), compare=list(compare), slippage=bool(params.get("slippage", True)),
+    return dict(amount=amount, start=start, end=end, model=model, level=level, profile=TaxProfile(regime, income), compare=list(compare), slippage=bool(params.get("slippage", True)),
                 headline="sold" if end_conv == "sell" else "held", horizon=horizon)
 
 
@@ -138,12 +146,12 @@ def calculate(params: dict) -> dict:
     check = {}
     pid = f"PRODUCT_{p['level']}"
     try:
-        run = PR.run(p["level"], p["amount"], p["start"], p["end"], p["profile"], p["slippage"])
+        run = PR.run(p["level"], p["amount"], p["start"], p["end"], p["profile"], p["slippage"], p["model"])
     except ValueError as e:
         messages.append({"id": pid, "text": str(e)})
     else:
         b = run.booked
-        results.append({"id": pid, "name": O.get(pid).name, "kind": "product", "plan": "replay of the frozen model's signal", "headline": p["headline"],
+        results.append({"id": pid, "name": O.get(pid).name + MODEL_NAMES[p["model"]], "kind": "product", "plan": PLANS[p["model"]], "headline": p["headline"],
                         **_figures(b.waterfall["sold"], b.waterfall["held"], traces),
                         "charges_by_kind": [{"label": R.KIND_LABELS.get(k, k), **_fig(n, traces, 3)} for k, n in b.charges_by_kind["sold"].items()],
                         "tax_by_fy": [{"fy": fy_label(fy), **_fig(n, traces, 6)} for fy, n in sorted(b.tax_by_fy.items())],
@@ -152,9 +160,10 @@ def calculate(params: dict) -> dict:
         series[pid] = _thin(run.dates, run.equity)
         csv = {"trades": R.csv_text(b.trades), "tax_lines": R.csv_text(b.tax_lines)}
         check["product_books_less_fast_simulator_rupees"] = round(run.gap, 2)
-        hist = PR.run(p["level"], RESEARCH_AMOUNT, O.PRODUCT_START, p["end"], p["profile"], p["slippage"])
-        w = run.weights[-1]
-        split = {"etf_equity": float(w[:3].sum()), "etf_gold": float(w[3]), "mf_debt": float(w[4])}
+        hist = PR.run(p["level"], RESEARCH_AMOUNT, O.PRODUCT_START, p["end"], p["profile"], p["slippage"], p["model"])
+        split = {}
+        for c, x in zip(classes(run.names[:-1]), run.weights[-1]):
+            split[c] = split.get(c, 0.0) + float(x)
         rets = np.diff(np.asarray(hist.pretax)) / np.asarray(hist.pretax[:-1])
         projections[pid] = PJ.project(rets, b.sold.value if p["headline"] == "sold" else b.held.value, split, p["horizon"], p["profile"], _seed(pid, p["horizon"]))
     for oid in p["compare"]:
@@ -174,9 +183,9 @@ def calculate(params: dict) -> dict:
         closes = np.array([float(b.close) for b in bars if b.on <= p["end"]])
         projections[oid] = PJ.project(closes[1:] / closes[:-1] - 1, r.sold.net.value if p["headline"] == "sold" else r.held.net.value, {o.instrument_class: 1.0},
                                       p["horizon"], p["profile"], _seed(oid, p["horizon"]))
-    return {"inputs": {**{k: v for k, v in params.items()}, "start": p["start"].isoformat(), "end": p["end"].isoformat(), "level": p["level"]},
+    return {"inputs": {**{k: v for k, v in params.items()}, "start": p["start"].isoformat(), "end": p["end"].isoformat(), "level": p["level"], "model": p["model"]},
             "stamps": {"data_as_of": DATA_END.isoformat(), "rules_verified_on": max(r.ref.verified_on for r in PR.rules().all_rows()).isoformat(),
-                       "signal": "frozen design frozen-design-v1 (research/out/signal)"},
+                       "signal": SIGNALS[p["model"]]},
             "results": results, "messages": messages, "traces": traces.trees, "series": series, "projections": projections, "csv": csv, "check": check, "notes": NOTES}
 
 
@@ -185,7 +194,7 @@ def preview(params: dict) -> dict:
     from calc import fyers as F
     try:
         p = _parse({**params, "compare": []})
-        run = PR.run(p["level"], p["amount"], p["start"], p["end"], p["profile"], p["slippage"])
+        run = PR.run(p["level"], p["amount"], p["start"], p["end"], p["profile"], p["slippage"], p["model"])
         days = F.order_days(run)
         on = date.fromisoformat(str(params.get("date", days[0] if days else run.dates[1])))
         return {"order_days": days, "preview": F.preview(run, on)}

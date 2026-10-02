@@ -32,7 +32,7 @@ def test_the_product_cannot_start_before_its_first_april_pick_and_the_dates_must
 
 def test_a_run_follows_the_artifacts_weights_from_the_start_day_and_its_books_balance(balanced):
     r = balanced
-    dates, w, strategy = A.load("Balanced")
+    dates, w, strategy = A.load("Balanced", A.SIGNAL_SIX)
     i = int(np.searchsorted(dates, np.datetime64(r.dates[0])))
     assert r.dates[0] == "2015-06-01" and np.allclose(r.weights, w[i:i + len(r.dates)]) and r.strategy[0] == strategy[i]
     assert_balanced(r.booked.sold)
@@ -65,3 +65,14 @@ def test_the_same_inputs_give_the_same_books():
 def test_the_pretax_marks_add_back_every_rupee_of_tax_paid(balanced):
     r = balanced
     assert r.pretax[-1] >= r.equity[-1] and r.pretax[0] == r.equity[0] and len(r.pretax) == len(r.equity)
+
+
+def test_the_six_etf_growth_level_holds_the_six_etfs_in_equal_parts_with_no_cash_and_the_four_etf_model_is_still_there():
+    from calc import product as PR
+    from decimal import Decimal
+    from datetime import date
+    from engine.tax import TaxProfile
+    g = PR.run("Growth", Decimal(1000000), date(2014, 4, 1), date(2015, 4, 1), TaxProfile("new", Decimal(1500000)))
+    assert g.names[-1] == "LIQUID_FUND" and len(g.names) == 7 and abs(g.weights[0][:6] - 1 / 6).max() < 0.05 and g.weights[:, 6].max() < 1e-9
+    f = PR.run("Balanced", Decimal(1000000), date(2014, 4, 1), date(2015, 4, 1), TaxProfile("new", Decimal(1500000)), model="four")
+    assert len(f.names) == 5

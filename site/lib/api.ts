@@ -17,6 +17,8 @@ export const OPTIONS: { id: string; name: string }[] = [
   { id: "JUNIORBEES", name: "Nifty Next 50 ETF" },
   { id: "BANKBEES", name: "Nifty Bank ETF" },
   { id: "GOLDBEES", name: "Gold ETF" },
+  { id: "MOM100", name: "Midcap 100 ETF" },
+  { id: "MON100", name: "Nasdaq 100 ETF" },
   { id: "NIFTY50_INDEX_FUND", name: "Nifty 50 index fund" },
   { id: "NEXT50_INDEX_FUND", name: "Next 50 index fund" },
   { id: "ARBITRAGE_FUND", name: "Arbitrage fund" },

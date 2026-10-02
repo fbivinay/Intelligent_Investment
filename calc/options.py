@@ -1,4 +1,4 @@
-"""What the calculator can show: the product at each risk level and eight alternatives, with their price or NAV history from the committed data files.
+"""What the calculator can show: the product at each risk level and ten alternatives, with their price or NAV history from the committed data files.
 
 ETFs: the exchange close and high, split-adjusted (units on today's unit size), and their dividends. Funds: the NAV on today's unit size (data/nav_units.csv applied),
 the direct plan from its first day in 2013, the regular plan for an earlier start (a holding cannot switch plans without a sale).
@@ -35,10 +35,14 @@ OPTIONS = [
     Option("PRODUCT_Conservative", "Model: Conservative (10% cap)", "product", ""),
     Option("PRODUCT_Balanced", "Model: Balanced (20% cap)", "product", ""),
     Option("PRODUCT_Aggressive", "Model: Aggressive (30% cap)", "product", ""),
+    Option("PRODUCT_Growth", "Model: Growth (six ETFs in equal parts, no fall guard)", "product", ""),
     Option("NIFTYBEES", "Nifty 50 ETF (Nifty BeES)", "etf", "etf_equity", symbol="NIFTYBEES"),
     Option("JUNIORBEES", "Nifty Next 50 ETF (Junior BeES)", "etf", "etf_equity", symbol="JUNIORBEES"),
     Option("BANKBEES", "Nifty Bank ETF (Bank BeES)", "etf", "etf_equity", symbol="BANKBEES"),
     Option("GOLDBEES", "Gold ETF (Gold BeES)", "etf", "etf_gold", symbol="GOLDBEES"),
+    Option("MOM100", "Nifty Midcap 100 ETF (Motilal Oswal)", "etf", "etf_equity", symbol="MOM100", note="before 2016 its NAV stands in for the price"),
+    Option("MON100", "Nasdaq 100 ETF (Motilal Oswal)", "etf", "etf_gold", symbol="MON100",
+           note="taxed as a non-equity ETF, like gold; traded above its NAV since 2022; before 2016 its NAV stands in for the price"),
     Option("NIFTY50_INDEX_FUND", "HDFC Nifty 50 index fund", "fund", "mf_equity", regular="101525", direct="119063", direct_from=date(2013, 1, 1)),
     Option("NEXT50_INDEX_FUND", "ICICI Prudential Nifty Next 50 index fund", "fund", "mf_equity", regular="112957", direct="120684", direct_from=date(2013, 1, 2)),
     Option("ARBITRAGE_FUND", "SBI Arbitrage fund", "fund", "mf_equity", regular="104457", direct="119574", direct_from=date(2013, 1, 14),

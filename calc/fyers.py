@@ -16,7 +16,6 @@ import numpy as np
 
 from calc.product import ProductRun
 
-ASSETS = ("NIFTYBEES", "JUNIORBEES", "BANKBEES", "GOLDBEES", "LIQUID_FUND")
 MARKET, CNC = 2, "CNC"
 SIDE = {"buy": 1, "sell": -1}
 LABEL = "Preview only: no account, no keys, nothing is sent to Fyers. A past day, replayed."
@@ -50,8 +49,8 @@ def preview(run: ProductRun, on: date) -> dict:
         orders.append({"trade": t, "payload": p, "how": how, "fees": t["charges"], "depository": t["dp"]})
     before = run.units[i - 1]
     value = before * run.prices[i - 1]
-    return {"label": LABEL, "decided_on": run.dates[i - 1], "fill_day": day, "targets": {a: float(w) for a, w in zip(ASSETS, target)},
-            "holdings_before": {a: float(u) for a, u in zip(ASSETS, before)}, "values_before": {a: float(v) for a, v in zip(ASSETS, value)}, "orders": orders,
+    return {"label": LABEL, "decided_on": run.dates[i - 1], "fill_day": day, "targets": {a: float(w) for a, w in zip(run.names, target)},
+            "holdings_before": {a: float(u) for a, u in zip(run.names, before)}, "values_before": {a: float(v) for a, v in zip(run.names, value)}, "orders": orders,
             "total_fees": float(sum(float(o["fees"]) for o in orders)), "total_depository": float(sum(float(o["depository"]) for o in orders)),
             "timeline": [f"After the close of {run.dates[i - 1]}: the day's prices are in; the weights for the next session are worked out",
                          "The same evening: the ETF orders are placed as after-market orders; the fund leg goes to the fund house",

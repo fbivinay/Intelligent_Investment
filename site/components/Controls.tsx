@@ -7,6 +7,7 @@ const LEVELS: { id: Inputs["level"]; cap: string }[] = [
   { id: "Conservative", cap: "falls up to about 10%" },
   { id: "Balanced", cap: "about 20%" },
   { id: "Aggressive", cap: "about 30%" },
+  { id: "Growth", cap: "no fall guard: fell up to about 30%" },
 ];
 
 export function Controls({ v, set }: { v: Inputs; set: (p: Partial<Inputs>) => void }) {
