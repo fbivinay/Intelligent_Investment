@@ -63,7 +63,7 @@ def book(rules: Rules, panel: Panel, log, amount: Decimal, profile: TaxProfile) 
     days = [date.fromisoformat(str(d)) for d in panel.dates]
     NAMES, CLS, cash = names_of(panel), classes(panel.assets), len(panel.assets)
     gf = [i for i, d in enumerate(days) if d <= GRANDFATHER]
-    fmv_unit = {a: _dec(panel.high[gf[-1], a]) for a in range(cash) if CLS[a] == "etf_equity"} if gf else {}
+    fmv_unit = {a: _dec(panel.high[gf[-1], a]) for a in range(cash) if CLS[a] in ("etf_equity", "eq_share")} if gf else {}
     inv, kinds, buys, sells = Inventory(), {}, [], []
     events: dict[int, list[CGEvent]] = {}
     trades, lines, dp_seen = [], [], set()

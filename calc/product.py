@@ -16,16 +16,16 @@ from pathlib import Path
 import numpy as np
 
 from calc import replay as R
-from calc.options import PRODUCT_START
+from calc.options import MAX_START, PRODUCT_START
 from engine.charges import amc_fee
 from engine.rules import Rules
 from engine.tax import TaxProfile
-from research import artifact as A, causal, panel as P, sim
+from research import artifact as A, causal, maxmodel as X, panel as P, sim
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA_END = date(2026, 9, 30)
 MIN_AMOUNT = Decimal(10000)
-MODELS = {"six": (P.GROWTH, A.SIGNAL_SIX, tuple(A.LEVELS_SIX)), "four": (P.ASSETS, A.SIGNAL, tuple(A.LEVELS))}     # assets, signal folder, levels
+MODELS = {"six": (P.GROWTH, A.SIGNAL_SIX, (*A.LEVELS_SIX, "Max")), "four": (P.ASSETS, A.SIGNAL, tuple(A.LEVELS))}     # assets, signal folder, levels
 LEVELS = MODELS["six"][2]
 
 
@@ -34,14 +34,21 @@ def rules() -> Rules:
     return Rules.load(ROOT / "rules")
 
 
+def start_of(level: str) -> date:
+    """The level's first day: Max holds stocks, whose data starts later."""
+    return MAX_START if level == "Max" else PRODUCT_START
+
+
 @lru_cache(maxsize=None)
-def full_panel(model: str = "six") -> P.Panel:
+def full_panel(model: str = "six", level: str = "") -> P.Panel:
+    if level == "Max":
+        return X.load_panel()                      # its own panel: the stocks it ever held, the gold and Nasdaq ETFs
     return P.load_panel(end=DATA_END.isoformat(), assets=MODELS[model][0])
 
 
 @lru_cache(maxsize=None)
 def _signal(level: str, model: str = "six"):
-    return A.load(level, MODELS[model][1])
+    return A.load(level, X.OUT if level == "Max" else MODELS[model][1])
 
 
 @dataclass
@@ -69,15 +76,15 @@ def run(level: str, amount: Decimal, start: date, end: date, profile: TaxProfile
         raise KeyError(f"unknown model {model!r}; the models are {tuple(MODELS)}")
     if level not in MODELS[model][2]:
         raise KeyError(f"unknown risk level {level!r}; the levels are {MODELS[model][2]}")
-    if start < PRODUCT_START:
-        raise ValueError(f"the model's history starts {PRODUCT_START.isoformat()} (its first yearly pick); choose a start on or after it")
+    if start < start_of(level):
+        raise ValueError(f"the {level} level's history starts {start_of(level).isoformat()} (its first pick); choose a start on or after it")
     if end <= start:
         raise ValueError("the end date must be after the start date")
     if end > DATA_END:
         raise ValueError(f"the data ends {DATA_END.isoformat()}")
     if amount < MIN_AMOUNT:
         raise ValueError(f"the model needs at least Rs {MIN_AMOUNT:,} to hold its mix of ETFs")
-    panel, rl = full_panel(model), rules()
+    panel, rl = full_panel(model, "Max" if level == "Max" else ""), rules()
     sig_dates, sig_w, sig_strategy = _signal(level, model)
     i0 = int(np.searchsorted(panel.dates, np.datetime64(start)))
     i1 = int(np.searchsorted(panel.dates, np.datetime64(end), side="right")) - 1
@@ -88,7 +95,8 @@ def run(level: str, amount: Decimal, start: date, end: date, profile: TaxProfile
     if sig_dates[s0] != panel.dates[i0]:
         raise ValueError("the signal and the price data do not share a calendar")
     w = sig_w[s0:s0 + len(window.dates)]
-    cfg = sim.SimConfig(capital=float(amount), governor=False, harvest=True, slippage=slippage, profile=profile, min_trade=min(5000.0, float(amount) * 0.005))
+    cfg = sim.SimConfig(capital=float(amount), governor=False, harvest=True, slippage=slippage, profile=profile, min_trade=min(5000.0, float(amount) * 0.005),
+                        max_orders=200_000)
     r = sim.simulate(window, w, rl, cfg)
     booked = R.book(rl, window, r.order_log, amount, profile)
     days = [date.fromisoformat(str(d)) for d in window.dates]
