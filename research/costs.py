@@ -25,7 +25,7 @@ CHARGE_RULES = ("fyers.brokerage", "charges.stt", "charges.exchange_txn", "charg
                 "fyers.dp", "charges.dp_depository")
 
 # Slippage (assumed, labelled): a half-spread per instrument plus an impact that grows with the square root of the order's share of a normal day's traded value.
-HALF_SPREAD = {"NIFTYBEES": 0.0003, "JUNIORBEES": 0.0008, "BANKBEES": 0.0006, "GOLDBEES": 0.0006, "CASH": 0.0}
+HALF_SPREAD = {"NIFTYBEES": 0.0003, "JUNIORBEES": 0.0008, "BANKBEES": 0.0006, "GOLDBEES": 0.0006, "MOM100": 0.0015, "MON100": 0.0015, "CASH": 0.0}   # the two thinner ETFs: wider, assumed
 IMPACT = 0.005
 MAX_SLIPPAGE = 0.03
 

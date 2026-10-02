@@ -1,7 +1,8 @@
 """Daily NAV of the mutual-fund schemes we use, from mfapi.in (a mirror of AMFI's NAV file), checked against AMFI's own report on sample days.
 
 The ETFs are here to confirm splits and to stand in before 2016-06 (AMFI has no NAV for them from 2011-08-18 to 2016-11-06, because the ETF schemes
-were re-registered under new codes). The funds are what an ordinary investor could hold instead: Nifty 50 index, Nifty Next 50 index, gold, arbitrage
+were re-registered under new codes). The Midcap 100 and Nasdaq 100 ETFs have one code all along; their NAV stands in for the exchange price before 2016,
+where no exchange file of ours has them (data/nse_build.py). The funds are what an ordinary investor could hold instead: Nifty 50 index, Nifty Next 50 index, gold, arbitrage
 and liquid. NAVs stay exactly as published (text), unadjusted.
 Run:  python -m data.amfi_nav sync | build | check [YYYY-MM-DD ...]
 """
@@ -38,6 +39,7 @@ SCHEMES = {
     "113345": "Nippon India Arbitrage fund, regular", "118585": "Nippon India Arbitrage fund, direct",
     "100851": "Nippon India Liquid fund, regular", "118701": "Nippon India Liquid fund, direct",
     "100835": "Kotak Liquid fund, regular", "119766": "Kotak Liquid fund, direct",
+    "114456": "Motilal Oswal Midcap 100 ETF (MOM100, was M100)", "114984": "Motilal Oswal Nasdaq 100 ETF (MON100, was N100)",
 }
 # Days the report is compared on: spread over the history, plus the Nifty BeES split day (2019-12-19) and both neighbours.
 SAMPLE_DAYS = [date(2006, 9, 15), date(2008, 3, 14), date(2010, 12, 15), date(2011, 8, 18), date(2013, 6, 14), date(2016, 11, 7), date(2017, 6, 15),

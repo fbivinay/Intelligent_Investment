@@ -4,6 +4,7 @@ code,date,factor,evidence
 107693,2021-12-20,0.02,"Quantum Gold ETF: NAV 2107.2943 on 2021-12-17 to 41.8417 on 2021-12-20 (ratio 0.0199: a 1 to 50 split plus a 0.7% gold move). Cause not verified."
 111954,2022-01-10,0.01,"SBI Gold ETF: NAV 4227.2573 on 2022-01-07 to 42.3783 on 2022-01-10 (ratio 0.01003: a 1 to 100 split plus a normal day). Cause not verified."
 113049,2021-02-22,0.01,"HDFC Gold ETF: NAV 4120.0604 on 2021-02-19 to 41.5242 on 2021-02-22 (ratio 0.01008: a 1 to 100 split plus a normal day). Cause not verified."
+114984,2021-06-21,0.1,"Motilal Oswal Nasdaq 100 ETF: NAV 1025.4998 on 2021-06-18 to 101.5224 on 2021-06-21 (ratio 0.099). The exchange price split 1 to 10 on 2021-06-17 (corporate_actions.csv); the NAV series switches two trading days later."
 119766,2013-01-20,100,"Kotak Liquid direct: NAV 23.3980 on 2013-01-18 to 2340.8814 on 2013-01-20 (ratio 100.05: a times-100 unit change plus a normal day of 0.05%). Cause not verified."
 140084,2019-12-23,0.1,"Nifty BeES (new code): NAV 1300.3137 on 2019-12-20 to 129.9356 on 2019-12-23 (ratio 0.0999). The exchange price split 1 to 10 on 2019-12-19 (corporate_actions.csv); the NAV series switches two trading days later."
 140087,2019-12-23,0.1,"Bank BeES (new code): NAV 3305.2296 on 2019-12-20 to 330.0579 on 2019-12-23 (ratio 0.0999). The exchange price split 1 to 10 on 2019-12-19 (corporate_actions.csv); the NAV series switches two trading days later."

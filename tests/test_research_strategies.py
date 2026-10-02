@@ -72,7 +72,7 @@ def test_every_strategy_passes_the_causality_harness(name, make):
 
 @pytest.mark.parametrize("make", [
     lambda: st.s1_static(MIX, rebalance="weekly"), lambda: st.s2_trend(50, "median"), lambda: st.s3_momentum(63, 2, "week"),
-    lambda: st.s3_momentum(63, 0, "month"), lambda: st.s3_momentum(63, 5, "month"), lambda: st.s4_voltarget(0.0, 20),
+    lambda: st.s3_momentum(63, 0, "month"), lambda: st.s3_momentum(63, 5, "month")(panel_from(walk(30))), lambda: st.s4_voltarget(0.0, 20),
     lambda: st.s5_marketdd(0.20, 0.05), lambda: st.s5_marketdd(0.10, 0.10), lambda: st.s5_marketdd(0.10, 1.5), lambda: st.s5_marketdd(-0.10, 0.20)])
 def test_nonsense_parameters_are_refused_when_the_strategy_is_made(make):
     with pytest.raises(ValueError):
@@ -362,3 +362,16 @@ def test_every_ensemble_passes_the_causality_harness():
     p = panel_from(walk(T=450, seed=14))
     for e in st.ensembles():
         causal.assert_causal(e.fn, p, n_cuts=4, seed=3)
+
+
+def test_on_a_wider_panel_every_strategy_gives_one_weight_per_etf_and_the_cash_leg():
+    close = walk(400, assets=6)
+    T = len(close)
+    dates = np.arange(np.datetime64("2012-01-02"), np.datetime64("2012-01-02") + T, dtype="datetime64[D]")
+    nan = np.full(T, np.nan)
+    p = Panel(dates=dates, assets=["NIFTYBEES", "JUNIORBEES", "BANKBEES", "GOLDBEES", "MOM100", "MON100"], open=close, high=close * 1.01, low=close * 0.99, close=close,
+              value=np.full((T, 6), 1e8), vwap=close, cash=np.cumprod(np.full(T, 1.0002)), nifty=close[:, 0], vix=nan, pe=nan, pb=nan)
+    for t in st.trials(s1_steps=2, n=6)[:3] + [t for t in st.trials(s1_steps=2, n=6) if t.family != "S1"] + st.ensembles(n=6, s1_steps=2):
+        w = t.fn(p)
+        assert w.shape == (T, 7) and np.allclose(w.sum(axis=1), 1) and (w >= -1e-12).all(), t.id
+    assert st.s3_momentum(63, 5, "month")(p).shape == (T, 7)

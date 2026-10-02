@@ -1,4 +1,4 @@
-"""Baseline strategies S0 to S5. Each factory returns `fn(panel) -> weights`: T x 5 target weights over [NIFTYBEES, JUNIORBEES, BANKBEES, GOLDBEES, cash leg].
+"""Baseline strategies S0 to S5. Each factory returns `fn(panel) -> weights`: T x (n + 1) target weights over the panel's n ETFs (NIFTYBEES first) and the cash leg.
 
 Row t is what is wanted after the close of day t (the simulator fills it on day t + 1). Weights are long only and sum to 1; what is not in an ETF is in the cash
 leg. Row t uses only data up to day t; `causal.assert_causal` proves it in the tests.
@@ -30,7 +30,7 @@ def _vol(close: np.ndarray, n: int) -> np.ndarray:
 
 
 def _with_cash(risky: np.ndarray) -> np.ndarray:
-    """T x 5 weights from the T x 4 weights on the ETFs: what is not in them is in the cash leg."""
+    """T x (n + 1) weights from the T x n weights on the ETFs: what is not in them is in the cash leg."""
     return np.column_stack([risky, 1.0 - risky.sum(axis=1)])
 
 
@@ -60,25 +60,27 @@ def s0_plain(cap: float, min_days: int = 252) -> Callable:
         worst = np.maximum.accumulate(1 - path / np.maximum.accumulate(path, axis=1), axis=1)
         share = np.where(worst <= cap + 1e-12, SHARES[:, None], 0.0).max(axis=0)
         share[:min_days - 1] = 0.0
-        return _with_cash(np.column_stack([share, np.zeros((len(share), 3))]))
+        return _with_cash(np.column_stack([share, np.zeros((len(share), p.close.shape[1] - 1))]))
     return fn
 
 
-def s1_grid(steps: int) -> list[list[float]]:
-    """Every mix of the four ETFs and cash in steps of 1/steps that sums to 1."""
-    return [[k / steps for k in (*c, steps - sum(c))] for c in product(range(steps + 1), repeat=4) if sum(c) <= steps]
+def s1_grid(steps: int, n: int = 4) -> list[list[float]]:
+    """Every mix of the n ETFs and cash in steps of 1/steps that sums to 1."""
+    return [[k / steps for k in (*c, steps - sum(c))] for c in product(range(steps + 1), repeat=n) if sum(c) <= steps]
 
 
 def s1_static(weights, rebalance: str = "band") -> Callable:
     """A fixed mix. `rebalance`: "band" holds the target every day (the simulator trades back when it is off by its band), "year" goes back to it on the first
     trading day of each financial year, "never" buys it on day 0 and lets it drift."""
     w = np.asarray(weights, dtype=float)
-    if w.shape != (5,) or (w < 0).any() or abs(w.sum() - 1) > 1e-9:
-        raise ValueError("a mix is five non-negative weights that sum to 1")
+    if w.ndim != 1 or len(w) < 2 or (w < 0).any() or abs(w.sum() - 1) > 1e-9:
+        raise ValueError("a mix is non-negative weights, one per ETF and the cash leg last, that sum to 1")
     if rebalance not in ("band", "year", "never"):
         raise ValueError(f"rebalance must be band, year or never, not {rebalance!r}")
 
     def fn(p):
+        if len(w) != p.close.shape[1] + 1:
+            raise ValueError(f"a mix for this panel has {p.close.shape[1] + 1} weights, not {len(w)}")
         target = np.tile(w, (len(p.dates), 1))
         if rebalance == "band":
             return target
@@ -109,19 +111,22 @@ def s3_momentum(lookback: int, k: int, every: str = "month") -> Callable:
     skipping any whose return is not above zero (their slots stay in cash); hold until the next rebalance day."""
     if every not in MONTHS:
         raise ValueError(f"every must be month or quarter, not {every!r}")
-    if not 1 <= k <= 4:
-        raise ValueError("k is between 1 and 4")
+    if k < 1:
+        raise ValueError("k is at least 1")
 
     def fn(p):
         past = p.close / np.vstack([np.full((lookback, p.close.shape[1]), np.nan), p.close[:-lookback]])[:len(p.close)] - 1   # NaN until `lookback` days exist
         reset = _first_days(p.dates, MONTHS[every])
-        target = np.zeros((len(p.dates), 5))
-        target[:, 4] = 1.0
+        n = p.close.shape[1]
+        if k > n:
+            raise ValueError(f"k is at most the number of ETFs ({n})")
+        target = np.zeros((len(p.dates), n + 1))
+        target[:, n] = 1.0
         for t in np.flatnonzero(reset):
             r = np.where(np.isfinite(past[t]), past[t], -np.inf)
             chosen = [i for i in np.argsort(-r, kind="stable")[:k] if r[i] > 0]
             target[t, chosen] = 1.0 / k
-            target[t, 4] = 1.0 - len(chosen) / k
+            target[t, n] = 1.0 - len(chosen) / k
         return _drifting(p, target, reset)
     return fn
 
@@ -135,7 +140,7 @@ def s4_voltarget(target: float, lookback: int) -> Callable:
     def fn(p):
         vol = _vol(p.close[:, :1], lookback)[:, 0]
         share = np.where(np.isfinite(vol), np.minimum(1.0, target / np.maximum(vol, MIN_VOL)), 0.0)
-        return _with_cash(np.column_stack([share, np.zeros((len(share), 3))]))
+        return _with_cash(np.column_stack([share, np.zeros((len(share), p.close.shape[1] - 1))]))
     return fn
 
 
@@ -149,7 +154,7 @@ def s5_marketdd(start: float, end: float) -> Callable:
         close = pd.Series(p.close[:, 0])
         dd = (1 - close / close.rolling(252, min_periods=1).max()).to_numpy()
         share = np.clip((end - dd) / (end - start), 0.0, 1.0)
-        return _with_cash(np.column_stack([share, np.zeros((len(share), 3))]))
+        return _with_cash(np.column_stack([share, np.zeros((len(share), p.close.shape[1] - 1))]))
     return fn
 
 
@@ -168,7 +173,7 @@ def _fmt(v) -> str:
     return "/".join(f"{x:g}" for x in v) if isinstance(v, (list, tuple)) else (f"{v:g}" if isinstance(v, float) else str(v))
 
 
-def trials(s1_steps: int = 10) -> list[Trial]:
+def trials(s1_steps: int = 10, n: int = 4) -> list[Trial]:
     """The committed list, every parameter set of S0 to S5 (spec section 3). Each one is a trial for the ledger and the deflated Sharpe ratio."""
     out: list[Trial] = []
 
@@ -178,7 +183,7 @@ def trials(s1_steps: int = 10) -> list[Trial]:
 
     for cap in RISK_CAPS:
         add("S0", s0_plain, {"cap": cap}, cap=cap)
-    for w, rebalance in product(s1_grid(s1_steps), ("year", "never")):
+    for w, rebalance in product(s1_grid(s1_steps, n), ("year", "never")):
         add("S1", s1_static, {"weights": w, "rebalance": rebalance})
     for (length, weighting), band in product(product((50, 100, 200), ("equal", "invvol")), (0.01, 0.05)):
         add("S2", s2_trend, {"length": length, "weighting": weighting}, band)
@@ -191,11 +196,12 @@ def trials(s1_steps: int = 10) -> list[Trial]:
     return out
 
 
-def ensembles() -> list[Trial]:
+def ensembles(n: int = 4, s1_steps: int = 10) -> list[Trial]:
     """One candidate per family with no parameter left to choose. E1: the equal-weight mix of the four ETFs and cash, rebalanced yearly (the 1/N portfolio, the average of the
     symmetric S1 grid). E2 to E5: the average of the weights of every committed parameter set of S2 to S5 (those with the 5% simulator band where a family has both bands)."""
-    every = trials()
-    out = [Trial("E1|equal-weight,rebalance=year|band=0.01", "E1", {"weights": [0.2] * 5, "rebalance": "year"}, s1_static([0.2] * 5, "year"))]
+    every = trials(s1_steps, n)
+    eq = [1.0 / (n + 1)] * (n + 1)
+    out = [Trial("E1|equal-weight,rebalance=year|band=0.01", "E1", {"weights": eq, "rebalance": "year"}, s1_static(eq, "year"))]
     for k, src in enumerate(("S2", "S3", "S4", "S5"), start=2):
         band = 0.01 if src == "S3" else 0.05
         members = [t.fn for t in every if t.family == src and t.band == band]

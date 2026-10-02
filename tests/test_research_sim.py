@@ -435,3 +435,23 @@ def test_selling_the_whole_fund_position_after_pieces_were_sold_across_lots_does
     marks = np.column_stack([p.close, p.cash])
     assert r.units[-1, 4] == 0 and r.units[-1, 0] > 0
     assert np.allclose(r.equity, (r.units * marks).sum(axis=1) + r.cash, rtol=0, atol=1e-6)
+
+
+def test_a_wider_panel_trades_every_etf_and_taxes_the_nasdaq_etf_as_a_non_equity_etf():
+    days = weekdays(date(2019, 4, 1), 300)
+    T = len(days)
+    p = np.linspace(100, 160, T)[:, None] * np.ones((1, 6))
+    nan = np.full(T, np.nan)
+    wide = Panel(dates=np.array(days, dtype="datetime64[D]"), assets=["NIFTYBEES", "JUNIORBEES", "BANKBEES", "GOLDBEES", "MOM100", "MON100"], open=p, high=p * 1.01,
+                 low=p * 0.99, close=p, value=np.full((T, 6), 1e9), vwap=p, cash=np.ones(T), nifty=np.full(T, 5000.0), vix=nan, pe=nan, pb=nan)
+
+    def held(a):                                      # all in ETF a, then all sold on day 200 (short-term), the year's tax taken
+        w = np.zeros((T, 7))
+        w[:, a] = 1.0
+        w[200:, a], w[200:, 6] = 0.0, 1.0
+        return sim.simulate(wide, w, RULES, sim.SimConfig(**CFG, profile=PROFILE))
+    mid, nas = held(4), held(5)
+    assert mid.units[150, 4] > 0 and nas.units[150, 5] > 0 and mid.units[250, 4] == 0 and nas.units[250, 5] == 0
+    assert sim.classes(wide.assets) == ("etf_equity",) * 3 + ("etf_gold", "etf_equity", "etf_gold", "mf_debt")
+    # the same gain: 15% short-term on the equity ETF in FY 2019-20, the slab rate on the non-equity one
+    assert mid.tax_by_fy[2019] != nas.tax_by_fy[2019] and mid.tax_by_fy[2019] > 0 and nas.tax_by_fy[2019] > 0

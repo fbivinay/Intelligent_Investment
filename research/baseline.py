@@ -23,6 +23,14 @@ FIRST_PICK = np.datetime64("2013-04-01")           # the walk-forward selector's
 RISKS = dict(zip(("Conservative", "Balanced", "Aggressive"), st.RISK_CAPS))
 FAMILIES = ("S0", "S1", "S2", "S3", "S4", "S5", "S6")
 REFERENCE = {"Nifty BeES": [1, 0, 0, 0, 0], "Junior BeES": [0, 1, 0, 0, 0], "Bank BeES": [0, 0, 1, 0, 0], "Gold BeES": [0, 0, 0, 1, 0], "Liquid fund": [0, 0, 0, 0, 1]}
+HOLDS = {"Nifty BeES": "NIFTYBEES", "Junior BeES": "JUNIORBEES", "Bank BeES": "BANKBEES", "Gold BeES": "GOLDBEES", "Midcap 100 ETF": "MOM100",
+         "Nasdaq 100 ETF": "MON100", "Liquid fund": None}       # the reference investments by name, and the ETF each holds (None: the cash leg)
+
+
+def hold_mix(name: str, assets: list[str]) -> list[float]:
+    """The mix that holds one reference investment alone, over a panel's ETFs and the cash leg."""
+    sym = HOLDS[name]
+    return [1.0 if a == sym else 0.0 for a in assets] + [1.0 if sym is None else 0.0]
 COLUMNS = ["id", "family", "params", "risk", "cap", "band", "start", "end", "years", "orders", "final", "cagr", "cagr_liquidated", "max_dd", "cagr_2013", "max_dd_2013",
            "sharpe", "turnover", "charges", "slippage", "tax", "liquidation_tax"]
 

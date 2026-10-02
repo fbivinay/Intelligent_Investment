@@ -47,7 +47,7 @@ def read(path):
 def test_build_writes_one_sorted_csv_per_kind_from_the_raw_files_that_are_listed(tmp_path):
     root = make_root(tmp_path)
     counts = nb.build(root, etfs={"NIFTYBEES", "GOLDBEES"}, futures={"NIFTY"}, indices={"Nifty 50"})
-    assert counts == {"cash": 3, "fo": 1, "index": 1, "index_month_first": 0, "cash_web": 0, "fo_web": 0, "index_web": 0}
+    assert counts == {"cash": 3, "fo": 1, "index": 1, "index_month_first": 0, "cash_web": 0, "fo_web": 0, "index_web": 0, "cash_nav": 0}
     etf = read(root / "processed" / "nse_etf_daily.csv")
     assert [(r["date"], r["symbol"], r["close"]) for r in etf] == [("2016-06-01", "GOLDBEES", "2505"), ("2016-06-01", "NIFTYBEES", "828.85"),
                                                                     ("2016-06-02", "NIFTYBEES", "834.5")]
@@ -137,7 +137,7 @@ def test_build_adds_the_website_file_for_the_years_before_the_archive_and_marks_
     root = make_root(tmp_path)
     web_file(root, *web_items())
     counts = nb.build(root, etfs={"NIFTYBEES", "GOLDBEES"}, futures={"NIFTY"}, indices={"Nifty 50"})
-    assert counts == {"cash": 4, "fo": 2, "index": 2, "index_month_first": 0, "cash_web": 1, "fo_web": 1, "index_web": 1}
+    assert counts == {"cash": 4, "fo": 2, "index": 2, "index_month_first": 0, "cash_web": 1, "fo_web": 1, "index_web": 1, "cash_nav": 0}
     etf = read(root / "processed" / "nse_etf_daily.csv")
     assert [(r["date"], r["symbol"], r["source"]) for r in etf] == [("2010-06-30", "NIFTYBEES", "web"), ("2016-06-01", "GOLDBEES", "archive"),
                                                                      ("2016-06-01", "NIFTYBEES", "archive"), ("2016-06-02", "NIFTYBEES", "archive")]
@@ -171,3 +171,31 @@ def test_website_rows_for_an_instrument_outside_the_build_universe_are_left_out(
     web_file(root, *web_items())
     counts = nb.build(root, etfs={"GOLDBEES"}, futures={"BANKNIFTY"}, indices={"Nifty Bank"})
     assert (counts["cash_web"], counts["fo_web"], counts["index_web"]) == (0, 0, 0)
+
+
+def test_an_etf_listed_under_its_old_ticker_is_read_under_todays_ticker(tmp_path):
+    put(tmp_path, "cash", date(2016, 6, 1), zipped([CASH_HEAD, "N100,EQ,330,333,329,331.5,331,330,1000,331500,01-JUN-2016,40,INF247L01031,"]))
+    put(tmp_path, "cash", date(2021, 6, 16), zipped([CASH_HEAD, "MON100,EQ,1020,1022,1010,1015.62,1015,1021.86,37395,37922703.21,16-JUN-2021,900,INF247L01031,"]))
+    nb.build(tmp_path, {"MON100"}, {"NIFTY"}, {"Nifty 50"})
+    assert [(r["date"], r["symbol"], r["close"]) for r in read(tmp_path / "processed" / "nse_etf_daily.csv")] == [("2016-06-01", "MON100", "331.5"),
+                                                                                                                ("2021-06-16", "MON100", "1015.62")]
+
+
+def test_before_its_first_exchange_row_an_etf_s_nav_stands_in_scaled_to_the_exchange_price_and_marked(tmp_path):
+    days = [date(2016, 1, d) for d in (1, 4, 5)]
+    for k, d in enumerate(days):
+        put(tmp_path, "cash", d, zipped([CASH_HEAD, f"NIFTYBEES,EQ,80,81,79,80,80,80,100,8000,{d.strftime('%d-%b-%Y').upper()},5,X,"]
+                                        + ([f"MON100,EQ,105,105,105,105,105,105,10,{1050 + 10 * k},{d.strftime('%d-%b-%Y').upper()},5,X,"] if k else [])))
+    put(tmp_path, "cash", date(2015, 2, 28), zipped([CASH_HEAD, "NIFTYBEES,EQ,80,81,79,80,80,80,100,8000,28-FEB-2015,5,X,"]))     # a Saturday session (budget day)
+    put(tmp_path, "cash", date(2015, 4, 19), zipped([CASH_HEAD, "GOLDBEES,EQ,25,25,25,25,25,25,100,2500,19-APR-2015,5,X,"]))      # a gold-only Sunday session
+    (tmp_path / "processed").mkdir()
+    (tmp_path / "processed" / "amfi_nav_daily.csv").write_text("date,code,nav\n2015-02-27,114984,90\n2015-12-31,114984,99\n2016-01-04,114984,100\n2016-01-05,114984,100\n")
+    nb.build(tmp_path, {"NIFTYBEES", "GOLDBEES", "MON100"}, {"NIFTY"}, {"Nifty 50"})
+    mon = [r for r in read(tmp_path / "processed" / "nse_etf_daily.csv") if r["symbol"] == "MON100"]
+    # the days are the Nifty ETF's (every full session, none of the gold-only ones); a day without a NAV of its own takes the last one before it, times
+    # the price over NAV on the exchange days (105 / 100)
+    assert [(r["date"], r["close"], r["source"]) for r in mon] == [("2015-02-28", "94.5000", "nav"), ("2016-01-01", "103.9500", "nav"), ("2016-01-04", "105", "archive"),
+                                                                   ("2016-01-05", "105", "archive")]
+    mon = mon[1:]
+    assert mon[0]["open"] == mon[0]["high"] == mon[0]["low"] == "103.9500" and mon[0]["qty"] == "10"            # median traded value 1065 / price, whole units
+    assert mon[0]["value"] == "1039.5000"                                                                       # units times the price: the VWAP is the price

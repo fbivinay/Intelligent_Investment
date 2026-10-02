@@ -111,7 +111,7 @@ REFERENCES = ("Nifty BeES", "Junior BeES", "Bank BeES", "Gold BeES", "Liquid fun
 class Selection:
     log: pd.DataFrame             # one row per cut
     holder: np.ndarray            # T: the index of the run held on each day (S0 before the first cut)
-    weights: np.ndarray           # T x 5: the stitched target weights
+    weights: np.ndarray           # T x (n + 1): the stitched target weights
     first_cut: int | None
 
 
@@ -128,9 +128,11 @@ def walk_forward(runs: list[Run], weights_of, dates: np.ndarray, cap: float, mar
         i, row = pick(runs, prefix_stats(runs, dates, c, capital), dates, c, cap, s0s[0], margin, draws)
         holder[c:cuts[k + 1] if k + 1 < len(cuts) else len(dates)] = i
         rows.append({**row, "picked": runs[i].id, "family": runs[i].family})
-    weights = np.empty((len(dates), 5))
+    weights = None
     for i in np.unique(holder):
-        weights[holder == i] = weights_of(int(i))[holder == i]
+        w = weights_of(int(i))
+        weights = np.empty((len(dates), w.shape[1])) if weights is None else weights
+        weights[holder == i] = w[holder == i]
     return Selection(pd.DataFrame(rows, columns=LOG_COLUMNS), holder, weights, cuts[0] if cuts else None)
 
 
@@ -162,6 +164,7 @@ def references(panel: P.Panel, sel: Selection, s0_weights: np.ndarray, rules, ca
     window = P.from_day(panel, i0)
     from research import strategies as st
     out = {"S0": sim.simulate(window, s0_weights[i0:], rules, sim.SimConfig(cap=cap, capital=capital, **(sim_kw or {})))}
-    for name in REFERENCES:
-        out[name] = sim.simulate(window, st.s1_static(baseline.REFERENCE[name], "never")(window), rules, sim.SimConfig(governor=False, capital=capital))
+    for name, sym in baseline.HOLDS.items():
+        if sym is None or sym in panel.assets:
+            out[name] = sim.simulate(window, st.s1_static(baseline.hold_mix(name, panel.assets), "never")(window), rules, sim.SimConfig(governor=False, capital=capital))
     return out
