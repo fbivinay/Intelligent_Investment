@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 
 // In development the calculator's Python API runs on its own port (npm run api); on Vercel /api/*.py are functions of the same project.
 const nextConfig: NextConfig = {
+  agentRules: false,
   async rewrites() {
     return process.env.NODE_ENV === "production" && !process.env.LOCAL_API
       ? []

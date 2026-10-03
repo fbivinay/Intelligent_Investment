@@ -1,69 +1,95 @@
 "use client";
 
-import type { Inputs } from "@/lib/types";
-import { OPTIONS } from "@/lib/api";
+import { motion } from "motion/react";
+import { useEffect, useState } from "react";
+import { DATA_END, FIRST_DAY, LEVELS, OPTIONS } from "@/lib/api";
+import { day, inr, inrShort } from "@/lib/format";
+import type { Level } from "@/lib/types";
+import { Segmented } from "./motion";
 
-const LEVELS: { id: Inputs["level"]; cap: string }[] = [
-  { id: "Conservative", cap: "falls up to about 10%" },
-  { id: "Balanced", cap: "about 20%" },
-  { id: "Aggressive", cap: "about 30%" },
-  { id: "Growth", cap: "no fall guard: fell up to about 30%" },
-  { id: "Max", cap: "stock momentum, gold and Nasdaq: fell up to about 18% (from April 2017)" },
-];
+const MIN = 10000, MAX = 1e9;
+const QUICK = [100000, 500000, 1000000, 2500000, 10000000];
 
-const MAX_START = "2017-04-03"; // the Max level holds stocks; its data starts later
-
-export function Controls({ v, set }: { v: Inputs; set: (p: Partial<Inputs>) => void }) {
+export function AmountField({ value, onChange, inputRef }: { value: number; onChange: (n: number) => void; inputRef?: React.Ref<HTMLInputElement> }) {
+  const [text, setText] = useState(inr(value).slice(1));
+  useEffect(() => setText(inr(value).slice(1)), [value]);
+  const n = Number(text.replace(/[^\d]/g, ""));
+  const bad = !n || n < MIN || n > MAX;
   return (
-    <section className="controls" aria-label="Inputs">
-      <label>Amount (₹)
-        <input type="number" min={10000} step={10000} value={v.amount} onChange={(e) => set({ amount: Number(e.target.value) })} name="amount" />
-      </label>
-      <label>Start
-        <input type="date" min="2010-04-01" max="2026-09-29" value={v.start} onChange={(e) => set({ start: e.target.value })} name="start" />
-      </label>
-      <label>End
-        <input type="date" min="2010-04-02" max="2026-09-30" value={v.end} onChange={(e) => set({ end: e.target.value })} name="end" />
-      </label>
-      <fieldset className="levels">
-        <legend>Model risk level</legend>
+    <div className="field">
+      <label className="label" htmlFor="amount">You invest</label>
+      <div className={bad ? "amount bad" : "amount"}>
+        <span>₹</span>
+        <input id="amount" ref={inputRef} inputMode="numeric" value={text} aria-invalid={bad}
+          onChange={(e) => {
+            const v = Number(e.target.value.replace(/[^\d]/g, ""));
+            setText(v ? inr(v).slice(1) : "");
+            if (v >= MIN && v <= MAX) onChange(v);
+          }} />
+      </div>
+      {bad && <p className="hint">Between ₹10,000 and ₹100 crore.</p>}
+      <div className="chips">
+        {QUICK.map((q) => (
+          <motion.button key={q} whileTap={{ scale: 0.95 }} className={q === value ? "chip on" : "chip"} onClick={() => onChange(q)}>{inrShort(q).replace(".00", "")}</motion.button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export function DateField({ value, level, onChange }: { value: string; level: Level; onChange: (d: string) => void }) {
+  const last = "2026-09-29";
+  return (
+    <div className="field">
+      <label className="label" htmlFor="start">Invested on</label>
+      <input id="start" type="date" className="input" value={value} min={FIRST_DAY[level]} max={last}
+        onChange={(e) => e.target.value >= FIRST_DAY[level] && e.target.value <= last && onChange(e.target.value)} />
+      <p className="hint">Held until {day(DATA_END)}, the last day of the data.</p>
+    </div>
+  );
+}
+
+export function StrategyList({ value, onChange }: { value: Level; onChange: (l: Level) => void }) {
+  return (
+    <div className="field">
+      <span className="label">Strategy</span>
+      <div className="levels" role="radiogroup">
         {LEVELS.map((l) => (
-          <button key={l.id} className={v.level === l.id ? "on" : ""} onClick={() => set({ level: l.id, ...(l.id === "Max" && v.start < MAX_START ? { start: MAX_START } : {}) })} aria-pressed={v.level === l.id} title={l.cap}>
-            {l.id}
+          <button key={l.id} role="radio" aria-checked={value === l.id} className={value === l.id ? "level on" : "level"} onClick={() => onChange(l.id)}>
+            {value === l.id && <motion.span layoutId="level-bg" className="level-bg" transition={{ type: "spring", stiffness: 420, damping: 38 }} />}
+            <span className="level-name">{l.name}</span>
+            <motion.span className="level-line" initial={false} animate={{ height: value === l.id ? "auto" : 0, opacity: value === l.id ? 1 : 0 }}
+              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}>{l.line}</motion.span>
           </button>
         ))}
-      </fieldset>
-      <label>Tax regime
-        <select value={v.regime} onChange={(e) => set({ regime: e.target.value as Inputs["regime"] })} name="regime">
-          <option value="new">New</option>
-          <option value="old">Old</option>
+      </div>
+    </div>
+  );
+}
+
+export function BenchmarkSelect({ value, onChange, label = "Compared with" }: { value: string; onChange: (id: string) => void; label?: string }) {
+  return (
+    <div className="field">
+      <label className="label" htmlFor="bench">{label}</label>
+      <select id="bench" className="input" value={value} onChange={(e) => onChange(e.target.value)}>
+        {OPTIONS.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
+      </select>
+    </div>
+  );
+}
+
+const INCOMES = [0, 500000, 1000000, 1200000, 1500000, 2500000, 5000000];
+
+export function TaxFields({ regime, income, onChange }: { regime: "new" | "old"; income: number; onChange: (p: { regime?: "new" | "old"; other_income?: number }) => void }) {
+  return (
+    <div className="field">
+      <span className="label">Your tax</span>
+      <div className="tax-row">
+        <Segmented id="regime" size="sm" value={regime} onChange={(r) => onChange({ regime: r })} options={[{ id: "new", label: "New regime" }, { id: "old", label: "Old regime" }]} />
+        <select className="input input-sm" aria-label="Other income a year" value={income} onChange={(e) => onChange({ other_income: Number(e.target.value) })}>
+          {INCOMES.map((i) => <option key={i} value={i}>{i ? `${inrShort(i).replace(".00", "")} other income` : "No other income"}</option>)}
         </select>
-      </label>
-      <label>Other income a year (₹)
-        <input type="number" min={0} step={50000} value={v.other_income} onChange={(e) => set({ other_income: Number(e.target.value) })} name="other_income" />
-      </label>
-      <label>At the end
-        <select value={v.end_convention} onChange={(e) => set({ end_convention: e.target.value as Inputs["end_convention"] })} name="end_convention">
-          <option value="sell">Sell everything and pay the tax</option>
-          <option value="hold">Still holding</option>
-        </select>
-      </label>
-      <label className="check">
-        <input type="checkbox" checked={v.slippage} onChange={(e) => set({ slippage: e.target.checked })} /> Model pays slippage (assumed)
-      </label>
-      <label>Estimate for the next {v.horizon} years
-        <input type="range" min={1} max={20} value={v.horizon} onChange={(e) => set({ horizon: Number(e.target.value) })} name="horizon" />
-      </label>
-      <fieldset className="compare">
-        <legend>Compare with</legend>
-        {OPTIONS.map((o) => (
-          <label key={o.id} className="chip">
-            <input type="checkbox" checked={v.compare.includes(o.id)}
-              onChange={(e) => set({ compare: e.target.checked ? [...v.compare, o.id] : v.compare.filter((c) => c !== o.id) })} />
-            {o.name}
-          </label>
-        ))}
-      </fieldset>
-    </section>
+      </div>
+    </div>
   );
 }

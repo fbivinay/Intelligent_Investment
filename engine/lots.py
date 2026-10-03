@@ -42,7 +42,7 @@ class Inventory:
         if qty > held:
             raise ValueError(f"cannot sell {qty} {instrument}: only {held} held")
         lots, out, need = self._lots[instrument], [], qty
-        while need > 0:
+        while need > 0 and lots:      # lots run out first only by rounding dust: their total can round up at Decimal's 28 digits
             lot = lots[0]
             if lot.qty <= need:
                 out.append(Slice(lot.acq_date, lot.qty, lot.cost))

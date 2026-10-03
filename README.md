@@ -69,5 +69,6 @@ python -m pip install -r requirements-research.txt     # Python 3.13
 python -m pytest                                       # the tests
 python -m research.intraday.levels_tax                 # the risk levels by tax profile
 python -m tools.export_dataset                         # rebuild dataset/ from data/ and rules/
+python -m tools.site_data                              # the saved run the website shows first (site/public/history.json)
 python -m tools.bundle_site                            # then: cd site && npx vercel deploy --prod --yes
 ```
