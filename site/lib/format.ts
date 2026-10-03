@@ -1,26 +1,24 @@
-const inr = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 });
-const inr2 = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const IN = new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 });
 
-export const rupees = (v: number) => inr.format(v);
-export const rupeesExact = (v: number) => inr2.format(v);
-export const pct = (v: number, digits = 1) => `${(v * 100).toFixed(digits)}%`;
+export const inr = (n: number) => `₹${IN.format(Math.round(n))}`;
 
-/** A short form for chart axes: 12.5 L, 1.2 Cr. */
-export function short(v: number): string {
-  if (Math.abs(v) >= 1e7) return `${(v / 1e7).toFixed(2)} Cr`;
-  if (Math.abs(v) >= 1e5) return `${(v / 1e5).toFixed(1)} L`;
-  return inr.format(v);
+export function inrShort(n: number) {
+  const a = Math.abs(n), s = n < 0 ? "−" : "";
+  if (a >= 1e7) return `${s}₹${(a / 1e7).toFixed(2)} Cr`;
+  if (a >= 1e5) return `${s}₹${(a / 1e5).toFixed(a >= 1e6 ? 1 : 2).replace(/\.0+$/, "")} L`;
+  return `${s}₹${IN.format(Math.round(a))}`;
 }
 
-export function years(start: string, end: string): number {
-  return (Date.parse(end) - Date.parse(start)) / (365.25 * 86400000);
-}
+export const pct = (x: number, d = 1) => `${x < 0 ? "−" : ""}${Math.abs(x * 100).toFixed(d)}%`;
+export const signedPct = (x: number, d = 1) => `${x >= 0 ? "+" : "−"}${Math.abs(x * 100).toFixed(d)}%`;
+export const points = (x: number) => `${x >= 0 ? "+" : "−"}${Math.abs(x * 100).toFixed(1)} pts`;
 
-export function download(name: string, text: string) {
-  const url = URL.createObjectURL(new Blob([text], { type: "text/csv" }));
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = name;
-  a.click();
-  URL.revokeObjectURL(url);
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+export function day(iso: string) {
+  const [y, m, d] = iso.split("-").map(Number);
+  return `${d} ${MONTHS[m - 1]} ${y}`;
+}
+export function month(iso: string) {
+  const [y, m] = iso.split("-").map(Number);
+  return `${MONTHS[m - 1]} ${y}`;
 }
