@@ -14,6 +14,7 @@ import json
 import zlib
 from datetime import date
 from decimal import Decimal
+from functools import lru_cache
 
 import numpy as np
 
@@ -21,7 +22,7 @@ from calc import compare as CP, options as O, paths, product as PR, project as P
 from engine.tax import TaxProfile, fy_label
 from engine.trace import Node, flags
 from research.maxmodel import FIXED as MAX_FIXED
-from research.sim import classes
+from research.sim import _cost_table as sim_cost_table, classes
 
 DATA_START, DATA_END = date(2010, 4, 1), PR.DATA_END
 MAX_CHILDREN = 12
@@ -205,6 +206,33 @@ def _seed(option_id: str, years: int) -> int:
 
 
 def calculate(params: dict) -> dict:
+    if params.get("warm"):
+        return warm()
+    if params.get("lean"):
+        return _remembered(json.dumps(params, sort_keys=True))
+    return _calculate(params)
+
+
+@lru_cache(maxsize=48)
+def _remembered(key: str) -> dict:
+    """A lean answer already worked out in this process comes back at once: the website asks the same few questions again and again. Never mutate it."""
+    return _calculate(json.loads(key))
+
+
+def warm() -> dict:
+    """Load what every answer needs (the rules and their charge table, the panels and signals, the price files) before anyone asks: the website sends
+    {"warm": true} when it opens, so a visitor's first question does not pay for loading."""
+    rl = PR.rules()
+    sim_cost_table(rl)
+    for level in PR.LEVELS:
+        PR.full_panel("six", "Max" if level == "Max" else "")
+        PR._signal(level, "six")
+    O._etfs()
+    O._navs()
+    return {"warm": True}
+
+
+def _calculate(params: dict) -> dict:
     try:
         p = _parse(params)
     except (ValueError, KeyError) as e:
