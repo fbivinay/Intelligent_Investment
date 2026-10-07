@@ -195,10 +195,14 @@ def _parse(params: dict) -> dict:
                 headline="sold" if end_conv == "sell" else "held", horizon=horizon, monthly=mode == "sip", lean=bool(params.get("lean", False)))
 
 
-def _figures(sold_w: dict, held_w: dict, traces: _Traces) -> dict:
-    """The headline figures: their own traces are shallow (the parts have traces of their own), the tax ones deep enough to show the rates and the exemption."""
-    return {"net": _fig(sold_w["net"], traces, 2), "gross_end": _fig(sold_w["gross_end"], traces, 3), "charges": _fig(sold_w["charges"], traces, 2),
-            "tax": _fig(sold_w["tax"], traces, 2), "held_net": _fig(held_w["net"], traces, 2), "held_tax": _fig(held_w["tax"], traces, 2)}
+def _figures(sold_w: dict, held_w: dict | None, traces: _Traces) -> dict:
+    """The headline figures: their own traces are shallow (the parts have traces of their own), the tax ones deep enough to show the rates and the exemption.
+    Without the held ending (a lean answer's alternatives), only the sale's."""
+    out = {"net": _fig(sold_w["net"], traces, 2), "gross_end": _fig(sold_w["gross_end"], traces, 3), "charges": _fig(sold_w["charges"], traces, 2),
+           "tax": _fig(sold_w["tax"], traces, 2)}
+    if held_w is not None:
+        out.update(held_net=_fig(held_w["net"], traces, 2), held_tax=_fig(held_w["tax"], traces, 2))
+    return out
 
 
 def _seed(option_id: str, years: int) -> int:
@@ -267,7 +271,7 @@ def _calculate(params: dict) -> dict:
     for oid in p["compare"]:
         o = O.get(oid)
         try:
-            r = CP.run_option(o, p["amount"], p["start"], p["end"], p["profile"], p["monthly"])
+            r = CP.run_option(o, p["amount"], p["start"], p["end"], p["profile"], p["monthly"], held=not p["lean"] or p["headline"] == "held")
         except ValueError as e:
             messages.append({"id": oid, "text": str(e)})
             continue
@@ -275,8 +279,9 @@ def _calculate(params: dict) -> dict:
                    "Account opening fee": r.sold.waterfall["account_opening"], "Yearly demat fees": r.sold.waterfall["amc"]}
         buys = sum(1 for x in r.sold.buys if x[2] > 0) if p["monthly"] else 1
         series[oid], path = _path(r.dates, r.values, r.paid)
-        results.append({"id": oid, "name": o.name, "kind": o.kind, "plan": r.plan, "headline": p["headline"], **_figures(r.sold.waterfall, r.held.waterfall, traces),
-                        **_invested(r.sold.waterfall["initial"].value, {"sold": r.sold.waterfall, "held": r.held.waterfall}, p["headline"]),
+        held_w = r.held.waterfall if r.held else None
+        results.append({"id": oid, "name": o.name, "kind": o.kind, "plan": r.plan, "headline": p["headline"], **_figures(r.sold.waterfall, held_w, traces),
+                        **_invested(r.sold.waterfall["initial"].value, {"sold": r.sold.waterfall, "held": held_w}, p["headline"]),
                         "charges_by_kind": [{"label": k, **_fig(n, traces)} for k, n in charges.items()], "tax_by_fy": [],
                         "growth": r.growth_sold, "growth_held": r.growth_held, "worst_fall": r.worst_fall, "orders": buys + (1 if p["headline"] == "sold" else 0),
                         **path})
