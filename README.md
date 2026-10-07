@@ -19,9 +19,10 @@ everything here is past results and estimates, never a promise.
    the later ones. Trades fill at the next day's prices with slippage. Nothing uses future data (tested). Heavy runs went to Kaggle (GPU for the deep
    model, CPU for the option grids).
 4. **Calculator and website** (`calc/`, `site/`). Enter an amount, once or every month (SIP), a start and your tax profile; it replays the model with exact
-   charges and tax and compares it with ETFs and funds. The site is a desktop slide deck in three parts: Overview, Performance (the calculator, the path, the
-   model's trades, and what a plan started today could become at each option's past return) and Evidence (the Max model in seven steps: the model, data,
-   signals, strategy, testing, costs and tax, limits). Live: https://intelligent-investment.vercel.app
+   charges and tax and compares it with ETFs and funds. The site is a desktop slide deck in three parts: Overview, Performance (the Max and Growth
+   strategies side by side with every option ranked by final value, the path, the model's trades, and what a plan started today could become at each
+   option's past return) and Evidence (five questions: what the model is, what data it reads, what goes into it, what it predicts, how that becomes an
+   investment). Live: https://intelligent-investment.vercel.app
 
 ## What we found
 
