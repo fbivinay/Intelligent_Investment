@@ -73,10 +73,23 @@ export type Request = {
 };
 
 export type Facts = {
-  stocks: { symbols: number; rows: number; from: string; to: string };
+  stocks: { symbols: number; funds: number; rows: number; from: string; to: string; fields: string[] };
   rules: { rows: number; from: string; verified_on: string };
   max: { momentum: number; fixed: Record<string, number>; trend_days: number };
   costs: { stock_half_spread: number; etf_half_spread: Record<string, number>; impact: number; max_slippage: number };
+  ranking: { day: string; ranked: number; held: number; decisions: number; switch_days: number;
+             top: { symbol: string; score: number; r6: number; r12: number; vol: number }[] };
   universe_runs: { picks: number; universe: number; a_year: number; worst_fall: number; orders: number }[];
-  mixes: { what: string; a_year: number; worst_fall: number }[];
+};
+
+/** Invest today (calc/future.py via tools/site_data.py): each option's past yearly return after charges and tax, and value factors for 1 to 30 years. */
+export type Future = {
+  label: string;
+  from: string;
+  to: string;
+  amount: number;
+  regime: string;
+  other_income: number;
+  rates: Record<string, { rate: number; worst_fall: number }>;
+  factors: Record<string, { lump: number[]; sip: number[] }>;
 };

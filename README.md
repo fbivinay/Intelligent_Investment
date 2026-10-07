@@ -20,7 +20,8 @@ everything here is past results and estimates, never a promise.
    model, CPU for the option grids).
 4. **Calculator and website** (`calc/`, `site/`). Enter an amount, once or every month (SIP), a start and your tax profile; it replays the model with exact
    charges and tax and compares it with ETFs and funds. The site is a desktop slide deck in three parts: Overview, Performance (the calculator, the path, the
-   model's trades) and Evidence (the Max model step by step, how it was chosen, its limits). Live: https://intelligent-investment.vercel.app
+   model's trades, and what a plan started today could become at each option's past return) and Evidence (the Max model in seven steps: the model, data,
+   signals, strategy, testing, costs and tax, limits). Live: https://intelligent-investment.vercel.app
 
 ## What we found
 
@@ -29,8 +30,8 @@ everything here is past results and estimates, never a promise.
 | Deep learning (5 network types, Kaggle GPU) | lost to a simple equal mix of ETFs: rejected |
 | Trend, momentum and volatility rules on 4 ETFs | about 7-11% a year; a fall guard cut both risk and return |
 | Six ETFs in equal parts (adds Midcap 100 and Nasdaq 100) | about 15% a year, worst fall 28% (2013-2026) |
-| Stock momentum (30 strongest of the 500 most traded shares) | about 23% a year, worst fall 48% (2017-2026) |
-| **Max**: momentum half (with a market switch) + gold ETF + Nasdaq 100 ETF | **21.4% a year, worst fall 18%** (2017-2026); on the website |
+| Stock momentum (30 strongest of the 500 most traded shares, ETFs left out) | about 22% a year, worst fall 48% (2017-2026) |
+| **Max**: momentum half (with a market switch) + gold ETF + Nasdaq 100 ETF | **20.3% a year, worst fall 18%** (2017-2026, the same years its switch and mix were chosen on); on the website |
 | Nifty futures for leverage; covered calls; insurance puts | added nothing after cost and tax: rejected |
 | **About 100 Fyers automations** (1,905 settings of intraday Nifty and Bank Nifty option, futures and signal strategies) | option selling with a stop on every leg wins; buying options on chart signals does not |
 

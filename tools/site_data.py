@@ -1,11 +1,12 @@
-"""What the website shows before anyone asks the calculator: two real calculator answers (lean: no traces, CSV or projections) and the repository facts the
-Evidence pages quote. Rerun after the data, the rules or the model change.
+"""What the website shows before anyone asks the calculator: two real calculator answers (lean: no traces, CSV or projections), the invest-today table
+and the repository facts the Evidence pages quote. Rerun after the data, the rules or the model change.
 
     python -m tools.site_data
 
-site/public/data/lump.json   Rs 10 lakh once, from the Max level's first day: the Overview and the calculator's first one-time answer
-site/public/data/sip.json    Rs 5,000 every month over the same years: the calculator's first monthly answer
-site/public/data/facts.json  the data, the rules, the cost assumptions and the Max level's selection runs, read from the files that hold them
+site/public/data/lump.json    Rs 10 lakh once, from the Max level's first day, beside every alternative: the Overview and the calculator's first answer
+site/public/data/sip.json     Rs 5,000 every month over the same years: the calculator's first monthly answer
+site/public/data/future.json  each option's yearly return after charges and tax over those years, and the invest-today factors (calc.future)
+site/public/data/facts.json   the data, the rules, the cost assumptions, the Max level's latest ranking and its universe runs, read from the files
 """
 from __future__ import annotations
 
@@ -13,54 +14,85 @@ import csv
 import json
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
+import pyarrow.parquet as pq
 
-from calc import api
-from calc.product import DATA_END, rules
-from research import costs as C, maxmodel as X
+from calc import api, future, options as O
+from calc.product import DATA_END, LEVELS, rules
+from research import costs as C, maxmodel as X, stockmom as M
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "site" / "public" / "data"
-COMMON = {"end": DATA_END.isoformat(), "level": "Max", "compare": ["NIFTYBEES", "GOLDBEES", "MON100", "MOM100", "LIQUID_FUND"], "regime": "new",
-          "other_income": 1200000, "lean": True}
-RUNS = {"lump": {**COMMON, "mode": "lump", "amount": 1000000, "start": "2017-04-03"},
-        "sip": {**COMMON, "mode": "sip", "amount": 5000, "start": "2017-04-03"}}
-MIXES = ("mom", "momT", "momT50+gold25+nasdaq25", "momT60+gold20+nasdaq20", "momT70+gold30", "momT50+growth50", "nifty", "gold", "nasdaq")
+START = "2017-04-03"                                     # the Max level's first day: every option is measured over the same years from it
+ALTERNATIVES = [o.id for o in O.OPTIONS if o.kind != "product"]
+COMMON = {"end": DATA_END.isoformat(), "level": "Max", "compare": ALTERNATIVES, "regime": "new", "other_income": 1200000, "lean": True}
+RUNS = {"lump": {**COMMON, "mode": "lump", "amount": 1000000, "start": START},
+        "sip": {**COMMON, "mode": "sip", "amount": 5000, "start": START}}
 
 
-def mixes(path: Path) -> list[dict]:
-    """The rows of research/out/mixes.txt's first table (name, a year, worst fall) that the Evidence page quotes."""
-    rows = []
-    for line in path.read_text(encoding="utf-8").splitlines()[1:]:
-        if line.startswith("---"):
-            break
-        *name, cagr, fall = line.split()
-        if " ".join(name) in MIXES:
-            rows.append({"what": " ".join(name), "a_year": float(cagr), "worst_fall": float(fall)})
-    return rows
+def ranking() -> dict:
+    """The Max level's latest ranking, by its own code: the day, the shares it could rank, the trend score of the best ones (with the 6- and 12-month
+    returns and the yearly volatility the score is made of), checked against the 30 the model picked that day."""
+    f, idx, traded = M.wide()
+    chosen = M.picks(idx, f["value"], traded, 30, 500, trend=X.TREND)
+    key = max(d for d, v in chosen.items() if v)
+    day = pd.Timestamp(key)
+    p = idx.index.get_loc(day)
+    medval = f["value"].fillna(0).rolling(126, min_periods=100).median()
+    s = M.score(idx, medval, traded.cumsum(), traded, p, 500).dropna()
+    s = s.nlargest(len(s))                                                    # the order picks() takes its 30 from
+    assert list(s.index[:30]) == list(chosen[key]), "the ranking does not give the model's picks"
+    i = idx[s.index[:36]]
+    r6, r12 = i.iloc[p] / i.iloc[p - 126] - 1, i.iloc[p] / i.iloc[p - 252] - 1
+    vol = np.log(i.iloc[p - 252:p + 1]).diff().std() * np.sqrt(252)
+    top = [{"symbol": k, "score": round(float(s[k]), 4), "r6": round(float(r6[k]), 4), "r12": round(float(r12[k]), 4), "vol": round(float(vol[k]), 4)}
+           for k in s.index[:36]]
+    return {"day": str(day.date()), "ranked": int(len(s)), "held": 30, "top": top,
+            "decisions": len(chosen), "switch_days": sum(1 for v in chosen.values() if not v)}
 
 
 def facts() -> dict:
     stocks = pd.read_parquet(ROOT / "data" / "processed" / "stocks_eq.parquet", columns=["date", "symbol"])
+    fields = [c for c in pq.read_schema(ROOT / "data" / "processed" / "stocks_eq.parquet").names if c not in ("date", "symbol")]
     rows = list(rules().all_rows())
     with (ROOT / "research" / "out" / "stockmom.csv").open(newline="") as f:
         runs = [{"picks": int(r["n"]), "universe": int(r["top"]), "a_year": float(r["cagr_liquidated"]), "worst_fall": float(r["max_dd"]), "orders": int(r["orders"])}
                 for r in csv.DictReader(f)]
-    return {"stocks": {"symbols": int(stocks.symbol.nunique()), "rows": len(stocks), "from": str(stocks.date.min().date()), "to": str(stocks.date.max().date())},
+    return {"stocks": {"symbols": int(stocks.symbol.nunique()), "funds": len(M.funds()), "rows": len(stocks), "from": str(stocks.date.min().date()),
+                       "to": str(stocks.date.max().date()), "fields": fields},
             "rules": {"rows": len(rows), "from": min(r.valid_from for r in rows).isoformat(), "verified_on": max(r.ref.verified_on for r in rows).isoformat()},
             "max": {"momentum": X.MOMENTUM, "fixed": X.FIXED, "trend_days": X.TREND},
             "costs": {"stock_half_spread": C.STOCK_HALF_SPREAD, "etf_half_spread": {k: C.HALF_SPREAD[k] for k in X.FIXED}, "impact": C.IMPACT,
                       "max_slippage": C.MAX_SLIPPAGE},
-            "universe_runs": runs, "mixes": mixes(ROOT / "research" / "out" / "mixes.txt")}
+            "ranking": ranking(), "universe_runs": runs}
+
+
+def projections(lump: dict) -> dict:
+    """Each option's yearly return after charges and tax over the same years (Rs 10 lakh once from the Max level's first day; each model level run on
+    those years too), and the invest-today factors made from them."""
+    rates = {r["id"]: {"rate": r["growth"], "worst_fall": r["worst_fall"]} for r in lump["results"]}
+    for level in LEVELS:
+        if f"PRODUCT_{level}" in rates:
+            continue
+        a = api.calculate({**RUNS["lump"], "level": level, "compare": []})
+        assert "error" not in a and not a["messages"], a.get("error") or a["messages"]
+        r = a["results"][0]
+        rates[r["id"]] = {"rate": r["growth"], "worst_fall": r["worst_fall"]}
+    return {"label": future.LABEL, "from": START, "to": DATA_END.isoformat(), "amount": RUNS["lump"]["amount"], "regime": "new", "other_income": 1200000,
+            "rates": rates, "factors": future.factors({k: v["rate"] for k, v in rates.items()})}
 
 
 def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
+    saved = {}
     for name, inputs in RUNS.items():
         a = api.calculate(inputs)
         assert "error" not in a and not a["messages"], a.get("error") or a["messages"]
         (OUT / f"{name}.json").write_text(json.dumps(a, separators=(",", ":")), encoding="utf-8")
+        saved[name] = a
         print(f"{name}: " + ", ".join(f"{r['id']} {r['growth']:.1%}" for r in a["results"]))
+    (OUT / "future.json").write_text(json.dumps(projections(saved["lump"]), separators=(",", ":")), encoding="utf-8")
     (OUT / "facts.json").write_text(json.dumps(facts(), indent=1), encoding="utf-8")
     print(f"wrote {OUT}")
 

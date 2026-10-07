@@ -1,21 +1,26 @@
 import type { Level } from "./types";
 
-// Each option keeps one colour everywhere. Slot order and steps validated with the dataviz palette checks on the page surface #F5F6F2
-// (model, Nifty, gold, Nasdaq, liquid, midcap, bank, next 50: worst adjacent colour-blind ΔE 10.6, normal-vision 18.9, every hue >= 3:1).
+// Each option keeps one colour everywhere. The first eight slots were validated with the dataviz palette checks on the page surface #F5F6F2
+// (worst adjacent colour-blind ΔE 10.6, normal-vision 18.9, every hue >= 3:1). Past eight, each fund takes a lighter step of its nearest relative's hue
+// (composite encoding: the related pair reads as related), never a new hue; the eleven together pass the same checks, and the three lighter steps, under
+// 3:1 against the page, always appear with their name beside them.
 export const OPTIONS: Record<string, { name: string; color: string; what: string }> = {
   PRODUCT: { name: "Intelligent Investment", color: "#087A52", what: "The model" },
-  NIFTYBEES: { name: "Nifty 50 ETF", color: "#2F63B3", what: "India's 50 largest companies, bought once and held" },
-  GOLDBEES: { name: "Gold ETF", color: "#A9770C", what: "Gold, bought once and held" },
-  MON100: { name: "Nasdaq 100 ETF", color: "#C4467C", what: "100 large US companies, in rupees, bought once and held" },
+  NIFTYBEES: { name: "Nifty 50 ETF", color: "#2F63B3", what: "India's 50 largest companies" },
+  GOLDBEES: { name: "Gold ETF", color: "#A9770C", what: "Gold" },
+  MON100: { name: "Nasdaq 100 ETF", color: "#C4467C", what: "100 large US companies, in rupees" },
   LIQUID_FUND: { name: "Liquid fund", color: "#0A87B4", what: "Short-term debt, close to cash" },
-  MOM100: { name: "Midcap 100 ETF", color: "#CF5F23", what: "India's 100 mid-sized companies, bought once and held" },
-  BANKBEES: { name: "Bank Nifty ETF", color: "#7B4CA3", what: "India's largest banks, bought once and held" },
-  JUNIORBEES: { name: "Nifty Next 50 ETF", color: "#6E8A12", what: "The 50 companies after the Nifty 50, bought once and held" },
+  MOM100: { name: "Midcap 100 ETF", color: "#CF5F23", what: "India's 100 mid-sized companies" },
+  BANKBEES: { name: "Bank Nifty ETF", color: "#7B4CA3", what: "India's largest banks" },
+  JUNIORBEES: { name: "Nifty Next 50 ETF", color: "#6E8A12", what: "The 50 companies after the Nifty 50" },
+  NIFTY50_INDEX_FUND: { name: "Nifty 50 index fund", color: "#6B8FD3", what: "The Nifty 50 through a mutual fund, no demat account" },
+  NEXT50_INDEX_FUND: { name: "Next 50 index fund", color: "#97AD45", what: "The Next 50 through a mutual fund" },
+  ARBITRAGE_FUND: { name: "Arbitrage fund", color: "#3DA5D0", what: "Low-risk fund taxed like shares" },
 };
 
-/** The alternatives the calculator offers, in palette order. */
-export const ALTERNATIVES = ["NIFTYBEES", "GOLDBEES", "MON100", "LIQUID_FUND", "MOM100", "BANKBEES", "JUNIORBEES"];
-export const MAX_COMPARE = 5;
+/** The alternatives the calculator can set beside the model: every one calc/options.py supports, in palette order. */
+export const ALTERNATIVES = ["NIFTYBEES", "GOLDBEES", "MON100", "LIQUID_FUND", "MOM100", "BANKBEES", "JUNIORBEES", "NIFTY50_INDEX_FUND", "NEXT50_INDEX_FUND",
+  "ARBITRAGE_FUND"];
 
 const key = (id: string) => (id.startsWith("PRODUCT_") ? "PRODUCT" : id);
 export const nameOf = (id: string) => OPTIONS[key(id)]?.name ?? id;

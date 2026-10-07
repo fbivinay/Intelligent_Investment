@@ -88,7 +88,7 @@ export function LineChart({ times, series, format, axis = format, include = [], 
   const reduce = useReducedMotion();
   const shown = series.filter((s) => !hidden?.has(s.id));
   const labelled = !!ends || shown.length > 1;
-  const pad = { l: 64, r: labelled ? 196 : 24, t: 18, b: 34 };
+  const pad = { l: 72, r: labelled ? 224 : 28, t: 18, b: 38 };
   const target = useMemo(() => {
     const keep = Object.entries(ends ?? {}).filter(([id]) => !hidden?.has(id)).map(([, e]) => e.value);
     return { dom: domain(shown.flatMap((s) => s.values).concat(keep), include), vals: Object.fromEntries(series.map((s) => [s.id, s.values])) as Record<string, number[]> };
@@ -118,7 +118,10 @@ export function LineChart({ times, series, format, axis = format, include = [], 
   const lastOf = (v: number[]) => { for (let i = v.length - 1; i >= 0; i--) if (Number.isFinite(v[i])) return v[i]; return NaN; };
   const last = (id: string) => lastOf(vals[id]);                                      // where the line ends now (mid-morph too)
   const endY = Object.fromEntries(shown.map((s) => [s.id, Y(ends?.[s.id] ? ends[s.id].value : last(s.id))]));
-  const at = spread(shown.map((s) => ({ id: s.id, y: endY[s.id] })), 40, pad.t + 8, pad.t + ih - 4);
+  // At most four names at the line ends (fewer if the chart is short): the strong line, the one in focus, then the rest in the order given.
+  const room = Math.max(1, Math.min(4, Math.floor((ih - 12) / 48) + 1));
+  const named = new Set([...new Set([...shown.filter((s) => s.strong), ...shown.filter((s) => s.id === focus), ...shown].map((s) => s.id))].slice(0, room));
+  const at = spread(shown.filter((s) => named.has(s.id)).map((s) => ({ id: s.id, y: endY[s.id] })), 48, pad.t + 8, pad.t + ih - 4);
 
   const move = (e: React.PointerEvent) => {
     const r = (e.currentTarget as SVGRectElement).getBoundingClientRect();
@@ -172,11 +175,13 @@ export function LineChart({ times, series, format, axis = format, include = [], 
                 {ends?.[s.id] && <line x1={xEnd + 10} x2={xEnd + 10} y1={yLine} y2={yEnd} stroke={s.color} strokeWidth={2} opacity={0.35} />}
                 {ends?.[s.id] && <line x1={xEnd} x2={xEnd + 10} y1={yLine} y2={yLine} stroke={s.color} strokeWidth={2} opacity={0.35} />}
                 <circle cx={ends?.[s.id] ? xEnd + 10 : xEnd} cy={yEnd} r={5} fill={s.color} className="ring" />
-                {Math.abs(yLab - yEnd) > 2 && <path d={`M${xEnd + 16},${yEnd} L${xEnd + 26},${yLab}`} className="leader" />}
-                <text x={xEnd + 30} y={yLab} className="end-label">
-                  <tspan dy="-0.15em">{ends?.[s.id]?.text ?? format(lastOf(s.values))}</tspan>
-                  <tspan x={xEnd + 30} dy="1.25em" className="end-name">{s.label}</tspan>
-                </text>
+                {named.has(s.id) && Math.abs(yLab - yEnd) > 2 && <path d={`M${xEnd + 16},${yEnd} L${xEnd + 26},${yLab}`} className="leader" />}
+                {named.has(s.id) && (
+                  <text x={xEnd + 30} y={yLab} className="end-label">
+                    <tspan dy="-0.15em">{ends?.[s.id]?.text ?? format(lastOf(s.values))}</tspan>
+                    <tspan x={xEnd + 30} dy="1.25em" className="end-name">{s.label}</tspan>
+                  </text>
+                )}
               </motion.g>
             );
           })}
@@ -202,20 +207,23 @@ export function LineChart({ times, series, format, axis = format, include = [], 
 }
 
 /** Rows of bars from one baseline, longest first: where each option ended. */
-export function RankedBars({ rows, label }: {
+export function RankedBars({ rows, label, version = "" }: {
   rows: { id: string; name: string; sub?: string; color: string; value: number; text: ReactNode; aside?: ReactNode; strong?: boolean }[]; label: string;
+  version?: string;
 }) {
   const reduce = useReducedMotion();
-  const max = Math.max(...rows.map((r) => r.value), 1);
+  const first = useRef(version);
+  const fresh = version === first.current;             // the first showing comes in with the slide; a new ranking moves at once, rows gliding to their places
+  const max = Math.max(...rows.map((r) => r.value), 1e-9);
   return (
     <div className="ranked" role="list" aria-label={label}>
       {rows.map((r, i) => (
         <motion.div key={r.id} role="listitem" className={r.strong ? "rk strong" : "rk"} layout initial={reduce ? false : { opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: EASE, delay: ENTER + 0.25 + i * 0.07, layout: { duration: 0.8, ease: SWEEP } }}>
+          animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: EASE, delay: ENTER + 0.25 + i * 0.06, layout: { duration: 0.75, ease: SWEEP } }}>
           <div className="rk-name"><span>{r.name}</span>{r.sub && <small>{r.sub}</small>}</div>
           <div className="rk-track">
-            <motion.div className="rk-bar" style={{ background: r.color }} initial={reduce ? false : { width: "0%" }} animate={{ width: `${(r.value / max) * 74}%` }}
-              transition={{ duration: 1.3, ease: EASE, delay: ENTER + 0.4 + i * 0.07 }} />
+            <motion.div className="rk-bar" style={{ background: r.color }} initial={reduce ? false : { width: "0%" }} animate={{ width: `${(r.value / max) * 70}%` }}
+              transition={{ duration: fresh ? 1.3 : 0.8, ease: EASE, delay: fresh ? ENTER + 0.4 + i * 0.06 : i * 0.025 }} />
             <span className="rk-val">{r.text}</span>
           </div>
           {r.aside && <div className="rk-aside">{r.aside}</div>}
@@ -233,7 +241,7 @@ export function StackArea({ dates, shares, order, color, name, height }: {
   const reduce = useReducedMotion();
   const [hover, setHover] = useState<number | null>(null);
   const times = useMemo(() => dates.map(ms), [dates]);
-  const pad = { l: 64, r: 24, t: 6, b: 28 };
+  const pad = { l: 72, r: 24, t: 8, b: 32 };
   const iw = Math.max(1, w - pad.l - pad.r), ih = Math.max(1, h - pad.t - pad.b);
   const X = (tm: number) => pad.l + ((tm - times[0]) / (times[times.length - 1] - times[0] || 1)) * iw;
   const Y = (v: number) => pad.t + (1 - v) * ih;
@@ -295,7 +303,7 @@ export function TradeStrip({ days, from, to, onPick, picked }: {
 }) {
   const [ref, { w, h }] = useSize<HTMLDivElement>();
   const reduce = useReducedMotion();
-  const pad = { l: 64, r: 24, t: 6, b: 6 };
+  const pad = { l: 72, r: 24, t: 6, b: 6 };
   const iw = Math.max(1, w - pad.l - pad.r), mid = h / 2, room = Math.max(1, mid - pad.t - 2);
   const t0 = ms(from), t1 = ms(to);
   const X = (d: string) => pad.l + ((ms(d) - t0) / (t1 - t0 || 1)) * iw;
@@ -326,112 +334,6 @@ export function TradeStrip({ days, from, to, onPick, picked }: {
           <rect x={pad.l} y={0} width={iw} height={h} fill="transparent" style={{ cursor: "pointer" }}
             onPointerMove={(e) => onPick?.(near(e.clientX - (e.currentTarget as SVGRectElement).getBoundingClientRect().left + pad.l))}
             onPointerLeave={() => onPick?.(null)} />
-        </svg>
-      )}
-    </div>
-  );
-}
-
-/** Calendar-year returns side by side, part years marked. */
-export function YearColumns({ series, format }: {
-  series: { id: string; label: string; color: string; years: { year: number; value: number; partial: boolean }[] }[]; format: (v: number) => string;
-}) {
-  const [ref, { w, h }] = useSize<HTMLDivElement>();
-  const reduce = useReducedMotion();
-  const [hover, setHover] = useState<number | null>(null);
-  const yrs = [...new Set(series.flatMap((s) => s.years.map((y) => y.year)))].sort();
-  const all = series.flatMap((s) => s.years.map((y) => y.value));
-  const [lo, hi] = domain(all, [0], 0.08);
-  const pad = { l: 64, r: 12, t: 16, b: 30 };
-  const iw = Math.max(1, w - pad.l - pad.r), ih = Math.max(1, h - pad.t - pad.b);
-  const band = iw / Math.max(1, yrs.length);
-  const bw = Math.min(22, (band * 0.7) / series.length);
-  const Y = (v: number) => pad.t + (1 - (v - lo) / (hi - lo || 1)) * ih;
-  const z = Y(0);
-  return (
-    <div ref={ref} className="chart">
-      {w > 0 && h > 0 && (
-        <svg width={w} height={h} role="img" aria-label="Return in each calendar year">
-          {ticks(lo, hi, 4).map((v) => (
-            <g key={v} className="grid"><line x1={pad.l} x2={pad.l + iw} y1={Y(v)} y2={Y(v)} /><text x={pad.l - 12} y={Y(v)} dy="0.35em" textAnchor="end">{format(v)}</text></g>
-          ))}
-          <line className="zero" x1={pad.l} x2={pad.l + iw} y1={z} y2={z} />
-          {yrs.map((yr, k) => {
-            const cx = pad.l + band * k + band / 2;
-            return (
-              <g key={yr} onPointerEnter={() => setHover(k)} onPointerLeave={() => setHover(null)}>
-                <rect x={cx - band / 2} y={pad.t} width={band} height={ih} fill="transparent" />
-                {series.map((s, j) => {
-                  const r = s.years.find((y) => y.year === yr);
-                  if (!r) return null;
-                  const x = cx - (bw * series.length + 2 * (series.length - 1)) / 2 + j * (bw + 2);
-                  const y = r.value >= 0 ? Y(r.value) : z, hgt = Math.max(1, Math.abs(Y(r.value) - z));
-                  return (
-                    <motion.rect key={s.id} x={x} width={bw} rx={3} fill={s.color} opacity={r.partial ? 0.42 : hover !== null && hover !== k ? 0.55 : 1}
-                      initial={reduce ? false : { y: z, height: 0 }} animate={{ y, height: hgt }}
-                      transition={{ duration: 0.9, ease: EASE, delay: ENTER + 0.3 + k * 0.05 }} />
-                  );
-                })}
-                <text className="xtick" x={cx} y={pad.t + ih + 20} textAnchor="middle">{yr}</text>
-              </g>
-            );
-          })}
-        </svg>
-      )}
-      {hover !== null && (
-        <div className="tip" style={{ left: pad.l + band * hover + band / 2, top: pad.t, transform: hover > yrs.length * 0.6 ? "translateX(calc(-100% - 18px))" : "translateX(18px)" }}>
-          <div className="tip-date">{yrs[hover]}{series.some((s) => s.years.find((y) => y.year === yrs[hover])?.partial) ? ", part of the year" : ""}</div>
-          {series.map((s) => {
-            const r = s.years.find((y) => y.year === yrs[hover]);
-            return r ? <div key={s.id} className="tip-row"><span className="key" style={{ background: s.color }} /><span>{s.label}</span><b>{format(r.value)}</b></div> : null;
-          })}
-        </div>
-      )}
-    </div>
-  );
-}
-
-/** Points of return against worst fall, the chosen one marked. */
-export function Scatter({ points, x, y }: {
-  points: { id: string; label: string; x: number; y: number; chosen?: boolean; group?: "asset" | "rule" | "mix" }[]; x: (v: number) => string; y: (v: number) => string;
-}) {
-  const [ref, { w, h }] = useSize<HTMLDivElement>();
-  const reduce = useReducedMotion();
-  const pad = { l: 64, r: 30, t: 20, b: 46 };
-  const iw = Math.max(1, w - pad.l - pad.r), ih = Math.max(1, h - pad.t - pad.b);
-  const [x0, x1] = [0, Math.max(...points.map((p) => p.x)) * 1.12];
-  const [y0, y1] = [Math.min(0, ...points.map((p) => p.y)), Math.max(...points.map((p) => p.y)) * 1.15];
-  const X = (v: number) => pad.l + ((v - x0) / (x1 - x0)) * iw;
-  const Y = (v: number) => pad.t + (1 - (v - y0) / (y1 - y0)) * ih;
-  // Each label takes the first spot (right, left, above, below) that overlaps no label or point already placed.
-  const boxes: [number, number, number, number][] = points.map((p) => [X(p.x) - 8, Y(p.y) - 8, X(p.x) + 8, Y(p.y) + 8]);
-  const place = points.map((p) => {
-    const cx = X(p.x), cy = Y(p.y), tw = p.label.length * (p.chosen ? 7.6 : 6.9), gap = p.chosen ? 14 : 10;
-    const spots = [
-      { x: cx + gap, y: cy, a: "start" as const, b: [cx + gap, cy - 8, cx + gap + tw, cy + 8] },
-      { x: cx - gap, y: cy, a: "end" as const, b: [cx - gap - tw, cy - 8, cx - gap, cy + 8] },
-      { x: cx, y: cy - 16, a: "middle" as const, b: [cx - tw / 2, cy - 24, cx + tw / 2, cy - 8] },
-      { x: cx, y: cy + 20, a: "middle" as const, b: [cx - tw / 2, cy + 12, cx + tw / 2, cy + 28] },
-    ];
-    const free = (b: number[]) => b[0] >= pad.l && b[2] <= w && !boxes.some((o, k) => points[k] !== p && b[0] < o[2] && b[2] > o[0] && b[1] < o[3] && b[3] > o[1]);
-    const s = spots.find((x) => free(x.b)) ?? spots[0];
-    boxes.push(s.b as [number, number, number, number]);
-    return s;
-  });
-  return (
-    <div ref={ref} className="chart">
-      {w > 0 && h > 0 && (
-        <svg width={w} height={h} role="img" aria-label="Return a year against the worst fall">
-          {ticks(y0, y1, 4).map((v) => <g key={"y" + v} className="grid"><line x1={pad.l} x2={pad.l + iw} y1={Y(v)} y2={Y(v)} /><text x={pad.l - 12} y={Y(v)} dy="0.35em" textAnchor="end">{y(v)}</text></g>)}
-          {ticks(x0, x1, 5).map((v) => <text key={"x" + v} className="xtick" x={X(v)} y={pad.t + ih + 22} textAnchor="middle">{x(v)}</text>)}
-          <text className="axis-title" x={pad.l + iw} y={pad.t + ih + 42} textAnchor="end">Worst fall along the way</text>
-          {points.map((p, i) => (
-            <motion.g key={p.id} initial={reduce ? false : { opacity: 0, scale: 0.4 }} animate={{ opacity: 1, scale: 1 }} style={{ originX: `${X(p.x)}px`, originY: `${Y(p.y)}px` }}
-              transition={{ duration: 0.7, ease: EASE, delay: ENTER + 0.3 + i * 0.08 }}>
-              <circle cx={X(p.x)} cy={Y(p.y)} r={p.chosen ? 8 : 5.5} className={p.chosen ? "pt chosen" : p.group === "asset" ? "pt asset" : "pt"} />
-              <text x={place[i].x} y={place[i].y} dy="0.35em" textAnchor={place[i].a} className={p.chosen ? "pt-label chosen" : "pt-label"}>{p.label}</text>
-            </motion.g>
-          ))}
         </svg>
       )}
     </div>
