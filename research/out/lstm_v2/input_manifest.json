@@ -1,0 +1,36 @@
+{
+ "files": {
+  "c_lstm.py": "4bf99fd79122d8dcfab8e45440c2e41217c5046804138bcb274b5b459f8c8eda",
+  "c_snapshot.py": "9769e70007d65db027df01512e40e72291fccb9b0a79993d69c48e21b0ee0ecd",
+  "d_cash.npy": "d95242039f84b4f5753f5d4e3d8e6020c1da04f27d543438aa98e40ae13ec31c",
+  "d_cuts.npy": "6098c8ef120f979571f9727a178abca8c3ff1402fd818279db155a2aa43597fd",
+  "d_dates.npy": "aad1bd16f8c47ca44959260a921b4ae6963f7283119026c665fd6810c4a2c53a",
+  "d_f_cash_yield63.npy": "a9655f31fd75108c6cd8655a0364344d7f9ef8b81c7998226fc58cfd5e489c65",
+  "d_f_dd252.npy": "b70a200626d11a7414988feaf620d62a96c3babba72e0919d4b1918df604f438",
+  "d_f_dist200.npy": "11188d56900ca02f1597979e8c9711e3f1407cb8e7e99ab4327a85407b729b35",
+  "d_f_dist50.npy": "97fd7608f8bff4dbcc4500f62eef29aa78ea07d25f3b43784c689c6dc0cfb7f1",
+  "d_f_gold_vs_equity63.npy": "82cb5ca6393300348a8635673be5e1aafd4d6d6642c87fcd7a5afb1f766526ed",
+  "d_f_pb_pct.npy": "fb3c7ec43c2f97490f511d962212c4fcafa76579517f61959e43a98490ebbeff",
+  "d_f_pe_pct.npy": "897b8e10dc4548ab1a417269315b6a62c2b18a7c5b81b8cba85786e8fb6de1d2",
+  "d_f_ret1.npy": "835870a34faca3546ee56147ec08b53787ed4fb77e479b91b0202184c31a4994",
+  "d_f_ret21.npy": "935e6ec2a0fc8e4b81c065aadab0f7da0634f082182b9f7dc0b7c19914f71187",
+  "d_f_ret252.npy": "129188358cf0326a5a046cef4b9a621531751841e632066154e3ce48f2f707ec",
+  "d_f_ret5.npy": "81d9bfccac91bfcd9abd380d849acb21afabdf2437e303f37acc8edb4fcc4389",
+  "d_f_ret63.npy": "3920b64cc83f0a4862962cb78eef3b05ec6cca57ba25f637aad3c2c0c49b712d",
+  "d_f_vix.npy": "970b723f77ca821f55e6a14daabd815a47fdda21f5312afa511a3367ac4cd176",
+  "d_f_vixchg5.npy": "596fb74db4445571b3b8db607716661bb651f359f5ffacade33aea1d17d03ec5",
+  "d_f_vol21.npy": "b195eed1dd838bb19604ec0bb5938fd387be0d927cc2b83daad98ff6bb6005dd",
+  "d_f_vol63.npy": "bfcb2ddb6eef010781d9b0f74bb958627e3d527ddc58b1b31a50d548ba31d986",
+  "d_f_vspike.npy": "7f840fbe0d8bb3fad769be912f61adf26e82dec526225d51a86b239f08f5a580",
+  "d_vwap.npy": "614345480c90c9c0b0d4b302337593a352096d97fa9cf00d1bd718e86d094d5a"
+ },
+ "meta": {
+  "assets": [
+   "NIFTYBEES",
+   "GOLDBEES",
+   "MON100"
+  ],
+  "design_end": "2026-09-30",
+  "version": "v2"
+ }
+}

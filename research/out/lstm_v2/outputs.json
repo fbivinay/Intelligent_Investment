@@ -1,0 +1,10 @@
+{
+ "files": {
+  "run.json": "c218313c4b2dde9d1a0a9d5d421acfbfeb0e23096464d45e9447da81f909dfe7",
+  "weights_L126-h32.npy": "8d3aec31f1881838b1068df8451d25e38b38c9f4a8395fa38d8690eac123e7b6",
+  "weights_L126-h64.npy": "2f2d2ca675663942299e3b139aaf7a1e53ade9c1c31f91f9fa03de01721ccde6",
+  "weights_L63-h32.npy": "abc23743886d84efc112fce20da98293403a5b607c045ddc623895a78906d8b1",
+  "weights_L63-h64.npy": "82dabd0d6a3141042889a79608c32019e337d4be5cf18b33d5fff0e687935a66",
+  "weights_chosen.npy": "695553dec8f6f7eae04b69bda521d8a5afebf6296a9e3cdf66455e7dfc34687f"
+ }
+}
