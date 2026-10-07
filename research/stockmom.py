@@ -1,16 +1,19 @@
 """Stock momentum through the exact simulator: charges by the engine (listed shares: STT 0.1% on both sides), slippage, FIFO lots, yearly tax by each
-sale's own date, both endings. Data: data/processed/stocks_eq.parquet (python -m research.stocks_build), every EQ stock 2016-01 to 2026-09.
+sale's own date, both endings. Data: data/processed/stocks_eq.parquet (python -m research.stocks_build), every EQ instrument 2016-01 to 2026-09.
 
     python -m research.stockmom
 
 Rule (the published momentum-index method, fixed before this run): on the first trading day of each quarter, after the close, the universe is the `top`
 most traded stocks (median daily value over 126 days, a year of history, traded in the last week); the score is the mean of the 6- and 12-month returns over
 the yearly volatility; the best `n` are held in equal parts, drifting until the next quarter. Bought at the next day's VWAP. No drawdown guard.
+Stocks only: EQ also lists exchange-traded fund units (liquid, gold, silver, index ETFs, an ISIN of INF...). They are left out of the ranking (a liquid
+ETF's tiny volatility gave it the top score, and the engine would charge and tax a fund as a share); the Nifty ETF is still read for the market switch.
 A stock that stops trading keeps its last price until the next rebalance sells it: a stand-in, a real delisting can pay less.
 """
 from __future__ import annotations
 
 import sys
+from functools import lru_cache
 from pathlib import Path
 
 import numpy as np
@@ -21,10 +24,18 @@ from research import baseline as B, panel as P, sim, strategies as st
 
 ROOT = Path(__file__).resolve().parents[1]
 START = "2017-04-01"
+PARQUET = ROOT / "data" / "processed" / "stocks_eq.parquet"
+
+
+@lru_cache(maxsize=1)
+def funds() -> frozenset[str]:
+    """The exchange-traded fund units in the stock file: symbols with a mutual fund unit's ISIN (INF...). Never ranked."""
+    df = pd.read_parquet(PARQUET, columns=["symbol", "isin"])
+    return frozenset(df.symbol[df["isin"].astype(str).str.startswith("INF")])
 
 
 def wide():
-    df = pd.read_parquet(ROOT / "data" / "processed" / "stocks_eq.parquet")
+    df = pd.read_parquet(PARQUET, columns=["date", "symbol", "high", "low", "close", "prev_close", "qty", "value"])
     r = df.close / df.prev_close - 1
     df["r"] = r.where(r.abs() < 0.5, 0.0)          # a >50% day is a missed corporate action or a relisting, not a return
     f = {c: df.pivot(index="date", columns="symbol", values=c) for c in ("r", "high", "low", "close", "qty", "value")}
@@ -56,14 +67,20 @@ def picks(idx, value, traded, n=30, top=500, start=START, trend=0, safe=()):
             continue
         if invested and d not in quarter:
             continue
-        live = (age.iloc[p] >= 252) & traded.iloc[p - 5:p + 1].any()
-        uni = medval.iloc[p][live].nlargest(top).index
-        i = idx[uni]
-        vol = np.log(i.iloc[p - 252:p + 1]).diff().std() * np.sqrt(252)
-        s = ((i.iloc[p] / i.iloc[p - 126] - 1) + (i.iloc[p] / i.iloc[p - 252] - 1)) / 2 / vol
-        out[d] = list(s.dropna().nlargest(n).index)
+        out[d] = list(score(idx, medval, age, traded, p, top).dropna().nlargest(n).index)
         invested = True
     return out
+
+
+def score(idx, medval, age, traded, p, top=500):
+    """The trend score of each share in the universe on day index p, from data up to that day: among the `top` most traded shares (median daily value
+    over 126 days; fund units left out) with a year of history and a trade in the last week, the mean of the 6- and 12-month returns over the yearly
+    volatility."""
+    live = (age.iloc[p] >= 252) & traded.iloc[p - 5:p + 1].any() & ~age.columns.isin(funds())
+    uni = medval.iloc[p][live].nlargest(top).index
+    i = idx[uni]
+    vol = np.log(i.iloc[p - 252:p + 1]).diff().std() * np.sqrt(252)
+    return ((i.iloc[p] / i.iloc[p - 126] - 1) + (i.iloc[p] / i.iloc[p - 252] - 1)) / 2 / vol
 
 
 def stock_panel(f, idx, symbols, start=START):
