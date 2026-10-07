@@ -19,10 +19,9 @@ everything here is past results and estimates, never a promise.
    the later ones. Trades fill at the next day's prices with slippage. Nothing uses future data (tested). Heavy runs went to Kaggle (GPU for the deep
    model, CPU for the option grids).
 4. **Calculator and website** (`calc/`, `site/`). Enter an amount, once or every month (SIP), a start and your tax profile; it replays the model with exact
-   charges and tax and compares it with ETFs and funds. The site is a desktop slide deck in three parts: Overview, Performance (the Max and Growth
-   strategies side by side with every option ranked by final value, the path, the model's trades, and what a plan started today could become at each
-   option's past return) and Evidence (five questions: what the model is, what data it reads, what goes into it, what it predicts, how that becomes an
-   investment). Live: https://intelligent-investment.vercel.app
+   charges and tax and compares it with ETFs and funds. The site is a desktop slide deck in three parts: Overview, Performance (the Max
+   strategy beside every option ranked by final value, the path, the model's trades, and what a plan started today could become at each option's past
+   return) and Evidence (how Max and the LSTM work, the data, what each model reads, and the two side by side). Live: https://intelligent-investment.vercel.app
 
 ## What we found
 
@@ -33,6 +32,7 @@ everything here is past results and estimates, never a promise.
 | Six ETFs in equal parts (adds Midcap 100 and Nasdaq 100) | about 15% a year, worst fall 28% (2013-2026) |
 | Stock momentum (30 strongest of the 500 most traded shares, ETFs left out) | about 22% a year, worst fall 48% (2017-2026) |
 | **Max**: momentum half (with a market switch) + gold ETF + Nasdaq 100 ETF | **20.3% a year, worst fall 18%** (2017-2026, the same years its switch and mix were chosen on); on the website |
+| LSTM strategy (deep learning, Kaggle T4 GPU): reads 43 daily numbers about the Nifty 50, Gold and Nasdaq 100 ETFs and the market, sets each day's mix with the liquid fund; retrained each April on earlier years only | 11.2% a year, worst fall 30% (2017-2026), well below Max; on the website beside it (a first version on six ETFs: 10.8%, 36%) |
 | Nifty futures for leverage; covered calls; insurance puts | added nothing after cost and tax: rejected |
 | **About 100 Fyers automations** (1,905 settings of intraday Nifty and Bank Nifty option, futures and signal strategies) | option selling with a stop on every leg wins; buying options on chart signals does not |
 

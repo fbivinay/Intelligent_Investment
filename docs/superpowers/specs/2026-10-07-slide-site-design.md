@@ -72,3 +72,17 @@ everywhere; desktop only; motion as the main finish.
 - Growth's colour, #56B07F, is a lighter step of the model's emerald (passes the palette checks next to it).
 - History: `e2479c3` holds this pass under a wrong message ("scale UI typography 2x"); `0170be4` reverted it from another session and `d5f97d8`
   restored it.
+
+## Third pass (2026-10-08): Max only, and an LSTM strategy beside it
+
+- The calculator and invest-today show the Max strategy only (Growth gone); `tools/site_data.py` saves Max-only answers.
+- The LSTM strategy (`research/lstm.py`), a model of its own: an LSTM reads the last 63 or 126 days of causal features (11 per ETF, 6 for the market,
+  4 missing-data flags) and outputs the next day's weights (softmax, long only, equal-weight start), trained to maximise the after-cost Sharpe ratio
+  (after Zhang, Zohren and Roberts, 2020). Retrained each April from 2017 on earlier days only; settings (sequence 63 or 126, 32 or 64 units) chosen per
+  cut on purged validation days; five seeds averaged. Trained on a Kaggle T4 GPU (`research/kaggle/lstm.py`, kernel `kernel_lstm.py`, weights verified
+  by hash); scored with every charge and tax by `research/lstm_result.py` (5% trade band).
+- Results on Rs 10 lakh, 2017-04-03 to 2026-09-30, after tax: v1 (written down first; six ETFs) 10.8% a year, worst fall 36% (it moved into Indian
+  shares just before the 2020 crash); v2 (after v1; Nifty 50, Gold and Nasdaq 100 ETFs) 11.2%, 30%. Max: 20.3%, 18%. The best fixed mix of these ETFs,
+  picked with hindsight, makes 18.6% with a 20% fall, so an ETF-only model is unlikely to reach Max. The user chose to show v2 honestly; the site says
+  both versions were trained.
+- Evidence: four slides (how the two models work, the data, what each model reads, the two side by side with a growth chart).

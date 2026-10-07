@@ -80,6 +80,12 @@ export type Facts = {
   ranking: { day: string; ranked: number; held: number; decisions: number; switch_days: number;
              top: { symbol: string; score: number; r6: number; r12: number; vol: number }[] };
   sample: { date: string; symbol: string; high: number; low: number; close: number; qty: number; value: number }[];
+  lstm: {
+    from: string; to: string; capital: number; final: number; cagr: number; worst_fall: number; orders: number; tax: number; charges: number;
+    average_mix: Record<string, number>; choice: { from: string; chosen: string }[]; gpu: string | null; series: { dates: string[]; values: number[] };
+    inputs: number; per_asset: number; market: number; flags: number; assets: string[]; seq_lens: number[]; hidden: number[]; seeds: number; cost: number;
+    version: string; tried: { version: string; etfs: number; cagr: number; worst_fall: number }[];
+  };
 };
 
 /** Invest today (calc/future.py via tools/site_data.py): each option's past yearly return after charges and tax, and value factors for 1 to 30 years. */
