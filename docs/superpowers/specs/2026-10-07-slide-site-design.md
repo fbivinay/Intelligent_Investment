@@ -58,3 +58,17 @@ everywhere; desktop only; motion as the main finish.
   (21.4% before the fix), worst fall 18%; momentum alone 22.0% (22.8%), worst fall 48%. `research/out/mixes.txt`, which chose the 50 / 25 / 25 mix, is the
   record from before the fix and no longer goes to the site.
 - Short screens (under 820 px and 680 px tall): tighter spacing and fewer secondary lines, so nothing runs under the bottom bar.
+
+## Second refinement pass (2026-10-08)
+
+- Calculator: the Max and Growth strategies side by side (final value, a year, worst fall), one request (`calc/api.py` takes `levels`, each level worked
+  out as it would be alone, test); the table ranked by final value, best first, re-ranked on every answer; the extra text and the five-level menu gone.
+  Both strategies use the same dates, from Max's first day (2017-04-03).
+- Evidence cut to five questions, one picture each: the model (product, rule-based momentum time-series model, market signal, strategy), the data (NSE
+  and AMFI, 2016-2026 daily time series, 4.6 million share rows, three real rows), the features (six, in four groups), the signals (market on or off,
+  top 30 or the rest, the class in force now lit), and the flow from data to buy, hold or sell. Testing, costs and tax, and limits are off the site.
+- The brief asked to present the strategies as an LSTM. Not done: no LSTM was trained (`research/dl/configs.py` trained GRU, TCN and MLP position
+  models; LSTM and a transformer are coded but untrained) and no network drives Max or Growth, which are rules. The Evidence names the model for what it is.
+- Growth's colour, #56B07F, is a lighter step of the model's emerald (passes the palette checks next to it).
+- History: `e2479c3` holds this pass under a wrong message ("scale UI typography 2x"); `0170be4` reverted it from another session and `d5f97d8`
+  restored it.
