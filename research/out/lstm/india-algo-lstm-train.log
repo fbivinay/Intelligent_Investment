@@ -1,0 +1,18 @@
+[{"stream_name":"stdout","time":23.766351564,"data":"23:03:25 cut 1/10: chose L63-h32\n"}
+,{"stream_name":"stdout","time":33.116219132,"data":"23:03:34 cut 2/10: chose L63-h32\n"}
+,{"stream_name":"stdout","time":60.189184781,"data":"23:04:01 cut 3/10: chose L63-h64\n"}
+,{"stream_name":"stdout","time":73.910838311,"data":"23:04:15 cut 4/10: chose L126-h64\n"}
+,{"stream_name":"stdout","time":85.253384823,"data":"23:04:26 cut 5/10: chose L63-h64\n"}
+,{"stream_name":"stdout","time":103.204157203,"data":"23:04:44 cut 6/10: chose L126-h32\n"}
+,{"stream_name":"stdout","time":131.961587208,"data":"23:05:13 cut 7/10: chose L63-h64\n"}
+,{"stream_name":"stdout","time":152.247942867,"data":"23:05:33 cut 8/10: chose L126-h64\n"}
+,{"stream_name":"stdout","time":197.314455436,"data":"23:06:18 cut 9/10: chose L63-h64\n"}
+,{"stream_name":"stdout","time":255.857160382,"data":"23:07:17 cut 10/10: chose L63-h32\n"}
+,{"stream_name":"stdout","time":255.86708176,"data":"23:07:17 done in 244.6 s\n"}
+,{"stream_name":"stderr","time":262.379684987,"data":"/usr/local/lib/python3.13/dist-packages/mistune.py:435: SyntaxWarning: invalid escape sequence '\\|'\n"}
+,{"stream_name":"stderr","time":262.37972816,"data":"  cells[i][c] = re.sub('\\\\\\\\\\|', '|', cell)\n"}
+,{"stream_name":"stderr","time":262.720170522,"data":"/usr/local/lib/python3.13/dist-packages/nbconvert/filters/filter_links.py:36: SyntaxWarning: invalid escape sequence '\\_'\n"}
+,{"stream_name":"stderr","time":262.720198428,"data":"  text = re.sub(r'_', '\\_', text) # Escape underscores in display text\n"}
+,{"stream_name":"stderr","time":263.643333155,"data":"[NbConvertApp] Converting notebook __script__.ipynb to html\n"}
+,{"stream_name":"stderr","time":264.775589282,"data":"[NbConvertApp] Writing 291076 bytes to __results__.html\n"}
+]
