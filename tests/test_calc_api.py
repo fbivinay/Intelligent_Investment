@@ -92,3 +92,27 @@ def test_the_four_etf_frozen_model_can_still_be_asked_for_and_an_unknown_model_i
     assert "frozen-design-v1" in a["stamps"]["signal"] and a["results"][0]["id"] == "PRODUCT_Conservative"
     assert "model" in api.calculate({"amount": 200000, "start": "2018-06-01", "end": "2019-06-03", "model": "eight"})["error"]
     assert "level" in api.calculate({"amount": 200000, "start": "2018-06-01", "end": "2019-06-03", "model": "four", "level": "Growth"})["error"]
+
+
+def test_the_lean_answer_has_no_traces_csv_or_projections_but_every_figure_and_the_chart_series():
+    a = api.calculate({"amount": 200000, "start": "2018-06-01", "end": "2019-06-03", "level": "Conservative", "compare": ["GOLDBEES"], "lean": True})
+    assert a["traces"] == {} and a["projections"] == {} and a["csv"] == {"trades": "", "tax_lines": ""}
+    g = next(r for r in a["results"] if r["id"] == "GOLDBEES")
+    assert g["net"]["trace"] is None and g["invested"] == 200000 and g["profit"] == pytest.approx(g["net"]["value"] - 200000)
+    s = a["series"]["GOLDBEES"]
+    assert len(s["dates"]) == len(s["values"]) == len(s["invested"]) == len(s["drawdown"]) and max(s["drawdown"]) == pytest.approx(g["worst_fall"], abs=1e-4)
+    assert g["years"][0] == {"year": 2018, "value": g["years"][0]["value"], "partial": True} and g["fall"]["depth"] == pytest.approx(g["worst_fall"], abs=1e-6)
+
+
+def test_a_monthly_plan_answer_and_the_models_activity():
+    a = api.calculate({"mode": "sip", "amount": 10000, "start": "2018-06-01", "end": "2019-06-03", "level": "Balanced", "compare": ["NIFTYBEES", "LIQUID_FUND"],
+                       "lean": True})
+    assert a["inputs"]["mode"] == "sip" and all(r["invested"] == 130000 for r in a["results"])              # 13 payments, June 2018 to June 2019
+    s = a["series"]["NIFTYBEES"]
+    assert s["invested"][0] == 10000 and s["invested"][-1] == 130000
+    act = a["activity"]
+    assert act["totals"]["orders"] == a["results"][0]["orders"] and act["totals"]["trade_days"] == len(act["days"])
+    shares = act["allocation"]["shares"]
+    for k in range(len(act["allocation"]["dates"])):
+        assert sum(shares[g][k] for g in act["groups"]) == pytest.approx(1.0, abs=2e-3)
+    assert "mode" in api.calculate({"mode": "weekly", "amount": 1, "start": "2018-06-01", "end": "2019-06-03"})["error"]

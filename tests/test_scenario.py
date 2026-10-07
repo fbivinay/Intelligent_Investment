@@ -3,7 +3,7 @@ from decimal import ROUND_HALF_UP, Decimal as Dc
 
 import pytest
 
-from engine.scenario import Bar, buy_and_hold
+from engine.scenario import Bar, buy_and_hold, buy_monthly
 from engine.tax import TaxProfile
 from engine.trace import assert_balanced
 from tests.helpers import make_rules, table
@@ -150,3 +150,47 @@ def test_a_unit_step_that_is_not_positive_is_refused(rules):
     with pytest.raises(ValueError, match="step"):
         buy_and_hold(rules, instrument="FUND", instrument_class="mf_equity", bars=bars(), dividends={}, amount=Dc("100000"), start=date(2015, 4, 1),
                      end=date(2019, 6, 3), profile=TaxProfile("old", Dc(0)), unit_step=Dc(0))
+
+
+def plan(rules, payments, **kw):
+    return buy_monthly(rules, instrument="ETF", instrument_class="etf_equity", bars=bars(), dividends=kw.pop("dividends", {}), payments=payments,
+                       end=date(2019, 6, 3), profile=TaxProfile("old", Dc("1000000")), **kw)
+
+
+def test_a_plan_of_one_payment_is_the_buy_and_hold_of_that_payment(rules):
+    divs = {date(2016, 6, 1): Dc("2")}
+    one, lump = plan(rules, [(date(2015, 4, 1), Dc("1000000"))], dividends=divs), run(rules, "1000000", dividends=divs)
+    for k in ("net", "tax", "charges", "gross_end", "amc", "account_opening"):
+        assert one.waterfall[k].value == lump.waterfall[k].value, k
+    assert one.units == lump.units and one.buys == ((date(2015, 4, 1), Dc("1000000"), lump.units, lump.units * 100 + lump.waterfall["buy_charges"].value),)
+
+
+def test_each_payment_buys_a_lot_with_what_the_earlier_ones_left_and_the_lots_are_sold_first_in_first_out(rules):
+    r = plan(rules, [(date(2015, 4, 1), Dc("50")), (date(2015, 5, 1), Dc("60")), (date(2018, 3, 1), Dc("100000"))])
+    assert [b[2] for b in r.buys] == [0, 1, r.buys[2][2]] and r.buys[2][2] == 333       # 50 buys nothing; 110 buys one unit at 100; 100,000 at 300
+    assert r.units == 334 and r.waterfall["initial"].value == Dc("100110")
+    assert_balanced(r.net)
+    lots = {n.value.quantize(Dc("0.01")) for n in _walk(r.waterfall["tax"]) if n.label == "Sale proceeds of these units"}
+    assert lots == {Dc("300.00"), Dc("99900.00")}                                           # one capital gains event per lot: 1 unit, then 333
+
+
+def test_dividends_are_paid_only_on_the_units_bought_before_the_ex_date(rules):
+    pays = [(date(2015, 4, 1), Dc("100000")), (date(2016, 7, 1), Dc("100000"))]
+    with_div, without = plan(rules, pays, dividends={date(2016, 6, 1): Dc("2")}), plan(rules, pays)
+    first_lot = with_div.buys[0][2]
+    assert with_div.waterfall["gross_profit"].value - without.waterfall["gross_profit"].value == 2 * first_lot
+
+
+def test_a_plan_still_holding_pays_no_sale_charges_or_capital_gains_tax_and_a_plan_with_nothing_bought_is_refused(rules):
+    r = plan(rules, [(date(2015, 4, 1), Dc("100000")), (date(2016, 4, 1), Dc("100000"))], sell_at_end=False)
+    assert r.waterfall["sale_charges"].value == 0 and r.waterfall["tax"].value == 0 and not r.sold
+    with pytest.raises(ValueError, match="too small"):
+        plan(rules, [(date(2015, 4, 1), Dc("10")), (date(2015, 5, 1), Dc("10"))])
+    with pytest.raises(ValueError, match="more than"):
+        plan(rules, [])
+
+
+def _walk(n):
+    yield n
+    for i in n.inputs:
+        yield from _walk(i)
