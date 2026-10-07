@@ -1,39 +1,37 @@
-import type { Metadata } from "next";
-import { Geist, Instrument_Serif } from "next/font/google";
-import { Nav } from "@/components/Nav";
-import { ScenarioProvider } from "@/lib/scenario";
+import type { Metadata, Viewport } from "next";
+import { Archivo } from "next/font/google";
+import { Deck } from "@/components/Deck";
+import { DataProvider } from "@/lib/data";
 import "./globals.css";
 
-const sans = Geist({ subsets: ["latin"], variable: "--font-sans" });
-const serif = Instrument_Serif({ subsets: ["latin"], weight: "400", variable: "--font-serif" });
+// One family, used two ways: normal width for words, expanded width for money.
+const archivo = Archivo({ subsets: ["latin", "latin-ext"], axes: ["wdth"], variable: "--font-archivo", display: "swap" });
 
 export const metadata: Metadata = {
   title: "Intelligent Investment",
-  description: "What your money could have become in Indian markets, after every real charge and every tax, compared with the ordinary ways to invest.",
+  description: "What money invested in Indian markets could have become, after every real charge and every tax, set beside the ordinary ways to invest.",
 };
+
+export const viewport: Viewport = { themeColor: "#F5F6F2" };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en-IN" className={`${sans.variable} ${serif.variable}`}>
+    <html lang="en-IN" className={archivo.variable}>
       <body>
         <div className="gate" role="note">
-          <svg className="gate-art" viewBox="0 0 160 110" aria-hidden>
-            <rect className="gate-screen" x="22" y="10" width="116" height="74" rx="6" />
-            <path className="gate-base" d="M6 92h148l-8 8H14z" />
-            <path className="gate-line" d="M34 70 L52 58 L66 64 L84 44 L100 50 L124 26" />
+          <svg width="120" height="84" viewBox="0 0 120 84" aria-hidden>
+            <rect x="14" y="6" width="92" height="58" rx="7" fill="none" stroke="currentColor" strokeWidth="2" />
+            <path d="M4 72h112l-6 6H10z" fill="currentColor" opacity=".18" />
+            <path d="M26 50 42 38l10 6 16-18 12 6 14-14" fill="none" stroke="var(--model)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
           <h1>This experience is designed for a larger screen.</h1>
           <p>Open Intelligent Investment on a laptop or desktop for the full experience.</p>
         </div>
         <div className="app">
-          <ScenarioProvider>
-            <Nav />
-            {children}
-            <footer className="foot wrap">
-              <span>Intelligent Investment</span>
-              <span>Past results, not a promise. Not investment advice. No orders are ever sent.</span>
-            </footer>
-          </ScenarioProvider>
+          <DataProvider>
+            <Deck />
+          </DataProvider>
+          {children}
         </div>
       </body>
     </html>

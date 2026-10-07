@@ -1,0 +1,107 @@
+{
+ "stocks": {
+  "symbols": 3711,
+  "rows": 4585946,
+  "from": "2016-01-01",
+  "to": "2026-09-30"
+ },
+ "rules": {
+  "rows": 197,
+  "from": "2010-04-01",
+  "verified_on": "2026-10-02"
+ },
+ "max": {
+  "momentum": 0.5,
+  "fixed": {
+   "GOLDBEES": 0.25,
+   "MON100": 0.25
+  },
+  "trend_days": 200
+ },
+ "costs": {
+  "stock_half_spread": 0.001,
+  "etf_half_spread": {
+   "GOLDBEES": 0.0006,
+   "MON100": 0.0015
+  },
+  "impact": 0.005,
+  "max_slippage": 0.03
+ },
+ "universe_runs": [
+  {
+   "picks": 30,
+   "universe": 500,
+   "a_year": 0.22777876659881913,
+   "worst_fall": 0.4773414456625633,
+   "orders": 1574
+  },
+  {
+   "picks": 20,
+   "universe": 500,
+   "a_year": 0.2672552679271205,
+   "worst_fall": 0.4041697003062975,
+   "orders": 1122
+  },
+  {
+   "picks": 50,
+   "universe": 500,
+   "a_year": 0.21889477304870986,
+   "worst_fall": 0.4339402793578174,
+   "orders": 2197
+  },
+  {
+   "picks": 30,
+   "universe": 200,
+   "a_year": 0.14163457290952053,
+   "worst_fall": 0.4211551283378614,
+   "orders": 1336
+  }
+ ],
+ "mixes": [
+  {
+   "what": "nifty",
+   "a_year": 0.108,
+   "worst_fall": 0.363
+  },
+  {
+   "what": "nasdaq",
+   "a_year": 0.245,
+   "worst_fall": 0.366
+  },
+  {
+   "what": "gold",
+   "a_year": 0.174,
+   "worst_fall": 0.244
+  },
+  {
+   "what": "mom",
+   "a_year": 0.234,
+   "worst_fall": 0.495
+  },
+  {
+   "what": "momT",
+   "a_year": 0.214,
+   "worst_fall": 0.333
+  },
+  {
+   "what": "momT50+growth50",
+   "a_year": 0.19,
+   "worst_fall": 0.239
+  },
+  {
+   "what": "momT70+gold30",
+   "a_year": 0.217,
+   "worst_fall": 0.223
+  },
+  {
+   "what": "momT50+gold25+nasdaq25",
+   "a_year": 0.225,
+   "worst_fall": 0.19
+  },
+  {
+   "what": "momT60+gold20+nasdaq20",
+   "a_year": 0.224,
+   "worst_fall": 0.203
+  }
+ ]
+}
