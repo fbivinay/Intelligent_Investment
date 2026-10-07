@@ -3,11 +3,10 @@ and the repository facts the Evidence pages quote. Rerun after the data, the rul
 
     python -m tools.site_data
 
-site/public/data/lump.json    Rs 10 lakh once, from the Max level's first day, the Max and Growth levels beside every alternative: the Overview and the
-                              calculator's first answer
+site/public/data/lump.json    Rs 10 lakh once, from the Max level's first day, beside every alternative: the Overview and the calculator's first answer
 site/public/data/sip.json     Rs 5,000 every month over the same years: the calculator's first monthly answer
 site/public/data/future.json  each option's yearly return after charges and tax over those years, and the invest-today factors (calc.future)
-site/public/data/facts.json   the data (counts, periods, real sample rows) and the Max level's latest ranking, read from the files
+site/public/data/facts.json   the data (counts, periods, real sample rows), the Max level's latest ranking and the LSTM strategy's record, read from the files
 """
 from __future__ import annotations
 
@@ -19,16 +18,17 @@ import pandas as pd
 import pyarrow.parquet as pq
 
 from calc import api, future, options as O
-from calc.product import DATA_END, LEVELS
-from research import maxmodel as X, panel as P, stockmom as M
+from calc.product import DATA_END
+from research import lstm as L, maxmodel as X, panel as P, stockmom as M
+from research.kaggle import lstm as KL
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "site" / "public" / "data"
 START = "2017-04-03"                                     # the Max level's first day: every option is measured over the same years from it
 ALTERNATIVES = [o.id for o in O.OPTIONS if o.kind != "product"]
-COMMON = {"end": DATA_END.isoformat(), "level": "Max", "levels": ["Max", "Growth"], "compare": ALTERNATIVES, "regime": "new", "other_income": 1200000,
-          "lean": True}
+COMMON = {"end": DATA_END.isoformat(), "level": "Max", "levels": ["Max"], "compare": ALTERNATIVES, "regime": "new", "other_income": 1200000, "lean": True}
 SAMPLE = ("RELIANCE", "HDFCBANK", "INFY")
+LSTM_VERSION = "v2"                                      # the LSTM strategy the Evidence shows (research/kaggle/lstm.py names the versions)
 RUNS = {"lump": {**COMMON, "mode": "lump", "amount": 1000000, "start": START},
         "sip": {**COMMON, "mode": "sip", "amount": 5000, "start": START}}
 
@@ -62,6 +62,23 @@ def sample() -> list[dict]:
              "value": float(r.value)} for k, r in last.iterrows()]
 
 
+def lstm(version: str = LSTM_VERSION) -> dict:
+    """The LSTM strategy's record (research/lstm_result.py, from the Kaggle kernel's weights) and the facts of its design (research/lstm.py), for the
+    version the site shows."""
+    res = json.loads((KL.out_dir(version) / "result.json").read_text(encoding="utf-8"))
+    assets = KL.VERSIONS[version]
+    return {**res, "inputs": len(L.PER_ASSET) * len(assets) + len(L.MARKET) + len(L.MAY_BE_MISSING), "per_asset": len(L.PER_ASSET),
+            "market": len(L.MARKET), "flags": len(L.MAY_BE_MISSING), "assets": [*assets, "LIQUID_FUND"],
+            "seq_lens": sorted({c["seq_len"] for c in L.CONFIGS}), "hidden": sorted({c["hidden"] for c in L.CONFIGS}), "seeds": len(L.SEEDS), "cost": L.COST,
+            "tried": [{"version": v, "etfs": len(KL.VERSIONS[v]), **{k: r[k] for k in ("cagr", "worst_fall")}}
+                      for v in KL.VERSIONS if (r := _result(v))]}
+
+
+def _result(version: str) -> dict | None:
+    path = KL.out_dir(version) / "result.json"
+    return json.loads(path.read_text(encoding="utf-8")) if path.exists() else None
+
+
 def facts() -> dict:
     stocks = pd.read_parquet(M.PARQUET, columns=["date", "symbol"])
     fields = [c for c in pq.read_schema(M.PARQUET).names if c not in ("date", "symbol")]
@@ -71,20 +88,13 @@ def facts() -> dict:
                        "to": str(stocks.date.max().date()), "fields": fields},
             "etfs": {"symbols": [a for a in P.GROWTH], "rows": len(etf), "from": etf.date.min(), "to": etf.date.max()},
             "max": {"momentum": X.MOMENTUM, "fixed": X.FIXED, "trend_days": X.TREND},
-            "ranking": ranking(), "sample": sample()}
+            "ranking": ranking(), "sample": sample(), "lstm": lstm()}
 
 
 def projections(lump: dict) -> dict:
-    """Each option's yearly return after charges and tax over the same years (Rs 10 lakh once from the Max level's first day; each model level run on
-    those years too), and the invest-today factors made from them."""
+    """Each option's yearly return after charges and tax over the same years (Rs 10 lakh once from the Max level's first day), and the invest-today
+    factors made from them."""
     rates = {r["id"]: {"rate": r["growth"], "worst_fall": r["worst_fall"]} for r in lump["results"]}
-    for level in LEVELS:
-        if f"PRODUCT_{level}" in rates:
-            continue
-        a = api.calculate({**RUNS["lump"], "levels": [level], "compare": []})
-        assert "error" not in a and not a["messages"], a.get("error") or a["messages"]
-        r = a["results"][0]
-        rates[r["id"]] = {"rate": r["growth"], "worst_fall": r["worst_fall"]}
     return {"label": future.LABEL, "from": START, "to": DATA_END.isoformat(), "amount": RUNS["lump"]["amount"], "regime": "new", "other_income": 1200000,
             "rates": rates, "factors": future.factors({k: v["rate"] for k, v in rates.items()})}
 

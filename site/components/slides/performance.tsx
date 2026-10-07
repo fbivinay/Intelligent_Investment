@@ -7,9 +7,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { LIMITS, request, useData, type Form } from "@/lib/data";
 import type { SlideDef } from "@/lib/deck";
 import { count, day, inr, money, month, pct, signed, span, tick } from "@/lib/format";
-import { ALTERNATIVES, colorOf, DATA_END, groupColor, groupName, isModel, LEVELS, levelOf, nameOf, STRATEGIES } from "@/lib/names";
+import { ALTERNATIVES, colorOf, DATA_END, groupColor, groupName, isModel, levelOf, nameOf, STRATEGIES } from "@/lib/names";
 import { grid } from "@/lib/scale";
-import type { Answer, Level, Result, TradeDay } from "@/lib/types";
+import type { Answer, Result, TradeDay } from "@/lib/types";
 import { LineChart, RankedBars, StackArea, TradeStrip, type LineSeries } from "../charts";
 import { Appear, Arrow, Chip, Counter, EASE, ENTER, Key, Rise, Segmented, SWEEP } from "../ui";
 import { Loading } from "./overview";
@@ -494,13 +494,13 @@ function Trades() {
   );
 }
 
-type Plan = { mode: "lump" | "sip"; lump: number; sip: number; years: number; level: Level };
+type Plan = { mode: "lump" | "sip"; lump: number; sip: number; years: number };
 
 /** Invest today: the plan, then one step from money in, through the return each option earned after charges and tax, to what it could be worth.
  * The factors are the backend's (calc/future.py, saved by tools/site_data.py); the value is the factor times the payment. */
 function Future() {
   const { saved } = useData();
-  const [plan, setPlan] = useState<Plan>({ mode: "lump", lump: 1_000_000, sip: 5_000, years: 5, level: "Max" });
+  const [plan, setPlan] = useState<Plan>({ mode: "lump", lump: 1_000_000, sip: 5_000, years: 5 });
   if (!saved) return <Loading text="Loading the projection" />;
   return <FutureBody f={saved.future} plan={plan} set={(p) => setPlan((x) => ({ ...x, ...p }))} />;
 }
@@ -519,7 +519,7 @@ function FutureBody({ f, plan, set }: { f: NonNullable<ReturnType<typeof useData
   const amount = plan.mode === "lump" ? plan.lump : plan.sip;
   const invested = plan.mode === "lump" ? amount : amount * 12 * plan.years;
   const worth = (id: string) => amount * f.factors[id][plan.mode][plan.years - 1];
-  const modelId = `PRODUCT_${plan.level}`;
+  const modelId = `PRODUCT_${STRATEGIES[0]}`;
   const rows = [modelId, ...ALTERNATIVES].filter((id) => f.rates[id]).map((id) => ({ id, rate: f.rates[id].rate, value: worth(id) }))
     .sort((x, y) => y.value - x.value);
   const model = rows.find((r) => r.id === modelId)!;
@@ -536,14 +536,6 @@ function FutureBody({ f, plan, set }: { f: NonNullable<ReturnType<typeof useData
             <input id="future-years" className="range" type="range" min={1} max={20} step={1} value={plan.years} onChange={(e) => set({ years: +e.target.value })} />
             <div className="range-ends" aria-hidden><span>1 year</span><span>20 years</span></div>
           </div>
-          <div className="field">
-            <label htmlFor="future-level">Strategy</label>
-            <div className="select">
-              <select id="future-level" value={plan.level} onChange={(e) => set({ level: e.target.value as Level })}>
-                {LEVELS.map((l) => <option key={l.id} value={l.id}>Intelligent Investment {l.name}</option>)}
-              </select>
-            </div>
-          </div>
           <p className="field-hint future-note">An estimate from history, not a forecast: each option earns again what it made a year after charges and tax from
             {" "}{month(f.from)} to {month(f.to)} ({money(f.amount, 0)} once, {f.regime} tax regime).</p>
         </form>
@@ -554,7 +546,7 @@ function FutureBody({ f, plan, set }: { f: NonNullable<ReturnType<typeof useData
           <Step label={plan.mode === "lump" ? "You invest today" : "You invest every month"} value={<Counter value={amount} format={(n) => money(n)} />}
             sub={plan.mode === "lump" ? "once" : <>{plan.years * 12} payments, <Counter value={invested} format={(n) => money(n)} /> in all</>} />
           <span className="flow-arrow" aria-hidden><Arrow dir="right" /></span>
-          <Step label={`At its past return (${levelOf(plan.level).name})`} value={<Counter value={model.rate} format={(n) => `${pct(n)} a year`} />}
+          <Step label="At Max's past return" value={<Counter value={model.rate} format={(n) => `${pct(n)} a year`} />}
             sub={`after charges and tax, ${month(f.from)} to ${month(f.to)}`} />
           <span className="flow-arrow" aria-hidden><Arrow dir="right" /></span>
           <Step strong label={`It could be worth, after ${span1}`} value={<Counter value={model.value} format={(n) => money(n)} />}
@@ -562,8 +554,8 @@ function FutureBody({ f, plan, set }: { f: NonNullable<ReturnType<typeof useData
         </Appear>
         <div className="chart-title"><span>The same plan in every option, at each one&rsquo;s past return</span></div>
         <div className="future-list" data-scroll>
-          <RankedBars label="What each option could become" version={`${plan.mode}${plan.years}${amount}${plan.level}`} rows={rows.map((r) => ({
-            id: r.id, name: r.id === modelId ? `Intelligent Investment ${levelOf(plan.level).name}` : label(r.id), color: colorOf(r.id), value: Math.max(r.value, 0),
+          <RankedBars label="What each option could become" version={`${plan.mode}${plan.years}${amount}`} rows={rows.map((r) => ({
+            id: r.id, name: label(r.id), color: colorOf(r.id), value: Math.max(r.value, 0),
             strong: r.id === modelId,
             text: <Counter value={r.value} format={(n) => money(n)} />,
             aside: <span><b>{pct(r.rate)}</b> a year</span>,

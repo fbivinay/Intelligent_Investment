@@ -6,7 +6,6 @@ import type { Level } from "./types";
 // 3:1 against the page, always appear with their name beside them.
 export const OPTIONS: Record<string, { name: string; color: string; what: string }> = {
   PRODUCT: { name: "Intelligent Investment", color: "#087A52", what: "The model" },
-  PRODUCT_Growth: { name: "Growth strategy", color: "#56B07F", what: "Six ETFs in equal parts" },     // a lighter step of the model's hue: our second strategy
   NIFTYBEES: { name: "Nifty 50 ETF", color: "#2F63B3", what: "India's 50 largest companies" },
   GOLDBEES: { name: "Gold ETF", color: "#A9770C", what: "Gold" },
   MON100: { name: "Nasdaq 100 ETF", color: "#C4467C", what: "100 large US companies, in rupees" },
@@ -28,8 +27,8 @@ export const nameOf = (id: string) => OPTIONS[key(id)]?.name ?? id;
 export const colorOf = (id: string) => OPTIONS[key(id)]?.color ?? "#7A857F";
 export const isModel = (id: string) => id.startsWith("PRODUCT_");
 
-/** The two Intelligent Investment strategies the calculator works out side by side, the model (Max) first. */
-export const STRATEGIES: Level[] = ["Max", "Growth"];
+/** The strategy the calculator works out beside the alternatives. */
+export const STRATEGIES: Level[] = ["Max"];
 
 // The model's levels (calc/options.py); Max is the one the site presents.
 export const LEVELS: { id: Level; name: string; line: string; first: string }[] = [

@@ -247,7 +247,9 @@ small { font-size: 0.85em; color: var(--ink-3); }
 .table-wrap { flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: thin; }
 .compare thead th { position: sticky; top: 0; z-index: 1; background: var(--paper); }
 .period { font-size: 21px; color: var(--ink-2); }
-.strategy-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2vw; margin: 1.6vh 0 1.8vh; }
+.strategy-cards { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 1.2vw; margin: 1.6vh 0 1.8vh; }
+.strategy-cards .scard:only-child { flex-direction: row; flex-wrap: wrap; align-items: baseline; column-gap: 2.4vw; }
+.strategy-cards .scard:only-child .scard-name { flex-basis: 100%; }
 .scard { display: flex; flex-direction: column; gap: 4px; padding: 1.6vh 1.4vw 1.8vh; border: 1px solid var(--rule-2); border-radius: 18px; background: var(--card); min-width: 0; }
 .scard.main { background: var(--model-wash); border-color: transparent; }
 .scard-name { display: flex; align-items: center; font-size: 19px; font-weight: 560; }
@@ -384,16 +386,6 @@ table.compare { width: 100%; border-collapse: collapse; font-variant-numeric: ta
 .rail-step.is-now .rail-n { color: #fff; border-color: transparent; background: transparent; }
 .rail-mark { position: absolute; left: 0; top: 50%; width: 34px; height: 34px; margin-top: -17px; border-radius: 50%; background: var(--model); z-index: 1; }
 
-/* 1 the model: a chain read top to bottom, a dot running down it */
-.chain { position: relative; list-style: none; margin: auto 0; padding: 0 0 0 46px; display: grid; gap: 3.4vh; max-width: 1180px; }
-.chain::before { content: ""; position: absolute; left: 11px; top: 0.9em; bottom: 0.9em; width: 2px; background: var(--rule-2); }
-.chain-dot { position: absolute; left: 5px; width: 14px; height: 14px; margin-top: -7px; border-radius: 50%; background: var(--model); box-shadow: 0 0 0 6px rgba(8, 122, 82, .15); z-index: 1; }
-.chain li { position: relative; display: grid; grid-template-columns: 7.2em minmax(0, 1fr); column-gap: 1.6vw; row-gap: 4px; align-items: baseline; }
-.chain-node { position: absolute; left: -41px; top: 0.7em; width: 14px; height: 14px; border-radius: 50%; background: var(--paper); border: 2px solid var(--model); }
-.chain-k { grid-row: span 2; font-size: 17px; font-weight: 600; color: var(--model-ink); }
-.chain-t { font-size: clamp(28px, 1.6vw + 1.6vh, 54px); font-weight: 560; font-stretch: 108%; letter-spacing: -0.025em; line-height: 1.08; }
-.chain-d { font-size: clamp(18px, 0.5vw + 1vh, 24px); color: var(--ink-2); line-height: 1.4; }
-
 /* 2 data: the facts across the top, real rows below */
 .data-strip { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 1.8vw; margin: 0; }
 .data-strip > div { display: flex; flex-direction: column; gap: 6px; border-top: 2px solid var(--ink); padding-top: 1.4vh; min-width: 0; }
@@ -414,55 +406,51 @@ table.rows { width: 100%; border-collapse: collapse; font-variant-numeric: tabul
 .rows td:first-child { color: var(--ink-3); padding-right: 12px; }
 .rows .more-rows td { text-align: left; color: var(--ink-3); font-size: 15px; padding-left: 0; }
 
-/* 3 features: six, in four groups */
-.feat-count { display: flex; align-items: baseline; gap: 1.2vw; }
-.feat-count b { font-size: clamp(64px, 4.6vw + 2vh, 150px); line-height: .9; font-weight: 580; font-stretch: 125%; letter-spacing: -0.05em; color: var(--model); }
-.feat-count span { font-size: clamp(20px, 0.7vw + 1vh, 28px); color: var(--ink-2); max-width: 24em; }
-.feat-groups { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1.2vw; }
-.feat-group { display: flex; flex-direction: column; gap: 10px; padding: 2vh 1.3vw 2.2vh; border: 1px solid var(--rule-2); border-radius: 18px; background: var(--card); min-width: 0; }
-.feat-icon svg { display: block; width: 30px; height: 30px; fill: none; stroke: var(--model); stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
-.feat-group b { font-size: clamp(21px, 0.8vw + 0.9vh, 30px); font-weight: 560; font-stretch: 108%; letter-spacing: -0.015em; }
-.feat-group ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
-.feat-group li { font-size: 17px; color: var(--ink-2); line-height: 1.4; }
-.feat-into { display: flex; align-items: center; gap: 16px; color: var(--ink-3); }
-.feat-into p { font-size: clamp(18px, 0.5vw + 1vh, 24px); color: var(--ink); padding: 1.2vh 1.4vw; border-radius: 12px; background: var(--model-wash); }
+/* 1 models: Max and the LSTM, three plain steps each */
+.model-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 2vw; margin: auto 0; }
+.mcard { display: flex; flex-direction: column; gap: 2.2vh; padding: 2.6vh 1.8vw 3vh; border-radius: 20px; background: var(--model-wash); min-width: 0; }
+.mcard.lstm { background: var(--card); border: 1px solid var(--rule-2); }
+.mcard-head { display: flex; align-items: center; }
+.mcard-head b { font-size: clamp(24px, 1.2vw + 1.1vh, 40px); font-weight: 580; font-stretch: 112%; letter-spacing: -0.025em; }
+.mcard-kind { margin-left: auto; font-size: 15px; font-weight: 600; padding: 4px 12px; border-radius: 999px; background: var(--paper); color: var(--ink-2); }
+.mcard ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 2.2vh; }
+.mcard li { display: grid; grid-template-columns: 34px minmax(0, 1fr); column-gap: 14px; row-gap: 4px; }
+.mstep-n { grid-row: span 2; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: var(--model); color: #fff; font-size: 16px; font-weight: 600; }
+.mcard.lstm .mstep-n { background: var(--ink-2); }
+.mcard li b { font-size: clamp(19px, 0.6vw + 1vh, 26px); font-weight: 560; line-height: 1.2; }
+.mcard li > span:last-child { font-size: clamp(16px, 0.35vw + 0.9vh, 20px); color: var(--ink-2); line-height: 1.45; }
 
-/* 4 signals: two signals, two classes each, the one in force lit */
-.classes { display: grid; gap: 2.4vh; }
-.class-row { display: grid; grid-template-columns: 8.5em minmax(0, 1fr) minmax(0, 1fr); gap: 1.2vw; align-items: stretch; }
-.class-k { align-self: center; font-size: 18px; font-weight: 600; color: var(--model-ink); }
-.class { position: relative; display: flex; flex-direction: column; gap: 8px; padding: 2.2vh 1.4vw; border: 1px solid var(--rule-2); border-radius: 18px; background: var(--card); color: var(--ink-3); }
-.class b { font-size: clamp(30px, 2vw + 1.2vh, 62px); font-weight: 580; font-stretch: 125%; letter-spacing: -0.04em; line-height: 1; color: var(--ink-3); }
-.class span { font-size: 17px; line-height: 1.4; }
-.class em { font-style: normal; font-size: 16px; color: var(--ink-2); font-weight: 560; }
-.class.lit { background: var(--model-wash); border-color: transparent; color: var(--ink-2); }
-.class.lit b { color: var(--model); }
-.class.lit.off { background: var(--fall-wash); }
-.class.lit.off b { color: var(--fall); }
-.now { position: absolute; top: 1.8vh; right: 1.2vw; font-style: normal; font-size: 14px; font-weight: 600; color: var(--paper); background: var(--ink); padding: 3px 12px; border-radius: 999px; }
+/* 3 features: what each model reads */
+.feat-pair { display: grid; grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr); gap: 2vw; }
+.fcol { display: flex; flex-direction: column; gap: 1.5vh; padding: 2.2vh 1.6vw; border-radius: 20px; background: var(--model-wash); min-width: 0; }
+.fcol.lstm { background: var(--card); border: 1px solid var(--rule-2); }
+.fcol-head { display: flex; align-items: center; }
+.fcol-head b { font-size: clamp(22px, 1vw + 1vh, 34px); font-weight: 580; font-stretch: 112%; letter-spacing: -0.02em; }
+.fcount { display: flex; align-items: baseline; gap: 14px; }
+.fcount b { font-size: clamp(48px, 3vw + 2vh, 104px); line-height: .9; font-weight: 580; font-stretch: 125%; letter-spacing: -0.05em; color: var(--model); }
+.fcol.lstm .fcount b { color: var(--ink); }
+.fcount span { font-size: clamp(17px, 0.4vw + 1vh, 22px); color: var(--ink-2); }
+.fchips, .fgroups { list-style: none; margin: 0; padding: 0; display: grid; gap: 1vh; }
+.fchips li, .fgroups li { display: flex; flex-direction: column; gap: 2px; padding: 1.1vh 1vw; border-radius: 12px; background: var(--paper); }
+.fchips b, .fgroups b { font-size: clamp(17px, 0.4vw + 1vh, 22px); font-weight: 600; }
+.fchips span, .fgroups span { font-size: 16px; color: var(--ink-2); line-height: 1.4; }
+.fformula { font-size: 17px; font-weight: 560; }
+.fnote { font-size: 16px; color: var(--ink-2); line-height: 1.45; margin-top: auto; }
 
-/* 5 strategy: one flow, then the three actions */
-.flow-row { list-style: none; margin: 0; padding: 0; display: grid; column-gap: 30px; }
-.flow-stage { position: relative; display: flex; min-width: 0; }
-.flow-stage button {
-  position: relative; flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; text-align: left;
-  padding: 2vh 1.1vw 2.2vh; border: 1px solid var(--rule-2); border-radius: 18px; background: var(--card); color: var(--ink); transition: border-color .25s, color .35s;
-}
-.flow-stage button:hover { border-color: var(--ink-3); }
-.flow-stage.on button { color: #fff; border-color: var(--model); }
-.flow-lit { position: absolute; inset: -1px; border-radius: 18px; background: var(--model); }
-.flow-icon, .flow-name, .flow-line { position: relative; }
-.flow-icon svg { display: block; width: 32px; height: 32px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
-.flow-name { font-size: clamp(19px, 0.7vw + 0.9vh, 27px); font-weight: 560; font-stretch: 108%; letter-spacing: -0.015em; line-height: 1.1; }
-.flow-line { font-size: 16px; line-height: 1.4; color: var(--ink-2); transition: color .35s; }
-.flow-stage.on .flow-line { color: rgba(255, 255, 255, .85); }
-.flow-stage .flow-arrow { position: absolute; right: -30px; top: 50%; width: 30px; translate: 0 -50%; }
-.actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.2vw; margin-top: auto; }
-.act { display: flex; flex-direction: column; gap: 8px; padding: 2vh 1.4vw; border-radius: 18px; border: 1px solid var(--rule-2); background: var(--card); }
-.act b { font-size: clamp(30px, 1.8vw + 1.2vh, 56px); font-weight: 580; font-stretch: 125%; letter-spacing: -0.04em; line-height: 1; }
-.act span { font-size: 17px; color: var(--ink-2); line-height: 1.4; }
-.act.buy b { color: var(--model); }
-.act.sell b { color: var(--fall); }
+/* 4 Max and the LSTM side by side */
+.side-body { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(300px, 0.8fr) minmax(0, 1.2fr); gap: 2.4vw; }
+.side-cards { display: grid; gap: 1.6vh; align-content: start; }
+.rcard { display: flex; flex-direction: column; gap: 4px; padding: 2vh 1.4vw; border-radius: 18px; background: var(--model-wash); }
+.rcard.lstm { background: var(--card); border: 1px solid var(--rule-2); }
+.rcard-name { display: flex; align-items: center; font-size: 19px; font-weight: 600; }
+.rcard-value { font-size: clamp(32px, 2vw + 1.4vh, 60px); line-height: 1.02; font-weight: 580; font-stretch: 125%; letter-spacing: -0.045em; white-space: nowrap; color: var(--model); }
+.rcard.lstm .rcard-value { color: var(--ink); }
+.rcard-line { font-size: clamp(17px, 0.4vw + 1vh, 22px); color: var(--ink-2); }
+.rcard-line b { color: var(--ink); }
+.rcard-fall { font-size: clamp(17px, 0.4vw + 1vh, 22px); color: var(--fall); font-weight: 600; }
+.rcard-how { font-size: 16px; color: var(--ink-2); line-height: 1.45; margin-top: 6px; }
+.side-chart { display: flex; flex-direction: column; min-height: 0; min-width: 0; }
+.side-chart .chart { flex: 1; }
 
 /* ---------- short screens: a laptop once the browser's own bars are drawn ---------- */
 @media (max-height: 820px) {
@@ -487,13 +475,13 @@ table.rows { width: 100%; border-collapse: collapse; font-variant-numeric: tabul
   .cols { height: 15vh; min-height: 90px; }
   .trades { gap: 1.6vh; }
   .chart { min-height: 110px; }
-  .flow-line { display: none; }
-  .chain { gap: 2vh; }
   .data-strip dd span { font-size: 15px; }
   .rows td { padding-top: 0.5vh; padding-bottom: 0.5vh; }
-  .feat-group { padding: 1.4vh 1.1vw; }
-  .class { padding: 1.4vh 1.2vw; }
-  .act { padding: 1.4vh 1.2vw; }
+  .mcard { padding: 1.8vh 1.4vw 2vh; gap: 1.4vh; }
+  .mcard ol { gap: 1.4vh; }
+  .fcol { padding: 1.6vh 1.3vw; gap: 1vh; }
+  .fchips li, .fgroups li { padding: 0.7vh 0.9vw; }
+  .rcard { padding: 1.3vh 1.2vw; }
   .strategy-cards { margin: 1vh 0 1.2vh; }
   .scard { padding: 1.1vh 1.2vw; }
 }
@@ -501,9 +489,8 @@ table.rows { width: 100%; border-collapse: collapse; font-variant-numeric: tabul
 @media (max-height: 680px) {
   .slide { padding-top: calc(var(--top) + 0.6vh); padding-bottom: var(--bottom); }
   .chart { min-height: 80px; }
-  .chain-d { font-size: 16px; }
-  .feat-count b { font-size: 56px; }
-  .class span, .act span { font-size: 15px; }
+  .fcount b { font-size: 44px; }
+  .fchips span, .fgroups span, .mcard li > span:last-child { font-size: 15px; }
   .scard-value { font-size: 30px; }
 }
 
