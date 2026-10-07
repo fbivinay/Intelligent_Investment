@@ -15,18 +15,10 @@
    "isin"
   ]
  },
- "etfs": {
-  "symbols": [
-   "NIFTYBEES",
-   "JUNIORBEES",
-   "BANKBEES",
-   "GOLDBEES",
-   "MOM100",
-   "MON100"
-  ],
-  "rows": 24105,
+ "rules": {
+  "rows": 197,
   "from": "2010-04-01",
-  "to": "2026-09-30"
+  "verified_on": "2026-10-02"
  },
  "max": {
   "momentum": 0.5,
@@ -35,6 +27,15 @@
    "MON100": 0.25
   },
   "trend_days": 200
+ },
+ "costs": {
+  "stock_half_spread": 0.001,
+  "etf_half_spread": {
+   "GOLDBEES": 0.0006,
+   "MON100": 0.0015
+  },
+  "impact": 0.005,
+  "max_slippage": 0.03
  },
  "ranking": {
   "day": "2026-01-01",
@@ -124,38 +125,207 @@
     "r6": 1.4633,
     "r12": 1.2324,
     "vol": 0.6859
+   },
+   {
+    "symbol": "LAURUSLABS",
+    "score": 1.9557,
+    "r6": 0.4884,
+    "r12": 0.8926,
+    "vol": 0.3531
+   },
+   {
+    "symbol": "ASHOKLEY",
+    "score": 1.9237,
+    "r6": 0.4797,
+    "r12": 0.6883,
+    "vol": 0.3036
+   },
+   {
+    "symbol": "ANANDRATHI",
+    "score": 1.8241,
+    "r6": 0.4678,
+    "r12": 0.6608,
+    "vol": 0.3093
+   },
+   {
+    "symbol": "IMFA",
+    "score": 1.8171,
+    "r6": 0.8689,
+    "r12": 0.7638,
+    "vol": 0.4493
+   },
+   {
+    "symbol": "LUMAXTECH",
+    "score": 1.7938,
+    "r6": 0.4045,
+    "r12": 1.5348,
+    "vol": 0.5406
+   },
+   {
+    "symbol": "APOLLO",
+    "score": 1.7809,
+    "r6": 0.4392,
+    "r12": 1.8046,
+    "vol": 0.63
+   },
+   {
+    "symbol": "NYKAA",
+    "score": 1.7295,
+    "r6": 0.2835,
+    "r12": 0.6645,
+    "vol": 0.2741
+   },
+   {
+    "symbol": "EICHERMOT",
+    "score": 1.7206,
+    "r6": 0.2856,
+    "r12": 0.5067,
+    "vol": 0.2302
+   },
+   {
+    "symbol": "RBLBANK",
+    "score": 1.7071,
+    "r6": 0.2126,
+    "r12": 0.9724,
+    "vol": 0.3471
+   },
+   {
+    "symbol": "TVSMOTOR",
+    "score": 1.6879,
+    "r6": 0.3113,
+    "r12": 0.5676,
+    "vol": 0.2604
+   },
+   {
+    "symbol": "ANURAS",
+    "score": 1.679,
+    "r6": 0.1609,
+    "r12": 0.8565,
+    "vol": 0.303
+   },
+   {
+    "symbol": "M&MFIN",
+    "score": 1.6685,
+    "r6": 0.5128,
+    "r12": 0.5137,
+    "vol": 0.3076
+   },
+   {
+    "symbol": "AUBANK",
+    "score": 1.6339,
+    "r6": 0.1922,
+    "r12": 0.8099,
+    "vol": 0.3067
+   },
+   {
+    "symbol": "NAVINFLUOR",
+    "score": 1.548,
+    "r6": 0.2138,
+    "r12": 0.7909,
+    "vol": 0.3245
+   },
+   {
+    "symbol": "UPL",
+    "score": 1.5141,
+    "r6": 0.2001,
+    "r12": 0.6041,
+    "vol": 0.2656
+   },
+   {
+    "symbol": "CANBK",
+    "score": 1.5081,
+    "r6": 0.3363,
+    "r12": 0.5369,
+    "vol": 0.2895
+   },
+   {
+    "symbol": "YATRA",
+    "score": 1.5033,
+    "r6": 1.0644,
+    "r12": 0.5762,
+    "vol": 0.5456
+   },
+   {
+    "symbol": "NATIONALUM",
+    "score": 1.4901,
+    "r6": 0.6534,
+    "r12": 0.4729,
+    "vol": 0.3779
+   },
+   {
+    "symbol": "HEROMOTOCO",
+    "score": 1.4827,
+    "r6": 0.3823,
+    "r12": 0.3784,
+    "vol": 0.2565
+   },
+   {
+    "symbol": "CUB",
+    "score": 1.4402,
+    "r6": 0.2537,
+    "r12": 0.6739,
+    "vol": 0.3221
+   },
+   {
+    "symbol": "HINDALCO",
+    "score": 1.4156,
+    "r6": 0.289,
+    "r12": 0.4495,
+    "vol": 0.2609
+   },
+   {
+    "symbol": "SBILIFE",
+    "score": 1.3955,
+    "r6": 0.0955,
+    "r12": 0.4519,
+    "vol": 0.1962
+   },
+   {
+    "symbol": "INDIANB",
+    "score": 1.3741,
+    "r6": 0.2816,
+    "r12": 0.5216,
+    "vol": 0.2922
+   },
+   {
+    "symbol": "CARTRADE",
+    "score": 1.3403,
+    "r6": 0.669,
+    "r12": 0.8083,
+    "vol": 0.5511
    }
   ],
   "decisions": 44,
   "switch_days": 9
  },
- "sample": [
+ "universe_runs": [
   {
-   "date": "2026-09-30",
-   "symbol": "RELIANCE",
-   "high": 1196.5,
-   "low": 1181.7,
-   "close": 1187.0,
-   "qty": 16376789,
-   "value": 19480713993.9
+   "picks": 30,
+   "universe": 500,
+   "a_year": 0.219586982801101,
+   "worst_fall": 0.48111862577311937,
+   "orders": 1612
   },
   {
-   "date": "2026-09-30",
-   "symbol": "HDFCBANK",
-   "high": 720.3,
-   "low": 708.7,
-   "close": 708.7,
-   "qty": 39365496,
-   "value": 28120806967.1
+   "picks": 20,
+   "universe": 500,
+   "a_year": 0.25533229041446126,
+   "worst_fall": 0.41308324994589396,
+   "orders": 1162
   },
   {
-   "date": "2026-09-30",
-   "symbol": "INFY",
-   "high": 1024.0,
-   "low": 992.2,
-   "close": 994.1,
-   "qty": 13508984,
-   "value": 13548200811.4
+   "picks": 50,
+   "universe": 500,
+   "a_year": 0.22267363684020625,
+   "worst_fall": 0.4397109430579671,
+   "orders": 2215
+  },
+  {
+   "picks": 30,
+   "universe": 200,
+   "a_year": 0.14609300206541032,
+   "worst_fall": 0.4301556118095563,
+   "orders": 1336
   }
  ]
 }
