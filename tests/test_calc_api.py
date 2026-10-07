@@ -72,6 +72,15 @@ def test_a_lean_answer_skips_the_alternatives_held_ending_and_keeps_every_figure
     assert (lean["growth"], lean["invested"], lean["profit"], lean["orders"]) == (full["growth"], full["invested"], full["profit"], full["orders"])
 
 
+def test_several_levels_come_back_side_by_side_each_as_it_would_alone():
+    q = {"amount": 300000, "start": "2018-06-01", "end": "2019-06-03", "compare": ["GOLDBEES"], "lean": True}
+    both = api.calculate({**q, "levels": ["Conservative", "Balanced"]})
+    one = api.calculate({**q, "level": "Balanced"})
+    assert [r["id"] for r in both["results"]] == ["PRODUCT_Conservative", "PRODUCT_Balanced", "GOLDBEES"]
+    assert both["results"][1]["net"]["exact"] == one["results"][0]["net"]["exact"] and both["inputs"]["levels"] == ["Conservative", "Balanced"]
+    assert api.calculate({**q, "levels": ["Balanced", "Balanced"]})["error"]
+
+
 @pytest.mark.parametrize("params,needle", [
     ({"amount": 100000, "start": "2016-04-01", "end": "2015-04-01"}, "after the start"),
     ({"amount": -5, "start": "2016-04-01", "end": "2017-04-01"}, "amount"),

@@ -3,14 +3,14 @@ and the repository facts the Evidence pages quote. Rerun after the data, the rul
 
     python -m tools.site_data
 
-site/public/data/lump.json    Rs 10 lakh once, from the Max level's first day, beside every alternative: the Overview and the calculator's first answer
+site/public/data/lump.json    Rs 10 lakh once, from the Max level's first day, the Max and Growth levels beside every alternative: the Overview and the
+                              calculator's first answer
 site/public/data/sip.json     Rs 5,000 every month over the same years: the calculator's first monthly answer
 site/public/data/future.json  each option's yearly return after charges and tax over those years, and the invest-today factors (calc.future)
-site/public/data/facts.json   the data, the rules, the cost assumptions, the Max level's latest ranking and its universe runs, read from the files
+site/public/data/facts.json   the data (counts, periods, real sample rows) and the Max level's latest ranking, read from the files
 """
 from __future__ import annotations
 
-import csv
 import json
 from pathlib import Path
 
@@ -19,14 +19,16 @@ import pandas as pd
 import pyarrow.parquet as pq
 
 from calc import api, future, options as O
-from calc.product import DATA_END, LEVELS, rules
-from research import costs as C, maxmodel as X, stockmom as M
+from calc.product import DATA_END, LEVELS
+from research import maxmodel as X, panel as P, stockmom as M
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "site" / "public" / "data"
 START = "2017-04-03"                                     # the Max level's first day: every option is measured over the same years from it
 ALTERNATIVES = [o.id for o in O.OPTIONS if o.kind != "product"]
-COMMON = {"end": DATA_END.isoformat(), "level": "Max", "compare": ALTERNATIVES, "regime": "new", "other_income": 1200000, "lean": True}
+COMMON = {"end": DATA_END.isoformat(), "level": "Max", "levels": ["Max", "Growth"], "compare": ALTERNATIVES, "regime": "new", "other_income": 1200000,
+          "lean": True}
+SAMPLE = ("RELIANCE", "HDFCBANK", "INFY")
 RUNS = {"lump": {**COMMON, "mode": "lump", "amount": 1000000, "start": START},
         "sip": {**COMMON, "mode": "sip", "amount": 5000, "start": START}}
 
@@ -43,29 +45,33 @@ def ranking() -> dict:
     s = M.score(idx, medval, traded.cumsum(), traded, p, 500).dropna()
     s = s.nlargest(len(s))                                                    # the order picks() takes its 30 from
     assert list(s.index[:30]) == list(chosen[key]), "the ranking does not give the model's picks"
-    i = idx[s.index[:36]]
+    i = idx[s.index[:12]]
     r6, r12 = i.iloc[p] / i.iloc[p - 126] - 1, i.iloc[p] / i.iloc[p - 252] - 1
     vol = np.log(i.iloc[p - 252:p + 1]).diff().std() * np.sqrt(252)
     top = [{"symbol": k, "score": round(float(s[k]), 4), "r6": round(float(r6[k]), 4), "r12": round(float(r12[k]), 4), "vol": round(float(vol[k]), 4)}
-           for k in s.index[:36]]
+           for k in s.index[:12]]
     return {"day": str(day.date()), "ranked": int(len(s)), "held": 30, "top": top,
             "decisions": len(chosen), "switch_days": sum(1 for v in chosen.values() if not v)}
 
 
+def sample() -> list[dict]:
+    """Real rows of the share file on its last day: the form the data is in."""
+    df = pd.read_parquet(M.PARQUET, columns=["date", "symbol", "high", "low", "close", "qty", "value"])
+    last = df[df.date == df.date.max()].set_index("symbol").loc[list(SAMPLE)]
+    return [{"date": str(r.date.date()), "symbol": k, "high": float(r.high), "low": float(r.low), "close": float(r.close), "qty": int(r.qty),
+             "value": float(r.value)} for k, r in last.iterrows()]
+
+
 def facts() -> dict:
-    stocks = pd.read_parquet(ROOT / "data" / "processed" / "stocks_eq.parquet", columns=["date", "symbol"])
-    fields = [c for c in pq.read_schema(ROOT / "data" / "processed" / "stocks_eq.parquet").names if c not in ("date", "symbol")]
-    rows = list(rules().all_rows())
-    with (ROOT / "research" / "out" / "stockmom.csv").open(newline="") as f:
-        runs = [{"picks": int(r["n"]), "universe": int(r["top"]), "a_year": float(r["cagr_liquidated"]), "worst_fall": float(r["max_dd"]), "orders": int(r["orders"])}
-                for r in csv.DictReader(f)]
+    stocks = pd.read_parquet(M.PARQUET, columns=["date", "symbol"])
+    fields = [c for c in pq.read_schema(M.PARQUET).names if c not in ("date", "symbol")]
+    etf = pd.read_csv(ROOT / "data" / "processed" / "etf_daily_adjusted.csv", usecols=["date", "symbol"])
+    etf = etf[etf.symbol.isin(P.GROWTH)]
     return {"stocks": {"symbols": int(stocks.symbol.nunique()), "funds": len(M.funds()), "rows": len(stocks), "from": str(stocks.date.min().date()),
                        "to": str(stocks.date.max().date()), "fields": fields},
-            "rules": {"rows": len(rows), "from": min(r.valid_from for r in rows).isoformat(), "verified_on": max(r.ref.verified_on for r in rows).isoformat()},
+            "etfs": {"symbols": [a for a in P.GROWTH], "rows": len(etf), "from": etf.date.min(), "to": etf.date.max()},
             "max": {"momentum": X.MOMENTUM, "fixed": X.FIXED, "trend_days": X.TREND},
-            "costs": {"stock_half_spread": C.STOCK_HALF_SPREAD, "etf_half_spread": {k: C.HALF_SPREAD[k] for k in X.FIXED}, "impact": C.IMPACT,
-                      "max_slippage": C.MAX_SLIPPAGE},
-            "ranking": ranking(), "universe_runs": runs}
+            "ranking": ranking(), "sample": sample()}
 
 
 def projections(lump: dict) -> dict:
@@ -75,7 +81,7 @@ def projections(lump: dict) -> dict:
     for level in LEVELS:
         if f"PRODUCT_{level}" in rates:
             continue
-        a = api.calculate({**RUNS["lump"], "level": level, "compare": []})
+        a = api.calculate({**RUNS["lump"], "levels": [level], "compare": []})
         assert "error" not in a and not a["messages"], a.get("error") or a["messages"]
         r = a["results"][0]
         rates[r["id"]] = {"rate": r["growth"], "worst_fall": r["worst_fall"]}
