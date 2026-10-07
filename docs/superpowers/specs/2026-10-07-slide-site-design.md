@@ -24,11 +24,12 @@ everywhere; desktop only; motion as the main finish.
 - One deck (`components/Deck.tsx`) kept mounted by the layout across `/`, `/performance`, `/evidence`. Next slide wipes up over the old one (clip-path);
   the old one recedes as a rounded card; between sections the wipe is sideways. Wheel (one slide per gesture), arrow keys, the next button, dots and the
   section tabs. Reduced motion: a short cross-fade. Below 1024 px wide or 540 px tall: the "larger screen" message.
-- Overview: what Rs 10 lakh became (chart with each line's after-tax end marked), all six options ranked with a year and worst fall, the invitation.
-- Performance: calculator (one-time / monthly SIP, strategy, up to five alternatives, tax profile), where the money went, the path (value / return /
-  fall, morphing), the model's trades (mix through time, every trading day, biggest days, holdings), behaviour next to one alternative.
-- Evidence: the Max model only, as the pipeline Data, Signals, Strategy, Decision, Trade, Costs and tax, Result; then safeguards and limits, including
-  that the mix was chosen on the same 2017-2026 years.
+- Overview: what Rs 10 lakh became "N years ago" (chart with each line's after-tax end marked), all eleven options ranked by final value, a year or
+  worst fall, the invitation.
+- Performance: calculator (one-time from a month and a year, or monthly SIP; strategy; any of the ten alternatives; tax profile), where the money went,
+  the path (value / return / fall, morphing), the model's trades (mix through time, every trading day, biggest days, holdings), invest today.
+- Evidence: the Max model only, in seven steps: the model, data, signals, strategy, testing, costs and tax, limits (including that the mix was chosen on
+  the same 2017-2026 years).
 - Type: Archivo only, normal width for words, expanded for money. Colour: one emerald for the model; series hues validated with the dataviz checks.
 
 ## Defaults and their honesty notes
@@ -37,3 +38,23 @@ everywhere; desktop only; motion as the main finish.
   years lose most gains to tax. The calculator says so when that profile is used, and the profile can be changed.
 - The hero uses Rs 10 lakh from the Max level's first day, not a chosen start. The Nasdaq 100 ETF ended higher over these years; the site says so with
   its worst fall beside it.
+
+## Refinement pass (2026-10-08)
+
+- Speed: `research/sim.py`'s `_run` loops only over the assets held or bought, and the long-term table is worked out once per asset class (runs are
+  bit-identical to the saved ones); `calc/options.py` reads each price and NAV file once; `calc/api.py` answers a `warm` ping (the site sends it on load)
+  and remembers recent lean answers. Bundled without numba, as on Vercel, locally: the first answer 2.4 s cold, then 0.7 to 2.6 s.
+- Dates: each level starts at its first possible decision (Max on 3 Apr 2017: share data from January 2016 plus a year of prices; the ETF levels in
+  April 2013). The one-time start is a month and a year inside that range.
+- Comparisons: all ten alternatives `calc/options.py` supports (adds the Nifty 50 and Next 50 index funds and the arbitrage fund). The Overview ranks
+  all eleven; the calculator starts with four and cuts a saved answer when options are removed (each option is worked out on its own).
+- Invest today (`calc/future.py`, `site/public/data/future.json`): each option's past yearly return after charges and tax (Rs 10 lakh once, 2017-04-03
+  to 2026-09-30) compounded over 1 to 20 years, once or monthly; the slide calls it an estimate, not a forecast. It replaces "behaviour next to one
+  alternative".
+- Evidence shows the latest real ranking (`facts.json` `ranking`, asserted equal to the model's own 30 picks).
+- Fixed (user's go): the momentum ranking took every equity-segment instrument, ETFs included; by January 2026 half of the 30 picks were liquid, silver
+  or gold ETFs, charged and taxed as shares. `research/stocks_build.py` now keeps each row's ISIN and `research/stockmom.py` ranks shares only (fund units,
+  ISIN INF..., left out; the Nifty ETF still drives the market switch). Rebuilt `research/out/signal_max` and `stockmom.csv`: Max 20.3% a year after tax
+  (21.4% before the fix), worst fall 18%; momentum alone 22.0% (22.8%), worst fall 48%. `research/out/mixes.txt`, which chose the 50 / 25 / 25 mix, is the
+  record from before the fix and no longer goes to the site.
+- Short screens (under 820 px and 680 px tall): tighter spacing and fewer secondary lines, so nothing runs under the bottom bar.

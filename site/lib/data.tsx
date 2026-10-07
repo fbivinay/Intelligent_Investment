@@ -3,8 +3,8 @@
 // Everything the slides read: the two saved calculator answers and the repository facts (tools/site_data.py), and the calculator's own form and answer.
 // No money is worked out here: every figure comes from the calculator API (calc/api.py) or a saved answer of it.
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { ALTERNATIVES, DATA_END, levelOf } from "./names";
-import type { Answer, Facts, Level, Mode, Request } from "./types";
+import { ALTERNATIVES, DATA_END, isModel, levelOf } from "./names";
+import type { Answer, Facts, Future, Level, Mode, Request } from "./types";
 
 export type Form = {
   mode: Mode;
@@ -39,10 +39,25 @@ export function request(f: Form): Request {
 
 const keyOf = (r: Request) => JSON.stringify(r);
 
+/** The calculator starts with these beside the model; the other alternatives are one tap away (the Overview shows them all). */
+const FIRST_COMPARE = ["NIFTYBEES", "GOLDBEES", "MON100", "LIQUID_FUND"];
+
 function formOf(lump: Answer, sip: Answer): Form {
   const i = lump.inputs;
-  return { mode: "lump", lumpAmount: i.amount, sipAmount: sip.inputs.amount, start: i.start, years: "all", level: i.level, compare: i.compare, regime: i.regime,
-           income: i.other_income, bench: i.compare[0] };
+  return { mode: "lump", lumpAmount: i.amount, sipAmount: sip.inputs.amount, start: i.start, years: "all", level: i.level, compare: FIRST_COMPARE, regime: i.regime,
+           income: i.other_income, bench: FIRST_COMPARE[0] };
+}
+
+/** An answer already worked out for the same question with more options beside the model, cut to the options asked for. Each option is worked out
+ * on its own, so the cut is exactly what the calculator would answer. */
+function cut(cache: Map<string, Answer>, req: Request): Answer | undefined {
+  for (const [k, a] of cache) {
+    const r: Request = JSON.parse(k);
+    if (keyOf({ ...r, compare: req.compare }) !== keyOf(req) || !req.compare.every((id) => r.compare.includes(id))) continue;
+    const keep = (id: string) => req.compare.includes(id) || isModel(id);
+    return { ...a, inputs: { ...a.inputs, compare: req.compare }, results: a.results.filter((x) => keep(x.id)), messages: a.messages.filter((m) => keep(m.id)),
+             series: Object.fromEntries(Object.entries(a.series).filter(([id]) => keep(id))) };
+  }
 }
 
 async function ask(req: Request, signal: AbortSignal): Promise<Answer> {
@@ -59,7 +74,7 @@ async function ask(req: Request, signal: AbortSignal): Promise<Answer> {
   return body as Answer;
 }
 
-type Saved = { lump: Answer; sip: Answer; facts: Facts };
+type Saved = { lump: Answer; sip: Answer; facts: Facts; future: Future };
 type Status = "loading" | "ready" | "error";
 type Data = {
   saved: Saved | null;
@@ -88,23 +103,33 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const get = (p: string) => fetch(p).then((r) => (r.ok ? r.json() : Promise.reject(new Error(`${p} ${r.status}`))));
-    Promise.all([get("/data/lump.json"), get("/data/sip.json"), get("/data/facts.json")]).then(
-      ([lump, sip, facts]) => {
+    Promise.all([get("/data/lump.json"), get("/data/sip.json"), get("/data/facts.json"), get("/data/future.json")]).then(
+      ([lump, sip, facts, future]) => {
         const f = formOf(lump, sip);
-        cache.current.set(keyOf(request(f)), lump);
-        cache.current.set(keyOf(request({ ...f, mode: "sip" })), sip);
-        setSaved({ lump, sip, facts });
+        cache.current.set(keyOf(request({ ...f, compare: lump.inputs.compare })), lump);
+        cache.current.set(keyOf(request({ ...f, mode: "sip", compare: sip.inputs.compare })), sip);
+        setSaved({ lump, sip, facts, future });
         setForm(f);
       },
       () => setFailed("The saved results could not be loaded. Reload the page to try again."),
     );
+    // Wake the calculator while the visitor reads the Overview: it loads its data once, so their first question is answered at full speed.
+    fetch("/api/calc", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ warm: true }) }).catch(() => {});
   }, []);
 
   const reqKey = form ? keyOf(request(form)) : "";       // the slides' own settings (bench) change the form, not the question
+  const find = useCallback((key: string) => {
+    let a = cache.current.get(key);
+    if (!a) {
+      a = cut(cache.current, JSON.parse(key));
+      if (a) cache.current.set(key, a);
+    }
+    return a;
+  }, []);
   useEffect(() => {
     if (!reqKey) return;
     const req: Request = JSON.parse(reqKey);
-    const hit = cache.current.get(reqKey);
+    const hit = find(reqKey);
     if (hit) {
       setAnswers((a) => ({ ...a, [req.mode]: hit }));
       setStatus("ready");
@@ -128,14 +153,14 @@ export function DataProvider({ children }: { children: ReactNode }) {
           setStatus("error");
         },
       );
-    }, 650);
+    }, 450);
     return () => { clearTimeout(t); ac.abort(); };
-  }, [reqKey, attempt]);
+  }, [reqKey, attempt, find]);
 
   const set = useCallback((p: Partial<Form>) => setForm((f) => (f ? { ...f, ...p } : f)), []);
   const retry = useCallback(() => setAttempt((n) => n + 1), []);
   // An answer already worked out shows in the same render (the numbers on screen travel to it instead of starting again from zero).
-  const hit = reqKey ? cache.current.get(reqKey) : undefined;
+  const hit = reqKey ? find(reqKey) : undefined;
   const answer = hit ?? (form ? answers[form.mode] ?? null : null);
   const shownStatus: Status = hit ? "ready" : status;
   const value = useMemo<Data>(() => ({ saved, failed, form, set, answer, status: shownStatus, since, error: hit ? null : error, retry }),

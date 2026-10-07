@@ -3,15 +3,15 @@
 // Overview: what ₹10 lakh became, how each option got there, and the way into the calculator. Every figure is the saved calculator answer
 // (site/public/data/lump.json, made by tools/site_data.py).
 import { motion, useReducedMotion } from "motion/react";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useData } from "@/lib/data";
 import { useDeck, type SlideDef } from "@/lib/deck";
-import { day, money, month, pct, span } from "@/lib/format";
-import { colorOf, isModel, nameOf, OPTIONS } from "@/lib/names";
+import { day, money, pct, span } from "@/lib/format";
+import { colorOf, isModel, nameOf } from "@/lib/names";
 import { grid } from "@/lib/scale";
 import type { Answer, Result } from "@/lib/types";
 import { LineChart, RankedBars } from "../charts";
-import { Appear, Counter, ENTER, EASE, Key, Primary, Rise } from "../ui";
+import { Appear, Counter, ENTER, Key, Primary, Rise, Segmented } from "../ui";
 
 export function Loading({ text = "Loading the record" }: { text?: string }) {
   return (
@@ -45,7 +45,7 @@ function HeroBody({ a }: { a: Answer }) {
   return (
     <div className="hero">
       <div className="hero-copy">
-        <Rise className="statement" lines={[`${money(model.invested, 0)} invested in ${month(a.inputs.start, true)}`, "could have become"]} />
+        <Rise className="statement" lines={[`${money(model.invested, 0)} invested ${span(a.inputs.start, a.inputs.end)} ago`, "could have become"]} />
         <div className="hero-figure">
           <Counter value={model.net.value} format={(n) => money(n)} delay={ENTER + 0.35} duration={2.2} />
         </div>
@@ -70,7 +70,8 @@ function HeroBody({ a }: { a: Answer }) {
           series={ids.map((id) => ({ id, label: isModel(id) ? "Intelligent Investment" : nameOf(id), color: colorOf(id), values: g.values[id], strong: isModel(id) }))} />
         <p className="chart-note">
           Lines: what each was worth along the way. Dots: what was left after selling everything on {day(a.inputs.end)} and paying all tax
-          (new regime, {money(a.inputs.other_income, 0)} other income).
+          (new regime, {money(a.inputs.other_income, 0)} other income). The model&rsquo;s record starts on {day(a.inputs.start)}, its first possible
+          pick: the NSE share data begins in January 2016 and every pick needs a year of prices.
         </p>
       </Appear>
     </div>
@@ -83,37 +84,43 @@ function Different() {
   return <DifferentBody a={saved.lump} />;
 }
 
+type Metric = "value" | "year" | "fall";
+const METRICS: { id: Metric; label: string }[] = [{ id: "value", label: "Final value" }, { id: "year", label: "Per year" }, { id: "fall", label: "Worst fall" }];
+
 function DifferentBody({ a }: { a: Answer }) {
   const { model, alts } = parts(a);
-  const rows = [model, ...alts].sort((x, y) => y.net.value - x.net.value);
-  const maxFall = Math.max(...rows.map((r) => r.worst_fall));
+  const [metric, setMetric] = useState<Metric>("value");
+  const [switched, setSwitched] = useState(false);
+  const of = (r: Result) => (metric === "value" ? r.net.value : metric === "year" ? r.growth : r.worst_fall);
+  const fmt = metric === "value" ? (n: number) => money(n) : metric === "year" ? (n: number) => `${pct(n)} a year` : (n: number) => `fell ${pct(n, 0)}`;
+  const rows = [model, ...alts].sort((x, y) => (metric === "fall" ? of(x) - of(y) : of(y) - of(x)));        // best first: highest value or return, smallest fall
   const higher = alts.filter((r) => r.net.value > model.net.value);
   const lower = alts.filter((r) => r.net.value < model.net.value).sort((x, y) => y.net.value - x.net.value);
   const nifty = alts.find((r) => r.id === "NIFTYBEES");
   return (
     <div className="different">
       <div className="different-head">
-        <Rise className="statement" lines={[`Same ${money(model.invested, 0)}.`, "Same day.", "Different decisions."]} />
-        <Appear delay={0.3} className="terms">
-          <dl>
-            <div><dt>Put in</dt><dd>{money(model.invested, 0)}, once</dd></div>
-            <div><dt>From</dt><dd>{day(a.inputs.start)}</dd></div>
-            <div><dt>To</dt><dd>{day(a.inputs.end)}, {span(a.inputs.start, a.inputs.end)}</dd></div>
-            <div><dt>Counted</dt><dd>Every charge and tax, then sold</dd></div>
-          </dl>
+        <div>
+          <Rise className="statement" lines={[`Same ${money(model.invested, 0)}. Same day. Different decisions.`]} />
+          <Appear delay={0.3}>
+            <p className="terms-line">
+              {money(model.invested, 0)} on {day(a.inputs.start)} in each of {rows.length} options, valued on {day(a.inputs.end)} ({span(a.inputs.start, a.inputs.end)}),
+              after every charge and tax.
+            </p>
+          </Appear>
+        </div>
+        <Appear delay={0.35}>
+          <Segmented id="rank-by" label="Rank by" value={metric} onChange={(m) => { setMetric(m); setSwitched(true); }} options={METRICS} />
         </Appear>
       </div>
-      <RankedBars label="What each option became" rows={rows.map((r) => ({
-        id: r.id, name: isModel(r.id) ? "Intelligent Investment" : nameOf(r.id), sub: isModel(r.id) ? "The model: shares, gold and Nasdaq 100, re-picked by rules" : OPTIONS[r.id]?.what,
-        color: colorOf(r.id), value: r.net.value, strong: isModel(r.id), text: <Counter value={r.net.value} format={(n) => money(n)} delay={ENTER + 0.5} />,
+      <RankedBars label="What each option became" version={metric} rows={rows.map((r) => ({
+        id: r.id, name: isModel(r.id) ? "Intelligent Investment" : nameOf(r.id), color: colorOf(r.id), value: Math.max(of(r), 0), strong: isModel(r.id),
+        text: <Counter key={metric} value={of(r)} format={fmt} delay={switched ? 0.05 : ENTER + 0.5} duration={switched ? 0.8 : 1.4} />,
         aside: (
           <>
-            <span className="aside-num"><b>{pct(r.growth)}</b> a year</span>
-            <span className="aside-fall" title={`Worst fall ${pct(r.worst_fall)}`}>
-              <span className="fall-track"><motion.span className="fall-bar" initial={{ width: 0 }} animate={{ width: `${(r.worst_fall / maxFall) * 100}%` }}
-                transition={{ duration: 1.1, ease: EASE, delay: ENTER + 0.8 }} /></span>
-              <b>{pct(r.worst_fall, 0)}</b> worst fall
-            </span>
+            {metric !== "value" && <span><b>{money(r.net.value)}</b></span>}
+            {metric !== "year" && <span><b>{pct(r.growth)}</b> a year</span>}
+            {metric !== "fall" && <span>fell <b>{pct(r.worst_fall, 0)}</b></span>}
           </>
         ),
       }))} />

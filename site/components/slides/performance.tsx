@@ -1,17 +1,17 @@
 "use client";
 
 // Performance: the calculator (one payment or every month) and what its answer shows: the outcome, where the money went, the path, the model's
-// trades and how it behaved next to one alternative. Every figure is the calculator API's answer for the form (lib/data.tsx).
+// trades; then what the same plan could become from today. Every past figure is the calculator API's answer for the form (lib/data.tsx).
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { LIMITS, request, useData, type Form } from "@/lib/data";
 import type { SlideDef } from "@/lib/deck";
 import { count, day, inr, money, month, pct, signed, span, tick } from "@/lib/format";
-import { ALTERNATIVES, colorOf, DATA_END, groupColor, groupName, isModel, LEVELS, levelOf, MAX_COMPARE, nameOf } from "@/lib/names";
+import { ALTERNATIVES, colorOf, DATA_END, groupColor, groupName, isModel, LEVELS, levelOf, nameOf } from "@/lib/names";
 import { grid } from "@/lib/scale";
-import type { Answer, Result, TradeDay } from "@/lib/types";
-import { LineChart, StackArea, TradeStrip, YearColumns, type LineSeries } from "../charts";
-import { Appear, Chip, Counter, EASE, ENTER, Key, Rise, Segmented } from "../ui";
+import type { Answer, Level, Result, TradeDay } from "@/lib/types";
+import { LineChart, RankedBars, StackArea, TradeStrip, type LineSeries } from "../charts";
+import { Appear, Arrow, Chip, Counter, EASE, ENTER, Key, Rise, Segmented } from "../ui";
 import { Loading } from "./overview";
 
 const label = (id: string) => (isModel(id) ? "Intelligent Investment" : nameOf(id));
@@ -56,10 +56,9 @@ function Status() {
   );
 }
 
-function AmountField({ form, set }: { form: Form; set: (p: Partial<Form>) => void }) {
-  const lump = form.mode === "lump";
-  const value = lump ? form.lumpAmount : form.sipAmount;
-  const [lo, hi] = LIMITS[form.mode];
+function MoneyField({ id, mode, value, onChange }: { id: string; mode: "lump" | "sip"; value: number; onChange: (n: number) => void }) {
+  const lump = mode === "lump";
+  const [lo, hi] = LIMITS[mode];
   const [text, setText] = useState(inr(value).slice(1));
   const [bad, setBad] = useState(false);
   const focused = useRef(false);
@@ -70,15 +69,15 @@ function AmountField({ form, set }: { form: Form; set: (p: Partial<Form>) => voi
     const n = +digits;
     const ok = n >= lo && n <= hi;
     setBad(!ok);
-    if (ok) set(lump ? { lumpAmount: n } : { sipAmount: n });
+    if (ok) onChange(n);
   };
   const picks = lump ? [100_000, 500_000, 1_000_000, 2_500_000] : [2_000, 5_000, 10_000, 25_000];
   return (
     <div className="field">
-      <label htmlFor="amount">{lump ? "Amount, once" : "Amount, every month"}</label>
+      <label htmlFor={id}>{lump ? "Amount, once" : "Amount, every month"}</label>
       <div className={bad ? "money-input bad" : "money-input"}>
         <span>₹</span>
-        <input id="amount" inputMode="numeric" autoComplete="off" value={text} aria-invalid={bad}
+        <input id={id} inputMode="numeric" autoComplete="off" value={text} aria-invalid={bad}
           onFocus={() => (focused.current = true)} onBlur={() => { focused.current = false; if (bad || !text) { setText(inr(value).slice(1)); setBad(false); } }}
           onChange={(e) => take(e.target.value)} />
       </div>
@@ -90,23 +89,51 @@ function AmountField({ form, set }: { form: Form; set: (p: Partial<Form>) => voi
   );
 }
 
+function AmountField({ form, set }: { form: Form; set: (p: Partial<Form>) => void }) {
+  return <MoneyField id="amount" mode={form.mode} value={form.mode === "lump" ? form.lumpAmount : form.sipAmount}
+    onChange={(n) => set(form.mode === "lump" ? { lumpAmount: n } : { sipAmount: n })} />;
+}
+
+const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
 function WhenField({ form, set }: { form: Form; set: (p: Partial<Form>) => void }) {
   const first = levelOf(form.level).first;
   const firstYear = +first.slice(0, 4);
   const start = request(form).start;
   if (form.mode === "lump") {
-    const years = [firstYear, firstYear + 2, firstYear + 4, firstYear + 6].filter((y) => y <= 2025);
+    // Any month from the strategy's first day to a month before the data ends, chosen as a month and a year; the start is that month's first day
+    // (the first trading day on or after it), never before the strategy's first day.
+    const fm = +first.slice(5, 7), ly = +DATA_END.slice(0, 4), lm = +DATA_END.slice(5, 7) - 1;
+    const y = +start.slice(0, 4), m = +start.slice(5, 7);
+    const lo = (yy: number) => (yy === firstYear ? fm : 1), hi = (yy: number) => (yy === ly ? lm : 12);
+    const pick = (yy: number, mm: number) => {
+      const s = `${yy}-${String(Math.min(Math.max(mm, lo(yy)), hi(yy))).padStart(2, "0")}-01`;
+      set({ start: s < first ? first : s });
+    };
+    const years = Array.from({ length: ly - firstYear + 1 }, (_, k) => firstYear + k);
+    const quick = [firstYear, firstYear + 2, firstYear + 4, firstYear + 6].filter((v) => v <= 2025);
     return (
       <div className="field">
-        <label htmlFor="start">Invested in</label>
-        <input id="start" className="month-input" type="month" min={first.slice(0, 7)} max="2026-08" value={start.slice(0, 7)}
-          onChange={(e) => e.target.value && set({ start: e.target.value + "-01" })} />
-        <div className="chips">
-          {years.map((y) => {
-            const s = y === firstYear ? first : `${y}-01-01`;
-            return <Chip key={y} on={start.slice(0, 7) === (y === firstYear ? first : `${y}-01-01`).slice(0, 7)} onClick={() => set({ start: s })}>{y === firstYear ? month(first) : String(y)}</Chip>;
-          })}
+        <span className="field-label">Invested in</span>
+        <div className="date-pick">
+          <div className="select">
+            <select aria-label="Month" value={m} onChange={(e) => pick(y, +e.target.value)}>
+              {MONTHS.map((_, k) => k + 1).filter((mm) => mm >= lo(y) && mm <= hi(y)).map((mm) => <option key={mm} value={mm}>{MONTHS[mm - 1]}</option>)}
+            </select>
+          </div>
+          <div className="select">
+            <select aria-label="Year" value={y} onChange={(e) => pick(+e.target.value, m)}>
+              {years.map((yy) => <option key={yy} value={yy}>{yy}</option>)}
+            </select>
+          </div>
         </div>
+        <div className="chips">
+          {quick.map((yy) => <Chip key={yy} on={y === yy} onClick={() => pick(yy, yy === firstYear ? fm : 1)}>{yy === firstYear ? month(first) : String(yy)}</Chip>)}
+        </div>
+        <p className="field-hint">
+          {form.level === "Max" ? "Max can start from April 2017: its share data begins in January 2016 and each pick needs a year of prices."
+            : `This model can start from ${month(first, true)}, its first pick.`}
+        </p>
       </div>
     );
   }
@@ -153,13 +180,9 @@ function Calculator() {
             <p className="field-hint">{lvl.line}{lvl.id === "Max" ? ": the model in Evidence." : ": a simpler ETF model."}</p>
           </div>
           <div className="field">
-            <span className="field-label">Compare with <small>up to {MAX_COMPARE}</small></span>
+            <span className="field-label">Compare with</span>
             <div className="chips">
-              {ALTERNATIVES.map((id) => {
-                const on = form.compare.includes(id);
-                return <Chip key={id} on={on} color={colorOf(id)} disabled={!on && form.compare.length >= MAX_COMPARE} onClick={() => toggle(id)}
-                  title={!on && form.compare.length >= MAX_COMPARE ? `Up to ${MAX_COMPARE} at a time` : undefined}>{nameOf(id)}</Chip>;
-              })}
+              {ALTERNATIVES.map((id) => <Chip key={id} on={form.compare.includes(id)} color={colorOf(id)} onClick={() => toggle(id)}>{nameOf(id)}</Chip>)}
             </div>
           </div>
           <div className="field tax">
@@ -216,6 +239,7 @@ function Outcome({ a, model, alts }: { a: Answer; model: Result; alts: Result[] 
           <div><dt>Charges and tax</dt><dd><Counter value={model.charges.value + model.tax.value} format={(n) => money(n)} /></dd></div>
         </dl>
       </div>
+      <div className="table-wrap" data-scroll>
       <table className="compare">
         <thead><tr><th>Option</th><th>Final value</th><th>Profit</th><th>{perYear(a)}</th><th>Against the model</th></tr></thead>
         <tbody>
@@ -234,6 +258,7 @@ function Outcome({ a, model, alts }: { a: Answer; model: Result; alts: Result[] 
           })}
         </tbody>
       </table>
+      </div>
       {a.messages.length > 0 && <ul className="messages">{a.messages.map((m) => <li key={m.id}>{nameOf(m.id)}: {m.text}</li>)}</ul>}
       <p className="fine">
         Each option gets the same money on the same days and is sold on the last day; tax is worked out for your profile, year by year.
@@ -248,8 +273,13 @@ function Bench({ alts }: { alts: Result[] }) {
   if (!form) return null;
   const bench = alts.find((r) => r.id === form.bench) ?? alts[0];
   return (
-    <div className="chips bench" role="group" aria-label="Set beside">
-      {alts.map((r) => <Chip key={r.id} on={r.id === bench?.id} color={colorOf(r.id)} onClick={() => set({ bench: r.id })}>{nameOf(r.id)}</Chip>)}
+    <div className="field bench">
+      <label htmlFor="bench">Set beside the model</label>
+      <div className="select">
+        <select id="bench" value={bench?.id} onChange={(e) => set({ bench: e.target.value })}>
+          {alts.map((r) => <option key={r.id} value={r.id}>{nameOf(r.id)}</option>)}
+        </select>
+      </div>
     </div>
   );
 }
@@ -267,7 +297,8 @@ function Costs() {
   const top = Math.max(...rows.map((r) => r.gross_end.value));
   const taxes = model.tax_by_fy.filter((t) => Math.abs(t.value) >= 1);
   const tmax = Math.max(...taxes.map((t) => Math.abs(t.value)), 1);
-  const kinds = [...model.charges_by_kind].filter((c) => c.value >= 1).sort((x, y) => y.value - x.value);
+  const all = [...model.charges_by_kind].filter((c) => c.value >= 1).sort((x, y) => y.value - x.value);
+  const kinds = all.length > 5 ? [...all.slice(0, 4), { label: "Everything else", value: all.slice(4).reduce((x, c) => x + c.value, 0) }] : all;
   const kmax = Math.max(...kinds.map((c) => c.value), 1);
   return (
     <div className="costs">
@@ -471,58 +502,81 @@ function Trades() {
   );
 }
 
-/** Content that slides in afresh when `id` changes (the alternative set beside the model). */
-function Swap({ id, delay = 0, children }: { id: string; delay?: number; children: React.ReactNode }) {
+type Plan = { mode: "lump" | "sip"; lump: number; sip: number; years: number; level: Level };
+
+/** Invest today: the plan, then one step from money in, through the return each option earned after charges and tax, to what it could be worth.
+ * The factors are the backend's (calc/future.py, saved by tools/site_data.py); the value is the factor times the payment. */
+function Future() {
+  const { saved } = useData();
+  const [plan, setPlan] = useState<Plan>({ mode: "lump", lump: 1_000_000, sip: 5_000, years: 5, level: "Max" });
+  if (!saved) return <Loading text="Loading the projection" />;
+  return <FutureBody f={saved.future} plan={plan} set={(p) => setPlan((x) => ({ ...x, ...p }))} />;
+}
+
+function Step({ label, value, sub, strong }: { label: string; value: React.ReactNode; sub: React.ReactNode; strong?: boolean }) {
   return (
-    <AnimatePresence mode="wait" initial={false}>
-      <motion.span key={id} style={{ display: "block" }} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0, transition: { duration: 0.4, ease: EASE, delay } }}
-        exit={{ opacity: 0, y: -6, transition: { duration: 0.15 } }}>{children}</motion.span>
-    </AnimatePresence>
+    <div className={strong ? "step strong" : "step"}>
+      <span className="step-label">{label}</span>
+      <span className="step-value">{value}</span>
+      <span className="step-sub">{sub}</span>
+    </div>
   );
 }
 
-function Behaviour() {
-  const { a, model, alts } = useAnswer();
-  const bench = useBench(alts);
-  if (!a || !model) return <Loading text="Working it out" />;
-  if (!bench) return <div className="empty"><p>Choose an option to compare with on the calculator slide.</p></div>;
-  const full = (r: Result) => r.years.filter((y) => !y.partial);
-  const best = (r: Result) => full(r).reduce<null | { year: number; value: number }>((b, y) => (!b || y.value > b.value ? y : b), null);
-  const worst = (r: Result) => full(r).reduce<null | { year: number; value: number }>((b, y) => (!b || y.value < b.value ? y : b), null);
-  const fall = (r: Result) => r.fall ? <>{pct(r.fall.depth, 0)} <small>{month(r.fall.peak)} to {month(r.fall.trough)}</small></> : "None";
-  const back = (r: Result) => !r.fall ? "—" : r.fall.recovered ? <>{count(r.fall.days)} days <small>back by {month(r.fall.recovered)}</small></> : <>Not yet <small>{count(r.fall.days)} days so far</small></>;
-  const yr = (y: { year: number; value: number } | null) => (y ? <>{signed(y.value)} <small>in {y.year}</small></> : "—");
-  const rows: [string, (r: Result) => React.ReactNode][] = [
-    ["Orders placed", (r) => count(r.orders)],
-    [perYear(a), (r) => pct(r.growth)],
-    ["Deepest fall", fall],
-    ["Back to its high", back],
-    ["Best calendar year", (r) => yr(best(r))],
-    ["Worst calendar year", (r) => yr(worst(r))],
-    ["Tax paid", (r) => money(r.tax.value)],
-    ["Charges paid", (r) => money(r.charges.value)],
-  ];
+function FutureBody({ f, plan, set }: { f: NonNullable<ReturnType<typeof useData>["saved"]>["future"]; plan: Plan; set: (p: Partial<Plan>) => void }) {
+  const amount = plan.mode === "lump" ? plan.lump : plan.sip;
+  const invested = plan.mode === "lump" ? amount : amount * 12 * plan.years;
+  const worth = (id: string) => amount * f.factors[id][plan.mode][plan.years - 1];
+  const modelId = `PRODUCT_${plan.level}`;
+  const rows = [modelId, ...ALTERNATIVES].filter((id) => f.rates[id]).map((id) => ({ id, rate: f.rates[id].rate, value: worth(id) }))
+    .sort((x, y) => y.value - x.value);
+  const model = rows.find((r) => r.id === modelId)!;
+  const span1 = `${plan.years} ${plan.years === 1 ? "year" : "years"}`;
   return (
-    <div className="behaviour">
-      <div className="behaviour-head">
-        <Rise className="statement" lines={["How it behaved,", `next to the ${nameOf(bench.id)}.`]} />
-        <Appear delay={0.3}><Bench alts={alts} /></Appear>
-      </div>
-      <div className="behaviour-body">
-        <Appear delay={0.15} y={0} className="years-chart">
-          <div className="chart-title"><span>Return in each calendar year</span>
-            <span className="mini-legend"><span><Key color={colorOf(model.id)} />Intelligent Investment</span><span><Key color={colorOf(bench.id)} />{nameOf(bench.id)}</span><span className="faint">Paler: part of a year</span></span></div>
-          <YearColumns key={bench.id + a.inputs.start + a.inputs.mode} format={(v) => signed(v, 0)} series={[model, bench].map((r) => ({ id: r.id, label: label(r.id), color: colorOf(r.id), years: r.years }))} />
+    <div className="future">
+      <Appear className="calc-form" delay={0.05}>
+        <form onSubmit={(e) => e.preventDefault()} aria-label="Your plan" data-scroll>
+          <Segmented id="future-mode" label="How you invest" value={plan.mode} onChange={(m) => set({ mode: m })}
+            options={[{ id: "lump", label: "One-time" }, { id: "sip", label: "Monthly SIP" }]} />
+          <MoneyField id="future-amount" mode={plan.mode} value={amount} onChange={(n) => set(plan.mode === "lump" ? { lump: n } : { sip: n })} />
+          <div className="field">
+            <label htmlFor="future-years">For <b>{span1}</b></label>
+            <input id="future-years" className="range" type="range" min={1} max={20} step={1} value={plan.years} onChange={(e) => set({ years: +e.target.value })} />
+            <div className="range-ends" aria-hidden><span>1 year</span><span>20 years</span></div>
+          </div>
+          <div className="field">
+            <label htmlFor="future-level">Strategy</label>
+            <div className="select">
+              <select id="future-level" value={plan.level} onChange={(e) => set({ level: e.target.value as Level })}>
+                {LEVELS.map((l) => <option key={l.id} value={l.id}>Intelligent Investment {l.name}</option>)}
+              </select>
+            </div>
+          </div>
+          <p className="field-hint future-note">An estimate from history, not a forecast: each option earns again what it made a year after charges and tax from
+            {" "}{month(f.from)} to {month(f.to)} ({money(f.amount, 0)} once, {f.regime} tax regime).</p>
+        </form>
+      </Appear>
+      <div className="future-out">
+        <Rise as="h2" className="title" lines={["If you invest today, what could it become?"]} />
+        <Appear delay={0.2} className="flow3">
+          <Step label={plan.mode === "lump" ? "You invest today" : "You invest every month"} value={<Counter value={amount} format={(n) => money(n)} />}
+            sub={plan.mode === "lump" ? "once" : <>{plan.years * 12} payments, <Counter value={invested} format={(n) => money(n)} /> in all</>} />
+          <span className="flow-arrow" aria-hidden><Arrow dir="right" /></span>
+          <Step label={`At its past return (${levelOf(plan.level).name})`} value={<Counter value={model.rate} format={(n) => `${pct(n)} a year`} />}
+            sub={`after charges and tax, ${month(f.from)} to ${month(f.to)}`} />
+          <span className="flow-arrow" aria-hidden><Arrow dir="right" /></span>
+          <Step strong label={`It could be worth, after ${span1}`} value={<Counter value={model.value} format={(n) => money(n)} />}
+            sub={<>a gain of <Counter value={model.value - invested} format={(n) => money(n)} /></>} />
         </Appear>
-        <Appear delay={0.3} className="facts">
-          <table className="side">
-            <thead><tr><th /><th><Key color={colorOf(model.id)} />The model</th><th><Swap id={bench.id}><Key color={colorOf(bench.id)} />{nameOf(bench.id)}</Swap></th></tr></thead>
-            <tbody>
-              {rows.map(([name, f], k) => <tr key={name}><th>{name}</th><td>{f(model)}</td><td><Swap id={bench.id} delay={k * 0.03}>{f(bench)}</Swap></td></tr>)}
-            </tbody>
-          </table>
-          <p className="fine">Growth and falls leave out the money paid in; years are calendar years of the account&rsquo;s value before the final sale.</p>
-        </Appear>
+        <div className="chart-title"><span>The same plan in every option, at each one&rsquo;s past return</span></div>
+        <div className="future-list" data-scroll>
+          <RankedBars label="What each option could become" version={`${plan.mode}${plan.years}${amount}${plan.level}`} rows={rows.map((r) => ({
+            id: r.id, name: r.id === modelId ? `Intelligent Investment ${levelOf(plan.level).name}` : label(r.id), color: colorOf(r.id), value: Math.max(r.value, 0),
+            strong: r.id === modelId,
+            text: <Counter value={r.value} format={(n) => money(n)} />,
+            aside: <span><b>{pct(r.rate)}</b> a year</span>,
+          }))} />
+        </div>
       </div>
     </div>
   );
@@ -533,5 +587,5 @@ export const PERFORMANCE: SlideDef[] = [
   { id: "costs", title: "Where the money went", Slide: Costs },
   { id: "journey", title: "The journey", Slide: Journey },
   { id: "trades", title: "The model's trades", Slide: Trades },
-  { id: "behaviour", title: "How it behaved", Slide: Behaviour },
+  { id: "future", title: "If you invest today", Slide: Future },
 ];

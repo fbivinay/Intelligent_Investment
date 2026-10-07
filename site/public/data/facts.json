@@ -1,9 +1,19 @@
 {
  "stocks": {
   "symbols": 3711,
+  "funds": 498,
   "rows": 4585946,
   "from": "2016-01-01",
-  "to": "2026-09-30"
+  "to": "2026-09-30",
+  "fields": [
+   "high",
+   "low",
+   "close",
+   "prev_close",
+   "qty",
+   "value",
+   "isin"
+  ]
  },
  "rules": {
   "rows": 197,
@@ -27,81 +37,295 @@
   "impact": 0.005,
   "max_slippage": 0.03
  },
+ "ranking": {
+  "day": "2026-01-01",
+  "ranked": 499,
+  "held": 30,
+  "top": [
+   {
+    "symbol": "CUPID",
+    "score": 10.5801,
+    "r6": 3.7949,
+    "r12": 5.7834,
+    "vol": 0.4527
+   },
+   {
+    "symbol": "LTF",
+    "score": 2.9333,
+    "r6": 0.5264,
+    "r12": 1.2994,
+    "vol": 0.3112
+   },
+   {
+    "symbol": "GRMOVER",
+    "score": 2.5368,
+    "r6": 0.3709,
+    "r12": 1.6736,
+    "vol": 0.4029
+   },
+   {
+    "symbol": "FORCEMOT",
+    "score": 2.5206,
+    "r6": 0.4156,
+    "r12": 2.1728,
+    "vol": 0.5134
+   },
+   {
+    "symbol": "ASHAPURMIN",
+    "score": 2.177,
+    "r6": 1.0299,
+    "r12": 1.2357,
+    "vol": 0.5203
+   },
+   {
+    "symbol": "MARUTI",
+    "score": 2.1267,
+    "r6": 0.3429,
+    "r12": 0.5271,
+    "vol": 0.2045
+   },
+   {
+    "symbol": "MUTHOOTFIN",
+    "score": 2.0737,
+    "r6": 0.4531,
+    "r12": 0.8549,
+    "vol": 0.3154
+   },
+   {
+    "symbol": "HINDCOPPER",
+    "score": 2.0115,
+    "r6": 0.8429,
+    "r12": 1.0376,
+    "vol": 0.4674
+   },
+   {
+    "symbol": "TFCILTD",
+    "score": 1.9758,
+    "r6": 0.4765,
+    "r12": 1.1979,
+    "vol": 0.4237
+   },
+   {
+    "symbol": "SHRIRAMFIN",
+    "score": 1.9734,
+    "r6": 0.4641,
+    "r12": 0.8579,
+    "vol": 0.335
+   },
+   {
+    "symbol": "ABCAPITAL",
+    "score": 1.9687,
+    "r6": 0.289,
+    "r12": 0.9753,
+    "vol": 0.3211
+   },
+   {
+    "symbol": "JAYNECOIND",
+    "score": 1.9651,
+    "r6": 1.4633,
+    "r12": 1.2324,
+    "vol": 0.6859
+   },
+   {
+    "symbol": "LAURUSLABS",
+    "score": 1.9557,
+    "r6": 0.4884,
+    "r12": 0.8926,
+    "vol": 0.3531
+   },
+   {
+    "symbol": "ASHOKLEY",
+    "score": 1.9237,
+    "r6": 0.4797,
+    "r12": 0.6883,
+    "vol": 0.3036
+   },
+   {
+    "symbol": "ANANDRATHI",
+    "score": 1.8241,
+    "r6": 0.4678,
+    "r12": 0.6608,
+    "vol": 0.3093
+   },
+   {
+    "symbol": "IMFA",
+    "score": 1.8171,
+    "r6": 0.8689,
+    "r12": 0.7638,
+    "vol": 0.4493
+   },
+   {
+    "symbol": "LUMAXTECH",
+    "score": 1.7938,
+    "r6": 0.4045,
+    "r12": 1.5348,
+    "vol": 0.5406
+   },
+   {
+    "symbol": "APOLLO",
+    "score": 1.7809,
+    "r6": 0.4392,
+    "r12": 1.8046,
+    "vol": 0.63
+   },
+   {
+    "symbol": "NYKAA",
+    "score": 1.7295,
+    "r6": 0.2835,
+    "r12": 0.6645,
+    "vol": 0.2741
+   },
+   {
+    "symbol": "EICHERMOT",
+    "score": 1.7206,
+    "r6": 0.2856,
+    "r12": 0.5067,
+    "vol": 0.2302
+   },
+   {
+    "symbol": "RBLBANK",
+    "score": 1.7071,
+    "r6": 0.2126,
+    "r12": 0.9724,
+    "vol": 0.3471
+   },
+   {
+    "symbol": "TVSMOTOR",
+    "score": 1.6879,
+    "r6": 0.3113,
+    "r12": 0.5676,
+    "vol": 0.2604
+   },
+   {
+    "symbol": "ANURAS",
+    "score": 1.679,
+    "r6": 0.1609,
+    "r12": 0.8565,
+    "vol": 0.303
+   },
+   {
+    "symbol": "M&MFIN",
+    "score": 1.6685,
+    "r6": 0.5128,
+    "r12": 0.5137,
+    "vol": 0.3076
+   },
+   {
+    "symbol": "AUBANK",
+    "score": 1.6339,
+    "r6": 0.1922,
+    "r12": 0.8099,
+    "vol": 0.3067
+   },
+   {
+    "symbol": "NAVINFLUOR",
+    "score": 1.548,
+    "r6": 0.2138,
+    "r12": 0.7909,
+    "vol": 0.3245
+   },
+   {
+    "symbol": "UPL",
+    "score": 1.5141,
+    "r6": 0.2001,
+    "r12": 0.6041,
+    "vol": 0.2656
+   },
+   {
+    "symbol": "CANBK",
+    "score": 1.5081,
+    "r6": 0.3363,
+    "r12": 0.5369,
+    "vol": 0.2895
+   },
+   {
+    "symbol": "YATRA",
+    "score": 1.5033,
+    "r6": 1.0644,
+    "r12": 0.5762,
+    "vol": 0.5456
+   },
+   {
+    "symbol": "NATIONALUM",
+    "score": 1.4901,
+    "r6": 0.6534,
+    "r12": 0.4729,
+    "vol": 0.3779
+   },
+   {
+    "symbol": "HEROMOTOCO",
+    "score": 1.4827,
+    "r6": 0.3823,
+    "r12": 0.3784,
+    "vol": 0.2565
+   },
+   {
+    "symbol": "CUB",
+    "score": 1.4402,
+    "r6": 0.2537,
+    "r12": 0.6739,
+    "vol": 0.3221
+   },
+   {
+    "symbol": "HINDALCO",
+    "score": 1.4156,
+    "r6": 0.289,
+    "r12": 0.4495,
+    "vol": 0.2609
+   },
+   {
+    "symbol": "SBILIFE",
+    "score": 1.3955,
+    "r6": 0.0955,
+    "r12": 0.4519,
+    "vol": 0.1962
+   },
+   {
+    "symbol": "INDIANB",
+    "score": 1.3741,
+    "r6": 0.2816,
+    "r12": 0.5216,
+    "vol": 0.2922
+   },
+   {
+    "symbol": "CARTRADE",
+    "score": 1.3403,
+    "r6": 0.669,
+    "r12": 0.8083,
+    "vol": 0.5511
+   }
+  ],
+  "decisions": 44,
+  "switch_days": 9
+ },
  "universe_runs": [
   {
    "picks": 30,
    "universe": 500,
-   "a_year": 0.22777876659881913,
-   "worst_fall": 0.4773414456625633,
-   "orders": 1574
+   "a_year": 0.219586982801101,
+   "worst_fall": 0.48111862577311937,
+   "orders": 1612
   },
   {
    "picks": 20,
    "universe": 500,
-   "a_year": 0.2672552679271205,
-   "worst_fall": 0.4041697003062975,
-   "orders": 1122
+   "a_year": 0.25533229041446126,
+   "worst_fall": 0.41308324994589396,
+   "orders": 1162
   },
   {
    "picks": 50,
    "universe": 500,
-   "a_year": 0.21889477304870986,
-   "worst_fall": 0.4339402793578174,
-   "orders": 2197
+   "a_year": 0.22267363684020625,
+   "worst_fall": 0.4397109430579671,
+   "orders": 2215
   },
   {
    "picks": 30,
    "universe": 200,
-   "a_year": 0.14163457290952053,
-   "worst_fall": 0.4211551283378614,
+   "a_year": 0.14609300206541032,
+   "worst_fall": 0.4301556118095563,
    "orders": 1336
-  }
- ],
- "mixes": [
-  {
-   "what": "nifty",
-   "a_year": 0.108,
-   "worst_fall": 0.363
-  },
-  {
-   "what": "nasdaq",
-   "a_year": 0.245,
-   "worst_fall": 0.366
-  },
-  {
-   "what": "gold",
-   "a_year": 0.174,
-   "worst_fall": 0.244
-  },
-  {
-   "what": "mom",
-   "a_year": 0.234,
-   "worst_fall": 0.495
-  },
-  {
-   "what": "momT",
-   "a_year": 0.214,
-   "worst_fall": 0.333
-  },
-  {
-   "what": "momT50+growth50",
-   "a_year": 0.19,
-   "worst_fall": 0.239
-  },
-  {
-   "what": "momT70+gold30",
-   "a_year": 0.217,
-   "worst_fall": 0.223
-  },
-  {
-   "what": "momT50+gold25+nasdaq25",
-   "a_year": 0.225,
-   "worst_fall": 0.19
-  },
-  {
-   "what": "momT60+gold20+nasdaq20",
-   "a_year": 0.224,
-   "worst_fall": 0.203
   }
  ]
 }

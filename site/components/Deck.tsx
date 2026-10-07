@@ -45,9 +45,12 @@ export function Deck() {
   const { failed } = useData();
   const [pos, setPos] = useState<{ s: number; i: number; dir: Dir }>(() => ({ s: sectionOf(pathname), i: 0, dir: { axis: "y", sign: 1 } }));
   const [moved, setMoved] = useState(false);
+  const [mounted, setMounted] = useState(false);   // defer motion to avoid SSR hydration mismatch
   const lockUntil = useRef(0);
   const posRef = useRef(pos);
   posRef.current = pos;
+
+  useEffect(() => { setMounted(true); }, []);
 
   useEffect(() => {
     const s = SECTIONS.findIndex((x) => x.path === pathname);
@@ -119,7 +122,7 @@ export function Deck() {
         <div className="deck">
           <header className="top">
             <a className="brand" href="/" onClick={(e) => { e.preventDefault(); go(0, 0); }}>
-              <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden><rect width="22" height="22" rx="6" fill="var(--model)" /><path d="M5 15.5 9.2 11l3 2.6L17 7" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              <svg width="30" height="30" viewBox="0 0 22 22" aria-hidden><rect width="22" height="22" rx="6" fill="var(--model)" /><path d="M5 15.5 9.2 11l3 2.6L17 7" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
               <span>Intelligent Investment</span>
             </a>
             <nav className="tabs" aria-label="Sections">
@@ -141,6 +144,10 @@ export function Deck() {
           <main className="stage">
             {failed ? (
               <div className="failed" role="alert"><p>{failed}</p></div>
+            ) : !mounted ? (
+              <section className={`slide s-${sec.id}`} aria-roledescription="slide" aria-label={`${def.title}, ${pos.i + 1} of ${sec.slides.length}`}>
+                <Slide />
+              </section>
             ) : (
               <AnimatePresence initial={false} custom={pos.dir}>
                 <motion.section key={`${pos.s}-${pos.i}`} className={`slide s-${sec.id}`} custom={pos.dir} variants={reduce ? FADE : MOVE} initial="enter" animate="center"
