@@ -7,14 +7,15 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { LIMITS, request, useData, type Form } from "@/lib/data";
 import type { SlideDef } from "@/lib/deck";
 import { count, day, inr, money, month, pct, signed, span, tick } from "@/lib/format";
-import { ALTERNATIVES, colorOf, DATA_END, groupColor, groupName, isModel, LEVELS, levelOf, nameOf } from "@/lib/names";
+import { ALTERNATIVES, colorOf, DATA_END, groupColor, groupName, isModel, LEVELS, levelOf, nameOf, STRATEGIES } from "@/lib/names";
 import { grid } from "@/lib/scale";
 import type { Answer, Level, Result, TradeDay } from "@/lib/types";
 import { LineChart, RankedBars, StackArea, TradeStrip, type LineSeries } from "../charts";
-import { Appear, Arrow, Chip, Counter, EASE, ENTER, Key, Rise, Segmented } from "../ui";
+import { Appear, Arrow, Chip, Counter, EASE, ENTER, Key, Rise, Segmented, SWEEP } from "../ui";
 import { Loading } from "./overview";
 
-const label = (id: string) => (isModel(id) ? "Intelligent Investment" : nameOf(id));
+const label = (id: string) => (isModel(id) ? `${id.slice("PRODUCT_".length)} strategy` : nameOf(id));
+const fall = (x: number) => (x < 0.005 ? "0%" : `−${pct(x, 0)}`);
 const perYear = (a: Answer) => (a.inputs.mode === "sip" ? "Per year (XIRR)" : "Per year");
 
 /** The answer on screen, the model's result and the alternatives in palette order. */
@@ -131,8 +132,7 @@ function WhenField({ form, set }: { form: Form; set: (p: Partial<Form>) => void 
           {quick.map((yy) => <Chip key={yy} on={y === yy} onClick={() => pick(yy, yy === firstYear ? fm : 1)}>{yy === firstYear ? month(first) : String(yy)}</Chip>)}
         </div>
         <p className="field-hint">
-          {form.level === "Max" ? "Max can start from April 2017: its share data begins in January 2016 and each pick needs a year of prices."
-            : `This model can start from ${month(first, true)}, its first pick.`}
+          From {month(first, true)}: Max needs a year of share prices before its first pick.
         </p>
       </div>
     );
@@ -155,7 +155,6 @@ function Calculator() {
   const { form, set, a, model, alts, saved } = useAnswer();
   const [tax, setTax] = useState(false);
   if (!form || !saved) return <Loading text="Loading the calculator" />;
-  const lvl = levelOf(form.level);
   const toggle = (id: string) => set({ compare: form.compare.includes(id) ? form.compare.filter((x) => x !== id) : [...form.compare, id] });
   return (
     <div className="calc">
@@ -170,15 +169,6 @@ function Calculator() {
               <WhenField form={form} set={set} />
             </motion.div>
           </AnimatePresence>
-          <div className="field">
-            <label htmlFor="level">Strategy</label>
-            <div className="select">
-              <select id="level" value={form.level} onChange={(e) => set({ level: e.target.value as Form["level"] })}>
-                {LEVELS.map((l) => <option key={l.id} value={l.id}>Intelligent Investment {l.name}</option>)}
-              </select>
-            </div>
-            <p className="field-hint">{lvl.line}{lvl.id === "Max" ? ": the model in Evidence." : ": a simpler ETF model."}</p>
-          </div>
           <div className="field">
             <span className="field-label">Compare with</span>
             <div className="chips">
@@ -212,58 +202,60 @@ function Calculator() {
       <div className="calc-out">
         <Rise as="h2" className="title" lines={["How your money would have grown"]} />
         <Status />
-        {a && model ? <Outcome a={a} model={model} alts={alts} /> : <Loading text="Working it out" />}
+        {a && model ? <Outcome a={a} alts={alts} /> : <Loading text="Working it out" />}
       </div>
     </div>
   );
 }
 
-function Outcome({ a, model, alts }: { a: Answer; model: Result; alts: Result[] }) {
+function Outcome({ a, alts }: { a: Answer; alts: Result[] }) {
   const { status } = useData();
   const i = a.inputs;
-  const period = i.mode === "lump"
+  const sip = i.mode === "sip";
+  const products = a.results.filter((r) => r.kind === "product");
+  const rows = [...products, ...alts].sort((x, y) => y.net.value - x.net.value);          // ranked by final value, best first
+  const period = !sip
     ? <>{inr(i.amount)} on {day(i.start)}, valued on {day(i.end)}</>
-    : <>{inr(i.amount)} every month from {month(i.start)} to {month(i.end)}, {money(model.invested)} put in</>;
+    : <>{inr(i.amount)} every month from {month(i.start)} to {month(i.end)}, {money(products[0]?.invested ?? 0)} put in</>;
+  const others = a.messages.filter((m) => !isModel(m.id));
   return (
     <motion.div className="outcome" animate={{ opacity: status === "loading" ? 0.55 : 1 }} transition={{ duration: 0.4 }}>
       <p className="period">{period}</p>
-      <div className="headline-result">
-        <div>
-          <span className="cap"><Key color={colorOf(model.id)} />The model ({levelOf(i.level).name}), after charges and tax</span>
-          <Counter className="big-figure" value={model.net.value} format={(n) => money(n)} />
-        </div>
-        <dl className="mini">
-          <div><dt>Put in</dt><dd><Counter value={model.invested} format={(n) => money(n)} /></dd></div>
-          <div><dt>Profit</dt><dd><Counter value={model.profit} format={(n) => money(n)} /></dd></div>
-          <div><dt>Per year</dt><dd><Counter value={model.growth} format={(n) => pct(n)} /> <small>{a.inputs.mode === "sip" ? "XIRR" : "CAGR"}</small></dd></div>
-          <div><dt>Charges and tax</dt><dd><Counter value={model.charges.value + model.tax.value} format={(n) => money(n)} /></dd></div>
-        </dl>
+      <div className="strategy-cards">
+        {STRATEGIES.map((level) => {
+          const id = `PRODUCT_${level}`, r = products.find((x) => x.id === id);
+          return (
+            <div key={level} className={level === STRATEGIES[0] ? "scard main" : "scard"}>
+              <span className="scard-name"><Key color={colorOf(id)} />{label(id)}</span>
+              {r ? (
+                <>
+                  <Counter className="scard-value" value={r.net.value} format={(n) => money(n)} />
+                  <span className="scard-line"><Counter value={r.growth} format={(n) => pct(n)} /> a year{sip ? " (XIRR)" : ""}</span>
+                  <span className="scard-fall">Worst fall <Counter value={r.worst_fall} format={fall} /></span>
+                </>
+              ) : <span className="scard-line">{a.messages.find((m) => m.id === id)?.text ?? "Not available for these dates"}</span>}
+            </div>
+          );
+        })}
       </div>
       <div className="table-wrap" data-scroll>
-      <table className="compare">
-        <thead><tr><th>Option</th><th>Final value</th><th>Profit</th><th>{perYear(a)}</th><th>Against the model</th></tr></thead>
-        <tbody>
-          {[model, ...alts].map((r, k) => {
-            const d = r.net.value - model.net.value;
-            return (
+        <table className="compare">
+          <thead><tr><th>#</th><th>Option</th><th className="sorted">Final value</th><th>{perYear(a)}</th><th>Worst fall</th></tr></thead>
+          <tbody>
+            {rows.map((r, k) => (
               <motion.tr key={r.id} className={isModel(r.id) ? "is-model" : ""} layout initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, ease: EASE, delay: ENTER + 0.1 + k * 0.05 }}>
+                transition={{ duration: 0.6, ease: EASE, delay: ENTER + 0.1 + k * 0.05, layout: { duration: 0.7, ease: SWEEP } }}>
+                <td className="rank-no">{k + 1}</td>
                 <td><Key color={colorOf(r.id)} />{label(r.id)}</td>
                 <td><Counter value={r.net.value} format={(n) => money(n)} /></td>
-                <td><Counter value={r.profit} format={(n) => money(n)} /></td>
                 <td><Counter value={r.growth} format={(n) => pct(n)} /></td>
-                <td className={isModel(r.id) ? "muted" : d >= 0 ? "more" : "less"}>{isModel(r.id) ? "—" : `${money(Math.abs(d))} ${d >= 0 ? "more" : "less"}`}</td>
+                <td className="fall-cell">{fall(r.worst_fall)}</td>
               </motion.tr>
-            );
-          })}
-        </tbody>
-      </table>
+            ))}
+          </tbody>
+        </table>
       </div>
-      {a.messages.length > 0 && <ul className="messages">{a.messages.map((m) => <li key={m.id}>{nameOf(m.id)}: {m.text}</li>)}</ul>}
-      <p className="fine">
-        Each option gets the same money on the same days and is sold on the last day; tax is worked out for your profile, year by year.
-        {i.regime === "new" && i.other_income === 1_200_000 && <> {money(i.other_income)} of other income sits at the new regime&rsquo;s rebate limit, so the first gains from 2025-26 on are taxed heavily.</>}
-      </p>
+      {others.length > 0 && <ul className="messages">{others.map((m) => <li key={m.id}>{nameOf(m.id)}: {m.text}</li>)}</ul>}
     </motion.div>
   );
 }

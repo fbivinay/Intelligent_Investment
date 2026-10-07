@@ -167,9 +167,12 @@ def _parse(params: dict) -> dict:
     model = params.get("model", "six")
     if model not in PR.MODELS:
         raise ValueError(f"the model must be one of {', '.join(PR.MODELS)}")
-    level = params.get("level", "Balanced")
-    if level not in PR.MODELS[model][2]:
-        raise ValueError(f"the risk level must be one of {', '.join(PR.MODELS[model][2])}")
+    levels = params.get("levels", [params.get("level", "Balanced")])          # several levels: each worked out beside the same alternatives
+    if not isinstance(levels, list) or not levels or len(set(levels)) != len(levels):
+        raise ValueError("levels must be a list of different risk levels")
+    for level in levels:
+        if level not in PR.MODELS[model][2]:
+            raise ValueError(f"the risk level must be one of {', '.join(PR.MODELS[model][2])}")
     regime = params.get("regime", "new")
     if regime not in ("new", "old"):
         raise ValueError("the tax regime must be new or old")
@@ -191,7 +194,8 @@ def _parse(params: dict) -> dict:
     mode = params.get("mode", "lump")
     if mode not in ("lump", "sip"):
         raise ValueError("the mode must be lump (one payment) or sip (the amount every month)")
-    return dict(amount=amount, start=start, end=end, model=model, level=level, profile=TaxProfile(regime, income), compare=list(compare), slippage=bool(params.get("slippage", True)),
+    return dict(amount=amount, start=start, end=end, model=model, level=levels[0], levels=list(levels), profile=TaxProfile(regime, income), compare=list(compare),
+                slippage=bool(params.get("slippage", True)),
                 headline="sold" if end_conv == "sell" else "held", horizon=horizon, monthly=mode == "sip", lean=bool(params.get("lean", False)))
 
 
@@ -244,12 +248,13 @@ def _calculate(params: dict) -> dict:
     traces, results, messages, series, projections = _Traces(not p["lean"]), [], [], {}, {}
     csv = {"trades": "", "tax_lines": ""}
     check, activity = {}, None
-    pid = f"PRODUCT_{p['level']}"
-    try:
-        run = PR.run(p["level"], p["amount"], p["start"], p["end"], p["profile"], p["slippage"], p["model"], p["monthly"])
-    except ValueError as e:
-        messages.append({"id": pid, "text": str(e)})
-    else:
+    for level in p["levels"]:
+        pid = f"PRODUCT_{level}"
+        try:
+            run = PR.run(level, p["amount"], p["start"], p["end"], p["profile"], p["slippage"], p["model"], p["monthly"])
+        except ValueError as e:
+            messages.append({"id": pid, "text": str(e)})
+            continue
         b = run.booked
         series[pid], path = _path(run.dates, run.equity, run.paid, run.pretax)
         results.append({"id": pid, "name": O.get(pid).name + MODEL_NAMES[p["model"]], "kind": "product", "plan": PLANS[p["model"]], "headline": p["headline"],
@@ -258,11 +263,13 @@ def _calculate(params: dict) -> dict:
                         "tax_by_fy": [{"fy": fy_label(fy), **_fig(n, traces, 6)} for fy, n in sorted(b.tax_by_fy.items())],
                         "growth": run.growth_sold, "growth_held": run.growth_held, "worst_fall": run.worst_fall, "orders": len(b.trades),
                         "strategies": sorted(set(run.strategy)), **path})
-        activity = _activity(run)
-        check["product_books_less_fast_simulator_rupees"] = round(run.gap, 2)
+        if activity is None:                                                # the trades, the books check and the CSV: the first level's
+            activity = _activity(run)
+            check["product_books_less_fast_simulator_rupees"] = round(run.gap, 2)
+            if not p["lean"]:
+                csv = {"trades": R.csv_text(b.trades), "tax_lines": R.csv_text(b.tax_lines)}
         if not p["lean"]:
-            csv = {"trades": R.csv_text(b.trades), "tax_lines": R.csv_text(b.tax_lines)}
-            hist = PR.run(p["level"], RESEARCH_AMOUNT, PR.start_of(p["level"]), p["end"], p["profile"], p["slippage"], p["model"])
+            hist = PR.run(level, RESEARCH_AMOUNT, PR.start_of(level), p["end"], p["profile"], p["slippage"], p["model"])
             split = {}
             for c, x in zip(classes(run.names[:-1]), run.weights[-1]):
                 split[c] = split.get(c, 0.0) + float(x)
@@ -290,10 +297,10 @@ def _calculate(params: dict) -> dict:
             closes = np.array([float(b.close) for b in bars if b.on <= p["end"]])
             projections[oid] = PJ.project(closes[1:] / closes[:-1] - 1, r.sold.net.value if p["headline"] == "sold" else r.held.net.value, {o.instrument_class: 1.0},
                                           p["horizon"], p["profile"], _seed(oid, p["horizon"]))
-    return {"inputs": {**{k: v for k, v in params.items()}, "start": p["start"].isoformat(), "end": p["end"].isoformat(), "level": p["level"], "model": p["model"],
+    return {"inputs": {**{k: v for k, v in params.items()}, "start": p["start"].isoformat(), "end": p["end"].isoformat(), "level": p["level"], "levels": p["levels"], "model": p["model"],
                        "mode": "sip" if p["monthly"] else "lump"},
             "stamps": {"data_as_of": DATA_END.isoformat(), "rules_verified_on": max(r.ref.verified_on for r in PR.rules().all_rows()).isoformat(),
-                       "signal": SIGNALS[p["model"]] + ("; Max level: research/out/signal_max (stock momentum, gold and Nasdaq ETFs)" if p["level"] == "Max" else "")},
+                       "signal": SIGNALS[p["model"]] + ("; Max level: research/out/signal_max (stock momentum, gold and Nasdaq ETFs)" if "Max" in p["levels"] else "")},
             "results": results, "messages": messages, "traces": traces.trees, "series": series, "projections": projections, "csv": csv, "check": check,
             "activity": activity, "notes": NOTES}
 
