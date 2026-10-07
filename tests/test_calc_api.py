@@ -64,6 +64,14 @@ def test_the_end_convention_picks_the_headline_ending():
     assert hold["results"][0]["held_net"]["exact"] == sell["results"][0]["held_net"]["exact"]
 
 
+def test_a_lean_answer_skips_the_alternatives_held_ending_and_keeps_every_figure_it_shows():
+    q = {"amount": 200000, "start": "2018-06-01", "end": "2019-06-03", "level": "Conservative", "compare": ["GOLDBEES"], "horizon": 1}
+    full, lean = api.calculate(q)["results"][1], api.calculate({**q, "lean": True})["results"][1]
+    assert "held_net" in full and "held_net" not in lean and lean["growth_held"] is None
+    assert all(lean[k]["exact"] == full[k]["exact"] for k in ("net", "gross_end", "charges", "tax"))
+    assert (lean["growth"], lean["invested"], lean["profit"], lean["orders"]) == (full["growth"], full["invested"], full["profit"], full["orders"])
+
+
 @pytest.mark.parametrize("params,needle", [
     ({"amount": 100000, "start": "2016-04-01", "end": "2015-04-01"}, "after the start"),
     ({"amount": -5, "start": "2016-04-01", "end": "2017-04-01"}, "amount"),
