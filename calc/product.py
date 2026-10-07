@@ -7,6 +7,7 @@ The smallest order is Rs 5,000 or 0.5% of the amount, whichever is smaller, so s
 """
 from __future__ import annotations
 
+from bisect import bisect_left
 from dataclasses import dataclass
 from datetime import date
 from decimal import Decimal
@@ -15,7 +16,7 @@ from pathlib import Path
 
 import numpy as np
 
-from calc import replay as R
+from calc import paths, replay as R
 from calc.options import MAX_START, PRODUCT_START
 from engine.charges import amc_fee
 from engine.rules import Rules
@@ -25,6 +26,7 @@ from research import artifact as A, causal, maxmodel as X, panel as P, sim
 ROOT = Path(__file__).resolve().parents[1]
 DATA_END = date(2026, 9, 30)
 MIN_AMOUNT = Decimal(10000)
+MIN_PAYMENT = Decimal(1000)        # a monthly plan's smallest payment
 MODELS = {"six": (P.GROWTH, A.SIGNAL_SIX, (*A.LEVELS_SIX, "Max")), "four": (P.ASSETS, A.SIGNAL, tuple(A.LEVELS))}     # assets, signal folder, levels
 LEVELS = MODELS["six"][2]
 
@@ -66,12 +68,15 @@ class ProductRun:
     prices: np.ndarray          # T x (n + 1) closing prices (the fund: its total-return index), to value those units
     sim_final: float
     gap: float                  # exact books (still holding) less the fast simulator's, the yearly fee of the year in progress allowed for
-    growth_sold: float
+    growth_sold: float          # a year: plain growth for one payment, the plan's XIRR for monthly payments
     growth_held: float
-    worst_fall: float
+    worst_fall: float           # before tax, payments left out (calc.paths.growth_index)
+    paid: list[float] = None    # rupees paid in on each day (the first day's included)
+    invested: Decimal = Decimal(0)
 
 
-def run(level: str, amount: Decimal, start: date, end: date, profile: TaxProfile, slippage: bool = True, model: str = "six") -> ProductRun:
+def run(level: str, amount: Decimal, start: date, end: date, profile: TaxProfile, slippage: bool = True, model: str = "six", monthly: bool = False) -> ProductRun:
+    """`monthly`: `amount` is paid on each day of calc.paths.schedule (the first trading day on or after it) instead of once."""
     if model not in MODELS:
         raise KeyError(f"unknown model {model!r}; the models are {tuple(MODELS)}")
     if level not in MODELS[model][2]:
@@ -82,7 +87,9 @@ def run(level: str, amount: Decimal, start: date, end: date, profile: TaxProfile
         raise ValueError("the end date must be after the start date")
     if end > DATA_END:
         raise ValueError(f"the data ends {DATA_END.isoformat()}")
-    if amount < MIN_AMOUNT:
+    if monthly and amount < MIN_PAYMENT:
+        raise ValueError(f"a monthly plan needs at least Rs {MIN_PAYMENT:,} a month")
+    if not monthly and amount < MIN_AMOUNT:
         raise ValueError(f"the model needs at least Rs {MIN_AMOUNT:,} to hold its mix of ETFs")
     panel, rl = full_panel(model, "Max" if level == "Max" else ""), rules()
     sig_dates, sig_w, sig_strategy = _signal(level, model)
@@ -95,15 +102,26 @@ def run(level: str, amount: Decimal, start: date, end: date, profile: TaxProfile
     if sig_dates[s0] != panel.dates[i0]:
         raise ValueError("the signal and the price data do not share a calendar")
     w = sig_w[s0:s0 + len(window.dates)]
-    cfg = sim.SimConfig(capital=float(amount), governor=False, harvest=True, slippage=slippage, profile=profile, min_trade=min(5000.0, float(amount) * 0.005),
-                        max_orders=200_000)
-    r = sim.simulate(window, w, rl, cfg)
-    booked = R.book(rl, window, r.order_log, amount, profile)
     days = [date.fromisoformat(str(d)) for d in window.dates]
+    paid = np.zeros(len(days))
+    for d in (paths.schedule(start, days[-1]) if monthly else [start]):
+        paid[bisect_left(days, d)] += float(amount)                           # the first trading day on or after the payment's date
+    invested = amount * int(np.count_nonzero(paid))
+    cfg = sim.SimConfig(capital=paid[0], governor=False, harvest=True, slippage=slippage, profile=profile, min_trade=min(5000.0, float(amount) * 0.005),
+                        max_orders=200_000)
+    r = sim.simulate(window, w, rl, cfg, deposits=np.r_[0.0, paid[1:]])
+    booked = R.book(rl, window, r.order_log, invested, profile)
     last_fee = float(amc_fee(rl, days[-1], days[0]).value)                     # the books charge the year in progress; the simulator does not
-    years = (days[-1] - days[0]).days / 365.25
-    grow = lambda v: (float(v) / float(amount)) ** (1 / years) - 1 if v > 0 else -1.0
+    pretax = r.equity + np.cumsum(r.tax_paid)
+    if monthly:
+        flows = lambda v: [(days[t], -paid[t]) for t in np.nonzero(paid)[0]] + [(days[-1], float(v))]      # noqa: E731
+        grow = lambda v: paths.xirr(flows(v))                                                             # noqa: E731
+        worst = float(paths.drawdown(paths.growth_index(pretax, paid)).max())
+    else:
+        years = (days[-1] - days[0]).days / 365.25
+        grow = lambda v: (float(v) / float(amount)) ** (1 / years) - 1 if v > 0 else -1.0                   # noqa: E731
+        worst = float(r.drawdown.max())
     return ProductRun(level, booked, R.names_of(window), [d.isoformat() for d in days], w, sig_strategy[s0:s0 + len(days)], [float(x) for x in r.equity],
-                      [float(x) for x in r.equity + np.cumsum(r.tax_paid)], [float(x) for x in r.drawdown], r.units, np.column_stack([window.close, window.cash]),
+                      [float(x) for x in pretax], [float(x) for x in r.drawdown], r.units, np.column_stack([window.close, window.cash]),
                       float(r.equity[-1] - r.pending_tax), float(booked.held.value) - (float(r.equity[-1] - r.pending_tax) - last_fee),
-                      grow(booked.sold.value), grow(booked.held.value), float(r.drawdown.max()))
+                      grow(booked.sold.value), grow(booked.held.value), worst, [float(x) for x in paid], invested)

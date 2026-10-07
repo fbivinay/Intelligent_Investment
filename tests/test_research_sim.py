@@ -455,3 +455,30 @@ def test_a_wider_panel_trades_every_etf_and_taxes_the_nasdaq_etf_as_a_non_equity
     assert sim.classes(wide.assets) == ("etf_equity",) * 3 + ("etf_gold", "etf_equity", "etf_gold", "mf_debt")
     # the same gain: 15% short-term on the equity ETF in FY 2019-20, the slab rate on the non-equity one
     assert mid.tax_by_fy[2019] != nas.tax_by_fy[2019] and mid.tax_by_fy[2019] > 0 and nas.tax_by_fy[2019] > 0
+
+
+def test_no_payments_and_zero_payments_give_the_same_run():
+    days = weekdays(date(2016, 6, 1), 30)
+    p = flat_panel(days, close=np.linspace(100, 120, 30))
+    w = W(days, [[0.5, 0.2, 0, 0, 0.3]])
+    a, b = sim.simulate(p, w, RULES, sim.SimConfig(**CFG)), sim.simulate(p, w, RULES, sim.SimConfig(**CFG), deposits=np.zeros(30))
+    assert np.array_equal(a.equity, b.equity) and np.array_equal(a.order_log, b.order_log)
+
+
+def test_a_payment_arrives_before_the_days_orders_and_is_bought_that_day_even_below_the_band():
+    days = weekdays(date(2016, 6, 1), 10)
+    p = flat_panel(days, price=100.0)
+    dep = np.zeros(10)
+    dep[5] = 500.0                                                     # half the 1% band of a Rs 1 lakh account
+    r = sim.simulate(p, W(days, [[1, 0, 0, 0, 0]]), RULES, sim.SimConfig(**{**CFG, "capital": 100_000.0, "min_trade": 100.0}), deposits=dep)
+    assert r.units[4, 0] == r.units[3, 0] and r.units[5, 0] - r.units[4, 0] >= 4
+    assert r.equity[5] - r.equity[4] == pytest.approx(500.0, abs=1.0)    # the payment, less a few paise of charges
+
+
+def test_payments_are_refused_with_the_governor_or_when_negative():
+    days = weekdays(date(2016, 6, 1), 5)
+    p, w = flat_panel(days), W(days, [[1, 0, 0, 0, 0]])
+    with pytest.raises(ValueError, match="governor"):
+        sim.simulate(p, w, RULES, sim.SimConfig(**{**CFG, "governor": True}), deposits=np.r_[0, 0, 100.0, 0, 0])
+    with pytest.raises(ValueError, match="zero or more"):
+        sim.simulate(p, w, RULES, sim.SimConfig(**CFG), deposits=np.r_[0, 0, -1.0, 0, 0])

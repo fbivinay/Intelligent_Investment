@@ -186,7 +186,7 @@ def _add_lot(i, u, value, s, t, px, reg, cvals, cded, sizes, cls, units, cash, l
 
 
 @njit(cache=True)
-def _run(t0, t1, px, close, adv, reg, fixed, target, cvals, cded, sizes, cls, whole, half, impact, maxs, use_slip, band, min_trade, cap, use_gov, gstart, gend, ghold,
+def _run(t0, t1, px, close, adv, reg, fixed, dep, target, cvals, cded, sizes, cls, whole, half, impact, maxs, use_slip, band, min_trade, cap, use_gov, gstart, gend, ghold,
          hold_days, dayn, lt_turn, harvest, exempt, hshare, hmin, fmv, gf_idx,
          units, cash, lot_units, lot_cost, lot_day, head, tail, pend_w, pend_valid, gov, tax_due, rebuy, ltcg,
          equity, dd, mult, traded, chg, slipc, taxpaid, nord, units_out, cash_out,
@@ -198,6 +198,7 @@ def _run(t0, t1, px, close, adv, reg, fixed, target, cvals, cded, sizes, cls, wh
     for t in range(t0, t1):
         acc[:] = 0.0
         cash[0] -= fixed[t]
+        cash[0] += dep[t]                                                    # a payment arrives before the day's orders
         if pend_valid[0] == 1:
             if tax_due[0] > 0.0:
                 cash[0] -= tax_due[0]
@@ -254,10 +255,11 @@ def _run(t0, t1, px, close, adv, reg, fixed, target, cvals, cded, sizes, cls, wh
                     if u > 0.0:
                         _sell(i, u, t, px, adv, reg, cvals, cded, sizes, cls, half, impact, maxs, use_slip, units, cash, lot_units, lot_cost, lot_day, head, tail, lt_turn, fmv, gf_idx,
                               ltcg, sl_asset, sl_acq, sl_sale, sl_units, sl_cost, sl_proc, sl_scost, sl_n, acc, olog, ol_n)
+            thr_buy = min_trade if dep[t] > 0.0 else thr                     # a payment is put to work at once, not left waiting for the band
             for i in range(N):
                 cur = units[i] * px[t, i]
                 gap = pend_w[i] * total - cur
-                if gap <= thr or cash[0] <= 0.0:
+                if gap <= thr_buy or cash[0] <= 0.0:
                     continue
                 bv = min(gap, cash[0])
                 if whole[i] == 1:
@@ -464,7 +466,9 @@ def _check_weights(w: np.ndarray, T: int, n: int) -> None:
         raise ValueError("the weights of every day must sum to 1")
 
 
-def simulate(panel: Panel, weights: np.ndarray, rules: Rules, cfg: SimConfig = SimConfig()) -> Result:
+def simulate(panel: Panel, weights: np.ndarray, rules: Rules, cfg: SimConfig = SimConfig(), deposits: np.ndarray | None = None) -> Result:
+    """`deposits`: rupees paid into the account at the start of each day (a monthly plan), on top of `cfg.capital` on the first day. A day with a payment buys
+    whatever is under its weight by more than `min_trade`. Not with the governor: its drawdown would count the payments as gains."""
     days = [date.fromisoformat(str(d)) for d in panel.dates]
     T = len(days)
     n = len(panel.assets)
@@ -475,6 +479,11 @@ def simulate(panel: Panel, weights: np.ndarray, rules: Rules, cfg: SimConfig = S
     HALF = np.array([C.HALF_SPREAD.get(a, C.STOCK_HALF_SPREAD) for a in panel.assets] + [0.0])
     weights = np.asarray(weights, dtype=float)
     _check_weights(weights, T, N)
+    dep = np.zeros(T) if deposits is None else np.ascontiguousarray(deposits, dtype=float)
+    if dep.shape != (T,) or (dep < 0).any() or not np.isfinite(dep).all():
+        raise ValueError(f"deposits must be {T} rupee amounts of zero or more")
+    if cfg.governor and dep.any():
+        raise ValueError("deposits cannot be used with the governor")
     px = np.ascontiguousarray(np.column_stack([panel.vwap, panel.cash]))
     close = np.ascontiguousarray(np.column_stack([panel.close, panel.cash]))
     adv = pd.DataFrame(panel.value).rolling(cfg.adv_days, min_periods=1).mean().shift(1).to_numpy()
@@ -524,7 +533,7 @@ def simulate(panel: Panel, weights: np.ndarray, rules: Rules, cfg: SimConfig = S
     for c in range(len(bounds) - 1):
         t0, t1 = bounds[c], bounds[c + 1]
         sl_n[0] = 0
-        _run(t0, t1, px, close, adv, reg, fixed, weights, cvals, cded, sizes, CLS, WHOLE, HALF, C.IMPACT, C.MAX_SLIPPAGE, 1 if cfg.slippage else 0, cfg.band, cfg.min_trade,
+        _run(t0, t1, px, close, adv, reg, fixed, dep, weights, cvals, cded, sizes, CLS, WHOLE, HALF, C.IMPACT, C.MAX_SLIPPAGE, 1 if cfg.slippage else 0, cfg.band, cfg.min_trade,
              cfg.cap, 1 if cfg.governor else 0, cfg.gov_start, cfg.gov_end, cfg.gov_hold_days,
              cfg.hold_days, dayn, lt_turn, harvest, exempt, cfg.harvest_share, cfg.harvest_min, fmv, gf_idx if fmv_unit else -1,
              units, cash, lot_units, lot_cost, lot_day, head, tail, pend_w, pend_valid, gov, tax_due, rebuy, ltcg,

@@ -86,3 +86,14 @@ def test_the_max_level_starts_in_april_2017_holds_stocks_and_its_books_match_the
     assert abs(run.weights.sum(axis=1) - 1).max() < 1e-6
     assert abs(run.gap) < 1000
     assert any(t["side"] == "sell" for t in run.booked.trades)
+
+
+def test_a_monthly_plan_pays_each_month_its_books_agree_with_the_simulator_and_one_payment_is_the_lump_sum():
+    m = PR.run("Balanced", Decimal(20000), date(2016, 4, 1), date(2017, 3, 31), PROFILE, monthly=True)
+    assert m.invested == Decimal(240000) and sum(m.paid) == 240000 and np.count_nonzero(m.paid) == 12
+    assert_balanced(m.booked.sold) and abs(m.gap) < 100 and -1 < m.growth_sold < 1 and 0 <= m.worst_fall < 1
+    one = PR.run("Balanced", Decimal(200000), date(2016, 4, 1), date(2016, 4, 29), PROFILE, monthly=True)
+    lump = PR.run("Balanced", Decimal(200000), date(2016, 4, 1), date(2016, 4, 29), PROFILE)
+    assert one.booked.sold.value == lump.booked.sold.value and one.growth_sold == pytest.approx(lump.growth_sold, abs=1e-9)
+    with pytest.raises(ValueError, match="a month"):
+        PR.run("Balanced", Decimal(500), date(2016, 4, 1), date(2017, 3, 31), PROFILE, monthly=True)

@@ -1,9 +1,12 @@
 """One call for the web app: `calculate(params) -> dict`, plain JSON.
 
-Inputs: amount, start, end, model ("six" ETFs, the default, or "four", the frozen-test model), level (its risk level), compare (alternatives to show), regime, other_income, slippage, end_convention (sell or hold), horizon
-(projection years). Output: the model and each alternative with net, gross end value, charges, tax and "if still holding", each figure with the id of its trace;
-charges by kind and tax by financial year; daily values for the chart; projections; the model's trades and tax lines as CSV; stamps and notes. A bad input
-returns {"error": ...} only; an option that cannot run on these dates (the model before its first pick, a fund that did not exist yet) is a message beside the rest.
+Inputs: amount, start, end, mode ("lump": the amount once, the default; "sip": the amount every month from the start), model ("six" ETFs, the default, or
+"four", the frozen-test model), level (its risk level), compare (alternatives to show), regime, other_income, slippage, end_convention (sell or hold), horizon
+(projection years), lean (no traces, CSV or projections: what the website asks for). Output: the model and each alternative with net, gross end value, charges,
+tax and "if still holding", each figure with the id of its trace; money invested and profit; charges by kind and tax by financial year; calendar-year returns
+and the deepest fall; daily values, money paid in and drawdowns for the charts; the model's activity (its mix through time, every trading day, its holdings at
+the end); projections; the model's trades and tax lines as CSV; stamps and notes. A bad input returns {"error": ...} only; an option that cannot run on these
+dates (the model before its first pick, a fund that did not exist yet) is a message beside the rest.
 """
 from __future__ import annotations
 
@@ -14,9 +17,10 @@ from decimal import Decimal
 
 import numpy as np
 
-from calc import compare as CP, options as O, product as PR, project as PJ, replay as R
+from calc import compare as CP, options as O, paths, product as PR, project as PJ, replay as R
 from engine.tax import TaxProfile, fy_label
 from engine.trace import Node, flags
+from research.maxmodel import FIXED as MAX_FIXED
 from research.sim import classes
 
 DATA_START, DATA_END = date(2010, 4, 1), PR.DATA_END
@@ -40,11 +44,15 @@ NOTES = [
 
 
 class _Traces:
-    """Collects depth-limited trace trees by id; long input lists are cut to MAX_CHILDREN with one line saying how many more and their sum."""
-    def __init__(self):
+    """Collects depth-limited trace trees by id; long input lists are cut to MAX_CHILDREN with one line saying how many more and their sum. Switched off
+    (`lean`), it keeps nothing and figures carry no trace id."""
+    def __init__(self, on: bool = True):
         self.trees: dict[str, dict] = {}
+        self.on = on
 
-    def add(self, n: Node, depth: int = MAX_DEPTH) -> str:
+    def add(self, n: Node, depth: int = MAX_DEPTH) -> str | None:
+        if not self.on:
+            return None
         tid = f"t{len(self.trees)}"
         tree = self._dict(n, depth)
         tree["flags"] = [{"id": r.rule_id, "confidence": r.confidence, "note": r.note, "source": r.source} for r in flags(n)]
@@ -71,12 +79,69 @@ def _fig(n: Node, traces: _Traces, depth: int = MAX_DEPTH) -> dict:
     return {"value": float(n.value), "exact": str(n.value), "trace": traces.add(n, depth)}
 
 
-def _thin(dates: list[str], values: list[float]) -> dict:
-    step = max(1, int(np.ceil(len(dates) / SERIES_POINTS)))
-    keep = list(range(0, len(dates), step))
-    if keep[-1] != len(dates) - 1:
-        keep.append(len(dates) - 1)
-    return {"dates": [dates[i] for i in keep], "values": [round(values[i], 2) for i in keep]}
+def _keep(n: int) -> list[int]:
+    """The days a chart series keeps: about SERIES_POINTS of them, the last always."""
+    step = max(1, int(np.ceil(n / SERIES_POINTS)))
+    keep = list(range(0, n, step))
+    if keep[-1] != n - 1:
+        keep.append(n - 1)
+    return keep
+
+
+def _path(dates: list[str], values, paid, basis=None) -> tuple[dict, dict]:
+    """The chart series (value, money paid in so far, drawdown) on the kept days, and the path's calendar years and deepest fall. Drawdowns and years
+    are read from the growth index of `basis` (default the values; the product's is before tax), so a payment or a tax payment is not a gain or a loss.
+    Each kept day carries the deepest drawdown since the kept day before it, so thinning never hides the bottom."""
+    keep = _keep(len(dates))
+    index = paths.growth_index(values if basis is None else basis, paid)
+    dd = paths.drawdown(index)
+    deep = [float(dd[(keep[k - 1] + 1 if k else 0):i + 1].max()) for k, i in enumerate(keep)]
+    put = np.cumsum(paid)
+    series = {"dates": [dates[i] for i in keep], "values": [round(float(values[i]), 2) for i in keep], "invested": [round(float(put[i]), 2) for i in keep],
+              "drawdown": [round(x, 5) for x in deep]}
+    return series, {"years": paths.years(dates, index), "fall": paths.deepest_fall(dates, index)}
+
+
+def _activity(run: PR.ProductRun) -> dict:
+    """What the model's account did: its mix through time by group (the shares together, each ETF, the liquid fund, cash not yet invested), how many
+    shares it held, every day it traded (rupees bought and sold by group, which shares came in and went out), and what it held at the end."""
+    cash = len(run.names) - 1                    # the momentum rule's picks (shares, and an ETF it may pick, as BANKBEES) are one group; Max's fixed ETFs their own
+    group = ["STOCKS" if run.level == "Max" and i < cash and n not in MAX_FIXED else n for i, n in enumerate(run.names)]
+    group_of = dict(zip(run.names, group))
+    groups = list(dict.fromkeys(group))
+    pick = np.zeros((len(group), len(groups)))
+    pick[np.arange(len(group)), [groups.index(g) for g in group]] = 1.0
+    value = run.units * run.prices
+    eq = np.asarray(run.equity)
+    keep = _keep(len(run.dates))
+    by = (value @ pick)[keep] / eq[keep, None]
+    shares = {g: [round(float(x), 4) for x in by[:, j]] for j, g in enumerate(groups)}
+    shares["CASH"] = [round(max(float(x), 0.0), 4) for x in 1.0 - by.sum(axis=1)]
+    stock_cols = [i for i, g in enumerate(group) if g == "STOCKS"]
+    held = [int(x) for x in (run.units[keep][:, stock_cols] > 0).sum(axis=1)] if stock_cols else None
+    days: dict[str, dict] = {}
+    for t in run.booked.trades:
+        g = group_of[t["asset"]]
+        d = days.setdefault(t["date"], {"date": t["date"], "buys": 0, "sells": 0, "bought": {}, "sold": {}, "in": [], "out": []})
+        buy, rupees = t["side"] == "buy", float(t["turnover"])
+        d["buys" if buy else "sells"] += 1
+        flow = d["bought" if buy else "sold"]
+        flow[g] = flow.get(g, 0.0) + rupees
+        if g == "STOCKS":
+            d["in" if buy else "out"].append((rupees, t["asset"]))
+    for d in days.values():
+        for k in ("bought", "sold"):
+            d[k] = {g: round(v, 2) for g, v in d[k].items()}
+        for k in ("in", "out"):
+            d[k] = [name for _, name in sorted(d[k], reverse=True)]
+    end = value[-1]
+    holdings = sorted(({"asset": run.names[i], "group": group[i], "value": round(float(end[i]), 2)} for i in range(len(end)) if end[i] > 0),
+                      key=lambda h: -h["value"])
+    trades = run.booked.trades
+    return {"groups": groups + ["CASH"], "allocation": {"dates": [run.dates[i] for i in keep], "shares": shares, "stocks_held": held},
+            "days": [days[k] for k in sorted(days)], "holdings": holdings,
+            "totals": {"orders": len(trades), "buys": sum(t["side"] == "buy" for t in trades), "sells": sum(t["side"] == "sell" for t in trades),
+                       "trade_days": len(days), "stocks_traded": len({t["asset"] for t in trades if group_of[t["asset"]] == "STOCKS"})}}
 
 
 def _parse(params: dict) -> dict:
@@ -122,8 +187,11 @@ def _parse(params: dict) -> dict:
     end_conv = params.get("end_convention", "sell")
     if end_conv not in ("sell", "hold"):
         raise ValueError("the end convention must be sell or hold")
+    mode = params.get("mode", "lump")
+    if mode not in ("lump", "sip"):
+        raise ValueError("the mode must be lump (one payment) or sip (the amount every month)")
     return dict(amount=amount, start=start, end=end, model=model, level=level, profile=TaxProfile(regime, income), compare=list(compare), slippage=bool(params.get("slippage", True)),
-                headline="sold" if end_conv == "sell" else "held", horizon=horizon)
+                headline="sold" if end_conv == "sell" else "held", horizon=horizon, monthly=mode == "sip", lean=bool(params.get("lean", False)))
 
 
 def _figures(sold_w: dict, held_w: dict, traces: _Traces) -> dict:
@@ -141,52 +209,66 @@ def calculate(params: dict) -> dict:
         p = _parse(params)
     except (ValueError, KeyError) as e:
         return {"error": str(e).strip("'\"")}
-    traces, results, messages, series, projections = _Traces(), [], [], {}, {}
+    traces, results, messages, series, projections = _Traces(not p["lean"]), [], [], {}, {}
     csv = {"trades": "", "tax_lines": ""}
-    check = {}
+    check, activity = {}, None
     pid = f"PRODUCT_{p['level']}"
     try:
-        run = PR.run(p["level"], p["amount"], p["start"], p["end"], p["profile"], p["slippage"], p["model"])
+        run = PR.run(p["level"], p["amount"], p["start"], p["end"], p["profile"], p["slippage"], p["model"], p["monthly"])
     except ValueError as e:
         messages.append({"id": pid, "text": str(e)})
     else:
         b = run.booked
+        series[pid], path = _path(run.dates, run.equity, run.paid, run.pretax)
         results.append({"id": pid, "name": O.get(pid).name + MODEL_NAMES[p["model"]], "kind": "product", "plan": PLANS[p["model"]], "headline": p["headline"],
-                        **_figures(b.waterfall["sold"], b.waterfall["held"], traces),
+                        **_figures(b.waterfall["sold"], b.waterfall["held"], traces), **_invested(run.invested, b.waterfall, p["headline"]),
                         "charges_by_kind": [{"label": R.KIND_LABELS.get(k, k), **_fig(n, traces, 3)} for k, n in b.charges_by_kind["sold"].items()],
                         "tax_by_fy": [{"fy": fy_label(fy), **_fig(n, traces, 6)} for fy, n in sorted(b.tax_by_fy.items())],
                         "growth": run.growth_sold, "growth_held": run.growth_held, "worst_fall": run.worst_fall, "orders": len(b.trades),
-                        "strategies": sorted(set(run.strategy))})
-        series[pid] = _thin(run.dates, run.equity)
-        csv = {"trades": R.csv_text(b.trades), "tax_lines": R.csv_text(b.tax_lines)}
+                        "strategies": sorted(set(run.strategy)), **path})
+        activity = _activity(run)
         check["product_books_less_fast_simulator_rupees"] = round(run.gap, 2)
-        hist = PR.run(p["level"], RESEARCH_AMOUNT, PR.start_of(p["level"]), p["end"], p["profile"], p["slippage"], p["model"])
-        split = {}
-        for c, x in zip(classes(run.names[:-1]), run.weights[-1]):
-            split[c] = split.get(c, 0.0) + float(x)
-        rets = np.diff(np.asarray(hist.pretax)) / np.asarray(hist.pretax[:-1])
-        projections[pid] = PJ.project(rets, b.sold.value if p["headline"] == "sold" else b.held.value, split, p["horizon"], p["profile"], _seed(pid, p["horizon"]))
+        if not p["lean"]:
+            csv = {"trades": R.csv_text(b.trades), "tax_lines": R.csv_text(b.tax_lines)}
+            hist = PR.run(p["level"], RESEARCH_AMOUNT, PR.start_of(p["level"]), p["end"], p["profile"], p["slippage"], p["model"])
+            split = {}
+            for c, x in zip(classes(run.names[:-1]), run.weights[-1]):
+                split[c] = split.get(c, 0.0) + float(x)
+            rets = np.diff(np.asarray(hist.pretax)) / np.asarray(hist.pretax[:-1])
+            projections[pid] = PJ.project(rets, b.sold.value if p["headline"] == "sold" else b.held.value, split, p["horizon"], p["profile"], _seed(pid, p["horizon"]))
     for oid in p["compare"]:
         o = O.get(oid)
         try:
-            r = CP.run_option(o, p["amount"], p["start"], p["end"], p["profile"])
+            r = CP.run_option(o, p["amount"], p["start"], p["end"], p["profile"], p["monthly"])
         except ValueError as e:
             messages.append({"id": oid, "text": str(e)})
             continue
         charges = {"Buy charges": r.sold.waterfall["buy_charges"], "Sale charges": r.sold.waterfall["sale_charges"],
                    "Account opening fee": r.sold.waterfall["account_opening"], "Yearly demat fees": r.sold.waterfall["amc"]}
+        buys = sum(1 for x in r.sold.buys if x[2] > 0) if p["monthly"] else 1
+        series[oid], path = _path(r.dates, r.values, r.paid)
         results.append({"id": oid, "name": o.name, "kind": o.kind, "plan": r.plan, "headline": p["headline"], **_figures(r.sold.waterfall, r.held.waterfall, traces),
+                        **_invested(r.sold.waterfall["initial"].value, {"sold": r.sold.waterfall, "held": r.held.waterfall}, p["headline"]),
                         "charges_by_kind": [{"label": k, **_fig(n, traces)} for k, n in charges.items()], "tax_by_fy": [],
-                        "growth": r.growth_sold, "growth_held": r.growth_held, "worst_fall": r.worst_fall, "orders": 2 if p["headline"] == "sold" else 1})
-        series[oid] = _thin(r.dates, r.values)
-        bars, _, _ = O.history(o, O.first_day(o, p["start"]))
-        closes = np.array([float(b.close) for b in bars if b.on <= p["end"]])
-        projections[oid] = PJ.project(closes[1:] / closes[:-1] - 1, r.sold.net.value if p["headline"] == "sold" else r.held.net.value, {o.instrument_class: 1.0},
-                                      p["horizon"], p["profile"], _seed(oid, p["horizon"]))
-    return {"inputs": {**{k: v for k, v in params.items()}, "start": p["start"].isoformat(), "end": p["end"].isoformat(), "level": p["level"], "model": p["model"]},
+                        "growth": r.growth_sold, "growth_held": r.growth_held, "worst_fall": r.worst_fall, "orders": buys + (1 if p["headline"] == "sold" else 0),
+                        **path})
+        if not p["lean"]:
+            bars, _, _ = O.history(o, O.first_day(o, p["start"]))
+            closes = np.array([float(b.close) for b in bars if b.on <= p["end"]])
+            projections[oid] = PJ.project(closes[1:] / closes[:-1] - 1, r.sold.net.value if p["headline"] == "sold" else r.held.net.value, {o.instrument_class: 1.0},
+                                          p["horizon"], p["profile"], _seed(oid, p["horizon"]))
+    return {"inputs": {**{k: v for k, v in params.items()}, "start": p["start"].isoformat(), "end": p["end"].isoformat(), "level": p["level"], "model": p["model"],
+                       "mode": "sip" if p["monthly"] else "lump"},
             "stamps": {"data_as_of": DATA_END.isoformat(), "rules_verified_on": max(r.ref.verified_on for r in PR.rules().all_rows()).isoformat(),
                        "signal": SIGNALS[p["model"]] + ("; Max level: research/out/signal_max (stock momentum, gold and Nasdaq ETFs)" if p["level"] == "Max" else "")},
-            "results": results, "messages": messages, "traces": traces.trees, "series": series, "projections": projections, "csv": csv, "check": check, "notes": NOTES}
+            "results": results, "messages": messages, "traces": traces.trees, "series": series, "projections": projections, "csv": csv, "check": check,
+            "activity": activity, "notes": NOTES}
+
+
+def _invested(paid: Decimal, waterfall: dict, headline: str) -> dict:
+    """The money put in and what the headline ending made on it (after every charge and tax)."""
+    net = waterfall["sold" if headline == "sold" else "held"]["net"].value
+    return {"invested": float(paid), "profit": float(net - paid)}
 
 
 def preview(params: dict) -> dict:
