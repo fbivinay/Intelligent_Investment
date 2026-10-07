@@ -67,10 +67,17 @@ def _rows(name: str):
         yield from csv.DictReader(f)
 
 
-@lru_cache(maxsize=None)
+@lru_cache(maxsize=1)
+def _etfs() -> dict[str, tuple[Bar, ...]]:
+    """Every ETF's bars from one pass over the file (in file order)."""
+    out: dict[str, list[Bar]] = {}
+    for r in _rows("processed/etf_daily_adjusted.csv"):
+        out.setdefault(r["symbol"], []).append(Bar(date.fromisoformat(r["date"]), Decimal(r["adj_high"]), Decimal(r["adj_close"])))
+    return {k: tuple(v) for k, v in out.items()}
+
+
 def _etf(symbol: str) -> tuple[Bar, ...]:
-    return tuple(Bar(date.fromisoformat(r["date"]), Decimal(r["adj_high"]), Decimal(r["adj_close"]))
-                 for r in _rows("processed/etf_daily_adjusted.csv") if r["symbol"] == symbol)
+    return _etfs().get(symbol, ())
 
 
 @lru_cache(maxsize=None)
@@ -79,10 +86,18 @@ def _dividends(symbol: str) -> dict:
     return {date.fromisoformat(r["ex_date"]): Decimal(r["per_unit"]) for r in _rows(f"processed/{symbol}_dividends.csv")} if path.exists() else {}
 
 
+@lru_cache(maxsize=1)
+def _navs() -> dict[str, list[tuple[date, Decimal]]]:
+    """Every scheme's NAVs from one pass over the file."""
+    out: dict[str, list[tuple[date, Decimal]]] = {}
+    for r in _rows("processed/amfi_nav_adjusted.csv"):
+        out.setdefault(r["code"], []).append((date.fromisoformat(r["date"]), Decimal(r["adj_nav"])))
+    return out
+
+
 @lru_cache(maxsize=None)
 def _nav(code: str) -> tuple[Bar, ...]:
-    out = [(date.fromisoformat(r["date"]), Decimal(r["adj_nav"])) for r in _rows("processed/amfi_nav_adjusted.csv") if r["code"] == code]
-    return tuple(Bar(d, v, v) for d, v in sorted(out))
+    return tuple(Bar(d, v, v) for d, v in sorted(_navs().get(code, [])))
 
 
 def first_day(o: Option, on: date | None = None) -> date:

@@ -205,23 +205,25 @@ def _run(t0, t1, px, close, adv, reg, fixed, dep, target, cvals, cded, sizes, cl
                 taxpaid[t] = tax_due[0]
                 gov[5] += tax_due[0]
                 tax_due[0] = 0.0
-            for i in range(N):
-                if rebuy[i] > 0.0:
-                    if pend_w[i] > 0.0:
-                        s = _slip(i, rebuy[i] * px[t, i], adv[t, i], half, impact, maxs, use_slip)
-                        price = px[t, i] * (1.0 + s)
-                        u = rebuy[i]
-                        while u > 0.0 and u * price + _charge(cvals, sizes, reg[t], cls[i], 0, u * price) > cash[0]:
-                            u -= 1.0
-                        if u > 0.0:
-                            _add_lot(i, u, u * price, s, t, px, reg, cvals, cded, sizes, cls, units, cash, lot_units, lot_cost, lot_day, tail, acc, olog, ol_n)
-                    rebuy[i] = 0.0
+            # Only assets held, wanted or awaiting a rebuy can act; the loops visit those alone, in the same order, so a panel of hundreds of shares costs
+            # what its few dozen live ones do (a zero term added to a sum leaves it bit for bit the same).
+            for i in np.nonzero(rebuy > 0.0)[0]:
+                if pend_w[i] > 0.0:
+                    s = _slip(i, rebuy[i] * px[t, i], adv[t, i], half, impact, maxs, use_slip)
+                    price = px[t, i] * (1.0 + s)
+                    u = rebuy[i]
+                    while u > 0.0 and u * price + _charge(cvals, sizes, reg[t], cls[i], 0, u * price) > cash[0]:
+                        u -= 1.0
+                    if u > 0.0:
+                        _add_lot(i, u, u * price, s, t, px, reg, cvals, cded, sizes, cls, units, cash, lot_units, lot_cost, lot_day, tail, acc, olog, ol_n)
+                rebuy[i] = 0.0
+            held = np.nonzero(units)[0]
             total = cash[0]
-            for i in range(N):
+            for i in held:
                 total += units[i] * px[t, i]
             thr = max(min_trade, band * total)
-            # sells first: they raise the cash the buys use
-            for i in range(N):
+            # sells first: they raise the cash the buys use (an asset with no units has nothing to sell)
+            for i in held:
                 cur = units[i] * px[t, i]
                 gap = pend_w[i] * total - cur
                 sell_all = pend_w[i] <= 0.0 and units[i] > 0.0
@@ -243,8 +245,14 @@ def _run(t0, t1, px, close, adv, reg, fixed, dep, target, cvals, cded, sizes, cl
                       sl_asset, sl_acq, sl_sale, sl_units, sl_cost, sl_proc, sl_scost, sl_n, acc, olog, ol_n)
             # an overdraft (tax, fees) is covered by selling: the fund first, then the ETFs in turn
             if cash[0] < 0.0:
-                for k in range(N):
-                    i = N - 1 if k == 0 else k - 1
+                held = np.nonzero(units > 0.0)[0]
+                for k in range(held.shape[0] + 1):
+                    if k == 0:
+                        i = N - 1
+                    else:
+                        i = held[k - 1]
+                        if i == N - 1:
+                            continue
                     if cash[0] >= 0.0 or units[i] <= 0.0:
                         continue
                     need = -cash[0] * 1.002 + 1.0
@@ -256,7 +264,7 @@ def _run(t0, t1, px, close, adv, reg, fixed, dep, target, cvals, cded, sizes, cl
                         _sell(i, u, t, px, adv, reg, cvals, cded, sizes, cls, half, impact, maxs, use_slip, units, cash, lot_units, lot_cost, lot_day, head, tail, lt_turn, fmv, gf_idx,
                               ltcg, sl_asset, sl_acq, sl_sale, sl_units, sl_cost, sl_proc, sl_scost, sl_n, acc, olog, ol_n)
             thr_buy = min_trade if dep[t] > 0.0 else thr                     # a payment is put to work at once, not left waiting for the band
-            for i in range(N):
+            for i in np.nonzero(pend_w > 0.0)[0]:                            # an asset with no weight is never bought
                 cur = units[i] * px[t, i]
                 gap = pend_w[i] * total - cur
                 if gap <= thr_buy or cash[0] <= 0.0:
@@ -325,9 +333,9 @@ def _run(t0, t1, px, close, adv, reg, fixed, dep, target, cvals, cded, sizes, cl
         slipc[t] = acc[2]
         nord[t] = acc[3]
         eq = cash[0]
-        for i in range(N):
+        for i in np.nonzero(units)[0]:
             eq += units[i] * close[t, i]
-            units_out[t, i] = units[i]
+        units_out[t, :] = units
         cash_out[t] = cash[0]
         equity[t] = eq
         eqp = eq + gov[5]                      # before tax: what has been paid out of the account is not a market loss (spec section 2)
@@ -362,8 +370,8 @@ def _run(t0, t1, px, close, adv, reg, fixed, dep, target, cvals, cded, sizes, cl
                 gov[1] = m
         mult[t] = m
         risky = 0.0
-        for i in range(N - 1):
-            pend_w[i] = target[t, i] * m
+        pend_w[:N - 1] = target[t, :N - 1] * m
+        for i in np.nonzero(pend_w[:N - 1])[0]:
             risky += pend_w[i]
         pend_w[N - 1] = 1.0 - risky
         pend_valid[0] = 1
@@ -406,7 +414,8 @@ def lt_turn_days(rules: Rules, days: list[date], asset_class: str) -> np.ndarray
 def _lt_table(rules: Rules, days: list[date], cls: tuple[str, ...]) -> np.ndarray:
     key = (id(rules), days[0], days[-1], len(days), cls)
     if key not in _LT_CACHE:
-        _LT_CACHE[key] = (rules, np.ascontiguousarray(np.column_stack([lt_turn_days(rules, days, c) for c in cls])))
+        once = {c: lt_turn_days(rules, days, c) for c in dict.fromkeys(cls)}      # a column per asset, worked out once per tax class
+        _LT_CACHE[key] = (rules, np.ascontiguousarray(np.column_stack([once[c] for c in cls])))
     return _LT_CACHE[key][1]
 
 
