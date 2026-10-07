@@ -3,7 +3,7 @@
 // Everything the slides read: the two saved calculator answers and the repository facts (tools/site_data.py), and the calculator's own form and answer.
 // No money is worked out here: every figure comes from the calculator API (calc/api.py) or a saved answer of it.
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { ALTERNATIVES, DATA_END, isModel, levelOf, STRATEGIES } from "./names";
+import { ALTERNATIVES, DATA_END, isModel, levelOf } from "./names";
 import type { Answer, Facts, Future, Level, Mode, Request } from "./types";
 
 export type Form = {
@@ -33,7 +33,7 @@ export function request(f: Form): Request {
   const first = levelOf(f.level).first;
   const start = f.mode === "lump" ? later(f.start, first) : f.years === "all" ? first : later(yearsBefore(DATA_END, f.years), first);
   const compare = ALTERNATIVES.filter((id) => f.compare.includes(id));
-  return { mode: f.mode, amount: f.mode === "lump" ? f.lumpAmount : f.sipAmount, start, end: DATA_END, level: f.level, levels: STRATEGIES, compare, regime: f.regime,
+  return { mode: f.mode, amount: f.mode === "lump" ? f.lumpAmount : f.sipAmount, start, end: DATA_END, level: f.level, compare, regime: f.regime,
            other_income: f.income, lean: true };
 }
 
