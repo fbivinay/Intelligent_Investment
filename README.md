@@ -18,8 +18,9 @@ everything here is past results and estimates, never a promise.
 3. **Testing strategies without cheating** (`research/`). Every strategy is judged on years it never saw: chosen on the early years, then run unchanged on
    the later ones. Trades fill at the next day's prices with slippage. Nothing uses future data (tested). Heavy runs went to Kaggle (GPU for the deep
    model, CPU for the option grids).
-4. **Calculator and website** (`calc/`, `site/`). Enter an amount, dates and your tax profile; it replays the model with exact charges and tax, and compares
-   it with ETFs and funds. Every number has an ⓘ showing its calculation. Live: https://intelligent-investment.vercel.app
+4. **Calculator and website** (`calc/`, `site/`). Enter an amount, once or every month (SIP), a start and your tax profile; it replays the model with exact
+   charges and tax and compares it with ETFs and funds. The site is a desktop slide deck in three parts: Overview, Performance (the calculator, the path, the
+   model's trades) and Evidence (the Max model step by step, how it was chosen, its limits). Live: https://intelligent-investment.vercel.app
 
 ## What we found
 
@@ -69,6 +70,6 @@ python -m pip install -r requirements-research.txt     # Python 3.13
 python -m pytest                                       # the tests
 python -m research.intraday.levels_tax                 # the risk levels by tax profile
 python -m tools.export_dataset                         # rebuild dataset/ from data/ and rules/
-python -m tools.site_data                              # the saved run the website shows first (site/public/history.json)
+python -m tools.site_data                              # the saved runs and facts the website shows first (site/public/data/*.json)
 python -m tools.bundle_site                            # then: cd site && npx vercel deploy --prod --yes
 ```
