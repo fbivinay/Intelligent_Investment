@@ -1,5 +1,10 @@
 """tools/classes.py: each kind of file is measured from its contents, and the class list names every dataset once."""
+import zipfile
+
 import numpy as np
+import pandas as pd
+
+from engine.rules import Rules
 
 from tools import classes as C
 
@@ -29,3 +34,32 @@ def test_the_website_gets_rows_only_where_a_file_has_them():
     inv = [{"class": 1, "name": "n", "what": "w", "source": "s", "used_by": "u", "from": "2016-01-01", "to": "2026-09-30",
             "datasets": [{"dataset": "a", "rows": "", "files": 3, "first": "", "last": ""}, {"dataset": "b", "rows": 7, "files": 1, "first": "2016-01-01", "last": "2026-09-30"}]}]
     assert [(d["rows"], d["files"]) for d in C.summary(inv)[0]["datasets"]] == [(None, 3), (7, 1)]
+
+
+def test_the_folder_holds_each_class_whole_and_drops_old_files(tmp_path):
+    (tmp_path / "README.md").write_text("old", encoding="utf-8")
+    C.write(tmp_path, only=(2, 4, 9))
+    names = ("2_etf_prices", "4_mutual_fund_values", "9_tax_and_charge_rules")
+    assert sorted(p.name for p in tmp_path.iterdir()) == sorted(f"{n}.{x}" for n in names for x in ("csv", "zip"))
+    assert all(b"\r" not in (tmp_path / f"{n}.csv").read_bytes() for n in names)
+    etf = pd.read_csv(tmp_path / "2_etf_prices.csv", low_memory=False)
+    assert (etf.source != C.YAHOO).sum() == len(pd.read_csv(C.P / "etf_daily_adjusted.csv", low_memory=False))
+    assert (etf.source == C.YAHOO).sum() == len(pd.read_csv(C.P / "NIFTYBEES.csv"))
+    assert etf.loc[etf.adj_dividend.notna(), "date"].tolist() == ["2012-03-12"] and etf.qty.dropna().map(float.is_integer).all()
+    funds = pd.read_csv(tmp_path / "4_mutual_fund_values.csv")
+    assert len(funds) == len(pd.read_csv(C.P / "amfi_nav_adjusted.csv")) and funds.scheme.notna().all()
+    assert len(pd.read_csv(tmp_path / "9_tax_and_charge_rules.csv")) == len(list(Rules.load(C.ROOT / "rules").all_rows()))
+
+
+def test_a_zip_over_the_limit_is_cut_into_parts_that_never_split_a_day(tmp_path, monkeypatch):
+    src = tmp_path / "1_share_prices.csv"
+    rows = [f"2016-01-0{d},S{s},{d * 10 + s}\n" for d in (1, 4, 5, 6) for s in range(3)]
+    src.write_bytes(("date,symbol,close\n" + "".join(rows)).encode())
+    (whole,) = C._zip(src)
+    monkeypatch.setattr(C, "LIMIT", whole.stat().st_size - 1)              # just over: two parts
+    parts = C._zip(src)
+    assert [p.name for p in parts] == ["1_share_prices_part1.zip", "1_share_prices_part2.zip"]
+    texts = [zipfile.ZipFile(p).read(p.with_suffix(".csv").name).decode() for p in parts]
+    assert all(t.startswith("date,symbol,close\n") for t in texts)
+    bodies = [t.split("\n", 1)[1] for t in texts]
+    assert "".join(bodies) == "".join(rows) and {b[:10] for b in bodies[0].splitlines()}.isdisjoint(b[:10] for b in bodies[1].splitlines())

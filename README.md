@@ -181,8 +181,151 @@ result is shown.
 | **Period** | Shares January 2016 to September 2026; ETFs April 2010 to September 2026; every trading day |
 | **Form** | Daily time series: one row per instrument per day (open, high, low, close, previous close, volume, value traded, ISIN) |
 | **Records** | 4.6 million daily rows of 3,711 equity-segment instruments (3,213 shares, 498 ETF units); 24,105 rows of the six ETFs the models use; 29 fund schemes from AMFI |
-| **Classes** | 9 classes, 36 datasets: share prices, ETF prices, index levels and valuation, mutual fund values, index futures, index options, minute prices, reference data, tax and charge rules; each dataset with its files, rows and years in [`classes/`](classes/README.md) |
+| **Classes** | 9 classes, 36 datasets: share prices, ETF prices, index levels and valuation, mutual fund values, index futures, index options, minute prices, reference data, tax and charge rules; the complete data of each class is one CSV, zipped, in [`classes/`](classes/); every class and its datasets are listed below, in [The 9 classes of data](#the-9-classes-of-data) |
 | **Checks** | Gaps and fixes in `data/gaps.md`; a readable copy (raw downloads, cleaned Excel, the tax and charge rules) in `dataset/` |
+
+---
+
+## The 9 classes of data
+
+<!-- classes: written by python -m tools.classes -->
+Every dataset the project uses, 36 in all, each counted from its own files. The complete data of each class is one CSV, zipped, in [`classes/`](classes/); the two largest are zipped in parts (each part opens on its own, with the header on top), as GitHub takes no file over 100 MB.
+
+### 1. Share prices (2016–2026)
+
+Every share and ETF unit in NSE's EQ series: open, high, low, close, volume and value, one row per instrument per day.
+
+- Source: NSE daily equity files (bhavcopy)
+- Used by: Max strategy (its momentum ranking)
+- Complete data: 4,585,946 rows, 363.9 MB as CSV; zipped: [`1_share_prices_part1.zip`](classes/1_share_prices_part1.zip) (73.4 MB), [`1_share_prices_part2.zip`](classes/1_share_prices_part2.zip) (78.0 MB)
+
+| Dataset | Size | Years |
+|---|---:|---|
+| NSE daily equity files | 2,663 files | 2016–2026 |
+| Share prices, every EQ-series instrument | 4,585,946 rows | 2016–2026 |
+
+### 2. ETF prices (2009–2026)
+
+Seven ETFs (Nifty 50, Nifty Next 50, Bank Nifty, Gold, Midcap 100, Nasdaq 100, Liquid BeES): daily prices as published, and a copy adjusted for their four unit splits.
+
+- Source: NSE daily equity files from 2016, the NSE website's history for 2010 to 2015; Yahoo as a cross-check only
+- Used by: Max strategy, LSTM model, calculator
+- Complete data: 32,574 rows, 4.3 MB as CSV; zipped: [`2_etf_prices.zip`](classes/2_etf_prices.zip) (1.1 MB)
+
+| Dataset | Size | Years |
+|---|---:|---|
+| ETF daily prices, as published | 28,200 rows | 2010–2026 |
+| ETF daily prices, adjusted for splits | 28,200 rows | 2010–2026 |
+| NSE website history, 2010 to 2016 (its index and futures rows too) | 3 files |  |
+| Nifty 50 ETF from Yahoo, a cross-check only | 4,374 rows | 2009–2026 |
+| Yahoo download, as received | 1 file |  |
+| Notes on the Yahoo series (split, payouts, hashes) | 1 file |  |
+| Bad Yahoo prints left out | 1 file |  |
+| Nifty 50 ETF payout of 2012 | 1 row | 2012 |
+
+### 3. Index levels and valuation (2010–2026)
+
+Nifty 50, Nifty Next 50, Nifty Bank, Nifty Midcap 100 and India VIX: daily levels, with P/E, P/B and dividend yield for the four Nifty indices from 2012.
+
+- Source: NSE daily index files from 2012, the NSE website's history before
+- Used by: LSTM model (India VIX, P/E, P/B), research
+- Complete data: 19,822 rows, 1.8 MB as CSV; zipped: [`3_index_levels_and_valuation.zip`](classes/3_index_levels_and_valuation.zip) (0.6 MB)
+
+| Dataset | Size | Years |
+|---|---:|---|
+| NSE daily index files | 3,517 files | 2012–2026 |
+| Index daily levels and valuation | 19,822 rows | 2010–2026 |
+
+### 4. Mutual fund values (2006–2026)
+
+Daily net asset values (NAVs) of 29 schemes: index funds, liquid and arbitrage funds, gold ETFs and the BeES ETFs' own NAVs.
+
+- Source: AMFI, through api.mfapi.in
+- Used by: Liquid fund for Max and the LSTM, the calculator's funds
+- Complete data: 100,305 rows, 13.5 MB as CSV; zipped: [`4_mutual_fund_values.zip`](classes/4_mutual_fund_values.zip) (1.1 MB)
+
+| Dataset | Size | Years |
+|---|---:|---|
+| AMFI scheme histories | 29 files |  |
+| Fund NAVs, daily, as published | 100,305 rows | 2006–2026 |
+| Fund NAVs, adjusted for unit changes | 100,305 rows | 2006–2026 |
+| Scheme list | 29 rows |  |
+| Unit changes | 10 rows | 2012–2022 |
+
+### 5. Index futures (2010–2026)
+
+Nifty and Bank Nifty futures: the three contracts traded each day, with settlement price and open interest.
+
+- Source: NSE daily derivatives (F&O) files from 2016, the NSE website's history for 2010 to 2015
+- Used by: Research (futures for leverage, rejected)
+- Complete data: 24,564 rows, 2.9 MB as CSV; zipped: [`5_index_futures.zip`](classes/5_index_futures.zip) (0.9 MB)
+
+| Dataset | Size | Years |
+|---|---:|---|
+| NSE daily derivatives files | 2,662 files | 2016–2026 |
+| Index futures, daily | 24,564 rows | 2010–2026 |
+| Contract re-dates | 2 rows |  |
+
+### 6. Index options (2016–2026)
+
+Nifty and Bank Nifty options: every strike and expiry each day, calls and puts, with open interest.
+
+- Source: NSE daily derivatives (F&O) files
+- Used by: Research (covered calls, insurance puts, the intraday option book)
+- Complete data: 9,104,303 rows, 622.8 MB as CSV; zipped: [`6_index_options_part1.zip`](classes/6_index_options_part1.zip) (72.2 MB), [`6_index_options_part2.zip`](classes/6_index_options_part2.zip) (46.5 MB)
+
+| Dataset | Size | Years |
+|---|---:|---|
+| Nifty options, daily | 5,655,622 rows | 2016–2026 |
+| Bank Nifty options, daily | 3,448,681 rows | 2016–2026 |
+| Lot sizes | 411 rows |  |
+
+### 7. Minute prices (2015–2026)
+
+One-minute bars of the Nifty 50, Nifty Bank, Nifty Financial Services and India VIX, and the option days built from them.
+
+- Source: Kaggle dataset debashis74017/nifty-50-minute-data
+- Used by: Intraday research (the Fyers automations)
+- Complete data: 4,194,156 rows, 279.5 MB as CSV; zipped: [`7_minute_prices.zip`](classes/7_minute_prices.zip) (47.4 MB)
+
+| Dataset | Size | Years |
+|---|---:|---|
+| Nifty 50, one minute | 1,048,738 rows | 2015–2026 |
+| Nifty Bank, one minute | 1,048,705 rows | 2015–2026 |
+| Nifty Financial Services, one minute | 1,048,375 rows | 2015–2026 |
+| India VIX, one minute | 1,048,338 rows | 2015–2026 |
+| Nifty option days: minute paths, each strike's volatility | 2,558 rows | 2016–2026 |
+| Bank Nifty option days: the same | 2,558 rows | 2016–2026 |
+| Nifty option prices each minute, modelled | 2,558 rows |  |
+| Bank Nifty option prices each minute, modelled | 2,558 rows |  |
+
+### 8. Reference data (2012–2026)
+
+The record of every NSE file asked for and collected, with its hash, the ETF unit splits, and the data quality report.
+
+- Source: Built while downloading and checking
+- Used by: Data cleaning and checks
+- Complete data: 13,064 rows, 2.5 MB as CSV; zipped: [`8_reference_data.zip`](classes/8_reference_data.zip) (0.5 MB)
+
+| Dataset | Size | Years |
+|---|---:|---|
+| Every NSE daily file asked for, with its status | 13,057 rows | 2012–2026 |
+| NSE website files collected | 3 rows |  |
+| ETF unit splits | 4 rows | 2019–2021 |
+| Data quality report | 1 file |  |
+
+### 9. Tax and charge rules (2010–2026)
+
+Every Fyers fee, exchange and government charge and income-tax rule from 2010 to 2026, each dated and linked to its source.
+
+- Source: Income Tax Act, Finance Acts, CBDT, NSE, SEBI, Fyers (rules/SOURCES.md)
+- Used by: The engine: every charge and tax of every model
+- Complete data: 197 rows, 0.1 MB as CSV; zipped: [`9_tax_and_charge_rules.zip`](classes/9_tax_and_charge_rules.zip) (0.0 MB)
+
+| Dataset | Size | Years |
+|---|---:|---|
+| Dated tax and charge tables | 197 rows | 2010–2026 |
+<!-- /classes -->
 
 ---
 
@@ -198,9 +341,9 @@ research/kaggle/  snapshots and kernels for the Kaggle GPU runs (the deep models
 research/out/     results, reports and signals (signal_max, signal_lstm, lstm, lstm_v2, ...)
 data/             downloaders and cleaners; data/raw (downloads), data/processed (cleaned, what the code reads)
 dataset/          the data for reading: raw, cleaned (Excel), tax and charge rules
-classes/          the 9 classes of data: every dataset with its file, rows and years (README.md, datasets.csv)
+classes/          the complete data, one zipped CSV per class (the two largest in parts, each under GitHub's 100 MB)
 tools/            the website's saved data, the Vercel bundle, the dataset export, the classes of data
-tests/            1,561 tests
+tests/            1,563 tests
 docs/             designs, plans and the record of every decision
 ```
 
@@ -213,7 +356,7 @@ Python 3.13 and Node 24.
 ```bash
 # the research and the calculator
 python -m pip install -r requirements-research.txt
-python -m pytest                                       # 1,561 tests
+python -m pytest                                       # 1,563 tests
 
 # the website on this machine: the calculator API on port 8765, the site on port 3000
 python -m calc.server 8765                             # or, from site/: npm run api
@@ -231,7 +374,7 @@ python -m tools.site_data                              # the saved answers and f
 python -m research.stockmom                            # stock momentum by universe size
 python -m research.intraday.levels_tax                 # the intraday risk levels by tax profile
 python -m tools.export_dataset                         # rebuild dataset/ from data/ and rules/
-python -m tools.classes                                # list every dataset by class (classes/)
+python -m tools.classes                                # the complete data of each class, zipped (classes/), and the README's list of classes
 
 # deploy (only from the command line: pushes to GitHub do not deploy)
 python -m tools.bundle_site
