@@ -175,6 +175,7 @@ function FeaturesModal({ l, etfs, focus, onClose }: { l: Facts["lstm"]; etfs: st
     return () => { window.removeEventListener("keydown", onKey); back?.focus(); };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const what = (c: string) => FEATURE[c] ?? { name: c, what: "" };
+  const codes = l.codes ?? { per_asset: [], market: [], flags: [] };      // facts.json written before the codes were added: nothing to list
   return createPortal(
     <motion.div className="modal-back" data-modal onClick={onClose} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.25 }}>
       <motion.div className="modal" role="dialog" aria-modal="true" aria-labelledby="feat-title" onClick={(e) => e.stopPropagation()}
@@ -190,7 +191,7 @@ function FeaturesModal({ l, etfs, focus, onClose }: { l: Facts["lstm"]; etfs: st
           <table className="ftable">
             <thead><tr><th>Number</th><th>What it measures</th>{etfs.map((a) => <th key={a} className="etf-col"><Key dot color={colorOf(a)} />{nameOf(a).replace(" ETF", "")}</th>)}</tr></thead>
             <tbody>
-              {l.codes.per_asset.map((c) => (
+              {codes.per_asset.map((c) => (
                 <tr key={c}><td><b>{what(c).name}</b></td><td>{what(c).what}</td>{etfs.map((a) => <td key={a} className="tick" aria-label={nameOf(a)}>&#10003;</td>)}</tr>
               ))}
             </tbody>
@@ -198,11 +199,11 @@ function FeaturesModal({ l, etfs, focus, onClose }: { l: Facts["lstm"]; etfs: st
         </section>
         <section ref={(el) => { sections.current.market = el; }} className="modal-sec">
           <h3><b>{l.market}</b> about the market <span>one number each, the same for every ETF</span></h3>
-          <ul className="flist">{l.codes.market.map((c) => <li key={c}><b>{what(c).name}</b><span>{what(c).what}</span></li>)}</ul>
+          <ul className="flist">{codes.market.map((c) => <li key={c}><b>{what(c).name}</b><span>{what(c).what}</span></li>)}</ul>
         </section>
         <section ref={(el) => { sections.current.flags = el; }} className="modal-sec">
           <h3><b>{l.flags}</b> missing-data flags <span>1 on a day the number is not available (India VIX starts later, for example), otherwise 0</span></h3>
-          <ul className="flist flags">{l.codes.flags.map((c) => <li key={c}><b>{FLAG[c] ?? `${c} missing`}</b></li>)}</ul>
+          <ul className="flist flags">{codes.flags.map((c) => <li key={c}><b>{FLAG[c] ?? `${c} missing`}</b></li>)}</ul>
         </section>
         <p className="modal-total">{l.per_asset * etfs.length} + {l.market} + {l.flags} = <b>{l.inputs}</b> numbers a day, each scaled with statistics from the training years only.</p>
         </div>
@@ -254,12 +255,12 @@ function Features() {
               { k: "market" as const, n: l.market, t: "about the market", d: "fear gauge, valuation, gold, cash" },
               { k: "flags" as const, n: l.flags, t: "missing-data flags", d: "a day without VIX, P/E or P/B" },
             ].map((g) => (
-              <button key={g.k} type="button" className="fgroup-btn" onClick={() => setOpen(g.k)}>
+              <button key={g.k} type="button" className="fgroup-btn" disabled={!l.codes} onClick={() => setOpen(g.k)}>
                 <b>{g.n}</b><span className="fg-t">{g.t}</span><span className="fg-d">{g.d}</span>
               </button>
             ))}
           </div>
-          <button type="button" className="see-all" onClick={() => setOpen("etf")}>See all {l.inputs} numbers <Arrow dir="right" /></button>
+          {l.codes && <button type="button" className="see-all" onClick={() => setOpen("etf")}>See all {l.inputs} numbers <Arrow dir="right" /></button>}
           <p className="fnote">Each is worked out from prices up to that day, then scaled with statistics from the training years only.</p>
         </motion.div>
         <AnimatePresence>{open && <FeaturesModal key="features" l={l} etfs={etfs} focus={open} onClose={() => setOpen(null)} />}</AnimatePresence>
