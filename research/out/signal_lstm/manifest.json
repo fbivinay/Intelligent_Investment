@@ -1,0 +1,17 @@
+{
+ "assets": [
+  "NIFTYBEES",
+  "JUNIORBEES",
+  "BANKBEES",
+  "GOLDBEES",
+  "MOM100",
+  "MON100",
+  "cash"
+ ],
+ "band": 0.05,
+ "files": {
+  "LSTM.csv": "8cd5ea1cad1d866f01bbff5034b25a5163b360ec8e19feb54e4d57a52f512bb2"
+ },
+ "source": "695553dec8f6f7eae04b69bda521d8a5afebf6296a9e3cdf66455e7dfc34687f",
+ "version": "v2"
+}

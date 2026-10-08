@@ -6,6 +6,7 @@ import type { Level } from "./types";
 // 3:1 against the page, always appear with their name beside them.
 export const OPTIONS: Record<string, { name: string; color: string; what: string }> = {
   PRODUCT: { name: "Intelligent Investment", color: "#087A52", what: "The model" },
+  PRODUCT_LSTM: { name: "LSTM model", color: "#44514A", what: "Deep learning: a daily mix of the Nifty 50, Gold and Nasdaq 100 ETFs and the liquid fund" },
   NIFTYBEES: { name: "Nifty 50 ETF", color: "#2F63B3", what: "India's 50 largest companies" },
   GOLDBEES: { name: "Gold ETF", color: "#A9770C", what: "Gold" },
   MON100: { name: "Nasdaq 100 ETF", color: "#C4467C", what: "100 large US companies, in rupees" },
@@ -26,6 +27,9 @@ const key = (id: string) => (id in OPTIONS ? id : id.startsWith("PRODUCT_") ? "P
 export const nameOf = (id: string) => OPTIONS[key(id)]?.name ?? id;
 export const colorOf = (id: string) => OPTIONS[key(id)]?.color ?? "#7A857F";
 export const isModel = (id: string) => id.startsWith("PRODUCT_");
+export const isMax = (id: string) => id === "PRODUCT_Max";
+/** The deep-learning strategy, set beside the model like the other options (the calculator works it out as the level LSTM). */
+export const LSTM = "PRODUCT_LSTM";
 
 /** The strategy the calculator works out beside the alternatives. */
 export const STRATEGIES: Level[] = ["Max"];

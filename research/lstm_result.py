@@ -3,6 +3,7 @@ simulator with every charge and tax on Rs 10 lakh from the first April cut (2017
 
     python -m research.lstm_result          # v1: writes research/out/lstm/result.json
     python -m research.lstm_result v2       # v2: writes research/out/lstm_v2/result.json
+    python -m research.lstm_result signal v2    # the version as the calculator's signal: research/out/signal_lstm (calc.product, level LSTM)
 
 Trades follow the weights only when a holding is more than 5% of the money away from its target (the band the earlier deep model used), so a small daily
 change in the network's output does not become an order. Taxed with the research profile (new regime, Rs 12 lakh other income), as the Max level's
@@ -16,6 +17,7 @@ import sys
 from pathlib import Path
 
 import numpy as np
+import pandas as pd
 
 from engine.rules import Rules
 from research import baseline as B, lstm as L, oos, panel as P, sim
@@ -24,6 +26,7 @@ from research.kaggle.snapshot import sha256
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = KL.out_dir("v1")
+SIGNAL = ROOT / "research" / "out" / "signal_lstm"
 END = KL.END
 BAND = 0.05
 CAPITAL = 1_000_000.0
@@ -71,6 +74,31 @@ def main(version: str = "v1") -> dict:
     return res
 
 
+def signal(version: str = "v2", out: Path = SIGNAL) -> dict:
+    """The version's weights as a signal artifact the calculator follows (calc.product, level LSTM): the six-ETF panel's columns, the ETFs the version
+    does not hold at zero, then cash; from the first day a network made weights. The calculator trades it with the same 5% band."""
+    w, dates = load(KL.out_dir(version))
+    i0 = int(np.argmax(np.isfinite(w).all(axis=1)))
+    full = np.zeros((len(dates) - i0, len(P.GROWTH) + 1))
+    for j, a in enumerate(KL.VERSIONS[version]):
+        full[:, P.GROWTH.index(a)] = w[i0:, j]
+    full[:, -1] = w[i0:, -1]
+    full /= full.sum(axis=1, keepdims=True)
+    df = pd.DataFrame(full, columns=[*P.GROWTH, "cash"])
+    df.insert(0, "date", [str(d) for d in dates[i0:]])
+    df["multiplier"] = 1.0
+    df["strategy"] = f"LSTM {version}"
+    out.mkdir(parents=True, exist_ok=True)
+    df.to_csv(out / "LSTM.csv", index=False, float_format="%.10g", lineterminator="\n")
+    manifest = {"files": {"LSTM.csv": sha256(out / "LSTM.csv")}, "assets": [*P.GROWTH, "cash"], "version": version, "band": BAND,
+                "source": json.loads((KL.out_dir(version) / "outputs.json").read_text(encoding="utf-8"))["files"]["weights_chosen.npy"]}
+    (out / "manifest.json").write_bytes((json.dumps(manifest, indent=1, sort_keys=True) + "\n").encode("utf-8"))
+    return manifest
+
+
 if __name__ == "__main__":
+    if sys.argv[1:2] == ["signal"]:
+        print(json.dumps(signal(*sys.argv[2:3]), indent=1), file=sys.stderr)
+        sys.exit()
     res = main(*sys.argv[1:2])
     print(json.dumps({k: v for k, v in res.items() if k != "series"}, indent=1), file=sys.stderr)

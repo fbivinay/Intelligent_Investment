@@ -39,6 +39,8 @@ OPTIONS = [
     Option("PRODUCT_Growth", "Model: Growth (six ETFs in equal parts, no fall guard)", "product", ""),
     Option("PRODUCT_Max", "Model: Max (stock momentum half with a market switch, gold ETF and Nasdaq 100 ETF a quarter each)", "product", "",
            note="from 2017-04-03; the gold and Nasdaq ETFs and the mix were chosen after seeing 2017-2026"),
+    Option("PRODUCT_LSTM", "Model: LSTM (deep learning: a daily mix of the Nifty 50, Gold and Nasdaq 100 ETFs and the liquid fund)", "product", "",
+           note="from 2017-04-03; retrained each April on the years before it only"),
     Option("NIFTYBEES", "Nifty 50 ETF (Nifty BeES)", "etf", "etf_equity", symbol="NIFTYBEES"),
     Option("JUNIORBEES", "Nifty Next 50 ETF (Junior BeES)", "etf", "etf_equity", symbol="JUNIORBEES"),
     Option("BANKBEES", "Nifty Bank ETF (Bank BeES)", "etf", "etf_equity", symbol="BANKBEES"),
@@ -103,7 +105,7 @@ def _nav(code: str) -> tuple[Bar, ...]:
 def first_day(o: Option, on: date | None = None) -> date:
     """The first day the option can be bought (for a fund, of the plan a start on `on` would use)."""
     if o.kind == "product":
-        return MAX_START if o.id == "PRODUCT_Max" else PRODUCT_START
+        return MAX_START if o.id in ("PRODUCT_Max", "PRODUCT_LSTM") else PRODUCT_START
     if o.kind == "etf":
         return _etf(o.symbol)[0].on
     return _nav(_plan(o, on or date.min)[0])[0].on

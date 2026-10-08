@@ -7,7 +7,7 @@ import { useMemo, useState } from "react";
 import { useData } from "@/lib/data";
 import { useDeck, type SlideDef } from "@/lib/deck";
 import { day, money, pct, span } from "@/lib/format";
-import { colorOf, isModel, nameOf } from "@/lib/names";
+import { colorOf, isMax, nameOf } from "@/lib/names";
 import { grid } from "@/lib/scale";
 import type { Answer, Result } from "@/lib/types";
 import { LineChart, RankedBars } from "../charts";
@@ -25,8 +25,8 @@ export function Loading({ text = "Loading the record" }: { text?: string }) {
 const HERO_ALTS = ["NIFTYBEES", "GOLDBEES", "MON100"];
 
 function parts(a: Answer) {
-  const model = a.results.find((r) => r.kind === "product")!;
-  const alts = a.results.filter((r) => r.kind !== "product");
+  const model = a.results.find((r) => isMax(r.id))!;
+  const alts = a.results.filter((r) => !isMax(r.id));                    // the LSTM and the funds
   return { model, alts };
 }
 
@@ -67,7 +67,7 @@ function HeroBody({ a }: { a: Answer }) {
       <Appear delay={0.15} className="hero-chart" y={0}>
         <LineChart times={g.times} format={(v) => money(v)} axis={(v) => money(v, 0).replace(" lakh", "L").replace(" crore", "Cr")}
           include={[model.invested]} baseline={{ value: model.invested, label: `${money(model.invested, 0)} put in` }} ends={ends} area="wash"
-          series={ids.map((id) => ({ id, label: isModel(id) ? "Intelligent Investment" : nameOf(id), color: colorOf(id), values: g.values[id], strong: isModel(id) }))} />
+          series={ids.map((id) => ({ id, label: isMax(id) ? "Intelligent Investment" : nameOf(id), color: colorOf(id), values: g.values[id], strong: isMax(id) }))} />
         <p className="chart-note">
           Lines: what each was worth along the way. Dots: what was left after selling everything on {day(a.inputs.end)} and paying all tax
           (new regime, {money(a.inputs.other_income, 0)} other income). The model&rsquo;s record starts on {day(a.inputs.start)}, its first possible
@@ -114,7 +114,7 @@ function DifferentBody({ a }: { a: Answer }) {
         </Appear>
       </div>
       <RankedBars label="What each option became" version={metric} rows={rows.map((r) => ({
-        id: r.id, name: isModel(r.id) ? "Intelligent Investment" : nameOf(r.id), color: colorOf(r.id), value: Math.max(of(r), 0), strong: isModel(r.id),
+        id: r.id, name: isMax(r.id) ? "Intelligent Investment" : nameOf(r.id), color: colorOf(r.id), value: Math.max(of(r), 0), strong: isMax(r.id),
         text: <Counter key={metric} value={of(r)} format={fmt} delay={switched ? 0.05 : ENTER + 0.5} duration={switched ? 0.8 : 1.4} />,
         aside: (
           <>

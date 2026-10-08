@@ -88,6 +88,15 @@ def test_the_max_level_starts_in_april_2017_holds_stocks_and_its_books_match_the
     assert any(t["side"] == "sell" for t in run.booked.trades)
 
 
+def test_the_lstm_level_starts_with_its_first_network_holds_only_its_three_etfs_and_cash_and_its_books_match():
+    with pytest.raises(ValueError, match="2017-04-03"):
+        PR.run("LSTM", Decimal(1000000), date(2016, 4, 1), date(2020, 3, 31), PROFILE)
+    run = PR.run("LSTM", Decimal(1000000), date(2017, 4, 3), date(2019, 3, 29), PROFILE)
+    held = {n for n, w in zip(run.names, run.weights.max(axis=0)) if w > 0}
+    assert held <= {"NIFTYBEES", "GOLDBEES", "MON100", "LIQUID_FUND"} and abs(run.weights.sum(axis=1) - 1).max() < 1e-6
+    assert abs(run.gap) < 1000
+
+
 def test_a_monthly_plan_pays_each_month_its_books_agree_with_the_simulator_and_one_payment_is_the_lump_sum():
     m = PR.run("Balanced", Decimal(20000), date(2016, 4, 1), date(2017, 3, 31), PROFILE, monthly=True)
     assert m.invested == Decimal(240000) and sum(m.paid) == 240000 and np.count_nonzero(m.paid) == 12
