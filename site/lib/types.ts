@@ -87,6 +87,8 @@ export type Facts = {
     version: string; tried: { version: string; etfs: number; cagr: number; worst_fall: number }[];
     codes?: { per_asset: string[]; market: string[]; flags: string[] };
   };
+  classes?: { name: string; what: string; source: string; used_by: string; from: string; to: string;
+              datasets: { name: string; rows: number | null; files: number; from: string; to: string }[] }[];
 };
 
 /** Invest today (calc/future.py via tools/site_data.py): each option's past yearly return after charges and tax, and value factors for 1 to 30 years. */

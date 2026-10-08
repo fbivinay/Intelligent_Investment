@@ -6,7 +6,8 @@ and the repository facts the Evidence pages quote. Rerun after the data, the rul
 site/public/data/lump.json    Rs 10 lakh once, from the Max level's first day, beside every alternative: the Overview and the calculator's first answer
 site/public/data/sip.json     Rs 5,000 every month over the same years: the calculator's first monthly answer
 site/public/data/future.json  each option's yearly return after charges and tax over those years, and the invest-today factors (calc.future)
-site/public/data/facts.json   the data (counts, periods, real sample rows), the Max level's latest ranking and the LSTM strategy's record, read from the files
+site/public/data/facts.json   the data (counts, periods, real sample rows, its classes), the Max level's latest ranking and the LSTM strategy's record, read
+                              from the files
 """
 from __future__ import annotations
 
@@ -21,6 +22,7 @@ from calc import api, future, options as O
 from calc.product import DATA_END
 from research import lstm as L, maxmodel as X, panel as P, stockmom as M
 from research.kaggle import lstm as KL
+from tools import classes as C
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "site" / "public" / "data"
@@ -89,7 +91,7 @@ def facts() -> dict:
                        "to": str(stocks.date.max().date()), "fields": fields},
             "etfs": {"symbols": [a for a in P.GROWTH], "rows": len(etf), "from": etf.date.min(), "to": etf.date.max()},
             "max": {"momentum": X.MOMENTUM, "fixed": X.FIXED, "trend_days": X.TREND},
-            "ranking": ranking(), "sample": sample(), "lstm": lstm()}
+            "ranking": ranking(), "sample": sample(), "lstm": lstm(), "classes": C.summary(C.inventory())}
 
 
 def projections(lump: dict) -> dict:

@@ -99,9 +99,11 @@ const price = (n: number) => n.toLocaleString("en-IN", { minimumFractionDigits: 
 /* 2. What data do we use? The facts across the top, real rows below. */
 function Data() {
   const e = useEvidence();
+  const [open, setOpen] = useState<number | null>(null);
   if (!e) return <Loading />;
   const { f } = e;
   const shares = f.stocks.symbols - f.stocks.funds;
+  const classes = f.classes ?? [];                                     // facts.json written before the classes were added: no row
   const facts = [
     { k: "Source", v: "NSE and AMFI", d: "the exchange's daily files, the fund's daily value" },
     { k: "Period", v: `${yr(f.stocks.from)} → ${yr(f.stocks.to)}`, d: `every trading day; ETFs from ${yr(f.etfs.from)}` },
@@ -118,6 +120,14 @@ function Data() {
           </motion.div>
         ))}
       </dl>
+      {classes.length > 0 && (
+        <Appear delay={0.75}>
+          <div className="class-row" role="group" aria-labelledby="class-count">
+            <p id="class-count" className="class-count"><b>{classes.length} classes</b> of data, {classes.reduce((n, c) => n + c.datasets.length, 0)} datasets:</p>
+            {classes.map((c, i) => <button key={c.name} type="button" className="class-chip" onClick={() => setOpen(i)}>{c.name}</button>)}
+          </div>
+        </Appear>
+      )}
       <Appear delay={0.9} className="data-form">
         <div className="form-head"><span className="badge-src">NSE</span><Arrow dir="right" /><span>In what form: one row per share or ETF per trading day. Three real rows:</span></div>
         <table className="rows">
@@ -134,6 +144,7 @@ function Data() {
         </table>
         <div className="form-foot"><Arrow dir="down" /><span className="badge-model">into the models</span></div>
       </Appear>
+      <AnimatePresence>{open !== null && <ClassesModal key="classes" classes={classes} focus={open} onClose={() => setOpen(null)} />}</AnimatePresence>
     </Shell>
   );
 }
@@ -162,29 +173,76 @@ const FEATURE: Record<string, { name: string; what: string }> = {
 };
 const FLAG: Record<string, string> = { vix: "India VIX missing", vixchg5: "VIX change missing", pe_pct: "P/E missing", pb_pct: "P/B missing" };
 
-/** Every number the LSTM reads each day, in three groups, over the page; Escape, the close button or a click outside closes it. */
-function FeaturesModal({ l, etfs, focus, onClose }: { l: Facts["lstm"]; etfs: string[]; focus: Group; onClose: () => void }) {
+/** A pop-up over the page: Escape, the close button or a click outside closes it, and the focus goes back to what opened it. */
+function Modal({ id, title, onClose, children }: { id: string; title: string; onClose: () => void; children: ReactNode }) {
   const close = useRef<HTMLButtonElement>(null);
-  const sections = useRef<Partial<Record<Group, HTMLElement | null>>>({});
   useEffect(() => {
     const back = document.activeElement as HTMLElement | null;
     close.current?.focus();
-    if (focus !== "etf") sections.current[focus]?.scrollIntoView({ block: "start" });
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     window.addEventListener("keydown", onKey);
     return () => { window.removeEventListener("keydown", onKey); back?.focus(); };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
-  const what = (c: string) => FEATURE[c] ?? { name: c, what: "" };
-  const codes = l.codes ?? { per_asset: [], market: [], flags: [] };      // facts.json written before the codes were added: nothing to list
   return createPortal(
     <motion.div className="modal-back" data-modal onClick={onClose} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.25 }}>
-      <motion.div className="modal" role="dialog" aria-modal="true" aria-labelledby="feat-title" onClick={(e) => e.stopPropagation()}
+      <motion.div className="modal" role="dialog" aria-modal="true" aria-labelledby={id} onClick={(e) => e.stopPropagation()}
         initial={{ y: 26, scale: 0.98 }} animate={{ y: 0, scale: 1 }} exit={{ y: 18, opacity: 0 }} transition={{ duration: 0.35, ease: EASE }}>
         <div className="modal-head">
-          <h2 id="feat-title">The {l.inputs} numbers the LSTM reads each day</h2>
+          <h2 id={id}>{title}</h2>
           <button ref={close} type="button" className="modal-close" onClick={onClose} aria-label="Close">&times;</button>
         </div>
-        <div className="modal-body" data-scroll>
+        <div className="modal-body" data-scroll>{children}</div>
+      </motion.div>
+    </motion.div>,
+    document.body,
+  );
+}
+
+const years = (from: string, to: string) => (!from ? "" : yr(from) === yr(to) ? yr(from) : `${yr(from)}–${yr(to)}`);
+
+/** Every dataset of the project, class by class; it opens at the class that was clicked. */
+function ClassesModal({ classes, focus, onClose }: { classes: NonNullable<Facts["classes"]>; focus: number; onClose: () => void }) {
+  const sections = useRef<(HTMLElement | null)[]>([]);
+  useEffect(() => {
+    if (focus > 0) sections.current[focus]?.scrollIntoView({ block: "start" });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  return (
+    <Modal id="class-title" title={`The ${classes.length} classes of data`} onClose={onClose}>
+      <p className="modal-sub">Every dataset the project uses, {classes.reduce((n, c) => n + c.datasets.length, 0)} in all, each counted from its own files.
+        The same list is in the classes folder of the repository.</p>
+      {classes.map((c, i) => (
+        <section key={c.name} ref={(el) => { sections.current[i] = el; }} className="modal-sec">
+          <h3><b>{i + 1}</b>{c.name}<span>{years(c.from, c.to)}</span></h3>
+          <p className="cls-what">{c.what}.</p>
+          <dl className="cls-meta"><div><dt>Source</dt><dd>{c.source}</dd></div><div><dt>Used by</dt><dd>{c.used_by}</dd></div></dl>
+          <table className="ftable ctable">
+            <thead><tr><th>Dataset</th><th className="num">Size</th><th className="num">Years</th></tr></thead>
+            <tbody>
+              {c.datasets.map((d) => (
+                <tr key={d.name}>
+                  <td>{d.name}</td>
+                  <td className="num">{d.rows != null ? `${count(d.rows)} rows` : `${count(d.files)} ${d.files === 1 ? "file" : "files"}`}</td>
+                  <td className="num">{years(d.from, d.to)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </section>
+      ))}
+    </Modal>
+  );
+}
+
+/** Every number the LSTM reads each day, in three groups; it opens at the group that was clicked. */
+function FeaturesModal({ l, etfs, focus, onClose }: { l: Facts["lstm"]; etfs: string[]; focus: Group; onClose: () => void }) {
+  const sections = useRef<Partial<Record<Group, HTMLElement | null>>>({});
+  useEffect(() => {
+    if (focus !== "etf") sections.current[focus]?.scrollIntoView({ block: "start" });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const what = (c: string) => FEATURE[c] ?? { name: c, what: "" };
+  const codes = l.codes ?? { per_asset: [], market: [], flags: [] };      // facts.json written before the codes were added: nothing to list
+  return (
+    <Modal id="feat-title" title={`The ${l.inputs} numbers the LSTM reads each day`} onClose={onClose}>
         <p className="modal-sub">It reads them for each of the last {l.seq_lens.join(" or ")} days, oldest first, and from that sequence sets tomorrow&rsquo;s mix.</p>
         <section ref={(el) => { sections.current.etf = el; }} className="modal-sec">
           <h3><b>{l.per_asset * etfs.length}</b> about the ETFs <span>{l.per_asset} numbers, worked out for each of the {etfs.length}</span></h3>
@@ -206,10 +264,7 @@ function FeaturesModal({ l, etfs, focus, onClose }: { l: Facts["lstm"]; etfs: st
           <ul className="flist flags">{codes.flags.map((c) => <li key={c}><b>{FLAG[c] ?? `${c} missing`}</b></li>)}</ul>
         </section>
         <p className="modal-total">{l.per_asset * etfs.length} + {l.market} + {l.flags} = <b>{l.inputs}</b> numbers a day, each scaled with statistics from the training years only.</p>
-        </div>
-      </motion.div>
-    </motion.div>,
-    document.body,
+    </Modal>
   );
 }
 
