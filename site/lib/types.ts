@@ -79,7 +79,7 @@ export type Facts = {
   max: { momentum: number; fixed: Record<string, number>; trend_days: number };
   ranking: { day: string; ranked: number; held: number; decisions: number; switch_days: number;
              top: { symbol: string; score: number; r6: number; r12: number; vol: number }[] };
-  sample: { date: string; symbol: string; high: number; low: number; close: number; qty: number; value: number }[];
+  sample: { date: string; symbol: string; open: number; high: number; low: number; close: number; qty: number; value: number }[];
   lstm: {
     from: string; to: string; capital: number; final: number; cagr: number; worst_fall: number; orders: number; tax: number; charges: number;
     average_mix: Record<string, number>; choice: { from: string; chosen: string }[]; gpu: string | null; series: { dates: string[]; values: number[] };

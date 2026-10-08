@@ -56,9 +56,9 @@ def ranking() -> dict:
 
 def sample() -> list[dict]:
     """Real rows of the share file on its last day: the form the data is in."""
-    df = pd.read_parquet(M.PARQUET, columns=["date", "symbol", "high", "low", "close", "qty", "value"])
+    df = pd.read_parquet(M.PARQUET, columns=["date", "symbol", "open", "high", "low", "close", "qty", "value"])
     last = df[df.date == df.date.max()].set_index("symbol").loc[list(SAMPLE)]
-    return [{"date": str(r.date.date()), "symbol": k, "high": float(r.high), "low": float(r.low), "close": float(r.close), "qty": int(r.qty),
+    return [{"date": str(r.date.date()), "symbol": k, "open": float(r.open), "high": float(r.high), "low": float(r.low), "close": float(r.close), "qty": int(r.qty),
              "value": float(r.value)} for k, r in last.iterrows()]
 
 

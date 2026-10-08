@@ -179,7 +179,7 @@ result is shown.
 |---|---|
 | **Source** | NSE daily files (every share, ETF, future and option, index closes), the NSE website's history for 2010-2016, AMFI fund values (NAVs), minute-by-minute Nifty, Bank Nifty and India VIX (2015-2026, Kaggle) |
 | **Period** | Shares January 2016 to September 2026; ETFs April 2010 to September 2026; every trading day |
-| **Form** | Daily time series: one row per instrument per day (high, low, close, previous close, volume, value traded, ISIN) |
+| **Form** | Daily time series: one row per instrument per day (open, high, low, close, previous close, volume, value traded, ISIN) |
 | **Records** | 4.6 million daily rows of 3,711 equity-segment instruments (3,213 shares, 498 ETF units); 24,105 rows of the six ETFs the models use; 29 fund schemes from AMFI |
 | **Checks** | Gaps and fixes in `data/gaps.md`; a readable copy (raw downloads, cleaned Excel, the tax and charge rules) in `dataset/` |
 

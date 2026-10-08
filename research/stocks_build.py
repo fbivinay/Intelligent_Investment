@@ -1,5 +1,5 @@
-"""Every EQ-series instrument from the cash bhavcopies on disk (2016-01 to 2026-09) into one parquet: date, symbol, high, low, close, prev_close, qty, value
-(rupees traded), isin. EQ holds exchange-traded fund units too; their ISIN is a mutual fund unit's (INF...), so research/stockmom.py can rank shares only.
+"""Every EQ-series instrument from the cash bhavcopies on disk (2016-01 to 2026-09) into one parquet: date, symbol, open, high, low, close, prev_close, qty,
+value (rupees traded), isin. EQ holds exchange-traded fund units too; their ISIN is a mutual fund unit's (INF...), so research/stockmom.py can rank shares only.
 
     python -m research.stocks_build
 
@@ -17,9 +17,9 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parents[1]
 RAW = ROOT / "data" / "raw" / "nse" / "cash"
 OUT = ROOT / "data" / "processed" / "stocks_eq.parquet"
-OLD = {"SYMBOL": "symbol", "SERIES": "series", "HIGH": "high", "LOW": "low", "CLOSE": "close", "PREVCLOSE": "prev_close", "TOTTRDQTY": "qty", "TOTTRDVAL": "value",
+OLD = {"SYMBOL": "symbol", "SERIES": "series", "OPEN": "open", "HIGH": "high", "LOW": "low", "CLOSE": "close", "PREVCLOSE": "prev_close", "TOTTRDQTY": "qty", "TOTTRDVAL": "value",
        "ISIN": "isin"}
-NEW = {"TckrSymb": "symbol", "SctySrs": "series", "HghPric": "high", "LwPric": "low", "ClsPric": "close", "PrvsClsgPric": "prev_close", "TtlTradgVol": "qty",
+NEW = {"TckrSymb": "symbol", "SctySrs": "series", "OpnPric": "open", "HghPric": "high", "LwPric": "low", "ClsPric": "close", "PrvsClsgPric": "prev_close", "TtlTradgVol": "qty",
        "TtlTrfVal": "value", "ISIN": "isin"}
 
 
