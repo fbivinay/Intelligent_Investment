@@ -8,7 +8,7 @@ import { useMemo, type ReactNode } from "react";
 import { useData } from "@/lib/data";
 import type { SlideDef } from "@/lib/deck";
 import { count, day, money, month, pct } from "@/lib/format";
-import { colorOf, nameOf } from "@/lib/names";
+import { colorOf, LSTM, nameOf } from "@/lib/names";
 import { grid } from "@/lib/scale";
 import type { Series } from "@/lib/types";
 import { LineChart } from "../charts";
@@ -175,7 +175,8 @@ function Features() {
 /* 4. Max and the LSTM side by side: how each invests, and what Rs 10 lakh became in each. */
 function SideBySide() {
   const e = useEvidence();
-  const lstmSeries = e?.f.lstm.series;
+  const calc = e?.a.results.find((r) => r.id === LSTM);                    // the calculator's own run of the LSTM level, the one the other pages show
+  const lstmSeries = e ? (e.a.series[LSTM] ?? e.f.lstm.series) : undefined;
   const g = useMemo(() => {
     if (!e || !lstmSeries) return null;
     const all: Record<string, Series> = { PRODUCT_Max: e.a.series[e.max.id], LSTM: { dates: lstmSeries.dates, values: lstmSeries.values, invested: [], drawdown: [] } };
@@ -184,11 +185,12 @@ function SideBySide() {
   if (!e || !g) return <Loading />;
   const { max, f, a } = e;
   const l = f.lstm;
+  const final = calc?.net.value ?? l.final;
   const mix = Object.entries(l.average_mix).sort((x, y) => y[1] - x[1]).slice(0, 3);
   const cards = [
     { id: "PRODUCT_Max", name: "Max strategy", color: colorOf("PRODUCT_Max"), final: max.net.value, rate: max.growth, fall: max.worst_fall,
       how: "Half in the 30 strongest shares, a quarter gold, a quarter Nasdaq 100; shares sold when the market turns down." },
-    { id: "LSTM", name: "LSTM model", color: LSTM_COLOR, final: l.final, rate: l.cagr, fall: l.worst_fall,
+    { id: "LSTM", name: "LSTM model", color: LSTM_COLOR, final, rate: calc?.growth ?? l.cagr, fall: calc?.worst_fall ?? l.worst_fall,
       how: <>A new mix of {l.assets.length - 1} ETFs and the liquid fund each day; on average {mix.map(([k, v]) => `${pct(v, 0)} ${nameOf(k)}`).join(", ")}.</> },
   ];
   return (
@@ -209,7 +211,7 @@ function SideBySide() {
         <Appear delay={0.4} y={0} className="side-chart">
           <LineChart times={g.times} format={(v) => money(v)} axis={(v) => money(v, 0).replace(" lakh", "L").replace(" crore", "Cr")} area="wash"
             include={[1_000_000]} baseline={{ value: 1_000_000, label: "₹10 lakh put in" }}
-            ends={{ PRODUCT_Max: { value: max.net.value, text: money(max.net.value) }, LSTM: { value: l.final, text: money(l.final) } }}
+            ends={{ PRODUCT_Max: { value: max.net.value, text: money(max.net.value) }, LSTM: { value: final, text: money(final) } }}
             series={[{ id: "PRODUCT_Max", label: "Max strategy", color: colorOf("PRODUCT_Max"), values: g.values.PRODUCT_Max, strong: true },
                      { id: "LSTM", label: "LSTM model", color: LSTM_COLOR, values: g.values.LSTM }]} />
         </Appear>

@@ -27,7 +27,9 @@ ROOT = Path(__file__).resolve().parents[1]
 DATA_END = date(2026, 9, 30)
 MIN_AMOUNT = Decimal(10000)
 MIN_PAYMENT = Decimal(1000)        # a monthly plan's smallest payment
-MODELS = {"six": (P.GROWTH, A.SIGNAL_SIX, (*A.LEVELS_SIX, "Max")), "four": (P.ASSETS, A.SIGNAL, tuple(A.LEVELS))}     # assets, signal folder, levels
+MODELS = {"six": (P.GROWTH, A.SIGNAL_SIX, (*A.LEVELS_SIX, "Max", "LSTM")), "four": (P.ASSETS, A.SIGNAL, tuple(A.LEVELS))}     # assets, signal folder, levels
+LSTM_SIGNAL = ROOT / "research" / "out" / "signal_lstm"          # the LSTM strategy's weights (research/lstm_result.py signal)
+BAND = {"LSTM": 0.05}                                             # the trade band a level was tested with (the simulator's default otherwise)
 LEVELS = MODELS["six"][2]
 
 
@@ -37,8 +39,8 @@ def rules() -> Rules:
 
 
 def start_of(level: str) -> date:
-    """The level's first day: Max holds stocks, whose data starts later."""
-    return MAX_START if level == "Max" else PRODUCT_START
+    """The level's first day: Max holds stocks, whose data starts later; the LSTM's first weights are from its first April cut, the same day."""
+    return MAX_START if level in ("Max", "LSTM") else PRODUCT_START
 
 
 @lru_cache(maxsize=None)
@@ -50,7 +52,7 @@ def full_panel(model: str = "six", level: str = "") -> P.Panel:
 
 @lru_cache(maxsize=None)
 def _signal(level: str, model: str = "six"):
-    return A.load(level, X.OUT if level == "Max" else MODELS[model][1])
+    return A.load(level, X.OUT if level == "Max" else LSTM_SIGNAL if level == "LSTM" else MODELS[model][1])
 
 
 @dataclass
@@ -108,7 +110,7 @@ def run(level: str, amount: Decimal, start: date, end: date, profile: TaxProfile
         paid[bisect_left(days, d)] += float(amount)                           # the first trading day on or after the payment's date
     invested = amount * int(np.count_nonzero(paid))
     cfg = sim.SimConfig(capital=paid[0], governor=False, harvest=True, slippage=slippage, profile=profile, min_trade=min(5000.0, float(amount) * 0.005),
-                        max_orders=200_000)
+                        max_orders=200_000, band=BAND.get(level, sim.SimConfig.band))
     r = sim.simulate(window, w, rl, cfg, deposits=np.r_[0.0, paid[1:]])
     booked = R.book(rl, window, r.order_log, invested, profile)
     last_fee = float(amc_fee(rl, days[-1], days[0]).value)                     # the books charge the year in progress; the simulator does not

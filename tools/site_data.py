@@ -26,7 +26,7 @@ ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "site" / "public" / "data"
 START = "2017-04-03"                                     # the Max level's first day: every option is measured over the same years from it
 ALTERNATIVES = [o.id for o in O.OPTIONS if o.kind != "product"]
-COMMON = {"end": DATA_END.isoformat(), "level": "Max", "levels": ["Max"], "compare": ALTERNATIVES, "regime": "new", "other_income": 1200000, "lean": True}
+COMMON = {"end": DATA_END.isoformat(), "level": "Max", "levels": ["Max", "LSTM"], "compare": ALTERNATIVES, "regime": "new", "other_income": 1200000, "lean": True}
 SAMPLE = ("RELIANCE", "HDFCBANK", "INFY")
 LSTM_VERSION = "v2"                                      # the LSTM strategy the Evidence shows (research/kaggle/lstm.py names the versions)
 RUNS = {"lump": {**COMMON, "mode": "lump", "amount": 1000000, "start": START},

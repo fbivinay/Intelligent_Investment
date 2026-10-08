@@ -58,7 +58,7 @@ export type Answer = {
 };
 
 export type Mode = "lump" | "sip";
-export type Level = "Max" | "Growth" | "Aggressive" | "Balanced" | "Conservative";
+export type Level = "Max" | "Growth" | "Aggressive" | "Balanced" | "Conservative" | "LSTM";
 
 export type Request = {
   mode: Mode;

@@ -7,14 +7,15 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { LIMITS, request, useData, type Form } from "@/lib/data";
 import type { SlideDef } from "@/lib/deck";
 import { count, day, inr, money, month, pct, signed, span, tick } from "@/lib/format";
-import { ALTERNATIVES, colorOf, DATA_END, groupColor, groupName, isModel, levelOf, nameOf, STRATEGIES } from "@/lib/names";
+import { ALTERNATIVES, colorOf, DATA_END, groupColor, groupName, isMax, isModel, levelOf, LSTM, nameOf, STRATEGIES } from "@/lib/names";
 import { grid } from "@/lib/scale";
 import type { Answer, Result, TradeDay } from "@/lib/types";
 import { LineChart, RankedBars, StackArea, TradeStrip, type LineSeries } from "../charts";
 import { Appear, Arrow, Chip, Counter, EASE, ENTER, Key, Rise, Segmented, SWEEP } from "../ui";
 import { Loading } from "./overview";
 
-const label = (id: string) => (isModel(id) ? `${id.slice("PRODUCT_".length)} strategy` : nameOf(id));
+const label = (id: string) => (isMax(id) ? "Max strategy" : nameOf(id));
+const OPTION_IDS = [LSTM, ...ALTERNATIVES];                                  // what can be set beside the model: the LSTM first, then the funds
 const fall = (x: number) => (x < 0.005 ? "0%" : `−${pct(x, 0)}`);
 const perYear = (a: Answer) => (a.inputs.mode === "sip" ? "Per year (XIRR)" : "Per year");
 
@@ -22,8 +23,8 @@ const perYear = (a: Answer) => (a.inputs.mode === "sip" ? "Per year (XIRR)" : "P
 function useAnswer() {
   const d = useData();
   const a = d.answer;
-  const model = a?.results.find((r) => r.kind === "product") ?? null;
-  const alts = a ? ALTERNATIVES.map((id) => a.results.find((r) => r.id === id)).filter((r): r is Result => !!r) : [];
+  const model = a?.results.find((r) => isMax(r.id)) ?? null;
+  const alts = a ? OPTION_IDS.map((id) => a.results.find((r) => r.id === id)).filter((r): r is Result => !!r) : [];
   return { ...d, a, model, alts };
 }
 
@@ -172,7 +173,7 @@ function Calculator() {
           <div className="field">
             <span className="field-label">Compare with</span>
             <div className="chips">
-              {ALTERNATIVES.map((id) => <Chip key={id} on={form.compare.includes(id)} color={colorOf(id)} onClick={() => toggle(id)}>{nameOf(id)}</Chip>)}
+              {OPTION_IDS.map((id) => <Chip key={id} on={form.compare.includes(id)} color={colorOf(id)} onClick={() => toggle(id)}>{nameOf(id)}</Chip>)}
             </div>
           </div>
           <div className="field tax">
@@ -212,7 +213,7 @@ function Outcome({ a, alts }: { a: Answer; alts: Result[] }) {
   const { status } = useData();
   const i = a.inputs;
   const sip = i.mode === "sip";
-  const products = a.results.filter((r) => r.kind === "product");
+  const products = a.results.filter((r) => isMax(r.id));
   const rows = [...products, ...alts].sort((x, y) => y.net.value - x.net.value);          // ranked by final value, best first
   const period = !sip
     ? <>{inr(i.amount)} on {day(i.start)}, valued on {day(i.end)}</>
@@ -243,7 +244,7 @@ function Outcome({ a, alts }: { a: Answer; alts: Result[] }) {
           <thead><tr><th>#</th><th>Option</th><th className="sorted">Final value</th><th>{perYear(a)}</th><th>Worst fall</th></tr></thead>
           <tbody>
             {rows.map((r, k) => (
-              <motion.tr key={r.id} className={isModel(r.id) ? "is-model" : ""} layout initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+              <motion.tr key={r.id} className={isMax(r.id) ? "is-model" : ""} layout initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, ease: EASE, delay: ENTER + 0.1 + k * 0.05, layout: { duration: 0.7, ease: SWEEP } }}>
                 <td className="rank-no">{k + 1}</td>
                 <td><Key color={colorOf(r.id)} />{label(r.id)}</td>
@@ -365,7 +366,7 @@ function Journey() {
   const sip = a.inputs.mode === "sip";
   const vals = (id: string) => view === "value" ? g.value.values[id] : view === "fall" ? g.fall.values[id]
     : g.value.values[id].map((v, i) => v / g.paid.values[id][i] - 1);
-  const series: LineSeries[] = ids.map((id) => ({ id, label: label(id), color: colorOf(id), values: vals(id), strong: isModel(id), quiet: view === "fall" && !isModel(id) }));
+  const series: LineSeries[] = ids.map((id) => ({ id, label: label(id), color: colorOf(id), values: vals(id), strong: isMax(id), quiet: view === "fall" && !isMax(id) }));
   if (sip) series.push({ id: "PAID", label: "Money put in", color: "#8D9892", values: g.paid.values[model.id], quiet: true });
   const off = view === "value" ? hidden : new Set([...hidden, "PAID"]);
   const fmt = view === "value" ? (v: number) => money(v) : (v: number) => (view === "fall" ? pct(v, 1) : signed(v, 0));
@@ -520,7 +521,7 @@ function FutureBody({ f, plan, set }: { f: NonNullable<ReturnType<typeof useData
   const invested = plan.mode === "lump" ? amount : amount * 12 * plan.years;
   const worth = (id: string) => amount * f.factors[id][plan.mode][plan.years - 1];
   const modelId = `PRODUCT_${STRATEGIES[0]}`;
-  const rows = [modelId, ...ALTERNATIVES].filter((id) => f.rates[id]).map((id) => ({ id, rate: f.rates[id].rate, value: worth(id) }))
+  const rows = [modelId, ...OPTION_IDS].filter((id) => f.rates[id]).map((id) => ({ id, rate: f.rates[id].rate, value: worth(id) }))
     .sort((x, y) => y.value - x.value);
   const model = rows.find((r) => r.id === modelId)!;
   const span1 = `${plan.years} ${plan.years === 1 ? "year" : "years"}`;

@@ -3,7 +3,7 @@
 // Everything the slides read: the two saved calculator answers and the repository facts (tools/site_data.py), and the calculator's own form and answer.
 // No money is worked out here: every figure comes from the calculator API (calc/api.py) or a saved answer of it.
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { ALTERNATIVES, DATA_END, isModel, levelOf, STRATEGIES } from "./names";
+import { ALTERNATIVES, DATA_END, isModel, levelOf, LSTM, STRATEGIES } from "./names";
 import type { Answer, Facts, Future, Level, Mode, Request } from "./types";
 
 export type Form = {
@@ -33,19 +33,20 @@ export function request(f: Form): Request {
   const first = levelOf(f.level).first;
   const start = f.mode === "lump" ? later(f.start, first) : f.years === "all" ? first : later(yearsBefore(DATA_END, f.years), first);
   const compare = ALTERNATIVES.filter((id) => f.compare.includes(id));
-  return { mode: f.mode, amount: f.mode === "lump" ? f.lumpAmount : f.sipAmount, start, end: DATA_END, level: f.level, levels: STRATEGIES, compare, regime: f.regime,
+  const levels: Level[] = f.compare.includes(LSTM) ? [...STRATEGIES, "LSTM"] : STRATEGIES;          // the LSTM is a level the calculator runs, shown as an option
+  return { mode: f.mode, amount: f.mode === "lump" ? f.lumpAmount : f.sipAmount, start, end: DATA_END, level: f.level, levels, compare, regime: f.regime,
            other_income: f.income, lean: true };
 }
 
 const keyOf = (r: Request) => JSON.stringify(r);
 
 /** The calculator starts with these beside the model; the other alternatives are one tap away (the Overview shows them all). */
-const FIRST_COMPARE = ["NIFTYBEES", "GOLDBEES", "MON100", "LIQUID_FUND"];
+const FIRST_COMPARE = [LSTM, "NIFTYBEES", "GOLDBEES", "MON100", "LIQUID_FUND"];
 
 function formOf(lump: Answer, sip: Answer): Form {
   const i = lump.inputs;
   return { mode: "lump", lumpAmount: i.amount, sipAmount: sip.inputs.amount, start: i.start, years: "all", level: i.level, compare: FIRST_COMPARE, regime: i.regime,
-           income: i.other_income, bench: FIRST_COMPARE[0] };
+           income: i.other_income, bench: "NIFTYBEES" };
 }
 
 /** An answer already worked out for the same question with more options beside the model, cut to the options asked for. Each option is worked out
@@ -53,9 +54,11 @@ function formOf(lump: Answer, sip: Answer): Form {
 function cut(cache: Map<string, Answer>, req: Request): Answer | undefined {
   for (const [k, a] of cache) {
     const r: Request = JSON.parse(k);
-    if (keyOf({ ...r, compare: req.compare }) !== keyOf(req) || !req.compare.every((id) => r.compare.includes(id))) continue;
-    const keep = (id: string) => req.compare.includes(id) || isModel(id);
-    return { ...a, inputs: { ...a.inputs, compare: req.compare }, results: a.results.filter((x) => keep(x.id)), messages: a.messages.filter((m) => keep(m.id)),
+    if (keyOf({ ...r, compare: req.compare, levels: req.levels }) !== keyOf(req) || !req.compare.every((id) => r.compare.includes(id))
+        || !req.levels.every((l) => r.levels.includes(l))) continue;
+    const keep = (id: string) => req.compare.includes(id) || (isModel(id) && req.levels.includes(id.slice("PRODUCT_".length) as Level));
+    return { ...a, inputs: { ...a.inputs, compare: req.compare, levels: req.levels }, results: a.results.filter((x) => keep(x.id)),
+             messages: a.messages.filter((m) => keep(m.id)),
              series: Object.fromEntries(Object.entries(a.series).filter(([id]) => keep(id))) };
   }
 }
@@ -106,8 +109,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
     Promise.all([get("/data/lump.json"), get("/data/sip.json"), get("/data/facts.json"), get("/data/future.json")]).then(
       ([lump, sip, facts, future]) => {
         const f = formOf(lump, sip);
-        cache.current.set(keyOf(request({ ...f, compare: lump.inputs.compare })), lump);
-        cache.current.set(keyOf(request({ ...f, mode: "sip", compare: sip.inputs.compare })), sip);
+        cache.current.set(keyOf(request({ ...f, compare: [LSTM, ...lump.inputs.compare] })), lump);
+        cache.current.set(keyOf(request({ ...f, mode: "sip", compare: [LSTM, ...sip.inputs.compare] })), sip);
         setSaved({ lump, sip, facts, future });
         setForm(f);
       },

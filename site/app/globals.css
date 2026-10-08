@@ -164,11 +164,11 @@ small { font-size: 0.85em; color: var(--ink-3); }
 .chart-note { font-size: 18px; color: var(--ink-3); line-height: 1.5; margin-top: 12px; padding-left: 64px; max-width: 62em; }
 
 /* ---------- overview: same money ---------- */
-.different { display: flex; flex-direction: column; gap: 2.6vh; justify-content: center; }
+.different { display: flex; flex-direction: column; gap: 2.2vh; justify-content: center; }
 .different-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 3vw; }
 .terms-line { font-size: clamp(18px, 0.5vw + 1vh, 23px); color: var(--ink-2); margin-top: 1.2vh; max-width: 62em; }
 .ranked { display: grid; gap: 0.25vh; }
-.rk { display: grid; grid-template-columns: minmax(230px, 22%) minmax(0, 1fr) minmax(330px, 28%); align-items: center; gap: 24px; padding: max(4px, 0.72vh) 16px; margin: 0 -16px; border-radius: 12px; }
+.rk { display: grid; grid-template-columns: minmax(230px, 22%) minmax(0, 1fr) minmax(330px, 28%); align-items: center; gap: 24px; padding: max(3px, 0.42vh) 16px; margin: 0 -16px; border-radius: 12px; }
 .rk.strong { background: var(--model-wash); }
 .rk-name span { display: block; font-size: clamp(18px, 0.5vw + 1.05vh, 24px); font-weight: 560; white-space: nowrap; }
 .rk-name small { display: block; font-size: 17px; color: var(--ink-3); line-height: 1.35; margin-top: 3px; }
@@ -490,6 +490,9 @@ table.rows { width: 100%; border-collapse: collapse; font-variant-numeric: tabul
   .slide { padding-top: calc(var(--top) + 0.6vh); padding-bottom: var(--bottom); }
   .chart { min-height: 80px; }
   .fcount b { font-size: 44px; }
+  .rk { padding-top: 1px; padding-bottom: 1px; }
+  .rk-bar { height: 10px; }
+  .takeaway p { font-size: 16px; }
   .fchips span, .fgroups span, .mcard li > span:last-child { font-size: 15px; }
   .scard-value { font-size: 30px; }
 }
