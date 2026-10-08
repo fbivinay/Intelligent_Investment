@@ -209,7 +209,7 @@ function ClassesModal({ classes, focus, onClose }: { classes: NonNullable<Facts[
   return (
     <Modal id="class-title" title={`The ${classes.length} classes of data`} onClose={onClose}>
       <p className="modal-sub">Every dataset the project uses, {classes.reduce((n, c) => n + c.datasets.length, 0)} in all, each counted from its own files.
-        The same list is in the classes folder of the repository.</p>
+        The complete data of each class is in the classes folder of the repository, as a zipped CSV.</p>
       {classes.map((c, i) => (
         <section key={c.name} ref={(el) => { sections.current[i] = el; }} className="modal-sec">
           <h3><b>{i + 1}</b>{c.name}<span>{years(c.from, c.to)}</span></h3>
@@ -221,7 +221,7 @@ function ClassesModal({ classes, focus, onClose }: { classes: NonNullable<Facts[
               {c.datasets.map((d) => (
                 <tr key={d.name}>
                   <td>{d.name}</td>
-                  <td className="num">{d.rows != null ? `${count(d.rows)} rows` : `${count(d.files)} ${d.files === 1 ? "file" : "files"}`}</td>
+                  <td className="num">{d.rows != null ? `${count(d.rows)} ${d.rows === 1 ? "row" : "rows"}` : `${count(d.files)} ${d.files === 1 ? "file" : "files"}`}</td>
                   <td className="num">{years(d.from, d.to)}</td>
                 </tr>
               ))}

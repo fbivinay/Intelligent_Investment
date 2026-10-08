@@ -38,6 +38,8 @@ web/next-env.d.ts
 data/processed/stocks_eq.parquet
 data/processed/nifty_options.parquet
 research/out/eq_*.pkl
+# the classes as plain CSV; git keeps them zipped (three are over GitHub's 100 MB a file unzipped)
+/classes/*.csv
 research/out/fut_nifty.pkl
 data/processed/intraday_days.npz
 data/processed/intraday_paths.npy
