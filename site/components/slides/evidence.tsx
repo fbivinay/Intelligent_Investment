@@ -104,7 +104,7 @@ function Data() {
   const facts = [
     { k: "Source", v: "NSE and AMFI", d: "the exchange's daily files, the fund's daily value" },
     { k: "Period", v: `${yr(f.stocks.from)} → ${yr(f.stocks.to)}`, d: `every trading day; ETFs from ${yr(f.etfs.from)}` },
-    { k: "Format", v: "Daily time series", d: "high, low, close, volume, value traded" },
+    { k: "Format", v: "Daily time series", d: "open, high, low, close, volume, value traded" },
     { k: "Records", v: `${(f.stocks.rows / 1e6).toFixed(1)} million`, d: `daily rows of shares, and ${count(f.etfs.rows)} of ETFs` },
     { k: "Assets", v: `${count(shares)} shares, ${f.etfs.symbols.length} ETFs`, d: "and the liquid fund: Max reads the shares, the LSTM the ETFs" },
   ];
@@ -120,15 +120,15 @@ function Data() {
       <Appear delay={0.9} className="data-form">
         <div className="form-head"><span className="badge-src">NSE</span><Arrow dir="right" /><span>In what form: one row per share or ETF per trading day. Three real rows:</span></div>
         <table className="rows">
-          <thead><tr><th>Date</th><th>Share</th><th>High</th><th>Low</th><th>Close</th><th>Volume</th><th>Value traded</th></tr></thead>
+          <thead><tr><th>Date</th><th>Share</th><th>Open</th><th>High</th><th>Low</th><th>Close</th><th>Volume</th><th>Value traded</th></tr></thead>
           <tbody>
             {f.sample.map((r, i) => (
               <motion.tr key={r.symbol} initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6, ease: EASE, delay: ENTER + 1.2 + i * 0.15 }}>
-                <td>{day(r.date)}</td><td><b>{r.symbol}</b></td><td>{price(r.high)}</td><td>{price(r.low)}</td><td>{price(r.close)}</td><td>{count(r.qty)}</td>
+                <td>{day(r.date)}</td><td><b>{r.symbol}</b></td><td>{price(r.open)}</td><td>{price(r.high)}</td><td>{price(r.low)}</td><td>{price(r.close)}</td><td>{count(r.qty)}</td>
                 <td>₹{count(Math.round(r.value / 1e7))} crore</td>
               </motion.tr>
             ))}
-            <tr className="more-rows"><td colSpan={7}>and {(f.stocks.rows / 1e6).toFixed(1)} million more like these, {month(f.stocks.from)} to {month(f.stocks.to)}</td></tr>
+            <tr className="more-rows"><td colSpan={8}>and {(f.stocks.rows / 1e6).toFixed(1)} million more like these, {month(f.stocks.from)} to {month(f.stocks.to)}</td></tr>
           </tbody>
         </table>
         <div className="form-foot"><Arrow dir="down" /><span className="badge-model">into the models</span></div>
