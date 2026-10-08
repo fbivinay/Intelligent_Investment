@@ -455,7 +455,24 @@ table.rows { width: 100%; border-collapse: collapse; font-variant-numeric: tabul
   font-size: 17px; font-weight: 560; transition: background .2s; }
 .see-all:hover { background: var(--model); }
 
-/* the pop-up with every input of the LSTM */
+/* the classes of data under the facts: each button opens the list at its class */
+.class-row { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.class-count { font-size: 17px; color: var(--ink-2); margin-right: 6px; }
+.class-count b { color: var(--ink); font-weight: 600; }
+.class-chip { padding: 6px 14px; border: 1px solid var(--rule-2); border-radius: 999px; background: var(--paper); color: var(--ink); font-size: 15px; font-weight: 520;
+  transition: border-color .2s, background .2s; }
+.class-chip:hover { border-color: var(--ink); background: var(--card); }
+.cls-what { font-size: 16px; color: var(--ink-2); line-height: 1.45; }
+.cls-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 2vw; margin: 1vh 0 1.2vh; font-size: 15px; line-height: 1.4; }
+.cls-meta dt { color: var(--ink-3); }
+.cls-meta dd { margin: 0; color: var(--ink-2); }
+.ctable td:first-child { color: var(--ink); }
+.ctable { table-layout: fixed; }
+.ctable th:nth-child(2) { width: 20%; }
+.ctable th:nth-child(3) { width: 16%; }
+.ctable .num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+/* the pop-ups: every input of the LSTM, every class of data */
 .modal-back { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; padding: 4vh 4vw; background: rgba(20, 33, 27, .45); }
 .modal { width: min(1080px, 100%); max-height: 88vh; display: flex; flex-direction: column; overflow: hidden; border-radius: 22px; background: var(--paper);
   box-shadow: 0 30px 80px rgba(20, 33, 27, .3); }
@@ -522,6 +539,8 @@ table.ftable { width: 100%; border-collapse: collapse; font-size: 16px; }
   .trades { gap: 1.6vh; }
   .chart { min-height: 110px; }
   .data-strip dd span { font-size: 15px; }
+  .class-count { font-size: 16px; }
+  .class-chip { padding: 4px 12px; font-size: 14px; }
   .rows td { padding-top: 0.5vh; padding-bottom: 0.5vh; }
   .mcard { padding: 1.8vh 1.4vw 2vh; gap: 1.4vh; }
   .mcard ol { gap: 1.4vh; }
@@ -530,6 +549,10 @@ table.ftable { width: 100%; border-collapse: collapse; font-size: 16px; }
   .rcard { padding: 1.3vh 1.2vw; }
   .strategy-cards { margin: 1vh 0 1.2vh; }
   .scard { padding: 1.1vh 1.2vw; }
+}
+
+@media (max-height: 740px) {
+  .ev-data .form-foot { display: none; }          /* room for the classes of data above the rows */
 }
 
 @media (max-height: 680px) {
@@ -541,6 +564,8 @@ table.ftable { width: 100%; border-collapse: collapse; font-size: 16px; }
   .takeaway p { font-size: 16px; }
   .fchips span, .fgroups span, .mcard li > span:last-child { font-size: 15px; }
   .scard-value { font-size: 30px; }
+  .class-row { gap: 6px; }
+  .class-chip { padding: 3px 11px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

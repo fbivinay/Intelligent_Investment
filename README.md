@@ -177,10 +177,11 @@ result is shown.
 
 | | |
 |---|---|
-| **Source** | NSE daily files (every share, ETF, future and option, index closes), the NSE website's history for 2010-2016, AMFI fund values (NAVs), minute-by-minute Nifty, Bank Nifty and India VIX (2015-2026, Kaggle) |
+| **Source** | NSE daily files (every share, ETF, future and option, index closes), the NSE website's history for 2010-2016, AMFI fund values (NAVs), minute-by-minute Nifty 50, Bank Nifty, Fin Nifty and India VIX (2015-2026, Kaggle) |
 | **Period** | Shares January 2016 to September 2026; ETFs April 2010 to September 2026; every trading day |
 | **Form** | Daily time series: one row per instrument per day (open, high, low, close, previous close, volume, value traded, ISIN) |
 | **Records** | 4.6 million daily rows of 3,711 equity-segment instruments (3,213 shares, 498 ETF units); 24,105 rows of the six ETFs the models use; 29 fund schemes from AMFI |
+| **Classes** | 9 classes, 36 datasets: share prices, ETF prices, index levels and valuation, mutual fund values, index futures, index options, minute prices, reference data, tax and charge rules; each dataset with its files, rows and years in [`classes/`](classes/README.md) |
 | **Checks** | Gaps and fixes in `data/gaps.md`; a readable copy (raw downloads, cleaned Excel, the tax and charge rules) in `dataset/` |
 
 ---
@@ -197,8 +198,9 @@ research/kaggle/  snapshots and kernels for the Kaggle GPU runs (the deep models
 research/out/     results, reports and signals (signal_max, signal_lstm, lstm, lstm_v2, ...)
 data/             downloaders and cleaners; data/raw (downloads), data/processed (cleaned, what the code reads)
 dataset/          the data for reading: raw, cleaned (Excel), tax and charge rules
-tools/            the website's saved data, the Vercel bundle, the dataset export
-tests/            1,558 tests
+classes/          the 9 classes of data: every dataset with its file, rows and years (README.md, datasets.csv)
+tools/            the website's saved data, the Vercel bundle, the dataset export, the classes of data
+tests/            1,561 tests
 docs/             designs, plans and the record of every decision
 ```
 
@@ -211,7 +213,7 @@ Python 3.13 and Node 24.
 ```bash
 # the research and the calculator
 python -m pip install -r requirements-research.txt
-python -m pytest                                       # 1,558 tests
+python -m pytest                                       # 1,561 tests
 
 # the website on this machine: the calculator API on port 8765, the site on port 3000
 python -m calc.server 8765                             # or, from site/: npm run api
@@ -229,6 +231,7 @@ python -m tools.site_data                              # the saved answers and f
 python -m research.stockmom                            # stock momentum by universe size
 python -m research.intraday.levels_tax                 # the intraday risk levels by tax profile
 python -m tools.export_dataset                         # rebuild dataset/ from data/ and rules/
+python -m tools.classes                                # list every dataset by class (classes/)
 
 # deploy (only from the command line: pushes to GitHub do not deploy)
 python -m tools.bundle_site

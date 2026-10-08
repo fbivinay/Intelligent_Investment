@@ -1236,5 +1236,349 @@
     "worst_fall": 0.3009751547819246
    }
   ]
- }
+ },
+ "classes": [
+  {
+   "name": "Share prices",
+   "what": "Every share and ETF unit in NSE's EQ series: open, high, low, close, volume and value, one row per instrument per day",
+   "source": "NSE daily equity files (bhavcopy)",
+   "used_by": "Max strategy (its momentum ranking)",
+   "from": "2016-01-01",
+   "to": "2026-09-30",
+   "datasets": [
+    {
+     "name": "NSE daily equity files",
+     "rows": null,
+     "files": 2663,
+     "from": "2016-01-01",
+     "to": "2026-09-30"
+    },
+    {
+     "name": "Share prices, every EQ-series instrument",
+     "rows": 4585946,
+     "files": 1,
+     "from": "2016-01-01",
+     "to": "2026-09-30"
+    }
+   ]
+  },
+  {
+   "name": "ETF prices",
+   "what": "Seven ETFs (Nifty 50, Nifty Next 50, Bank Nifty, Gold, Midcap 100, Nasdaq 100, Liquid BeES): daily prices as published, and a copy adjusted for their four unit splits",
+   "source": "NSE daily equity files from 2016, the NSE website's history for 2010 to 2015; Yahoo as a cross-check only",
+   "used_by": "Max strategy, LSTM model, calculator",
+   "from": "2009-01-02",
+   "to": "2026-09-30",
+   "datasets": [
+    {
+     "name": "ETF daily prices, as published",
+     "rows": 28200,
+     "files": 1,
+     "from": "2010-04-01",
+     "to": "2026-09-30"
+    },
+    {
+     "name": "ETF daily prices, adjusted for splits",
+     "rows": 28200,
+     "files": 1,
+     "from": "2010-04-01",
+     "to": "2026-09-30"
+    },
+    {
+     "name": "NSE website history, 2010 to 2016 (its index and futures rows too)",
+     "rows": null,
+     "files": 3,
+     "from": "",
+     "to": ""
+    },
+    {
+     "name": "Nifty 50 ETF from Yahoo, a cross-check only",
+     "rows": 4374,
+     "files": 1,
+     "from": "2009-01-02",
+     "to": "2026-09-30"
+    },
+    {
+     "name": "Yahoo download, as received",
+     "rows": null,
+     "files": 1,
+     "from": "",
+     "to": ""
+    },
+    {
+     "name": "Notes on the Yahoo series (split, payouts, hashes)",
+     "rows": null,
+     "files": 1,
+     "from": "",
+     "to": ""
+    },
+    {
+     "name": "Bad Yahoo prints left out",
+     "rows": null,
+     "files": 1,
+     "from": "",
+     "to": ""
+    },
+    {
+     "name": "Nifty 50 ETF payout of 2012",
+     "rows": 1,
+     "files": 1,
+     "from": "2012-03-12",
+     "to": "2012-03-12"
+    }
+   ]
+  },
+  {
+   "name": "Index levels and valuation",
+   "what": "Nifty 50, Nifty Next 50, Nifty Bank, Nifty Midcap 100 and India VIX: daily levels, with P/E, P/B and dividend yield for the four Nifty indices from 2012",
+   "source": "NSE daily index files from 2012, the NSE website's history before",
+   "used_by": "LSTM model (India VIX, P/E, P/B), research",
+   "from": "2010-04-01",
+   "to": "2026-09-30",
+   "datasets": [
+    {
+     "name": "NSE daily index files",
+     "rows": null,
+     "files": 3517,
+     "from": "2012-07-02",
+     "to": "2026-09-30"
+    },
+    {
+     "name": "Index daily levels and valuation",
+     "rows": 19822,
+     "files": 1,
+     "from": "2010-04-01",
+     "to": "2026-09-30"
+    }
+   ]
+  },
+  {
+   "name": "Mutual fund values",
+   "what": "Daily net asset values (NAVs) of 29 schemes: index funds, liquid and arbitrage funds, gold ETFs and the BeES ETFs' own NAVs",
+   "source": "AMFI, through api.mfapi.in",
+   "used_by": "Liquid fund for Max and the LSTM, the calculator's funds",
+   "from": "2006-04-02",
+   "to": "2026-09-30",
+   "datasets": [
+    {
+     "name": "AMFI scheme histories",
+     "rows": null,
+     "files": 29,
+     "from": "",
+     "to": ""
+    },
+    {
+     "name": "Fund NAVs, daily, as published",
+     "rows": 100305,
+     "files": 1,
+     "from": "2006-04-02",
+     "to": "2026-09-30"
+    },
+    {
+     "name": "Fund NAVs, adjusted for unit changes",
+     "rows": 100305,
+     "files": 1,
+     "from": "2006-04-02",
+     "to": "2026-09-30"
+    },
+    {
+     "name": "Scheme list",
+     "rows": 29,
+     "files": 1,
+     "from": "",
+     "to": ""
+    },
+    {
+     "name": "Unit changes",
+     "rows": 10,
+     "files": 1,
+     "from": "2012-08-05",
+     "to": "2022-01-10"
+    }
+   ]
+  },
+  {
+   "name": "Index futures",
+   "what": "Nifty and Bank Nifty futures: the three contracts traded each day, with settlement price and open interest",
+   "source": "NSE daily derivatives (F&O) files from 2016, the NSE website's history for 2010 to 2015",
+   "used_by": "Research (futures for leverage, rejected)",
+   "from": "2010-04-01",
+   "to": "2026-09-30",
+   "datasets": [
+    {
+     "name": "NSE daily derivatives files",
+     "rows": null,
+     "files": 2662,
+     "from": "2016-01-01",
+     "to": "2026-09-30"
+    },
+    {
+     "name": "Index futures, daily",
+     "rows": 24564,
+     "files": 1,
+     "from": "2010-04-01",
+     "to": "2026-09-30"
+    },
+    {
+     "name": "Contract re-dates",
+     "rows": 2,
+     "files": 1,
+     "from": "",
+     "to": ""
+    }
+   ]
+  },
+  {
+   "name": "Index options",
+   "what": "Nifty and Bank Nifty options: every strike and expiry each day, calls and puts, with open interest",
+   "source": "NSE daily derivatives (F&O) files",
+   "used_by": "Research (covered calls, insurance puts, the intraday option book)",
+   "from": "2016-01-01",
+   "to": "2026-09-30",
+   "datasets": [
+    {
+     "name": "Nifty options, daily",
+     "rows": 5655622,
+     "files": 1,
+     "from": "2016-01-01",
+     "to": "2026-09-30"
+    },
+    {
+     "name": "Bank Nifty options, daily",
+     "rows": 3448681,
+     "files": 1,
+     "from": "2016-01-01",
+     "to": "2026-09-30"
+    },
+    {
+     "name": "Lot sizes",
+     "rows": 411,
+     "files": 1,
+     "from": "",
+     "to": ""
+    }
+   ]
+  },
+  {
+   "name": "Minute prices",
+   "what": "One-minute bars of the Nifty 50, Nifty Bank, Nifty Financial Services and India VIX, and the option days built from them",
+   "source": "Kaggle dataset debashis74017/nifty-50-minute-data",
+   "used_by": "Intraday research (the Fyers automations)",
+   "from": "2015-01-09",
+   "to": "2026-05-15",
+   "datasets": [
+    {
+     "name": "Nifty 50, one minute",
+     "rows": 1048738,
+     "files": 1,
+     "from": "2015-01-09",
+     "to": "2026-05-15"
+    },
+    {
+     "name": "Nifty Bank, one minute",
+     "rows": 1048705,
+     "files": 1,
+     "from": "2015-01-09",
+     "to": "2026-05-15"
+    },
+    {
+     "name": "Nifty Financial Services, one minute",
+     "rows": 1048375,
+     "files": 1,
+     "from": "2015-01-09",
+     "to": "2026-05-15"
+    },
+    {
+     "name": "India VIX, one minute",
+     "rows": 1048338,
+     "files": 1,
+     "from": "2015-01-09",
+     "to": "2026-05-15"
+    },
+    {
+     "name": "Nifty option days: minute paths, each strike's volatility",
+     "rows": 2558,
+     "files": 1,
+     "from": "2016-01-01",
+     "to": "2026-05-15"
+    },
+    {
+     "name": "Bank Nifty option days: the same",
+     "rows": 2558,
+     "files": 1,
+     "from": "2016-01-01",
+     "to": "2026-05-15"
+    },
+    {
+     "name": "Nifty option prices each minute, modelled",
+     "rows": 2558,
+     "files": 1,
+     "from": "",
+     "to": ""
+    },
+    {
+     "name": "Bank Nifty option prices each minute, modelled",
+     "rows": 2558,
+     "files": 1,
+     "from": "",
+     "to": ""
+    }
+   ]
+  },
+  {
+   "name": "Reference data",
+   "what": "The record of every NSE file asked for and collected, with its hash, the ETF unit splits, and the data quality report",
+   "source": "Built while downloading and checking",
+   "used_by": "Data cleaning and checks",
+   "from": "2012-07-01",
+   "to": "2026-09-30",
+   "datasets": [
+    {
+     "name": "Every NSE daily file asked for, with its status",
+     "rows": 13057,
+     "files": 1,
+     "from": "2012-07-01",
+     "to": "2026-09-30"
+    },
+    {
+     "name": "NSE website files collected",
+     "rows": 3,
+     "files": 1,
+     "from": "",
+     "to": ""
+    },
+    {
+     "name": "ETF unit splits",
+     "rows": 4,
+     "files": 1,
+     "from": "2019-12-19",
+     "to": "2021-06-17"
+    },
+    {
+     "name": "Data quality report",
+     "rows": null,
+     "files": 1,
+     "from": "",
+     "to": ""
+    }
+   ]
+  },
+  {
+   "name": "Tax and charge rules",
+   "what": "Every Fyers fee, exchange and government charge and income-tax rule from 2010 to 2026, each dated and linked to its source",
+   "source": "Income Tax Act, Finance Acts, CBDT, NSE, SEBI, Fyers (rules/SOURCES.md)",
+   "used_by": "The engine: every charge and tax of every model",
+   "from": "2010-04-01",
+   "to": "2026-10-02",
+   "datasets": [
+    {
+     "name": "Dated tax and charge tables",
+     "rows": 197,
+     "files": 25,
+     "from": "2010-04-01",
+     "to": "2026-10-02"
+    }
+   ]
+  }
+ ]
 }
