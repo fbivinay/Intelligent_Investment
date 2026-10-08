@@ -70,6 +70,7 @@ def lstm(version: str = LSTM_VERSION) -> dict:
     return {**res, "inputs": len(L.PER_ASSET) * len(assets) + len(L.MARKET) + len(L.MAY_BE_MISSING), "per_asset": len(L.PER_ASSET),
             "market": len(L.MARKET), "flags": len(L.MAY_BE_MISSING), "assets": [*assets, "LIQUID_FUND"],
             "seq_lens": sorted({c["seq_len"] for c in L.CONFIGS}), "hidden": sorted({c["hidden"] for c in L.CONFIGS}), "seeds": len(L.SEEDS), "cost": L.COST,
+            "codes": {"per_asset": list(L.PER_ASSET), "market": list(L.MARKET), "flags": list(L.MAY_BE_MISSING)},
             "tried": [{"version": v, "etfs": len(KL.VERSIONS[v]), **{k: r[k] for k in ("cagr", "worst_fall")}}
                       for v in KL.VERSIONS if (r := _result(v))]}
 

@@ -80,8 +80,8 @@ A separate strategy, after Zhang, Zohren and Roberts, *Deep Learning for Portfol
 and is trained to maximise the Sharpe ratio directly.
 
 1. **Reads the recent past.** Each day, the last 63 or 126 days of 43 numbers: for each of the Nifty 50, Gold and Nasdaq 100 ETFs its return over
-   1, 5, 21, 63 and 252 days, volatility over 21 and 63 days, fall from the year's high, distance from its 50- and 200-day averages and a volatility
-   spike (33); for the market India VIX and its 5-day change, the Nifty's P/E and P/B against their history, gold against shares over 63 days and
+   1, 5, 21, 63 and 252 days, volatility over 21 and 63 days, fall from the year's high, distance from its 50- and 200-day averages and a volume
+   spike (value traded against its 63-day average) (33); for the market India VIX and its 5-day change, the Nifty's P/E and P/B against their history, gold against shares over 63 days and
    the liquid fund's yield (6); and four missing-data flags. All from prices up to that day, scaled with statistics from the training years only.
 2. **Remembers patterns.** An LSTM layer (32 or 64 units) reads the sequence; its last state, through one linear layer started at zero (so the
    untrained network holds everything in equal parts), gives softmax weights for the three ETFs and the liquid fund: long only, adding to one.

@@ -1193,6 +1193,35 @@
   ],
   "seeds": 5,
   "cost": 0.003,
+  "codes": {
+   "per_asset": [
+    "ret1",
+    "ret5",
+    "ret21",
+    "ret63",
+    "ret252",
+    "vol21",
+    "vol63",
+    "dd252",
+    "dist50",
+    "dist200",
+    "vspike"
+   ],
+   "market": [
+    "vix",
+    "vixchg5",
+    "pe_pct",
+    "pb_pct",
+    "gold_vs_equity63",
+    "cash_yield63"
+   ],
+   "flags": [
+    "vix",
+    "vixchg5",
+    "pe_pct",
+    "pb_pct"
+   ]
+  },
   "tried": [
    {
     "version": "v1",

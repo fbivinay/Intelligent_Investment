@@ -3,14 +3,15 @@
 // Evidence: our two models in four pictures: how each works, the data, what each reads, and the two side by side. Max is the rule set the site's
 // calculator runs (research/maxmodel.py, research/stockmom.py); the LSTM is the deep-learning strategy (research/lstm.py, trained on a Kaggle GPU,
 // research/lstm_result.py). Figures come from site/public/data/facts.json and lump.json (tools/site_data.py).
-import { motion } from "motion/react";
-import { useMemo, type ReactNode } from "react";
+import { AnimatePresence, motion } from "motion/react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { useData } from "@/lib/data";
 import type { SlideDef } from "@/lib/deck";
 import { count, day, money, month, pct } from "@/lib/format";
 import { colorOf, LSTM, nameOf } from "@/lib/names";
 import { grid } from "@/lib/scale";
-import type { Series } from "@/lib/types";
+import type { Facts, Series } from "@/lib/types";
 import { LineChart } from "../charts";
 import { Appear, Arrow, Counter, EASE, ENTER, Key, Rise, SWEEP } from "../ui";
 import { Loading } from "./overview";
@@ -137,12 +138,87 @@ function Data() {
   );
 }
 
+type Group = "etf" | "market" | "flags";
+
+/** What each of the LSTM's inputs measures, by its name in research/features.py. */
+const FEATURE: Record<string, { name: string; what: string }> = {
+  ret1: { name: "1-day return", what: "the change since the day before" },
+  ret5: { name: "5-day return", what: "the change over the last week" },
+  ret21: { name: "21-day return", what: "the change over about a month" },
+  ret63: { name: "63-day return", what: "the change over about three months" },
+  ret252: { name: "252-day return", what: "the change over about a year" },
+  vol21: { name: "21-day volatility", what: "how much the price swung day to day over the last month" },
+  vol63: { name: "63-day volatility", what: "the same over the last three months" },
+  dd252: { name: "Fall from the year's high", what: "how far the price is below its highest close of the last year" },
+  dist50: { name: "Distance from the 50-day average", what: "the price against its average of the last 50 days" },
+  dist200: { name: "Distance from the 200-day average", what: "the price against its average of the last 200 days" },
+  vspike: { name: "Volume spike", what: "today's value traded against its average of the last 63 days" },
+  vix: { name: "India VIX", what: "how much the market expects prices to swing: its fear gauge" },
+  vixchg5: { name: "VIX 5-day change", what: "how fast that fear rose or fell over the last week" },
+  pe_pct: { name: "Nifty P/E against its history", what: "how expensive the Nifty is on earnings, as a share of its past days that were cheaper" },
+  pb_pct: { name: "Nifty P/B against its history", what: "the same on book value" },
+  gold_vs_equity63: { name: "Gold against shares", what: "the Gold ETF's three-month return minus the Nifty 50 ETF's" },
+  cash_yield63: { name: "Liquid fund yield", what: "what cash earned over the last three months, as a yearly rate" },
+};
+const FLAG: Record<string, string> = { vix: "India VIX missing", vixchg5: "VIX change missing", pe_pct: "P/E missing", pb_pct: "P/B missing" };
+
+/** Every number the LSTM reads each day, in three groups, over the page; Escape, the close button or a click outside closes it. */
+function FeaturesModal({ l, etfs, focus, onClose }: { l: Facts["lstm"]; etfs: string[]; focus: Group; onClose: () => void }) {
+  const close = useRef<HTMLButtonElement>(null);
+  const sections = useRef<Partial<Record<Group, HTMLElement | null>>>({});
+  useEffect(() => {
+    const back = document.activeElement as HTMLElement | null;
+    close.current?.focus();
+    if (focus !== "etf") sections.current[focus]?.scrollIntoView({ block: "start" });
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", onKey);
+    return () => { window.removeEventListener("keydown", onKey); back?.focus(); };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const what = (c: string) => FEATURE[c] ?? { name: c, what: "" };
+  return createPortal(
+    <motion.div className="modal-back" data-modal onClick={onClose} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.25 }}>
+      <motion.div className="modal" role="dialog" aria-modal="true" aria-labelledby="feat-title" onClick={(e) => e.stopPropagation()}
+        initial={{ y: 26, scale: 0.98 }} animate={{ y: 0, scale: 1 }} exit={{ y: 18, opacity: 0 }} transition={{ duration: 0.35, ease: EASE }}>
+        <div className="modal-head">
+          <h2 id="feat-title">The {l.inputs} numbers the LSTM reads each day</h2>
+          <button ref={close} type="button" className="modal-close" onClick={onClose} aria-label="Close">&times;</button>
+        </div>
+        <div className="modal-body" data-scroll>
+        <p className="modal-sub">It reads them for each of the last {l.seq_lens.join(" or ")} days, oldest first, and from that sequence sets tomorrow&rsquo;s mix.</p>
+        <section ref={(el) => { sections.current.etf = el; }} className="modal-sec">
+          <h3><b>{l.per_asset * etfs.length}</b> about the ETFs <span>{l.per_asset} numbers, worked out for each of the {etfs.length}</span></h3>
+          <table className="ftable">
+            <thead><tr><th>Number</th><th>What it measures</th>{etfs.map((a) => <th key={a} className="etf-col"><Key dot color={colorOf(a)} />{nameOf(a).replace(" ETF", "")}</th>)}</tr></thead>
+            <tbody>
+              {l.codes.per_asset.map((c) => (
+                <tr key={c}><td><b>{what(c).name}</b></td><td>{what(c).what}</td>{etfs.map((a) => <td key={a} className="tick" aria-label={nameOf(a)}>&#10003;</td>)}</tr>
+              ))}
+            </tbody>
+          </table>
+        </section>
+        <section ref={(el) => { sections.current.market = el; }} className="modal-sec">
+          <h3><b>{l.market}</b> about the market <span>one number each, the same for every ETF</span></h3>
+          <ul className="flist">{l.codes.market.map((c) => <li key={c}><b>{what(c).name}</b><span>{what(c).what}</span></li>)}</ul>
+        </section>
+        <section ref={(el) => { sections.current.flags = el; }} className="modal-sec">
+          <h3><b>{l.flags}</b> missing-data flags <span>1 on a day the number is not available (India VIX starts later, for example), otherwise 0</span></h3>
+          <ul className="flist flags">{l.codes.flags.map((c) => <li key={c}><b>{FLAG[c] ?? `${c} missing`}</b></li>)}</ul>
+        </section>
+        <p className="modal-total">{l.per_asset * etfs.length} + {l.market} + {l.flags} = <b>{l.inputs}</b> numbers a day, each scaled with statistics from the training years only.</p>
+        </div>
+      </motion.div>
+    </motion.div>,
+    document.body,
+  );
+}
+
 /* 3. What does each model look at? Max: three numbers per share and one for the market. The LSTM: 76 numbers a day, over months. */
 function Features() {
   const e = useEvidence();
+  const [open, setOpen] = useState<Group | null>(null);
   if (!e) return <Loading />;
   const l = e.f.lstm;
-  const n = l.assets.length - 1;
+  const etfs = l.assets.filter((a) => a !== "LIQUID_FUND");
   return (
     <Shell title="What does each model look at?" className="ev-features">
       <div className="feat-pair">
@@ -159,14 +235,34 @@ function Features() {
         </motion.div>
         <motion.div className="fcol lstm" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: EASE, delay: ENTER + 0.45 }}>
           <div className="fcol-head"><Key color={LSTM_COLOR} /><b>LSTM model</b></div>
-          <p className="fcount"><b>{l.inputs}</b><span>numbers a day, read as a sequence over the last {l.seq_lens.join(" or ")} days</span></p>
-          <ul className="fgroups">
-            <li><b>{l.per_asset} for each of the {n} ETFs</b><span>return over 1, 5, 21, 63 and 252 days; volatility over 21 and 63 days; fall from the year&rsquo;s high; distance from the 50- and 200-day averages; a volatility spike</span></li>
-            <li><b>{l.market} for the market</b><span>India VIX and its 5-day change; the Nifty&rsquo;s P/E and P/B against their history; gold against shares over 63 days; the liquid fund&rsquo;s yield</span></li>
-            <li><b>{l.flags} flags</b><span>whether VIX, P/E or P/B is missing that day</span></li>
-          </ul>
-          <p className="fnote">Every number is worked out from prices up to that day, then scaled with statistics from the training years only.</p>
+          <ol className="lflow" aria-label="How the LSTM reads its numbers">
+            {[
+              { t: `Last ${l.seq_lens.join(" or ")} days`, d: "of history, in order" },
+              { t: `${l.inputs} numbers`, d: "for each of those days" },
+              { t: "LSTM", d: "a network with memory" },
+              { t: "Tomorrow's mix", d: `${etfs.map((a) => nameOf(a).replace(" ETF", "")).join(", ")}, liquid fund` },
+            ].map((x, i, all) => (
+              <motion.li key={x.t} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6, ease: EASE, delay: ENTER + 0.7 + i * 0.18 }}>
+                <b>{x.t}</b><span>{x.d}</span>
+                {i < all.length - 1 && <span className="lflow-arrow" aria-hidden><Arrow dir="right" /></span>}
+              </motion.li>
+            ))}
+          </ol>
+          <div className="fgroup-row">
+            {[
+              { k: "etf" as const, n: l.per_asset * etfs.length, t: "about the ETFs", d: `${l.per_asset} for each of the ${etfs.length}` },
+              { k: "market" as const, n: l.market, t: "about the market", d: "fear gauge, valuation, gold, cash" },
+              { k: "flags" as const, n: l.flags, t: "missing-data flags", d: "a day without VIX, P/E or P/B" },
+            ].map((g) => (
+              <button key={g.k} type="button" className="fgroup-btn" onClick={() => setOpen(g.k)}>
+                <b>{g.n}</b><span className="fg-t">{g.t}</span><span className="fg-d">{g.d}</span>
+              </button>
+            ))}
+          </div>
+          <button type="button" className="see-all" onClick={() => setOpen("etf")}>See all {l.inputs} numbers <Arrow dir="right" /></button>
+          <p className="fnote">Each is worked out from prices up to that day, then scaled with statistics from the training years only.</p>
         </motion.div>
+        <AnimatePresence>{open && <FeaturesModal key="features" l={l} etfs={etfs} focus={open} onClose={() => setOpen(null)} />}</AnimatePresence>
       </div>
     </Shell>
   );
