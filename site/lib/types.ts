@@ -85,7 +85,7 @@ export type Facts = {
     average_mix: Record<string, number>; choice: { from: string; chosen: string }[]; gpu: string | null; series: { dates: string[]; values: number[] };
     inputs: number; per_asset: number; market: number; flags: number; assets: string[]; seq_lens: number[]; hidden: number[]; seeds: number; cost: number;
     version: string; tried: { version: string; etfs: number; cagr: number; worst_fall: number }[];
-    codes: { per_asset: string[]; market: string[]; flags: string[] };
+    codes?: { per_asset: string[]; market: string[]; flags: string[] };
   };
 };
 

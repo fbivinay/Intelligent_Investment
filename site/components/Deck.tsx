@@ -4,13 +4,26 @@
 // section, sideways between sections) while the old one recedes. Wheel, arrow keys and the next button move one slide per gesture.
 import { AnimatePresence, motion, MotionConfig, useReducedMotion, type Variants } from "motion/react";
 import { usePathname, useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Component, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { DeckCtx, type SectionId, type SlideDef } from "@/lib/deck";
 import { useData } from "@/lib/data";
 import { EVIDENCE, EvidenceRail } from "./slides/evidence";
 import { OVERVIEW } from "./slides/overview";
 import { PERFORMANCE } from "./slides/performance";
 import { Arrow, SWEEP } from "./ui";
+
+/** One slide that throws while rendering (a saved file missing a field, say) shows a short message; the deck, its bars and the other slides stay up. */
+class SlideGuard extends Component<{ children: ReactNode }, { failed: boolean }> {
+  state = { failed: false };
+
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+
+  render() {
+    return this.state.failed ? <div className="failed" role="alert"><p>This slide could not be shown. Go on to the next one, or reload the page.</p></div> : this.props.children;
+  }
+}
 
 const SECTIONS: { id: SectionId; name: string; path: string; slides: SlideDef[] }[] = [
   { id: "overview", name: "Overview", path: "/", slides: OVERVIEW },
@@ -148,13 +161,13 @@ export function Deck() {
               <div className="failed" role="alert"><p>{failed}</p></div>
             ) : !mounted ? (
               <section className={`slide s-${sec.id}`} aria-roledescription="slide" aria-label={`${def.title}, ${pos.i + 1} of ${sec.slides.length}`}>
-                <Slide />
+                <SlideGuard><Slide /></SlideGuard>
               </section>
             ) : (
               <AnimatePresence initial={false} custom={pos.dir}>
                 <motion.section key={`${pos.s}-${pos.i}`} className={`slide s-${sec.id}`} custom={pos.dir} variants={reduce ? FADE : MOVE} initial="enter" animate="center"
                   exit="exit" aria-roledescription="slide" aria-label={`${def.title}, ${pos.i + 1} of ${sec.slides.length}`}>
-                  <Slide />
+                  <SlideGuard><Slide /></SlideGuard>
                 </motion.section>
               </AnimatePresence>
             )}
