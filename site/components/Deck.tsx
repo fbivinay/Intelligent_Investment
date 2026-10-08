@@ -84,8 +84,9 @@ export function Deck() {
   useEffect(() => {
     const typing = (el: EventTarget | null) => el instanceof HTMLElement && (el.isContentEditable || /^(INPUT|SELECT|TEXTAREA)$/.test(el.tagName));
     const pressable = (el: EventTarget | null) => el instanceof HTMLElement && /^(BUTTON|A|SUMMARY)$/.test(el.tagName);
+    const modal = () => !!document.querySelector("[data-modal]");                        // a pop-up is open: the keys and the wheel are its own
     const onKey = (e: KeyboardEvent) => {
-      if (e.ctrlKey || e.metaKey || e.altKey || typing(e.target)) return;
+      if (e.ctrlKey || e.metaKey || e.altKey || typing(e.target) || modal()) return;
       if ((e.key === " " || e.key === "Enter") && pressable(e.target)) return;          // Space and Enter press the focused button
       if (["ArrowDown", "PageDown", "ArrowRight"].includes(e.key) || (e.key === " " && !e.shiftKey)) { e.preventDefault(); next(); }
       else if (["ArrowUp", "PageUp", "ArrowLeft"].includes(e.key) || (e.key === " " && e.shiftKey)) { e.preventDefault(); prev(); }
@@ -97,6 +98,7 @@ export function Deck() {
       if (now - last > 220) { acc = 0; used = false; }
       last = now;
       const dy = e.deltaMode === 1 ? e.deltaY * 16 : e.deltaY;
+      if (modal()) return;
       const box = (e.target as HTMLElement).closest?.("[data-scroll]") as HTMLElement | null;
       if (box && (dy > 0 ? box.scrollTop + box.clientHeight < box.scrollHeight - 1 : box.scrollTop > 0)) return;
       if (used || now < lockUntil.current) return;

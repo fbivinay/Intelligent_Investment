@@ -437,6 +437,52 @@ table.rows { width: 100%; border-collapse: collapse; font-variant-numeric: tabul
 .fformula { font-size: 17px; font-weight: 560; }
 .fnote { font-size: 16px; color: var(--ink-2); line-height: 1.45; margin-top: auto; }
 
+.lflow { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); column-gap: 26px; }
+.lflow li { position: relative; display: flex; flex-direction: column; gap: 2px; padding: 1.2vh 0.9vw; border-radius: 12px; background: var(--paper); min-width: 0; }
+.lflow li:nth-child(3) { background: var(--ink); color: var(--paper); }
+.lflow li:nth-child(3) span:not(.lflow-arrow) { color: rgba(245, 246, 242, .75); }
+.lflow b { font-size: clamp(16px, 0.35vw + 0.9vh, 21px); font-weight: 600; line-height: 1.2; }
+.lflow span { font-size: 14px; color: var(--ink-2); line-height: 1.35; }
+.lflow-arrow { position: absolute; right: -24px; top: 50%; translate: 0 -50%; width: 22px; display: grid; place-items: center; color: var(--ink-3) !important; }
+.fgroup-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.fgroup-btn { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left; padding: 1.3vh 0.9vw; border: 1px solid var(--rule-2); border-radius: 14px;
+  background: var(--paper); color: var(--ink); transition: border-color .2s, background .2s, transform .2s; }
+.fgroup-btn:hover { border-color: var(--ink); background: var(--card); transform: translateY(-2px); }
+.fgroup-btn b { font-size: clamp(26px, 1.3vw + 1vh, 40px); font-weight: 580; font-stretch: 125%; letter-spacing: -0.04em; line-height: 1; }
+.fg-t { font-size: 16px; font-weight: 600; }
+.fg-d { font-size: 14px; color: var(--ink-2); line-height: 1.35; }
+.see-all { align-self: flex-start; display: inline-flex; align-items: center; gap: 10px; padding: 11px 20px; border: 0; border-radius: 999px; background: var(--ink); color: var(--paper);
+  font-size: 17px; font-weight: 560; transition: background .2s; }
+.see-all:hover { background: var(--model); }
+
+/* the pop-up with every input of the LSTM */
+.modal-back { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; padding: 4vh 4vw; background: rgba(20, 33, 27, .45); }
+.modal { width: min(1080px, 100%); max-height: 88vh; display: flex; flex-direction: column; overflow: hidden; border-radius: 22px; background: var(--paper);
+  box-shadow: 0 30px 80px rgba(20, 33, 27, .3); }
+.modal-head { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 2.2vh 2.4vw 1.6vh; border-bottom: 1px solid var(--rule); }
+.modal-body { min-height: 0; overflow-y: auto; scrollbar-width: thin; padding: 1.4vh 2.4vw 2.6vh; }
+.modal-head h2 { font-size: clamp(24px, 1.2vw + 1vh, 36px); font-weight: 560; font-stretch: 106%; letter-spacing: -0.02em; line-height: 1.15; }
+.modal-close { flex: none; width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--rule-2); background: var(--card); font-size: 24px; line-height: 1; color: var(--ink-2); }
+.modal-close:hover { border-color: var(--ink); color: var(--ink); }
+.modal-sub { font-size: 17px; color: var(--ink-2); }
+.modal-sec { margin-top: 2.4vh; scroll-margin-top: 12px; }
+.modal-sec h3 { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px 12px; font-size: 20px; font-weight: 560; margin-bottom: 1vh; }
+.modal-sec h3 b { font-size: 30px; font-weight: 580; font-stretch: 125%; letter-spacing: -0.03em; color: var(--model); }
+.modal-sec h3 span { font-size: 15px; font-weight: 400; color: var(--ink-3); }
+table.ftable { width: 100%; border-collapse: collapse; font-size: 16px; }
+.ftable th { text-align: left; font-weight: 400; font-size: 14px; color: var(--ink-3); padding: 0 10px 6px 0; white-space: nowrap; }
+.ftable td { padding: 0.8vh 10px 0.8vh 0; border-top: 1px solid var(--rule); color: var(--ink-2); vertical-align: top; }
+.ftable td b { color: var(--ink); font-weight: 600; white-space: nowrap; }
+.ftable .etf-col, .ftable .tick { text-align: center; width: 9%; }
+.ftable .etf-col .key { margin-right: 6px; }
+.ftable .tick { color: var(--model); font-weight: 700; }
+.flist { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 8px 2vw; }
+.flist li { display: flex; flex-direction: column; gap: 2px; padding: 1vh 1vw; border-radius: 12px; background: var(--card); border: 1px solid var(--rule); font-size: 15px; color: var(--ink-2); }
+.flist li b { font-size: 16px; color: var(--ink); font-weight: 600; }
+.flist.flags { grid-template-columns: repeat(4, 1fr); }
+.modal-total { margin-top: 2.2vh; padding-top: 1.6vh; border-top: 1px solid var(--rule-2); font-size: 17px; color: var(--ink-2); }
+.modal-total b { color: var(--ink); }
+
 /* 4 Max and the LSTM side by side */
 .side-body { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(300px, 0.8fr) minmax(0, 1.2fr); gap: 2.4vw; }
 .side-cards { display: grid; gap: 1.6vh; align-content: start; }

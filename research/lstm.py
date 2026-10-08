@@ -6,7 +6,8 @@ maximise the Sharpe ratio directly):
 - What it holds: the Nifty 50, Nifty Next 50, Bank Nifty, Gold, Midcap 100 and Nasdaq 100 ETFs, and the liquid fund. Long only, no borrowing: a softmax
   gives seven weights that add to one. The last layer starts at zero, so the untrained network holds the seven in equal parts.
 - What it reads: on each day, the last `seq_len` days of 76 numbers: for each ETF its return over 1, 5, 21, 63 and 252 days, its volatility over 21 and 63
-  days, its fall from the year's high, its distance from the 50- and 200-day averages and a volatility spike (66); for the market India VIX and its
+  days, its fall from the year's high, its distance from the 50- and 200-day averages and a volume spike (value traded against its 63-day
+  average) (66); for the market India VIX and its
   5-day change, the Nifty's P/E and P/B percentiles, gold against equities over 63 days, the liquid fund's yield (6); and a flag for each of the four
   market numbers that can be missing (4). research/features.py works them out from prices up to that day; each is standardised with statistics from
   before the training cut.
