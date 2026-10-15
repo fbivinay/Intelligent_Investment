@@ -3,6 +3,7 @@ numpy>=2.4
 pandas>=2.3
 numba>=0.66
 scipy>=1.17
+pyarrow>=26        # tools.classes writes the classes with it
 pytest>=8.3
 # the deep model (research/dl) and its tests; CPU is enough locally, the GPU runs are on Kaggle
 torch>=2.12

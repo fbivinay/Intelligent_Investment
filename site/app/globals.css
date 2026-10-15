@@ -571,3 +571,24 @@ table.ftable { width: 100%; border-collapse: collapse; font-size: 16px; }
 @media (prefers-reduced-motion: reduce) {
   .loading-bar::after, .busy-bar span { animation-duration: 3s; }
 }
+
+/* Phones and tablets: the gate in layout.tsx replaces the deck. data-desktop-only is set by the inline script in
+   <head> before anything paints, so the deck never flashes on a phone. */
+.gate { display: none; }
+html[data-desktop-only] .app { display: none !important; }
+html[data-desktop-only] .gate {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 32px;
+  text-align: center;
+  background: var(--paper);
+  color: var(--ink);
+}
+html[data-desktop-only] .gate svg { color: var(--ink-3); }
+html[data-desktop-only] .gate h1 { margin: 0; max-width: 340px; font-size: 24px; line-height: 1.25; font-weight: 600; }
+html[data-desktop-only] .gate p { margin: 0; max-width: 340px; font-size: 16px; line-height: 1.5; color: var(--ink-2); }

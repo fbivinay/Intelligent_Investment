@@ -1,5 +1,6 @@
 """The project's data sorted into its 9 classes. classes/ holds the complete data of each class as one CSV (1_share_prices.csv to
-9_tax_and_charge_rules.csv) and the same CSV zipped; git keeps the zips, since three of the CSVs are over GitHub's 100 MB a file.
+9_tax_and_charge_rules.csv) and the same CSV zipped. Neither is in git: the zips are published in the data-v1 GitHub release, and
+python -m tools.download_classes puts them back in classes/, checked against classes/SHA256SUMS.
 inventory() measures every dataset of a class (rows, years, files) for the website's list and the README's.
 
     python -m tools.classes          # writes all nine and the README's list; python -m tools.classes 2 4 writes classes 2 and 4
@@ -8,6 +9,7 @@ Needs the data on this machine (data/raw and the largest files are not in git).
 """
 from __future__ import annotations
 
+import hashlib
 import itertools
 import re
 import shutil
@@ -348,8 +350,8 @@ def _ours(name: str) -> bool:
 
 
 def write(out: Path = OUT, only=None) -> None:
-    """The complete data of each class (or of the classes in only), one CSV per class, numbered in order, and zipped: the zips are what git
-    keeps (the CSVs are ignored), each under GitHub's 100 MB a file."""
+    """The complete data of each class (or of the classes in only), one CSV per class, numbered in order, and zipped, each zip under 100 MB;
+    then SHA256SUMS for the zips. New zips go to the data-v1 release with SHA256SUMS, which is the one file of classes/ that git keeps."""
     out.mkdir(exist_ok=True)
     for old in out.iterdir():                 # a file of an earlier layout of this folder; the classes' own files are made again in place
         if old.is_file() and old.suffix in (".md", ".csv", ".zip") and not _ours(old.name):
@@ -360,6 +362,13 @@ def write(out: Path = OUT, only=None) -> None:
         zips = _zip(path)
         print(f"{path.name}: {path.stat().st_size / 1e6:,.1f} MB, zipped " + ", ".join(f"{z.name} {z.stat().st_size / 1e6:,.1f} MB" for z in zips),
               flush=True)
+    write_sums(out)
+
+
+def write_sums(out: Path = OUT) -> None:
+    """classes/SHA256SUMS: one line per zip, in the sha256sum format tools.download_classes checks the release against."""
+    lines = [f"{hashlib.sha256(z.read_bytes()).hexdigest()}  {z.name}" for z in sorted(out.glob("*.zip"))]
+    (out / "SHA256SUMS").write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")
 
 
 def _size(d: dict) -> str:
@@ -372,17 +381,19 @@ def _years(a: str, b: str) -> str:
 
 
 README = ROOT / "README.md"
+RELEASE = "https://github.com/fbivinay/Intelligent_Investment/releases/download/data-v1/"
 MARKS = ("<!-- classes: written by python -m tools.classes -->", "<!-- /classes -->")
 
 
 def readme_section(classes: list[dict], out: Path = OUT) -> str:
     """The classes as the website's pop-up lists them, with each class's complete data: its rows, its size as CSV, and its zip or zipped parts."""
     lines = [f"Every dataset the project uses, {sum(len(c['datasets']) for c in classes)} in all, each counted from its own files. The complete data "
-             "of each class is one CSV, zipped, in [`classes/`](classes/); the two largest are zipped in parts (each part opens on its own, with the "
-             "header on top), as GitHub takes no file over 100 MB."]
+             "of each class is one CSV, zipped, in the [data-v1 release](" + RELEASE.removesuffix("download/data-v1/") + "tag/data-v1); "
+             "`python -m tools.download_classes` puts them all in `classes/`. The two largest are zipped in parts (each part opens on its own, with "
+             "the header on top), each under 100 MB."]
     for c in classes:
         csv_ = out / file_name(c["class"])
-        zips = ", ".join(f"[`{z.name}`](classes/{z.name}) ({z.stat().st_size / 1e6:,.1f} MB)" for z in _zips(csv_.stem, out))
+        zips = ", ".join(f"[`{z.name}`]({RELEASE}{z.name}) ({z.stat().st_size / 1e6:,.1f} MB)" for z in _zips(csv_.stem, out))
         lines += ["", f"### {c['class']}. {c['name']} ({_years(c['from'], c['to'])})", "", c["what"] + ".", "", f"- Source: {c['source']}",
                   f"- Used by: {c['used_by']}", f"- Complete data: {_lines(csv_) - 1:,} rows, {csv_.stat().st_size / 1e6:,.1f} MB as CSV; zipped: {zips}",
                   "", "| Dataset | Size | Years |", "|---|---:|---|",

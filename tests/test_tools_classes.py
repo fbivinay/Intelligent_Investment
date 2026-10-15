@@ -40,7 +40,8 @@ def test_the_folder_holds_each_class_whole_and_drops_old_files(tmp_path):
     (tmp_path / "README.md").write_text("old", encoding="utf-8")
     C.write(tmp_path, only=(2, 4, 9))
     names = ("2_etf_prices", "4_mutual_fund_values", "9_tax_and_charge_rules")
-    assert sorted(p.name for p in tmp_path.iterdir()) == sorted(f"{n}.{x}" for n in names for x in ("csv", "zip"))
+    assert sorted(p.name for p in tmp_path.iterdir()) == sorted([*(f"{n}.{x}" for n in names for x in ("csv", "zip")), "SHA256SUMS"])
+    assert [line.split()[1] for line in (tmp_path / "SHA256SUMS").read_text(encoding="utf-8").splitlines()] == [f"{n}.zip" for n in names]
     assert all(b"\r" not in (tmp_path / f"{n}.csv").read_bytes() for n in names)
     etf = pd.read_csv(tmp_path / "2_etf_prices.csv", low_memory=False)
     assert (etf.source != C.YAHOO).sum() == len(pd.read_csv(C.P / "etf_daily_adjusted.csv", low_memory=False))

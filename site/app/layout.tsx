@@ -7,16 +7,36 @@ import "./globals.css";
 // One family, used two ways: normal width for words, expanded width for money.
 const archivo = Archivo({ subsets: ["latin", "latin-ext"], axes: ["wdth"], variable: "--font-archivo", display: "swap" });
 
+const description = "What money invested in Indian markets could have become, after every real charge and every tax, set beside the ordinary ways to invest.";
+
 export const metadata: Metadata = {
+  metadataBase: new URL("https://intelligent-investment.vercel.app"),
   title: "Intelligent Investment",
-  description: "What money invested in Indian markets could have become, after every real charge and every tax, set beside the ordinary ways to invest.",
+  description,
+  openGraph: {
+    type: "website",
+    url: "/",
+    title: "Intelligent Investment",
+    description,
+    images: [{ url: "/og.png", width: 1440, height: 756 }],
+  },
+  twitter: { card: "summary_large_image", title: "Intelligent Investment", description, images: ["/og.png"] },
 };
 
 export const viewport: Viewport = { themeColor: "#F5F6F2" };
 
+// Phones and tablets get the gate below instead of the deck (see .gate in globals.css). Inline in <head> so the flag is set before the
+// first paint: by user agent, iPadOS by its touch points, and any touch-only screen whose "Desktop site" mode rewrote the user agent.
+const DESKTOP_ONLY = `(function(){try{var n=navigator,ua=n.userAgent||"",mq=function(q){return!!(window.matchMedia&&matchMedia(q).matches)};
+if((n.userAgentData&&n.userAgentData.mobile)||/Android|iPhone|iPad|iPod|Mobile|Tablet|Silk|Kindle|PlayBook|BlackBerry|BB10|Opera Mini|IEMobile|webOS/i.test(ua)||(/Macintosh/.test(ua)&&n.maxTouchPoints>1)||(mq("(pointer: coarse)")&&!mq("(any-pointer: fine)")))document.documentElement.setAttribute("data-desktop-only","")}catch(e){}})();`;
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en-IN" className={archivo.variable}>
+    // suppressHydrationWarning: the inline script sets data-desktop-only before React hydrates.
+    <html lang="en-IN" className={archivo.variable} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: DESKTOP_ONLY }} />
+      </head>
       <body>
         <div className="gate" role="note">
           <svg width="120" height="84" viewBox="0 0 120 84" aria-hidden>
