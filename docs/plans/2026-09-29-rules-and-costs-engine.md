@@ -1,14 +1,12 @@
 # Rules and Costs Engine Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
-
 **Goal:** Sub-project 1 of the India algo system: an exact, traced engine that prices every Indian tax and every Fyers, exchange and statutory charge by the rules in force on each transaction's date, verified by hand-worked golden cases, ending in a first visible result: ₹1 lakh in a Nifty ETF, after every cost and tax.
 
 **Architecture:** Rules are dated TOML tables under `rules/`, read by one loader that rejects gaps, overlaps and unsourced rows. Every number is a `Node` whose value is derived from its inputs, so its ⓘ trace cannot drift from the result. Charges, FIFO lots and per-financial-year tax are separate modules that read rules only through the loader. Golden cases, typed by hand from the sources, must probe both sides of every rule change.
 
 **Tech Stack:** Python 3.11 or newer (3.13.1 is installed), standard library only inside `engine/`, pytest 8 for tests, `urllib` for one price download.
 
-**Spec:** `docs/superpowers/specs/2026-09-29-india-algo-system-design.md`
+**Spec:** `docs/specs/2026-09-29-india-algo-system-design.md`
 
 **How this plan was prepared:** all code below was first written and run against made-up round-number rules (over 100 tests passing) in a scratch folder, replayed task by task in a fresh folder, then pasted here. The real rates do not exist yet: Tasks 5 to 8 and 14 research them. The order is deliberate: the user asked for research before any calculation.
 

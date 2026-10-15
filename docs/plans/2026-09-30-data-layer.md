@@ -2,7 +2,7 @@
 
 **Goal:** clean, unadjusted, point-in-time daily data for the v1 universe, rebuildable from a manifest of hashes, with every gap named.
 
-**Spec:** `docs/superpowers/specs/2026-09-29-india-algo-system-design.md` section 8 (data rules and feasibility gates).
+**Spec:** `docs/specs/2026-09-29-india-algo-system-design.md` section 8 (data rules and feasibility gates).
 
 **Tech:** Python 3.13 standard library only, pytest. Data code lives in `data/`. Network is never touched by tests (an injected opener stands in).
 

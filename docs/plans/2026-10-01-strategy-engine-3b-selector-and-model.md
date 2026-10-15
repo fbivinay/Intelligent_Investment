@@ -1,12 +1,12 @@
 # Strategy engine 3B: walk-forward selector, diagnostics, Kaggle GPU pipeline, deep model S6, tax wrapper W1, freeze
 
 > Executed inline (author and executor are the same session); every task is test first, every module mutation-tested, every ruling written to the ledger
-> `.superpowers/sdd/2026-10-01-strategy-engine-3b-selector-and-model/progress.md`. Plan 3A (panel, simulator, strategies S0 to S5, baseline) is done.
+> `docs/ledgers/2026-10-01-strategy-engine-3b-selector-and-model.md`. Plan 3A (panel, simulator, strategies S0 to S5, baseline) is done.
 
 **Goal:** the first honest out-of-sample answer to "does anything beat plain holding after every tax and cost at the same risk?" (selector over S0 to S5), then the
 deep model on a Kaggle GPU as one more candidate, the tax-aware wrapper, and the frozen test.
 
-**Spec:** `docs/superpowers/specs/2026-10-01-strategy-engine-design.md` (sections 4 to 8). Plan 3A: `2026-10-01-strategy-engine-3a-baseline.md`.
+**Spec:** `docs/specs/2026-10-01-strategy-engine-design.md` (sections 4 to 8). Plan 3A: `2026-10-01-strategy-engine-3a-baseline.md`.
 
 **Tech:** Python 3.13, numpy, pandas, numba, scipy, pytest; PyTorch (CPU here, T4 GPU on Kaggle); Kaggle CLI 2.2.4 (user `fbivinay06`).
 

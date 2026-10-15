@@ -1,4 +1,4 @@
-# SDD ledger — plan: docs/superpowers/plans/2026-10-01-strategy-engine-3a-baseline.md
+# SDD ledger — plan: docs/plans/2026-10-01-strategy-engine-3a-baseline.md
 Pre-flight: tasks share the Panel (task 1 produces, tasks 2 to 8 consume); Ruling below changes its fill price field.
 Ruling: fill price = next trading day's VWAP (traded value / traded quantity), not the open — the exchange's opening print is often one stray trade on thin ETF days (NIFTYBEES 2013-12-24: open 70.0, prior close 63.64, close 63.38; 185, 240, 93, 93 days of Nifty, Junior, Bank, Gold BeES have an open more than 4% from the prior close or the day's average) — a fill at those prints is not obtainable and a strategy could feed on them — cost if wrong: results move by the VWAP-versus-open difference, small on average, and the spec's "fills at the next open" is amended.
 Task 1: complete (commit b6b910f, tests: tests/test_research_panel.py -> 13 passed, mutants killed except an equivalent one)

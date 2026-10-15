@@ -1,6 +1,6 @@
 # Calculator, comparison, projection, web app, Fyers demo: Implementation Plan
 
-> Executed inline, test first; money paths (replay, buy-and-hold changes) mutation-tested. Spec: `docs/superpowers/specs/2026-10-01-calculator-site-design.md`.
+> Executed inline, test first; money paths (replay, buy-and-hold changes) mutation-tested. Spec: `docs/specs/2026-10-01-calculator-site-design.md`.
 
 **Goal:** the user picks amount, dates, risk level and tax profile; the site shows the product and eight alternatives after every charge and tax, each number with an ⓘ trace,
 a labelled projection, and a Fyers preview; deployable on Vercel.

@@ -6,7 +6,7 @@
 **Goal:** the first visible result of the model work: for each risk level, the after-tax, after-cost, drawdown-governed result of the same-risk plain holding and of every
 S1 to S5 strategy (and the W1 wrapper) over the design period, from a fast simulator that agrees with the exact `engine/`.
 
-**Spec:** `docs/superpowers/specs/2026-10-01-strategy-engine-design.md` (sections 2 to 5 and step 1 to 3 of section 8).
+**Spec:** `docs/specs/2026-10-01-strategy-engine-design.md` (sections 2 to 5 and step 1 to 3 of section 8).
 
 **Tech:** Python 3.13, numpy, pandas, numba, pytest. The engine stays exact Decimal; the research code is float and fast and is checked against it.
 
