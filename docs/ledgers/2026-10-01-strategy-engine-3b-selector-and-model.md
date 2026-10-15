@@ -1,4 +1,4 @@
-# SDD ledger — plan: docs/superpowers/plans/2026-10-01-strategy-engine-3b-selector-and-model.md
+# SDD ledger — plan: docs/plans/2026-10-01-strategy-engine-3b-selector-and-model.md
 Pre-flight: Task 1 produces Run/prefix_stats, Task 2 consumes them (pick), Task 3 consumes both plus sim.simulate and strategies.trials; Task 4 consumes the return matrices of Task 1's runs; Task 5 consumes 1-4. Interfaces fixed in the plan text; no conflict found.
 Ruling: the walk-forward selector uses the prefix property of the causal simulator (one full run per trial gives every April's training-window result) instead of re-simulating each window — cost if wrong: if a strategy or the simulator were not causal the prefix would differ; the causality tests (strategies, simulator truncation test in Task 3) guard it.
 Ruling: the shipping margin is decided from theory before the frozen test (deflated margin sqrt(2 ln N_eff) standard errors), the spec's one standard error is reported next to it — cost if wrong: the deflated margin may keep S0 almost always (an honest "no").

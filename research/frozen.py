@@ -2,7 +2,7 @@
 
     python -m research.frozen
 
-What runs is fixed in docs/superpowers/specs/2026-10-01-frozen-test-preregistration.md: for each risk level the walk-forward selector over plain holding (S0), the five
+What runs is fixed in docs/specs/2026-10-01-frozen-test-preregistration.md: for each risk level the walk-forward selector over plain holding (S0), the five
 ensembles and the deep model, with the deflated margin measured on the design period (MARGINS), every account with W1 harvesting, re-picking each April from past data only.
 The product's account, plain holding's, each candidate's and the reference investments' all start fresh on the first trading day of the frozen period with Rs 10 lakh.
 The run refuses to start unless the code, rules and data are exactly those of the tag, and it writes its own record (commit, data hashes, run date).
