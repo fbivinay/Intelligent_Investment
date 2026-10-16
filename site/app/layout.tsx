@@ -28,7 +28,7 @@ export const viewport: Viewport = { themeColor: "#F5F6F2" };
 // Phones and tablets get the gate below instead of the deck (see .gate in globals.css). Inline in <head> so the flag is set before the
 // first paint: by user agent, iPadOS by its touch points, and any touch-only screen whose "Desktop site" mode rewrote the user agent.
 const DESKTOP_ONLY = `(function(){try{var n=navigator,ua=n.userAgent||"",mq=function(q){return!!(window.matchMedia&&matchMedia(q).matches)};
-if((n.userAgentData&&n.userAgentData.mobile)||/Android|iPhone|iPad|iPod|Mobile|Tablet|Silk|Kindle|PlayBook|BlackBerry|BB10|Opera Mini|IEMobile|webOS/i.test(ua)||(/Macintosh/.test(ua)&&n.maxTouchPoints>1)||(mq("(pointer: coarse)")&&!mq("(any-pointer: fine)")))document.documentElement.setAttribute("data-desktop-only","")}catch(e){}})();`;
+if((n.userAgentData&&n.userAgentData.mobile)||/Android|iPhone|iPad|iPod|Mobile|Tablet|Silk|Kindle|PlayBook|BlackBerry|BB10|Opera Mini|IEMobile|webOS/i.test(ua)||(/Macintosh/.test(ua)&&n.maxTouchPoints>1)||(mq("(pointer: coarse)")&&!mq("(any-pointer: fine)"))||(navigator.maxTouchPoints>0&&(Math.min(screen.width,screen.height)<600||(/Linux (arm|aarch)|Android/i.test(navigator.platform)&&!/CrOS/.test(navigator.userAgent)))))document.documentElement.setAttribute("data-desktop-only","")}catch(e){}})();`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
